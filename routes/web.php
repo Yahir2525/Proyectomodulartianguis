@@ -1,6 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AbonoController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\CompraController;
+use App\Http\Controllers\Compra_productoController;
+use App\Http\Controllers\CreditoController;
+use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\VendedorController;
+
 
 Route::get('/', function () {
     return view('admin');
@@ -21,3 +29,15 @@ Route::get('/404', function () {
 Route::get('/500', function () {
     return view('pages.500');
 });
+
+Route::get('/registro', function () {
+    return view('auth.registro');
+});
+
+Route::resource('abono', AbonoController::class);
+Route::resource('cliente', ClienteController::class);
+Route::resource('compra', Compraontroller::class);
+Route::resource('compra-producto', Compra_productoController::class);
+Route::resource('credito', CreditoController::class);
+Route::resource('producto', ProductoController::class);
+Route::resource('vendedor', VendedorController::class);
