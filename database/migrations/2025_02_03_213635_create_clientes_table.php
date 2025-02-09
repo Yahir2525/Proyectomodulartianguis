@@ -20,8 +20,8 @@ return new class extends Migration
             $table->integer('telefono');
             $table->string('direccion',40);
             $table->string('correo',40);
-            $table->string('nombre_usuario',40);
-            $table->string('contrasenia',40);
+            $table->string('nombre_usuario',40)->unique();
+            // $table->string('contrasenia',40);
             $table->timestamps();
         });
     }

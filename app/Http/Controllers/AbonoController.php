@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Abono;
 use App\Models\Cliente;
 use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Auth;
 
 class AbonoController extends Controller
 {
@@ -34,15 +35,20 @@ class AbonoController extends Controller
     {
         $request->validate([
             'monto_abono' => 'required|numeric|max:999999.99|min:0',
-            'id_cliente' => 'required|integer|exists:clientes,id_cliente',
+            'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
+
+
+            // 'cantidad.*' => 'required|integer|min:1|max:999999',
+            // 'aceites.*' => 'required|integer|exists:aceites,id_aceite',
+            // 'id_cliente' => 'required|integer|exists:clientes,id_cliente'
         ], [
             'monto_abono.required' => 'El campo monto es obligatorio.',
             'monto_abono.numeric' => 'El campo precio debe ser un número.',
             'monto_abono.max'=>'El campo precio no puede ser mayor a 999,999.99',
             'monto_abono.min' => 'El campo precio no puede ser negativo.',
-            'id_cliente.required' => 'Debes seleccionar un cliente para la compra.',
-            'id_cliente.integer' => 'El ID del cliente debe ser un número entero.',
-            'id_cliente.exists' => 'El cliente seleccionado no está registrado.',
+            'nombre_usuario.required' => 'Debes seleccionar un cliente para la compra.',
+            'nombre_usuario.string' => 'El nombre de usuario debe ser una palabra compuesta.',
+            'nombre_usuario.exists' => 'El nombre del usuario seleccionado debe ser único.',
         ]);
         $abono = new Aceite();
         $abono->monto_abono = $request->monto_abono;
@@ -95,12 +101,16 @@ class AbonoController extends Controller
     public function update(Request $request, Abono $abono)
     {
         $request->validate([
-            'monto_abono' => 'required|numeric|max:999999.99|min:0'
+            'monto_abono' => 'required|numeric|max:999999.99|min:0',
+            'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
         ], [
             'monto_abono.required' => 'El campo monto es obligatorio.',
             'monto_abono.numeric' => 'El campo precio debe ser un número.',
             'monto_abono.max'=>'El campo precio no puede ser mayor a 999,999.99',
             'monto_abono.min' => 'El campo precio no puede ser negativo.',
+            'nombre_usuario.required' => 'Debes seleccionar un cliente para la compra.',
+            'nombre_usuario.string' => 'El nombre de usuario debe ser una palabra compuesta.',
+            'nombre_usuario.exists' => 'El nombre del usuario seleccionado debe ser único.',
 
         ]);
         $abono = Abono::find($id);
@@ -109,6 +119,7 @@ class AbonoController extends Controller
             return redirect()->route('abono.abonoIndex')->with('error', 'El abono no se encontró.');
         }
         $abono->monto_abono = $request->monto_abono;
+        $abono->nombre_usuario = $request->nombre_usuario;
         //dd($request);
         // if ($request->hasFile('archivo') && $request->file('archivo')->isValid()) {
         //     // Eliminar el archivo antiguo si existe

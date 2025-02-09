@@ -27,8 +27,8 @@
                         <td>{{ $abono->id }}</td>
                     </tr>
                     <tr>
-                            <td>ID del Cliente</td>
-                            <td>{{ $abono->cliente->id }}</td>
+                            <td>Nombre de usuario</td>
+                            <td>{{ optional($abono->cliente)->nombre_usuario ?? 'Sin cliente' }}</td>
                         </tr>
                     <tr>
                         <td>MONTO</td>

@@ -15,9 +15,14 @@ return new class extends Migration
         Schema::create('abonos', function (Blueprint $table) {
             $table->id();
             //Forma de declarar llaves foraneas
-            $table->foreignId("cliente_id")->constrained("clientes")->onDelete('set null');
+            $table->string('nombre_usuario')->nullable();
             $table->decimal('monto_abono', 10,2)->unsigned();
             $table->timestamps();
+
+            $table->foreign('nombre_usuario')
+            ->references('nombre_usuario')
+            ->on('clientes')
+            ->onDelete('set null');
         });
     }
 

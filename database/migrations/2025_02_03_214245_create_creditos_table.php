@@ -15,17 +15,18 @@ return new class extends Migration
         Schema::create('creditos', function (Blueprint $table) {
             $table->id();
             //Forma de declarar llaves foraneas
-            $table->foreignId("cliente_id")->constrained("clientes")->onDelete('set null');
-            $table->foreignId("compra_id")->constrained("compras")->onDelete('set null');
+            $table->string('nombre_usuario')->nullable();
+            $table->foreignId("compra_id")->nullable()->constrained("compras")->onDelete('set null');
             $table->dateTime('fecha_liquidacion');
             $table->dateTime('fecha_vencimiento');
             $table->boolean("estado");
-            $table->decimal('total_pagar', 10,2)->unsigned();
             $table->decimal('saldo_pendiente', 10,2)->unsigned();
             $table->timestamps();
 
-            //Forma de declarar llaves foranea que no sea el ID
-            // $table->foreign('compra_id')->references('total_pagar')->on('compras')->onDelete('set null');
+            $table->foreign('nombre_usuario')
+            ->references('nombre_usuario')
+            ->on('clientes')
+            ->onDelete('set null');
         });
     }
 

@@ -14,10 +14,16 @@ return new class extends Migration
         // Creación de la tabla Compras
         Schema::create('compras', function (Blueprint $table) {
             $table->id();
-            //Forma de declarar llaves foraneas
-            $table->foreignId("cliente_id")->constrained("clientes")->onDelete('set null');
-            $table->decimal('total_pagar', 10,2)->unsigned();
+            // $table->foreignId("pedidos_id")->nullable()->constrained("pedidos")->nullOnDelete();
+            $table->string('nombre_usuario')->nullable();
+            $table->boolean("estado_compra");
             $table->timestamps();
+
+
+            $table->foreign('nombre_usuario')
+            ->references('nombre_usuario')
+            ->on('clientes')
+            ->onDelete('set null');
         });
     }
 

@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('compra_producto', function (Blueprint $table) {
+        Schema::create('pedidos', function (Blueprint $table) {
             $table->id();
-            //Forma de declarar llaves foraneas
-            $table->foreignId('compra_id')->constrained('compras')->onDelete('set null');
-            $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');
+            $table->foreignId('compra_id')->nullable()->constrained('compras')->onDelete('set null');
+            $table->foreignId('producto_id')->nullable()->constrained('productos')->onDelete('cascade');
             $table->integer('cantidad')->unsigned();
             $table->decimal('precio_unitario', 10, 2)->unsigned();
+            $table->decimal('subtotal ', 10, 2)->unsigned();
+            $table->decimal('total_pagar', 10,2)->unsigned();
             $table->timestamps();
-
-            // $table->unique(['compra_id', 'producto_id']);
         });
     }
 
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('compra_producto');
+        Schema::dropIfExists('pedidos');
     }
 };

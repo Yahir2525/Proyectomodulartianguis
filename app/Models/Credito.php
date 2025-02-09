@@ -9,13 +9,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Credito extends Model
 {
     use HasFactory;
-    public function cliente(): BelongsTo{
-
-        return $this->belongsTo(Cliente::class);
+    
+        public function cliente(): BelongsTo
+    {
+        return $this->belongsTo(Cliente::class, 'nombre_usuario', 'nombre_usuario');
     }
 
-    public function compra(): HasMany{
+        public function compra(): HasMany
+    {
+        return $this->hasMany(Compra::class);
+    }
 
-        return $this->HasMany(Compra::class);
+    public function abono(): HasMany
+    {
+        return $this->hasMany(Abono::class);
     }
 }

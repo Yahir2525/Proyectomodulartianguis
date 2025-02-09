@@ -35,9 +35,15 @@ Route::get('/registro', function () {
 });
 
 Route::resource('abono', AbonoController::class);
+
 Route::resource('cliente', ClienteController::class);
-Route::resource('compra', Compraontroller::class);
-Route::resource('compra-producto', Compra_productoController::class);
+
+Route::resource('compra', CompraController::class);
+
+Route::resource('pedido', PedidoController::class);
+
 Route::resource('credito', CreditoController::class);
+
 Route::resource('producto', ProductoController::class);
+
 Route::resource('vendedor', VendedorController::class);
