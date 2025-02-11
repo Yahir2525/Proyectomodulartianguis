@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('color', 10)->nullable();
             $table->string('tamanio', 25);
             $table->string('marca', 25);
-            $table->decimal('precio', 6, 2)->unsigned();
+            $table->decimal('precio_unitario', 6, 2)->unsigned();
             $table->integer('piezas')->nullable();
             $table->timestamps();
         });

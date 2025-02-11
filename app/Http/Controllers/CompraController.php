@@ -36,21 +36,19 @@ class CompraController extends Controller
             'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
             'estado_compra' => 'required|boolean',
         ], [
-            'id_pedido.required' => 'Debes una elegir una selección de productos .',
-            'id_pedido.integer' => 'El ID de la compra-producto debe ser un número entero.',
-            'id_pedido.unique' => 'El ID debe ser único.',
-            'nombre_usuario.required' => 'Debes seleccionar un cliente para la compra.',
-            'nombre_usuario.string' => 'El nombre de usuario debe ser una palabra compuesta.',
-            'nombre_usuario.exists' => 'El nombre del usuario seleccionado debe ser único.',
-            'estado_compra.required' => 'Debes seleccionar un estado de la compra.',
-            'estado_compra.boolean' => 'El estado debe ser activo o desactivo.',
-
-            
+            'id_pedido.required' => 'Debe seleccionar un pedido.',
+            'id_pedido.integer' => 'El ID del pedido debe ser un número entero.',
+            'id_pedido.unique' => 'El ID del pedido debe ser único.',
+            'nombre_usuario.required' => 'Debe seleccionar un cliente para la compra.',
+            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto.',
+            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
+            'estado_compra.required' => 'Debe seleccionar un estado de la compra.',
+            'estado_compra.boolean' => 'El estado debe ser activo o desactivo.', 
         ]);
         $compra = new Compra();
         // Revisar el id compraproducto
-        // $compra->id_pedido = $idPedido;
-        $compra->nombre_usuario = $nombre_usuario;
+        $compra->id_pedido = $request->$idPedido;
+        $compra->nombre_usuario = $request->$nombre_usuario;
         $compra->estado_compra = $request->estado_compra;
         
         if ($compra->save()) {
@@ -99,24 +97,23 @@ class CompraController extends Controller
             'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
             'estado_compra' => 'required|boolean',
         ], [
-            'id_pedido.required' => 'Debes una elegir una selección de productos .',
-            'id_pedido.integer' => 'El ID de la compra-producto debe ser un número entero.',
-            'id_pedido.unique' => 'El ID debe ser único.',
-            'nombre_usuario.required' => 'Debes seleccionar un cliente para la compra.',
-            'nombre_usuario.string' => 'El nombre de usuario debe ser una palabra compuesta.',
-            'nombre_usuario.exists' => 'El nombre del usuario seleccionado debe ser único.',
-            'estado_compra.required' => 'Debes seleccionar un estado de la compra.',
-            'estado_compra.boolean' => 'El estado debe ser activo o desactivo.',
-
-            
+            'id_pedido.required' => 'Debe seleccionar un pedido.',
+            'id_pedido.integer' => 'El ID del pedido debe ser un número entero.',
+            'id_pedido.unique' => 'El ID del pedido debe ser único.',
+            'nombre_usuario.required' => 'Debe seleccionar un cliente para la compra.',
+            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto.',
+            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
+            'estado_compra.required' => 'Debe seleccionar un estado de la compra.',
+            'estado_compra.boolean' => 'El estado debe ser activo o desactivo.',            
         ]);
         $compra = Compra::find($id);
     
         if (!$compra) {
             return redirect()->route('compra.compraIndex')->with('error', 'La compra no se encontró.');
         }
+        $compra->id_pedido = $request->$idPedido;
+        $compra->nombre_usuario = $request->$nombre_usuario;
         $compra->estado_compra = $request->estado_compra;
-        $compra->nombre_usuario = $request->nombre_usuario;
         $compra->save();
         return redirect()->route('compra.compraIndex')->with('success', 'La compra se ha actualizado con éxito.');
     }

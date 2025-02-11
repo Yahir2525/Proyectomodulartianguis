@@ -8,13 +8,13 @@
     <link href="https://fonts.googleapis.com/css?family=Questrial&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ asset('css/aceite/indexAceite.css') }}"> -->
-    <title>Principal de aceites</title>
+    <title>Principal de Compras</title>
 </head>
 <body>
 <section>
-@foreach ($abonoIndex as $abono)
-                        <center>
-                        <table>
+@foreach ($compraIndex as $compra)
+                <center>
+                <table>
                     <tr>
                         <th colspan="2">Tabla de la compra: {{ $compra->id_compra }}</th>
                     </tr>

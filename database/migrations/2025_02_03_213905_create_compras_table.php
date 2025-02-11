@@ -14,7 +14,10 @@ return new class extends Migration
         // Creación de la tabla Compras
         Schema::create('compras', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId("pedidos_id")->nullable()->constrained("pedidos")->nullOnDelete();
+            $table->unsignedBigInteger("pedido_id")->nullable();
+            if (Schema::hasTable('pedidos')) {
+                $table->foreign("pedido_id")->references("id")->on("pedidos")->onDelete("set null");
+            }
             $table->string('nombre_usuario')->nullable();
             $table->boolean("estado_compra");
             $table->timestamps();

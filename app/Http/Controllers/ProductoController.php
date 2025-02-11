@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 
-class ProdcutoController extends Controller
+class ProductoController extends Controller
 {
     /**
      * Display a listing of the resource.

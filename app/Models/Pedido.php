@@ -20,4 +20,8 @@ class Pedido extends Model
         return $this->belongsTo(Cliente::class);
     }
     
+        public function producto(): HasMany
+    {
+        return $this->hasMany(Producto::class);
+    }
 }

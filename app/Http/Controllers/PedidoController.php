@@ -34,22 +34,45 @@ class PedidoController extends Controller
         //
         $request->validate([
             'id_compra' => 'required|integer|unique:compras,id_compra',
-            // 'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
+            'id_producto' => 'required|integer|unique:productos,id_productos',
+            'cantidad' => 'required|integer|min:0',
+            'precio_unitario' => 'required|numeric',
+            'subtotal' => 'required|numeric|min:0',
+            'total_pagar' => 'required|numeric|min:0',
+
         ], [
-            'id_compra.required' => 'Debes una elegir una selección de productos .',
-            'id_compra.integer' => 'El ID de la compra-producto debe ser un número entero.',
-            'id_compra.unique' => 'El ID debe ser único.',
-            // 'nombre_usuario.required' => 'Debes seleccionar un cliente para la compra.',
-            // 'nombre_usuario.string' => 'El nombre de usuario debe ser una palabra compuesta.',
-            // 'nombre_usuario.exists' => 'El nombre del usuario seleccionado debe ser único.',
+            'id_compra.required' => 'Debe seleccionar una compra .',
+            'id_compra.integer' => 'El ID de la compra debe ser un número entero.',
+            'id_compra.unique' => 'El ID de la compra debe ser único.',
+            'id_producto.required' => 'Debe seleccionar un producto .',
+            'id_producto.integer' => 'El ID del producto debe ser un número entero.',
+            'id_producto.unique' => 'El ID del producto debe ser único.',
+            'cantidad.required' => 'La cantidad de productos es obligatoria.',
+            'cantidad.integer' => 'La cantidad debe ser un número entero',
+            'cantidad.min' => 'La cantidad no puede ser negativa.',
+            'precio_unitario.required' => 'El precio unitario es obligatorio.',
+            'precio_unitario.numeric' => 'El precio unitario debe ser un número.',
+            'subtotal.required' => 'El subtotal es obligatorio.',
+            'subtotal.numeric' => 'El subtotal debe ser un número.',
+            'subtotal.min' => 'El subtotal no puede ser negativo.',
+            'total_pagar.required' => 'El total a pagar es obligatorio.',
+            'total_pagar.numeric' => 'El total a pagar debe ser un número.',
+            'total_pagar.min' => 'El total a pagar no puede ser negativo.',
+
         ]);
-        $abono = new Aceite();
-        $abono->monto_abono = $request->monto_abono;
+        $pedido = new Pedido();
+        $pedido->id_compra = $request->$idCompra;
+        $pedido->id_producto = $request->$idProducto;
+        $pedido->cantidad = $request->cantidad;
+        // $quantities = $request->input('cantidad');
+        $pedido->precio_unitario = $request->precio_unitario;
+        $pedido->subtotal = $request->subtotal;
+        $pedido->total_pagar = $request->total_pagar;
         
-        if ($abono->save()) {
-            return redirect('/abono')->with('success', 'Abono registrado correctamente.');
+        if ($pedido->save()) {
+            return redirect('/pedido')->with('success', 'Pedido registrado correctamente.');
         } else {
-            return redirect()->back()->withErrors(['Error al guardar el abono. Por favor, intenta de nuevo.']);
+            return redirect()->back()->withErrors(['Error al guardar el pedido. Por favor, intenta de nuevo.']);
         } 
     
     }
@@ -60,10 +83,10 @@ class PedidoController extends Controller
     public function show(Pedido $pedido)
     {
         $id = $request->input('id_pedido');
-        $pedido = Pedido::find($compra);
+        $pedido = Pedido::find($pedido);
             
         if (!$pedido) {
-            return redirect()->back()->with('error', 'La pedido no se encontró.');
+            return redirect()->back()->with('error', 'El pedido no se encontró.');
         }
         return view('/pedido/showPedido', ['pedido' => $pedido]);
     }
@@ -76,7 +99,7 @@ class PedidoController extends Controller
         $pedido = Pedido::find($id);
 
             if (!$pedido) {
-                return redirect()->route('pedido.pedidoIndex')->with('error', 'La pedido no se encontró.');
+                return redirect()->route('pedido.pedidoIndex')->with('error', 'El pedido no se encontró.');
             // }
 
             return view('/pedido/editPedido', ['pedido' => $pedido]);   
@@ -90,24 +113,48 @@ class PedidoController extends Controller
     {
         $request->validate([
             'id_compra' => 'required|integer|unique:compras,id_compra',
-            // 'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
+            'id_producto' => 'required|integer|unique:productos,id_productos',
+            'cantidad' => 'required|integer|min:0',
+            'precio_unitario' => 'required|numeric|exists:productos,nombre_usuario',
+            'subtotal' => 'required|numeric|min:0',
+            'total_pagar' => 'required|numeric|min:0',
+
         ], [
-            'id_compra.required' => 'Debes una elegir una selección de productos .',
-            'id_compra.integer' => 'El ID de la compra-producto debe ser un número entero.',
-            'id_compra.unique' => 'El ID debe ser único.',
-            'nombre_usuario.required' => 'Debes seleccionar un cliente para la compra.',
-            // 'nombre_usuario.string' => 'El nombre de usuario debe ser una palabra compuesta.',
-            // 'nombre_usuario.exists' => 'El nombre del usuario seleccionado debe ser único.',
+            'id_compra.required' => 'Debe seleccionar una compra .',
+            'id_compra.integer' => 'El ID de la compra debe ser un número entero.',
+            'id_compra.unique' => 'El ID de la compra debe ser único.',
+            'id_producto.required' => 'Debe seleccionar un producto .',
+            'id_producto.integer' => 'El ID del producto debe ser un número entero.',
+            'id_producto.unique' => 'El ID del producto debe ser único.',
+            'cantidad.required' => 'La cantidad de productos es obligatoria.',
+            'cantidad.integer' => 'La cantidad debe ser un número entero',
+            'cantidad.min' => 'La cantidad no puede ser negativa.',
+            'precio_unitario.required' => 'El precio unitario es obligatorio.',
+            'precio_unitario.numeric' => 'El precio unitario debe ser un número.',
+            'precio_unitario.exists' => 'El precio unitario debe existir',
+            'subtotal.required' => 'El subtotal es obligatorio.',
+            'subtotal.numeric' => 'El subtotal debe ser un número.',
+            'subtotal.min' => 'El subtotal no puede ser negativo.',
+            'total_pagar.required' => 'El total a pagar es obligatorio.',
+            'total_pagar.numeric' => 'El total a pagar debe ser un número.',
+            'total_pagar.min' => 'El total a pagar no puede ser negativo.',
+
         ]);
         $pedido = Pedido::find($id);
+        
     
         if (!$pedido) {
-            return redirect()->route('pedido.pedidoIndex')->with('error', 'La pedido no se encontró.');
+            return redirect()->route('pedido.pedidoIndex')->with('error', 'El pedido no se encontró.');
         }
-        // $compra->estado_compra = $request->estado_compra;
-        // $compra->nombre_usuario = $request->nombre_usuario;
+        $pedido->id_compra = $request->$idCompra;
+        $pedido->id_producto = $request->$idProducto;
+        $pedido->cantidad = $request->cantidad;
+        // $quantities = $request->input('cantidad');
+        $pedido->precio_unitario = $request->precio_unitario;
+        $pedido->subtotal = $request->subtotal;
+        $pedido->total_pagar = $request->total_pagar;
         $pedido->save();
-        return redirect()->route('pedido.pedidoIndex')->with('success', 'La pedido se ha actualizado con éxito.');
+        return redirect()->route('pedido.pedidoIndex')->with('success', 'El pedido se ha actualizado con éxito.');
     }
 
     /**
@@ -115,6 +162,30 @@ class PedidoController extends Controller
      */
     public function destroy(Pedido $pedido)
     {
-        //
+        $pedido = Pedido::find($id);
+
+        // if ($aceite->archivo_ubicacion) {
+        //     Storage::delete($aceite->archivo_ubicacion);
+        // }
+
+        if (!$pedido) {
+            return redirect()->route('pedido.pedidoIndex')->with('error', 'El pedido no se encontró.');
+        }
+        
+        // $detalleCompras = DetalleCompra::where('id_aceite', $id)->get();
+
+        // foreach ($detalleCompras as $detalleCompra) {
+        //     $compra = Compras::find($detalleCompra->id_compras);
+        //     if ($compra) {
+        //         $compra->delete();
+        //     }
+            
+        //     // Eliminar el DetalleCompras
+        //     $detalleCompra->delete();
+        // }
+
+        $pedido->delete();
+
+        return redirect()->route('pedido.pedidoIndex')->with('success', 'El pedido se ha eliminado con éxito.');
     }
 }

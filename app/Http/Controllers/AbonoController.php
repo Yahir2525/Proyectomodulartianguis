@@ -34,24 +34,19 @@ class AbonoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'monto_abono' => 'required|numeric|max:999999.99|min:0',
+            'monto_abono' => 'required|numeric|min:0',
             'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
-
-
-            // 'cantidad.*' => 'required|integer|min:1|max:999999',
-            // 'aceites.*' => 'required|integer|exists:aceites,id_aceite',
-            // 'id_cliente' => 'required|integer|exists:clientes,id_cliente'
         ], [
-            'monto_abono.required' => 'El campo monto es obligatorio.',
-            'monto_abono.numeric' => 'El campo precio debe ser un número.',
-            'monto_abono.max'=>'El campo precio no puede ser mayor a 999,999.99',
-            'monto_abono.min' => 'El campo precio no puede ser negativo.',
-            'nombre_usuario.required' => 'Debes seleccionar un cliente para la compra.',
-            'nombre_usuario.string' => 'El nombre de usuario debe ser una palabra compuesta.',
-            'nombre_usuario.exists' => 'El nombre del usuario seleccionado debe ser único.',
+            'monto_abono.required' => 'El monto del abono es obligatorio.',
+            'monto_abono.numeric' => 'El monto del abono debe ser un número.',
+            'monto_abono.min' => 'El monto del abono no puede ser negativo.',
+            'nombre_usuario.required' => 'Debe seleccionar el cliente que da el abono.',
+            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
+            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
         ]);
         $abono = new Aceite();
         $abono->monto_abono = $request->monto_abono;
+        $abono->nombre_usuario = $request->nombre_usuario;
         
         if ($abono->save()) {
             return redirect('/abono')->with('success', 'Abono registrado correctamente.');
@@ -101,17 +96,15 @@ class AbonoController extends Controller
     public function update(Request $request, Abono $abono)
     {
         $request->validate([
-            'monto_abono' => 'required|numeric|max:999999.99|min:0',
+            'monto_abono' => 'required|numeric|min:0',
             'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
         ], [
-            'monto_abono.required' => 'El campo monto es obligatorio.',
-            'monto_abono.numeric' => 'El campo precio debe ser un número.',
-            'monto_abono.max'=>'El campo precio no puede ser mayor a 999,999.99',
-            'monto_abono.min' => 'El campo precio no puede ser negativo.',
-            'nombre_usuario.required' => 'Debes seleccionar un cliente para la compra.',
-            'nombre_usuario.string' => 'El nombre de usuario debe ser una palabra compuesta.',
-            'nombre_usuario.exists' => 'El nombre del usuario seleccionado debe ser único.',
-
+            'monto_abono.required' => 'El monto del abono es obligatorio.',
+            'monto_abono.numeric' => 'El monto del abono debe ser un número.',
+            'monto_abono.min' => 'El monto del abono no puede ser negativo.',
+            'nombre_usuario.required' => 'Debe seleccionar el cliente que da el abono.',
+            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
+            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
         ]);
         $abono = Abono::find($id);
     
