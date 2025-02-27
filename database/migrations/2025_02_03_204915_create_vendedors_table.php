@@ -13,15 +13,15 @@ return new class extends Migration
     {
         // Creación de la tabla Vendedores/Administradores
         Schema::create('vendedors', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_vendedor');
             $table->string('nombre',40);
             $table->char('genero',1)->default('O');
             $table->integer('edad')->unsigned();
-            $table->integer('telefono');
-            $table->string('direccion',40);
+            $table->string('telefono');
+            $table->string('direccion');
             $table->string('correo',40);
             $table->string('nombre_usuario',40);
-            $table->string('contrasenia',40);
+            // $table->string('contrasenia',40);
             $table->timestamps();
         });
     }

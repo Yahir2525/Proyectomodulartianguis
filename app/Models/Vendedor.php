@@ -9,4 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Vendedor extends Model
 {
     use HasFactory;
+
+    protected $table = 'vendedors';
+    protected $primaryKey = 'id_vendedor';
+    public $incrementing = true;
+    protected $keyType = 'int';
 }

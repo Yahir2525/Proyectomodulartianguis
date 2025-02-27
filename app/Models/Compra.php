@@ -11,16 +11,25 @@ class Compra extends Model
 {
     use HasFactory;
 
+    protected $table = 'compras';
+    protected $primaryKey = 'id_compra';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
         public function cliente(): BelongsTo
     {
         return $this->belongsTo(Cliente::class, 'nombre_usuario', 'nombre_usuario');
     }
         public function credito(): BelongsTo
     {
-        return $this->belongsTo(Credito::class);
+        return $this->belongsTo(Credito::class, 'id_compra', 'id_compra');
     }
         public function pedido(): HasOne
     {
-        return $this->hasOne(Pedido::class);
+        return $this->hasOne(Pedido::class, 'id_compra', 'id_compra');
     }
+    //     public function pedidoPorIdCompra(): BelongsTo
+    // {
+    //     return $this->belongsTo(Pedido::class, 'id_compra', 'id_compra');
+    // }
 }

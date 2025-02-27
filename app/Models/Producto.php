@@ -10,8 +10,13 @@ class Producto extends Model
 {
     use HasFactory;
 
+    protected $table = 'productos';
+    protected $primaryKey = 'id_producto';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     public function pedido(): BelongsTo
     {
-        return $this->belongsTo(Producto::class);
+        return $this->belongsTo(Producto::class, 'id_producto', 'id_producto');
     }
 }

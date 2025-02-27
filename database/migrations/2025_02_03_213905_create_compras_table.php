@@ -13,15 +13,16 @@ return new class extends Migration
     {
         // Creación de la tabla Compras
         Schema::create('compras', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger("pedido_id")->nullable();
-            if (Schema::hasTable('pedidos')) {
-                $table->foreign("pedido_id")->references("id")->on("pedidos")->onDelete("set null");
-            }
+            $table->id('id_compra');
+            // $table->unsignedBigInteger("id_pedido")->nullable();
+            // if (Schema::hasTable('pedidos')) {
+            //     $table->foreign("id_pedido")->references("id_pedido")->on("pedidos")->onDelete("set cascade");
+            // }
             $table->string('nombre_usuario')->nullable();
             $table->boolean("estado_compra");
             $table->timestamps();
 
+            // $table->foreign('id_pedido')->references('id_pedido')->on('pedidos')->onDelete('cascade');
 
             $table->foreign('nombre_usuario')
             ->references('nombre_usuario')

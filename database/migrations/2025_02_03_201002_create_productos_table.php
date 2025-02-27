@@ -13,7 +13,7 @@ return new class extends Migration
     {
         // Creación de la tabla Productos
         Schema::create('productos', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_producto');
             $table->string('nombre',40);
             $table->string('material',20);
             $table->string('color', 10)->nullable();

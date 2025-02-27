@@ -46,7 +46,7 @@ class AbonoController extends Controller
         ]);
         $abono = new Aceite();
         $abono->monto_abono = $request->monto_abono;
-        $abono->nombre_usuario = $request->nombre_usuario;
+        $abono->nombre_usuario = $nombre_usuario;
         
         if ($abono->save()) {
             return redirect('/abono')->with('success', 'Abono registrado correctamente.');
@@ -78,6 +78,7 @@ class AbonoController extends Controller
         // if($user->isAdmin())
         // {
             $abono = Abono::find($id);
+            $cliente = Cliente::all();
 
             if (!$abono) {
                 return redirect()->route('abono.abonoIndex')->with('error', 'El abono no se encontró.');
@@ -112,7 +113,7 @@ class AbonoController extends Controller
             return redirect()->route('abono.abonoIndex')->with('error', 'El abono no se encontró.');
         }
         $abono->monto_abono = $request->monto_abono;
-        $abono->nombre_usuario = $request->nombre_usuario;
+        $abono->nombre_usuario = $nombre_usuario;
         //dd($request);
         // if ($request->hasFile('archivo') && $request->file('archivo')->isValid()) {
         //     // Eliminar el archivo antiguo si existe

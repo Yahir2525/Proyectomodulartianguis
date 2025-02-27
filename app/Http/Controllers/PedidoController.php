@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pedido;
+use App\Models\Compra;
+use App\Models\Producto;
 use Illuminate\Http\Request;
 
 class PedidoController extends Controller
@@ -60,9 +62,17 @@ class PedidoController extends Controller
             'total_pagar.min' => 'El total a pagar no puede ser negativo.',
 
         ]);
+
+        // $aceitesSeleccionados = $request->aceites;
+        // $aceitesUnicos = array_unique($aceitesSeleccionados);
+
+        // if (count($aceitesSeleccionados) !== count($aceitesUnicos)) {
+        //     return redirect()->back()->with('error', 'No puedes seleccionar el mismo aceite más de una vez en la misma compra.');
+        // }
+
         $pedido = new Pedido();
-        $pedido->id_compra = $request->$idCompra;
-        $pedido->id_producto = $request->$idProducto;
+        $pedido->id_compra = $idCompra;
+        $pedido->id_producto = $idProducto;
         $pedido->cantidad = $request->cantidad;
         // $quantities = $request->input('cantidad');
         $pedido->precio_unitario = $request->precio_unitario;
@@ -97,6 +107,8 @@ class PedidoController extends Controller
     public function edit(Pedido $pedido)
     {
         $pedido = Pedido::find($id);
+        $compra = Compra::all();
+        $producto = Producto::all();
 
             if (!$pedido) {
                 return redirect()->route('pedido.pedidoIndex')->with('error', 'El pedido no se encontró.');
@@ -146,8 +158,8 @@ class PedidoController extends Controller
         if (!$pedido) {
             return redirect()->route('pedido.pedidoIndex')->with('error', 'El pedido no se encontró.');
         }
-        $pedido->id_compra = $request->$idCompra;
-        $pedido->id_producto = $request->$idProducto;
+        $pedido->id_compra = $idCompra;
+        $pedido->id_producto = $idProducto;
         $pedido->cantidad = $request->cantidad;
         // $quantities = $request->input('cantidad');
         $pedido->precio_unitario = $request->precio_unitario;

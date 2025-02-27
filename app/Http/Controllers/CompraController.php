@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Compra;
+use App\Models\Pedido;
+use App\Models\Cliente;
 use Illuminate\Http\Request;
 
 class CompraController extends Controller
@@ -47,8 +49,8 @@ class CompraController extends Controller
         ]);
         $compra = new Compra();
         // Revisar el id compraproducto
-        $compra->id_pedido = $request->$idPedido;
-        $compra->nombre_usuario = $request->$nombre_usuario;
+        $compra->id_pedido = $idPedido;
+        $compra->nombre_usuario = $$nombre_usuario;
         $compra->estado_compra = $request->estado_compra;
         
         if ($compra->save()) {
@@ -78,6 +80,8 @@ class CompraController extends Controller
     public function edit(Compra $compra)
     {
         $compra = Compra::find($id);
+        $pedido = Pedido::all();
+        $cliente = Cliente::all();
 
             if (!$compra) {
                 return redirect()->route('compra.compraIndex')->with('error', 'La compra no se encontró.');
@@ -111,8 +115,8 @@ class CompraController extends Controller
         if (!$compra) {
             return redirect()->route('compra.compraIndex')->with('error', 'La compra no se encontró.');
         }
-        $compra->id_pedido = $request->$idPedido;
-        $compra->nombre_usuario = $request->$nombre_usuario;
+        $compra->id_pedido = $idPedido;
+        $compra->nombre_usuario = $nombre_usuario;
         $compra->estado_compra = $request->estado_compra;
         $compra->save();
         return redirect()->route('compra.compraIndex')->with('success', 'La compra se ha actualizado con éxito.');

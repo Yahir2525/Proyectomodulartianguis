@@ -11,6 +11,11 @@ class Cliente extends Model
 {
     use HasFactory;
 
+    protected $table = 'clientes';
+    protected $primaryKey = 'id_cliente';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
         public function compra(): HasMany
     {
         return $this->hasMany(Compra::class, 'nombre_usuario', 'nombre_usuario');

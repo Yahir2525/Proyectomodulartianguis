@@ -10,6 +10,12 @@ class Credito extends Model
 {
     use HasFactory;
     
+    protected $table = 'creditos';
+    protected $primaryKey = 'id_credito';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
+
         public function cliente(): BelongsTo
     {
         return $this->belongsTo(Cliente::class, 'nombre_usuario', 'nombre_usuario');
@@ -17,11 +23,11 @@ class Credito extends Model
 
         public function compra(): HasMany
     {
-        return $this->hasMany(Compra::class);
+        return $this->hasMany(Compra::class, 'id_compra', 'id_compra');
     }
 
     public function abono(): HasMany
     {
-        return $this->hasMany(Abono::class);
+        return $this->hasMany(Abono::class, 'monto_abono', 'monto_abono');
     }
 }

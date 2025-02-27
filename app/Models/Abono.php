@@ -10,6 +10,11 @@ class Abono extends Model
 {
     use HasFactory;
 
+    protected $table = 'abonos';
+    protected $primaryKey = 'id_abono';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     public function cliente(): BelongsTo
 {
     return $this->belongsTo(Cliente::class, 'nombre_usuario', 'nombre_usuario');
@@ -17,7 +22,7 @@ class Abono extends Model
 
     public function credito(): BelongsTo
 {
-    return $this->belongsTo(Cliente::class);
+    return $this->belongsTo(Credito::class, 'monto_abono', 'monto_abono');
 }
 
 }

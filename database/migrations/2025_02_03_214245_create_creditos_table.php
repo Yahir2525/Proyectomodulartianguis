@@ -13,15 +13,20 @@ return new class extends Migration
     {
         // Creación de la tabla Creditos
         Schema::create('creditos', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_credito');
             //Forma de declarar llaves foraneas
             $table->string('nombre_usuario')->nullable();
-            $table->foreignId("compra_id")->nullable()->constrained("compras")->onDelete('set null');
+            $table->unsignedBigInteger('id_compra')->nullable();
+            // if (Schema::hasTable('compras')) {
+            //     $table->foreign("compra_id")->references("id")->on("compras")->onDelete("set null");
+            // }
             $table->dateTime('fecha_liquidacion');
             $table->dateTime('fecha_vencimiento');
-            $table->boolean("estado");
+            $table->boolean('estado');
             $table->decimal('saldo_pendiente', 10,2)->unsigned();
             $table->timestamps();
+
+            $table->foreign('id_compra')->references('id_compra')->on('compras')->onDelete('cascade');
 
             $table->foreign('nombre_usuario')
             ->references('nombre_usuario')
