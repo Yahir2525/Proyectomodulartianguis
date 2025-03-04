@@ -98,7 +98,7 @@ class ClienteController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Cliente $cliente)
+    public function show(Request $request)
     {
         $id = $request->input('id_cliente');
         $cliente = Cliente::find($id);
@@ -112,16 +112,15 @@ class ClienteController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Cliente $cliente)
+    public function edit($id)
     {
         $cliente = Cliente::find($id);
 
-            if (!$cliente) {
-                return redirect()->route('cliente.clienteIndex')->with('error', 'El cliente no se encontró.');
-            // }
-
-            return view('/cliente/editCliente', ['cliente' => $cliente]);   
+        if (!$cliente) {
+            return redirect()->back()->with('error', 'El cliente no se encontró.');
+                // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
         }
+        return view('/cliente/editCliente', ['cliente' => $cliente]);
     }
 
     /**

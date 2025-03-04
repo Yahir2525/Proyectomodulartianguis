@@ -83,12 +83,11 @@ class CompraController extends Controller
         $pedido = Pedido::all();
         $cliente = Cliente::all();
 
-            if (!$compra) {
-                return redirect()->route('compra.compraIndex')->with('error', 'La compra no se encontró.');
-            // }
-
-            return view('/compra/editCompra', ['compra' => $compra]);   
+        if (!$compra) {
+            return redirect()->back()->with('error', 'La compra no se encontró.');
+                // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
         }
+        return view('/compra/editCompra', ['compra' => $compra]);
     }
 
     /**

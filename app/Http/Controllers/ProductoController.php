@@ -94,7 +94,7 @@ class ProductoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Producto $producto)
+    public function show(Request $request)
     {
         $id = $request->input('id_producto');
         $producto = Producto::find($id);
@@ -102,24 +102,22 @@ class ProductoController extends Controller
         if (!$producto) {
             return redirect()->back()->with('error', 'El producto no se encontró.');
         }
-        return view('/abono/showProducto', ['producto' => $producto]);
+        return view('/producto/showProducto', ['producto' => $producto]);
         //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Producto $producto)
+    public function edit($id)
     {
         $producto = Producto::find($id);
 
-            if (!$producto) {
-                return redirect()->route('producto.productoIndex')->with('error', 'El producto no se encontró.');
-            // }
-
-            return view('/producto/editProducto', ['producto' => $producto]);   
+        if (!$producto) {
+            return redirect()->back()->with('error', 'El pedido no se encontró.');
+                // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
         }
-        //
+        return view('/producto/editProducto', ['producto' => $producto]);   
     }
 
     /**

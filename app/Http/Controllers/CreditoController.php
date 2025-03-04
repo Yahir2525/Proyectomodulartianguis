@@ -95,12 +95,11 @@ class CreditoController extends Controller
         $cliente = Cliente::all();
         $compra = Compra::all();
 
-            if (!$credito) {
-                return redirect()->route('credito.creditoIndex')->with('error', 'El credito no se encontró.');
-            // }
-
-            return view('/credito/editCredito', ['credito' => $credito]);   
+        if (!$credito) {
+            return redirect()->back()->with('error', 'El credito no se encontró.');
+                // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
         }
+        return view('/credito/editCredito', ['credito' => $credito]);
     }
 
     /**

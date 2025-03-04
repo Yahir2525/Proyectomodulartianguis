@@ -8,6 +8,7 @@ use App\Http\Controllers\Compra_productoController;
 use App\Http\Controllers\CreditoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\VendedorController;
+use App\Http\Controllers\PedidoController;
 
 
 Route::get('/', function () {

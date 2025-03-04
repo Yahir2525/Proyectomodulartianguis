@@ -58,7 +58,7 @@ class AbonoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Abono $abono)
+    public function show(Request $request)
     {
         $id = $request->input('id_abono');
         $abono = Abono::find($id);
@@ -72,20 +72,19 @@ class AbonoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Abono $abono)
+    public function edit($id)
     {
         // $user = Auth::user();
         // if($user->isAdmin())
         // {
             $abono = Abono::find($id);
-            $cliente = Cliente::all();
+            // $cliente = Cliente::all();
 
             if (!$abono) {
-                return redirect()->route('abono.abonoIndex')->with('error', 'El abono no se encontró.');
-            // }
-
-            return view('/abono/editAbono', ['abono' => $abono]);   
-        }
+                return redirect()->back()->with('error', 'El abono no se encontró.');
+                    // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
+            }
+            return view('/abono/editAbono', ['abono' => $abono]);
         // else{
         //     return redirect()->back()->with('error', 'No puedes editar este abono.');
         // }
@@ -138,7 +137,7 @@ class AbonoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Abono $abono)
+    public function destroy($id)
     {
         $abono = Abono::find($id);
 
@@ -147,7 +146,7 @@ class AbonoController extends Controller
         // }
 
         if (!$abono) {
-            return redirect()->route('abono.abonoIndex')->with('error', 'El abono no se encontró.');
+            return redirect()->route('abono.index')->with('error', 'El abono no se encontró.');
         }
         
         // $detalleCompras = DetalleCompra::where('id_aceite', $id)->get();
@@ -164,6 +163,6 @@ class AbonoController extends Controller
 
         $abono->delete();
 
-        return redirect()->route('abono.abonoIndex')->with('success', 'El abono se ha eliminado con éxito.');
+        return redirect()->route('abono.index')->with('success', 'El abono se ha eliminado con éxito.');
     }
 }

@@ -85,7 +85,7 @@ class VendedorController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Vendedor $vendedor)
+    public function show(Request $request)
     {
         $id = $request->input('id_vendedor');
         $cliente = Cliente::find($id);
@@ -100,7 +100,7 @@ class VendedorController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Vendedor $vendedor)
+    public function edit($id)
     {
         // $user = Auth::user();
         // if($user->isAdmin())
@@ -108,11 +108,10 @@ class VendedorController extends Controller
             $vendedor = Vendedor::find($id);
 
             if (!$vendedor) {
-                return redirect()->route('vendedor.vendedorIndex')->with('error', 'El vendedor no se encontró.');
-            // }
-
-            return view('/vendedor/editVendedor', ['vendedor' => $vendedor]);   
-        }
+                return redirect()->back()->with('error', 'El vendedor no se encontró.');
+                    // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
+            }
+            return view('/vendedor/editVendedor', ['vendedor' => $vendedor]);
         // else{
         //     return redirect()->back()->with('error', 'No puedes editar este vendedor.');
         // }

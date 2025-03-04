@@ -36,19 +36,19 @@ class PedidoController extends Controller
         //
         $request->validate([
             'id_compra' => 'required|integer|unique:compras,id_compra',
-            'id_producto' => 'required|integer|unique:productos,id_productos',
+            'id_producto' => 'required|integer|unique:productos,id_producto',
             'cantidad' => 'required|integer|min:0',
             'precio_unitario' => 'required|numeric',
             'subtotal' => 'required|numeric|min:0',
             'total_pagar' => 'required|numeric|min:0',
 
         ], [
-            'id_compra.required' => 'Debe seleccionar una compra .',
-            'id_compra.integer' => 'El ID de la compra debe ser un número entero.',
-            'id_compra.unique' => 'El ID de la compra debe ser único.',
-            'id_producto.required' => 'Debe seleccionar un producto .',
-            'id_producto.integer' => 'El ID del producto debe ser un número entero.',
-            'id_producto.unique' => 'El ID del producto debe ser único.',
+            'compra_id.required' => 'Debe seleccionar una compra .',
+            'compra_id.integer' => 'El ID de la compra debe ser un número entero.',
+            'compra_id.unique' => 'El ID de la compra debe ser único.',
+            'producto_id.required' => 'Debe seleccionar un producto .',
+            'producto_id.integer' => 'El ID del producto debe ser un número entero.',
+            'producto_id.unique' => 'El ID del producto debe ser único.',
             'cantidad.required' => 'La cantidad de productos es obligatoria.',
             'cantidad.integer' => 'La cantidad debe ser un número entero',
             'cantidad.min' => 'La cantidad no puede ser negativa.',
@@ -75,7 +75,7 @@ class PedidoController extends Controller
         $pedido->id_producto = $idProducto;
         $pedido->cantidad = $request->cantidad;
         // $quantities = $request->input('cantidad');
-        $pedido->precio_unitario = $request->precio_unitario;
+        $pedido->precio_unitario = $precio_unitario;
         $pedido->subtotal = $request->subtotal;
         $pedido->total_pagar = $request->total_pagar;
         
@@ -90,11 +90,11 @@ class PedidoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Pedido $pedido)
+    public function show(Request $request)
     {
         $id = $request->input('id_pedido');
-        $pedido = Pedido::find($pedido);
-            
+        $pedido = Pedido::find($id);
+        // dd($id);
         if (!$pedido) {
             return redirect()->back()->with('error', 'El pedido no se encontró.');
         }
@@ -104,19 +104,19 @@ class PedidoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Pedido $pedido)
+    public function edit($id)
     {
         $pedido = Pedido::find($id);
-        $compra = Compra::all();
-        $producto = Producto::all();
-
-            if (!$pedido) {
-                return redirect()->route('pedido.pedidoIndex')->with('error', 'El pedido no se encontró.');
-            // }
-
-            return view('/pedido/editPedido', ['pedido' => $pedido]);   
+        // $compra = Compra::all();
+        // $producto = Producto::all();
+        // dd($pedido);
+        if (!$pedido) {
+            return redirect()->back()->with('error', 'El pedido no se encontró.');
+                // return redirect()->route('/pedido/pedidoIndex')->with('error', 'El pedido no se encontró.');
         }
+        return view('/pedido/editPedido', ['pedido' => $pedido]);
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -125,19 +125,19 @@ class PedidoController extends Controller
     {
         $request->validate([
             'id_compra' => 'required|integer|unique:compras,id_compra',
-            'id_producto' => 'required|integer|unique:productos,id_productos',
+            'id_producto' => 'required|integer|unique:productos,id_producto',
             'cantidad' => 'required|integer|min:0',
             'precio_unitario' => 'required|numeric|exists:productos,nombre_usuario',
             'subtotal' => 'required|numeric|min:0',
             'total_pagar' => 'required|numeric|min:0',
 
         ], [
-            'id_compra.required' => 'Debe seleccionar una compra .',
-            'id_compra.integer' => 'El ID de la compra debe ser un número entero.',
-            'id_compra.unique' => 'El ID de la compra debe ser único.',
-            'id_producto.required' => 'Debe seleccionar un producto .',
-            'id_producto.integer' => 'El ID del producto debe ser un número entero.',
-            'id_producto.unique' => 'El ID del producto debe ser único.',
+            'compra_id.required' => 'Debe seleccionar una compra .',
+            'compra_id.integer' => 'El ID de la compra debe ser un número entero.',
+            'compra_id.unique' => 'El ID de la compra debe ser único.',
+            'producto_id.required' => 'Debe seleccionar un producto .',
+            'producto_id.integer' => 'El ID del producto debe ser un número entero.',
+            'producto_id.unique' => 'El ID del producto debe ser único.',
             'cantidad.required' => 'La cantidad de productos es obligatoria.',
             'cantidad.integer' => 'La cantidad debe ser un número entero',
             'cantidad.min' => 'La cantidad no puede ser negativa.',
@@ -156,13 +156,13 @@ class PedidoController extends Controller
         
     
         if (!$pedido) {
-            return redirect()->route('pedido.pedidoIndex')->with('error', 'El pedido no se encontró.');
+            return redirect()->route('pedido/pedidoIndex')->with('error', 'El pedido no se encontró.');
         }
         $pedido->id_compra = $idCompra;
         $pedido->id_producto = $idProducto;
         $pedido->cantidad = $request->cantidad;
         // $quantities = $request->input('cantidad');
-        $pedido->precio_unitario = $request->precio_unitario;
+        $pedido->precio_unitario = $precio_unitario;
         $pedido->subtotal = $request->subtotal;
         $pedido->total_pagar = $request->total_pagar;
         $pedido->save();
