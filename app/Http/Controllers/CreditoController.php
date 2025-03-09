@@ -75,7 +75,7 @@ class CreditoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Credito $credito)
+    public function show(Request $request)
     {
         $id = $request->input('id_credito');
         $credito = Credito::find($credito);
@@ -89,11 +89,11 @@ class CreditoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Credito $credito)
+    public function edit($id)
     {
         $credito = Credito::find($id);
-        $cliente = Cliente::all();
-        $compra = Compra::all();
+        // $cliente = Cliente::all();
+        // $compra = Compra::all();
 
         if (!$credito) {
             return redirect()->back()->with('error', 'El credito no se encontró.');
@@ -149,7 +149,7 @@ class CreditoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Credito $credito)
+    public function destroy($id)
     {
         $credito = Credito::find($id);
 
@@ -158,23 +158,11 @@ class CreditoController extends Controller
         // }
 
         if (!$credito) {
-            return redirect()->route('credito.creditoIndex')->with('error', 'El credito no se encontró.');
+            return redirect()->route('credito.index')->with('error', 'El credito no se encontró.');
         }
-        
-        // $detalleCompras = DetalleCompra::where('id_aceite', $id)->get();
-
-        // foreach ($detalleCompras as $detalleCompra) {
-        //     $compra = Compras::find($detalleCompra->id_compras);
-        //     if ($compra) {
-        //         $compra->delete();
-        //     }
-            
-        //     // Eliminar el DetalleCompras
-        //     $detalleCompra->delete();
-        // }
 
         $credito->delete();
 
-        return redirect()->route('credito.creditoIndex')->with('success', 'El credito se ha eliminado con éxito.');
+        return redirect()->route('credito.index')->with('success', 'El credito se ha eliminado con éxito.');
     }
 }

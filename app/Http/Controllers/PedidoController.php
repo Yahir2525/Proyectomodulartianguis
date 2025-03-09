@@ -172,7 +172,7 @@ class PedidoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Pedido $pedido)
+    public function destroy($id)
     {
         $pedido = Pedido::find($id);
 
@@ -181,7 +181,7 @@ class PedidoController extends Controller
         // }
 
         if (!$pedido) {
-            return redirect()->route('pedido.pedidoIndex')->with('error', 'El pedido no se encontró.');
+            return redirect()->route('pedido.index')->with('error', 'El pedido no se encontró.');
         }
         
         // $detalleCompras = DetalleCompra::where('id_aceite', $id)->get();
@@ -198,6 +198,6 @@ class PedidoController extends Controller
 
         $pedido->delete();
 
-        return redirect()->route('pedido.pedidoIndex')->with('success', 'El pedido se ha eliminado con éxito.');
+        return redirect()->route('pedido.index')->with('success', 'El pedido se ha eliminado con éxito.');
     }
 }

@@ -24,11 +24,11 @@
                     </tr>
                     <tr>
                         <td>ID</td>
-                        <td>{{ $compra->id }}</td>
+                        <td>{{ $compra->id_compra }}</td>
                     </tr>
                     <tr>
-                            <td>ID del Cliente</td>
-                            <td>{{ optional($compra->cliente)->id ?? 'Sin cliente' }}</td>
+                            <td>Nombre del Cliente</td>
+                            <td>{{ optional($compra->cliente)->nombre_usuario ?? 'Sin cliente' }}</td>
                         </tr>
                     <tr>
                         <td>MONTO</td>
@@ -36,13 +36,21 @@
                     </tr>
                     <tr>
                         <td>Tipo</td>
-                        <td>{{ $abono->created_at }}</td>
+                        <td>{{ $compra->created_at }}</td>
                     </tr>
                     <tr>
                         <td>Cantidad</td>
-                        <td>{{ $abono->updated_at }}</td>
+                        <td>{{ $compra->updated_at }}</td>
                     </tr>
+                    
                 </table>
+                <br>
+                <form action="{{ route('compra.destroy', $compra->id_compra) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <br><button type="submit" class="button is-danger">Eliminar Compra</button>
+                        </form>
+                        <br>
                 @endforeach 
 </section>
 </body>

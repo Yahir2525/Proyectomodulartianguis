@@ -27,8 +27,6 @@ return new class extends Migration
 
             $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
 
-
-
             // $table->foreign('precio_unitario')
             // ->references('precio_unitario')
             // ->on('productos')

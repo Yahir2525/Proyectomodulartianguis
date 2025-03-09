@@ -63,7 +63,7 @@
                         <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <br><button type="submit" class="button is-danger">Eliminar Compra</button>
+                        <br><button type="submit" class="button is-danger">Eliminar Abono</button>
                         </form>
                     </center>
                 @endforeach 

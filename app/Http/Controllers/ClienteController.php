@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
+use App\Models\Compra;
+use App\Models\Pedido;
+use App\Models\Credito;
 use Illuminate\Http\Request;
 
 class ClienteController extends Controller
@@ -106,7 +109,7 @@ class ClienteController extends Controller
         if (!$cliente) {
             return redirect()->back()->with('error', 'El cliente no se encontró.');
         }
-        return view('/abono/showCliente', ['cliente' => $cliente]);
+        return view('/cliente/showCliente', ['cliente' => $cliente]);
     }
 
     /**
@@ -184,7 +187,7 @@ class ClienteController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Cliente $cliente)
+    public function destroy($id)
     {
         $cliente = Cliente::find($id);
 
@@ -193,23 +196,40 @@ class ClienteController extends Controller
         // }
 
         if (!$cliente) {
-            return redirect()->route('cliente.clienteIndex')->with('error', 'El cliente no se encontró.');
+            return redirect()->route('cliente.index')->with('error', 'El cliente no se encontró.');
         }
         
-        // $detalleCompras = DetalleCompra::where('id_aceite', $id)->get();
+        // $compra = Compra::where('id_cliente', $id)->get();
 
-        // foreach ($detalleCompras as $detalleCompra) {
-        //     $compra = Compras::find($detalleCompra->id_compras);
+        // foreach ($compra as $compra) {
+        //     $compra = Compra::find($compra->id_compra);
         //     if ($compra) {
         //         $compra->delete();
         //     }
-            
-        //     // Eliminar el DetalleCompras
-        //     $detalleCompra->delete();
         // }
+
+
+        $compras = Compra::where('nombre_usuario', $id)->get();
+
+        foreach ($compras as $item) {
+            $compra = Compra::find($item->id_compra);
+            if ($compra) {
+                $compra->delete();
+            }
+        }
+
+        $creditos = Credito::where('nombre_usuario', $id)->get();
+
+        foreach ($creditos as $item) {
+            $credito = Credito::find($item->id_credito);
+            if ($credito) {
+                $credito->delete();
+            }
+        }
 
         $cliente->delete();
 
-        return redirect()->route('cliente.clienteIndex')->with('success', 'El cliente se ha eliminado con éxito.');
+
+        return redirect()->route('cliente.index')->with('success', 'El cliente se ha eliminado con éxito.');
     }
 }

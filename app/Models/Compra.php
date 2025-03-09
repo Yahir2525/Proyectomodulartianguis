@@ -20,9 +20,9 @@ class Compra extends Model
     {
         return $this->belongsTo(Cliente::class, 'nombre_usuario', 'nombre_usuario');
     }
-        public function credito(): BelongsTo
+        public function credito(): HasMany
     {
-        return $this->belongsTo(Credito::class, 'id_compra', 'id_compra');
+        return $this->hasMany(Credito::class, 'id_compra', 'id_compra');
     }
         public function pedido(): HasOne
     {

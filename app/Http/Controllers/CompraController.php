@@ -63,7 +63,7 @@ class CompraController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Compra $compra)
+    public function show(Request $request)
     {
         $id = $request->input('id_compra');
         $compra = Compra::find($compra);
@@ -77,11 +77,11 @@ class CompraController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Compra $compra)
+    public function edit($id)
     {
         $compra = Compra::find($id);
-        $pedido = Pedido::all();
-        $cliente = Cliente::all();
+        // $pedido = Pedido::all();
+        // $cliente = Cliente::all();
 
         if (!$compra) {
             return redirect()->back()->with('error', 'La compra no se encontró.');
@@ -124,7 +124,7 @@ class CompraController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Compra $compra)
+    public function destroy($id, Pedido $pedido)
     {    
         $compra = Compra::find($id);
 
@@ -133,11 +133,15 @@ class CompraController extends Controller
         // }
 
         if (!$compra) {
-            return redirect()->route('compra.compraIndex')->with('error', 'La compra no se encontró.');
+            return redirect()->route('compra.index')->with('error', 'La compra no se encontró.');
         }
+
 
         $compra->delete();
 
-        return redirect()->route('compra.compraIndex')->with('success', 'La compra se ha eliminado con éxito.');
+        $pedido = Pedido::where('id_pedido', $id)->get();
+        $pedido->delete();
+
+        return redirect()->route('compra.index')->with('success', 'La compra se ha eliminado con éxito.');
     }
 }

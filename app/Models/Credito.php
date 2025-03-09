@@ -21,9 +21,9 @@ class Credito extends Model
         return $this->belongsTo(Cliente::class, 'nombre_usuario', 'nombre_usuario');
     }
 
-        public function compra(): HasMany
+        public function compra(): BelongsTo
     {
-        return $this->hasMany(Compra::class, 'id_compra', 'id_compra');
+        return $this->belongsTo(Compra::class, 'id_compra', 'id_compra');
     }
 
     public function abono(): HasMany
