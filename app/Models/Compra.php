@@ -28,8 +28,4 @@ class Compra extends Model
     {
         return $this->hasOne(Pedido::class, 'id_compra', 'id_compra');
     }
-    //     public function pedidoPorIdCompra(): BelongsTo
-    // {
-    //     return $this->belongsTo(Pedido::class, 'id_compra', 'id_compra');
-    // }
 }

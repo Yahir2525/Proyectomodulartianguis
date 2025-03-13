@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Abono;
 use App\Models\Cliente;
 use App\Models\Compra;
-use App\Models\Pedido;
 use App\Models\Credito;
+use App\Models\Pedido;
+use App\Models\Producto;
+use App\Models\Vendedor;
 use Illuminate\Http\Request;
 
 class ClienteController extends Controller
@@ -198,16 +201,6 @@ class ClienteController extends Controller
         if (!$cliente) {
             return redirect()->route('cliente.index')->with('error', 'El cliente no se encontró.');
         }
-        
-        // $compra = Compra::where('id_cliente', $id)->get();
-
-        // foreach ($compra as $compra) {
-        //     $compra = Compra::find($compra->id_compra);
-        //     if ($compra) {
-        //         $compra->delete();
-        //     }
-        // }
-
 
         $compras = Compra::where('nombre_usuario', $id)->get();
 

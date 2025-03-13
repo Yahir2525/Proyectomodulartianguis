@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Abono extends Model
 {
@@ -22,7 +23,7 @@ class Abono extends Model
 
     public function credito(): BelongsTo
 {
-    return $this->belongsTo(Credito::class, 'monto_abono', 'monto_abono');
+    return $this->belongsTo(Credito::class, 'id_credito', 'id_credito');
 }
 
 }

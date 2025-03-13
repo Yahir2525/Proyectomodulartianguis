@@ -17,12 +17,11 @@ return new class extends Migration
             //Forma de declarar llaves foraneas
             $table->string('nombre_usuario')->nullable();
             $table->unsignedBigInteger('id_compra')->nullable();
-            // if (Schema::hasTable('compras')) {
-            //     $table->foreign("compra_id")->references("id")->on("compras")->onDelete("set null");
-            // }
             $table->dateTime('fecha_liquidacion');
             $table->dateTime('fecha_vencimiento');
             $table->boolean('estado');
+            $table->decimal('saldo_inicial', 10,2);
+            $table->decimal('total_abonado', 10,2);
             $table->decimal('saldo_pendiente', 10,2)->unsigned();
             $table->timestamps();
 
@@ -38,8 +37,15 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-        Schema::dropIfExists('creditos');
+    // public function down(): void
+    // {
+    //     Schema::dropIfExists('creditos');
+        
+    // }
+
+    public function down(): void {
+        Schema::table('creditos', function (Blueprint $table) {
+            $table->dropColumn('total_abonado');
+        });
     }
 };

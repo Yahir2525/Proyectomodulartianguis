@@ -57,6 +57,14 @@
                                 <td>{{ $credito->estado ? 'Activo' : 'Inactivo' }}</td>
                             </tr>
                             <tr>
+                                <td>Saldo inicial</td>
+                                <td>{{ number_format($credito->saldo_inicial, 2) }}</td>
+                            </tr>
+                            <tr>
+                                <td>Total abonado</td>
+                                <td>{{ number_format($credito->total_abonado, 2) }}</td>
+                            </tr>
+                            <tr>
                                 <td>Saldo pendiente</td>
                                 <td>{{ number_format($credito->saldo_pendiente, 2) }}</td>
                             </tr>

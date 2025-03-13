@@ -42,6 +42,10 @@
                         <td>{{ $abono->id_abono }}</td>
                     </tr>
                     <tr>
+                        <td>ID del credito</td>
+                        <td>{{ optional($abono->credito)->id_credito ?? 'Sin credito' }}</td>
+                            </tr>
+                    <tr>
                         <td>Nombre de usuario</td>
                         <td>{{ optional($abono->cliente) ? $abono->nombre_usuario : 'No tiene usuario' }}</td>
                         </tr>

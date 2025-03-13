@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Pedido extends Model
 {
@@ -32,5 +33,9 @@ class Pedido extends Model
         public function producto(): HasMany
     {
         return $this->hasMany(Producto::class, 'id_producto', 'id_producto');
+    }
+        public function credito(): BelongsTo
+    {
+        return $this->belongsTo(Credito::class, 'id_credito', 'id_credito');
     }
 }
