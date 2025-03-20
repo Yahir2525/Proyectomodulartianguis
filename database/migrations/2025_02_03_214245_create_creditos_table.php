@@ -20,9 +20,9 @@ return new class extends Migration
             $table->dateTime('fecha_liquidacion');
             $table->dateTime('fecha_vencimiento');
             $table->boolean('estado');
-            $table->decimal('saldo_inicial', 10,2);
+            $table->decimal('saldo_total', 10,2)->nullable();
             $table->decimal('total_abonado', 10,2);
-            $table->decimal('saldo_pendiente', 10,2)->unsigned();
+            $table->decimal('saldo_pendiente', 10,2)->nullable();
             $table->timestamps();
 
             $table->foreign('id_compra')->references('id_compra')->on('compras')->onDelete('cascade');

@@ -43,7 +43,7 @@ class CreditoController extends Controller
             'fecha_liquidacion' => 'required|date|',
             'fecha_vencimiento' => 'required|date|',
             'estado' => 'required|boolean',
-            'saldo_inicial' => 'required|numeric',
+            'saldo_total' => 'required|numeric',
             'total_abonado' => 'required|numeric',
             'saldo_pendiente' => 'required|numeric',
         ], [
@@ -59,8 +59,8 @@ class CreditoController extends Controller
             'fecha_vencimiento.date ' => 'Este dato debe ser una fecha.',
             'estado.required' => 'Es requerido un estado del credito.',
             'estado.boolean' => 'El estado debe ser activo o desactivo.',
-            'saldo_inicial.required' => 'El saldo inicial es obligatorio.',
-            'saldo_inicial.numeric' => 'El saldo inicial debe ser un número.',
+            'saldo_total.required' => 'El saldo total es obligatorio.',
+            'saldo_total.numeric' => 'El saldo total debe ser un número.',
             'total_abonado.required' => 'El total abonado es obligatorio.',
             'total_abonado.numeric' => 'El total abonado debe ser un número.',
             'saldo_pendiente.required' => 'El saldo pendiente es obligatorio.',
@@ -72,11 +72,19 @@ class CreditoController extends Controller
         $credito->fecha_liquidacion = $request->fecha_liquidacion;
         $credito->fecha_vencimiento = $request->fecha_vencimiento;
         $credito->estado = $request->estado;
-        $pedido = Pedido::find($total_pagar);
-        $credito->saldo_inicial += $request->$total_pagar;
-        $abono = Abono::find($monto_abono);
-        $credito->total_abonado += $request->monto_abono;
-        $credito->saldo_pendiente -= $request->total_abonado;
+        $pedido = Pedido::find($request->$id_pedido);
+        $abono = Abono::find($request->id_abono);
+        $credito->saldo_total = 0;
+        if ($pedido) {
+            $credito->saldo_total += $pedido->total_pagar;
+        }
+        
+        // $credito->total_abonado = 0;
+        // if ($abono) {
+        //     $credito->total_abonado += $abono->monto_abono;
+        // }
+
+        // $credito->saldo_pendiente = $credito->saldo_total - $credito->total_abonado;
 
         if ($credito->save()) {
             return redirect('/credito')->with('success', 'Credito registrado correctamente.');
@@ -126,7 +134,7 @@ class CreditoController extends Controller
             'fecha_liquidacion' => 'required|date|',
             'fecha_vencimiento' => 'required|date|',
             'estado' => 'required|boolean',
-            'saldo_inicial' => 'required|numeric',
+            'saldo_total' => 'required|numeric',
             'total_abonado' => 'required|numeric',
             'saldo_pendiente' => 'required|numeric',
         ], [
@@ -142,8 +150,8 @@ class CreditoController extends Controller
             'fecha_vencimiento.date ' => 'Este dato debe ser una fecha.',
             'estado.required' => 'Es requerido un estado del credito.',
             'estado.boolean' => 'El estado debe ser activo o desactivo.',
-            'saldo_inicial.required' => 'El saldo inicial es obligatorio.',
-            'saldo_inicial.numeric' => 'El saldo inicial debe ser un número.',
+            'saldo_total.required' => 'El saldo total es obligatorio.',
+            'saldo_total.numeric' => 'El saldo total debe ser un número.',
             'total_abonado.required' => 'El total abonado es obligatorio.',
             'total_abonado.numeric' => 'El total abonado debe ser un número.',
             'saldo_pendiente.required' => 'El saldo pendiente es obligatorio.',
@@ -151,7 +159,6 @@ class CreditoController extends Controller
         ]);
         $credito = Credito::find($id);
         
-    
         if (!$credito) {
             return redirect()->route('credito.creditoIndex')->with('error', 'El credito no se encontró.');
         }
@@ -162,10 +169,20 @@ class CreditoController extends Controller
         $credito->fecha_vencimiento = $request->fecha_vencimiento;
         $credito->estado = $request->estado;
         $pedido = Pedido::find($request->id_pedido);
-        $credito->saldo_inicial += $total_pagar;
         $abono = Abono::find($request->id_abono);
-        $credito->total_abonado += $request->monto_abono;
-        $credito->saldo_pendiente -= $request->total_abonado;
+
+        $credito->saldo_total = 0;
+        if ($pedido) {
+            $credito->saldo_total += $pedido->total_pagar;
+        }
+        
+        $credito->total_abonado = 0;
+        if ($abono) {
+            $credito->total_abonado += $abono->monto_abono;
+        }
+
+        // Inicializar saldo_pendiente correctamente
+        $credito->saldo_pendiente = $credito->saldo_total - $credito->total_abonado;
 
         $credito->save();
         return redirect()->route('credito.creditoIndex')->with('success', 'El credito se ha actualizado con éxito.');

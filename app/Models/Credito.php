@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Credito extends Model
 {
     use HasFactory;
+
+    protected $guarded = [];
     
     protected $table = 'creditos';
     protected $primaryKey = 'id_credito';
