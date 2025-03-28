@@ -25,10 +25,10 @@ class CreditoFactory extends Factory
 
     public function definition(): array
     {
+        $compra = \App\Models\Compra::inRandomOrder()->first();
         return [
-            'nombre_usuario' => function (array $attributes) {
-            return \App\Models\Compra::find($attributes['id_compra'])->nombre_usuario ?? null;},
-            'id_compra' => \App\Models\Compra::inRandomOrder()->value('id_compra') ?? null,
+            'id_compra' => $compra?->id_compra,
+            'nombre_usuario' => $compra?->nombre_usuario, 
             'fecha_liquidacion' => $this->faker->dateTime(),
             'fecha_vencimiento' => $this->faker->dateTimeBetween('2020-01-01', '2024-12-31'),
             'estado' => $this->faker->randomElement([true, false]),

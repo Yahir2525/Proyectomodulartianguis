@@ -34,8 +34,8 @@ class Pedido extends Model
     {
         return $this->hasMany(Producto::class, 'id_producto', 'id_producto');
     }
-        public function credito(): BelongsTo
-    {
-        return $this->belongsTo(Credito::class, 'id_credito', 'id_credito');
-    }
+    //     public function credito(): BelongsTo
+    // {
+    //     return $this->belongsTo(Credito::class, 'id_credito', 'id_credito');
+    // }
 }

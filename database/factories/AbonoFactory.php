@@ -25,13 +25,10 @@ class AbonoFactory extends Factory
 
     public function definition(): array
     {
+        $credito = \App\Models\Credito::inRandomOrder()->first();
         return [
-            // 'nombre_usuario' => Cliente::inRandomOrder()->value('nombre_usuario') ?? null, // Selecciona un cliente aleatorio o NULL
-            // 'monto_abono' => $this->faker->randomFloat(2, 50, 1000), // Número decimal entre 50 y 1000
-            'id_credito' => \App\Models\Credito::inRandomOrder()->value('id_credito') ?? null,
-            // 'id_credito' => $creditoId = \App\Models\Credito::inRandomOrder()->value('id_credito') ?? null,
-            'nombre_usuario' => function (array $attributes) {
-            return \App\Models\Credito::find($attributes['id_credito'])->nombre_usuario ?? null;},
+            'id_credito' => $credito?->id_credito,
+            'nombre_usuario' => $credito?->nombre_usuario, 
             'monto_abono' => $this->faker->randomFloat(2, 1, 1000),
             'created_at' => now(),
             'updated_at' => now(),

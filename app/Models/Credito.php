@@ -34,8 +34,8 @@ class Credito extends Model
         return $this->hasMany(Abono::class, 'id_credito', 'id_credito');
     }
 
-    public function pedido(): HasMany
-    {
-        return $this->hasMany(Pedido::class, 'id_credito', 'id_credito');
-    }
+    // public function pedido(): HasMany
+    // {
+    //     return $this->hasMany(Pedido::class, 'id_credito', 'id_credito');
+    // }
 }

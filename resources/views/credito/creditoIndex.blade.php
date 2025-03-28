@@ -21,63 +21,36 @@
                 <input type="submit" id="enviar" name="enviar" value="buscar">
             </form>
             @if($creditoIndex->isNotEmpty())
-                <br><h2>Tablas de creditos registrados</h2>
-                @foreach ($creditoIndex as $credito)
-                    <center>
-                        <table>
-                            <tr>
-                                <th colspan="2">Tabla del pedido: {{ $credito->id_credito }}</th>
-                            </tr>
-                            <tr>
-                                <th>Atributo</th>
-                                <th>Valor</th>
-                            </tr>
-                            <tr>
-                                <td>ID del credito</td>
-                                <td>{{ $credito->id_credito }}</td>
-                            </tr>
-                            <tr>
-                            <td>Nombre del Cliente</td>
-                            <td>{{ optional($credito->cliente)->nombre_usuario ?? 'Sin cliente' }}</td>
-                            </tr>
-                            <tr>
-                                <td>ID de la compra</td>
-                                <td>{{ optional($credito->compra)->id_compra ?? 'Sin compra' }}</td>
-                            </tr>
-                            <tr>
-                                <td>Fecha de liquidación</td>
-                                <td>{{ $credito->fecha_liquidacion }}</td>
-                            </tr>
-                            <tr>
-                                <td>Fecha de vencimiento</td>
-                                <td>{{ $credito->fecha_vencimiento }}</td>
-                            </tr>
-                            <tr>
-                                <td>Estado</td>
-                                <td>{{ $credito->estado ? 'Activo' : 'Inactivo' }}</td>
-                            </tr>
-                            <tr>
-                                <td>Saldo total</td>
-                                <td>{{ number_format($credito->saldo_total, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Total abonado</td>
-                                <td>{{ number_format($credito->total_abonado, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Creado</td>
-                                <td>{{ $credito->created_at }}</td>
-                            </tr>
-                            <tr>
-                                <td>Actualizado</td>
-                                <td>{{ $credito->updated_at }}</td>
-                            </tr>
-                        </table>
-                        <br>
-                        <a href="{{ route('credito.edit', $credito->id_credito) }}" class="button is-primary">Editar Compra</a>
-                    </center>
-                @endforeach 
-            @endif
+    <br><h2>Tablas de créditos registrados</h2>
+    <center>
+        <table border="1">
+            <tr>
+                <th>ID del crédito</th>
+                <th>Nombre del Cliente</th>
+                <th>Saldo Total</th>
+                <th>Total Abonado</th>
+                <th>Fecha de Liquidación</th>
+                <th>Fecha de Vencimiento</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            @foreach ($creditoIndex as $credito)
+                <tr>
+                    <td>{{ $credito->id_credito }}</td>
+                    <td>{{ optional($credito->compra)->nombre_usuario ?? 'Sin cliente' }}</td>
+                    <td>{{ number_format($credito->saldo_total, 2) }}</td>
+                    <td>{{ number_format($credito->total_abonado, 2) }}</td>
+                    <td>{{ $credito->fecha_liquidacion }}</td>
+                    <td>{{ $credito->fecha_vencimiento }}</td>
+                    <td>{{ $credito->estado ? 'Activo' : 'Inactivo' }}</td>
+                    <td>
+                        <a href="{{ route('credito.edit', $credito->id_credito) }}" class="button is-primary">Editar</a>
+                    </td>
+                </tr>
+            @endforeach
+        </table>
+    </center>
+@endif
         </div>
     </section>
 </body>

@@ -38,8 +38,8 @@ class CreditoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
             'id_compra' => 'required|integer|unique:compras,id_compra',
+            'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
             'fecha_liquidacion' => 'required|date|',
             'fecha_vencimiento' => 'required|date|',
             'estado' => 'required|boolean',
@@ -47,12 +47,12 @@ class CreditoController extends Controller
             'total_abonado' => 'required|numeric',
             'saldo_pendiente' => 'required|numeric',
         ], [
-            'nombre_usuario.required' => 'Debe seleccionar el cliente que solicita el credito.',
-            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
-            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
             'id_compra.required' => 'Debe seleccionar una compra .',
             'id_compra.integer' => 'El ID de la compra debe ser un número entero.',
             'id_compra.unique' => 'El ID de la compra debe ser único.',
+            'nombre_usuario.required' => 'Debe seleccionar el cliente que solicita el credito.',
+            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
+            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
             'fecha_liquidacion.required' => 'Es requerida una fecha de liquidación.',
             'fecha_liquidacion.date' => 'Este dato debe ser una fecha.',
             'fecha_vencimiento.required' => 'Es requerida una fecha de vencimiento.',
@@ -67,12 +67,12 @@ class CreditoController extends Controller
             'saldo_pendiente.numeric' => 'El saldo pendiente debe ser un número.',
         ]);
         $credito = new Credito();
-        $credito->nombre_usuario = $nombre_usuario;
         $credito->id_compra = $idCompra;
+        $credito->nombre_usuario = $nombre_usuario;
         $credito->fecha_liquidacion = $request->fecha_liquidacion;
         $credito->fecha_vencimiento = $request->fecha_vencimiento;
         $credito->estado = $request->estado;
-        $pedido = Pedido::find($request->$id_pedido);
+        $pedido = Pedido::where('id_pedido', $credito->id)->first();
         $abono = Abono::find($request->id_abono);
         $credito->saldo_total = 0;
         if ($pedido) {
@@ -99,7 +99,7 @@ class CreditoController extends Controller
     public function show(Request $request)
     {
         $id = $request->input('id_credito');
-        $credito = Credito::find($credito);
+        $credito = Credito::find($id);
             
         if (!$credito) {
             return redirect()->back()->with('error', 'El credito no se encontró.');
@@ -129,8 +129,8 @@ class CreditoController extends Controller
     public function update(Request $request, Credito $credito)
     {
         $request->validate([
-            'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
             'id_compra' => 'required|integer|unique:compras,id_compra',
+            'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
             'fecha_liquidacion' => 'required|date|',
             'fecha_vencimiento' => 'required|date|',
             'estado' => 'required|boolean',
@@ -138,12 +138,12 @@ class CreditoController extends Controller
             'total_abonado' => 'required|numeric',
             'saldo_pendiente' => 'required|numeric',
         ], [
-            'nombre_usuario.required' => 'Debe seleccionar el cliente que solicita el credito.',
-            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
-            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
             'id_compra.required' => 'Debe seleccionar una compra .',
             'id_compra.integer' => 'El ID de la compra debe ser un número entero.',
             'id_compra.unique' => 'El ID de la compra debe ser único.',
+            'nombre_usuario.required' => 'Debe seleccionar el cliente que solicita el credito.',
+            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
+            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
             'fecha_liquidacion.required' => 'Es requerida una fecha de liquidación.',
             'fecha_liquidacion.date' => 'Este dato debe ser una fecha.',
             'fecha_vencimiento.required' => 'Es requerida una fecha de vencimiento.',
@@ -163,8 +163,8 @@ class CreditoController extends Controller
             return redirect()->route('credito.creditoIndex')->with('error', 'El credito no se encontró.');
         }
         $credito = new Credito();
-        $credito->nombre_usuario = $nombre_usuario;
         $credito->id_compra = $idCompra;
+        $credito->nombre_usuario = $nombre_usuario;
         $credito->fecha_liquidacion = $request->fecha_liquidacion;
         $credito->fecha_vencimiento = $request->fecha_vencimiento;
         $credito->estado = $request->estado;

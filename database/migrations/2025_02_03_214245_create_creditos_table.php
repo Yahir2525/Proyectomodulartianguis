@@ -14,9 +14,9 @@ return new class extends Migration
         // Creación de la tabla Creditos
         Schema::create('creditos', function (Blueprint $table) {
             $table->id('id_credito');
-            //Forma de declarar llaves foraneas
-            $table->string('nombre_usuario')->nullable();
             $table->unsignedBigInteger('id_compra')->nullable();
+            $table->string('nombre_usuario')->nullable();
+            
             $table->dateTime('fecha_liquidacion');
             $table->dateTime('fecha_vencimiento');
             $table->boolean('estado');

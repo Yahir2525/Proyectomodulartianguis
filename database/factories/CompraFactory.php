@@ -26,7 +26,6 @@ class CompraFactory extends Factory
     public function definition(): array
     {
         return [
-            // 'id_pedido' => \App\Models\Pedido::inRandomOrder()->value('id_pedido') ?? null,
             'nombre_usuario' => \App\Models\Cliente::inRandomOrder()->value('nombre_usuario') ?? null,
             'estado_compra' => $this->faker->randomElement(['1', '0']),
             'created_at' => now(),

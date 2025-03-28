@@ -30,8 +30,8 @@ class PedidoFactory extends Factory
             'id_producto' => $productoId = \App\Models\Producto::inRandomOrder()->value('id_producto') ?? null,
             'cantidad' => $this->faker->randomFloat(0, 1, 1000),
             'precio_unitario' => \App\Models\Producto::where('id_producto', $productoId)->value('precio_unitario') ?? null,
-            'subtotal' => $this->faker->randomFloat(0, 1, 1000),
-            'total_pagar' => $this->faker->randomFloat(2, 1, 1000),
+            'subtotal' => $pedido->subtotal ?? 0,
+            'total_pagar' => $pedido->total_pagar ?? 0,
             'created_at' => now(),
             'updated_at' => now(),
         ];

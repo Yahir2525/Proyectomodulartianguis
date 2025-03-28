@@ -78,7 +78,6 @@ class PedidoController extends Controller
         $pedido->id_compra = $idCompra;
         $pedido->id_producto = $idProducto;
         $pedido->cantidad = $request->cantidad;
-        // $quantities = $request->input('cantidad');
         $pedido->precio_unitario = $precio_unitario;
         $pedido->subtotal = $request->subtotal;
         $pedido->total_pagar = $request->total_pagar;
@@ -88,6 +87,15 @@ class PedidoController extends Controller
         } else {
             return redirect()->back()->withErrors(['Error al guardar el pedido. Por favor, intenta de nuevo.']);
         } 
+
+        $compra = Compra::find($idCompra);
+
+        if($compra){
+            $credito = Credito::find($compra->id_credito);
+            if ($credito) {
+                $credito->saldo_total -= $pedido->total_pagar;
+        }
+    }
     
     }
 

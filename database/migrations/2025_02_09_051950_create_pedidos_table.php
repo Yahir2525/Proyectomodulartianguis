@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id('id_pedido');
             $table->unsignedBigInteger('id_compra')->nullable();
             $table->unsignedBigInteger('id_producto')->nullable();
-            $table->unsignedBigInteger('id_credito')->nullable();
             $table->integer('cantidad')->unsigned();
             $table->decimal('precio_unitario', 10, 2)->unsigned()->default(0);
             $table->decimal('subtotal', 10, 2)->unsigned();
@@ -23,16 +22,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('id_compra')->references('id_compra')->on('compras')->onDelete('cascade');
-            // $table->foreignId('id_compra')->nullable()->constrained('compras')->onDelete('cascade');
-
             $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
 
-            $table->foreign('id_credito')->references('id_credito')->on('creditos')->onDelete('cascade');
-
-            // $table->foreign('precio_unitario')
-            // ->references('precio_unitario')
-            // ->on('productos')
-            // ->onDelete('set default');
         });
     }
 
