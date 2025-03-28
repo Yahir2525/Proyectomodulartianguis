@@ -24,6 +24,8 @@ return new class extends Migration
             $table->foreign('id_compra')->references('id_compra')->on('compras')->onDelete('cascade');
             $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
 
+            // $table->unique(['id_compra', 'id_producto']);
+
         });
     }
 

@@ -13,9 +13,6 @@ use Illuminate\Http\Request;
 
 class PedidoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $pedido = new Pedido ();
@@ -24,20 +21,13 @@ class PedidoController extends Controller
         return view('pedido/pedidoIndex', compact ('pedidoIndex'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('pedido/createPedido');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
         $request->validate([
             'id_compra' => 'required|integer|unique:compras,id_compra',
             'id_producto' => 'required|integer|unique:productos,id_producto',
@@ -66,21 +56,33 @@ class PedidoController extends Controller
             'total_pagar.min' => 'El total a pagar no puede ser negativo.',
 
         ]);
-
-        // $aceitesSeleccionados = $request->aceites;
-        // $aceitesUnicos = array_unique($aceitesSeleccionados);
-
-        // if (count($aceitesSeleccionados) !== count($aceitesUnicos)) {
-        //     return redirect()->back()->with('error', 'No puedes seleccionar el mismo aceite más de una vez en la misma compra.');
-        // }
-
         $pedido = new Pedido();
-        $pedido->id_compra = $idCompra;
-        $pedido->id_producto = $idProducto;
-        $pedido->cantidad = $request->cantidad;
-        $pedido->precio_unitario = $precio_unitario;
-        $pedido->subtotal = $request->subtotal;
-        $pedido->total_pagar = $request->total_pagar;
+        $pedido->id_compra = $id_compra;
+        $pedido->id_producto = $id_producto;
+        // $pedido->cantidad = $request->cantidad;
+        $pedido->cantidad = $request->input('cantidad');
+
+        // if ($request->input('action') == 'increase') {
+        //     $cantidad++;
+        // } elseif ($request->input('action') == 'decrease' && $cantidad > 1) {
+        //     $cantidad--;
+        // }
+    
+        // // Actualiza la cantidad
+        // $pedido->cantidad = $cantidad;
+
+        $pedido->precio_unitario = $request->precio_unitario;
+        $pedido->subtotal += $pedido->precio_unitario * $pedido->cantidad;
+        $pedido->total_pagar += each($pedido->subtotal);
+
+        $compra = Compra::find($id_compra);  // Buscamos la compra
+
+        // Calculamos el nuevo total a pagar sumando todos los subtotales de los pedidos de la compra
+        $totalPagar = $compra->pedido->sum('subtotal');
+        
+        // Actualizamos el campo 'total_pagar' de la compra
+        $compra->total_pagar = $totalPagar;
+        
         
         if ($pedido->save()) {
             return redirect('/pedido')->with('success', 'Pedido registrado correctamente.');
@@ -99,40 +101,27 @@ class PedidoController extends Controller
     
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Request $request)
     {
         $id = $request->input('id_pedido');
         $pedido = Pedido::find($id);
-        // dd($id);
         if (!$pedido) {
             return redirect()->back()->with('error', 'El pedido no se encontró.');
         }
         return view('/pedido/showPedido', ['pedido' => $pedido]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
         $pedido = Pedido::find($id);
         // $compra = Compra::all();
         // $producto = Producto::all();
-        // dd($pedido);
         if (!$pedido) {
             return redirect()->back()->with('error', 'El pedido no se encontró.');
-                // return redirect()->route('/pedido/pedidoIndex')->with('error', 'El pedido no se encontró.');
         }
         return view('/pedido/editPedido', ['pedido' => $pedido]);
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Pedido $pedido)
     {
         $request->validate([
@@ -172,42 +161,22 @@ class PedidoController extends Controller
         }
         $pedido->id_compra = $idCompra;
         $pedido->id_producto = $idProducto;
-        $pedido->cantidad = $request->cantidad;
-        // $quantities = $request->input('cantidad');
+        $pedido->cantidad = $request->input('cantidad');
+
+        // Ajusta la cantidad según la acción (aumentar o disminuir)
         $pedido->precio_unitario = $precio_unitario;
-        $pedido->subtotal = $request->subtotal;
+        $pedido->subtotal += $pedido->precio_unitario * $pedido->cantidad;
         $pedido->total_pagar = $request->total_pagar;
         $pedido->save();
         return redirect()->route('pedido.pedidoIndex')->with('success', 'El pedido se ha actualizado con éxito.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         $pedido = Pedido::find($id);
-
-        // if ($aceite->archivo_ubicacion) {
-        //     Storage::delete($aceite->archivo_ubicacion);
-        // }
-
         if (!$pedido) {
             return redirect()->route('pedido.index')->with('error', 'El pedido no se encontró.');
         }
-        
-        // $detalleCompras = DetalleCompra::where('id_aceite', $id)->get();
-
-        // foreach ($detalleCompras as $detalleCompra) {
-        //     $compra = Compras::find($detalleCompra->id_compras);
-        //     if ($compra) {
-        //         $compra->delete();
-        //     }
-            
-        //     // Eliminar el DetalleCompras
-        //     $detalleCompra->delete();
-        // }
-
         $pedido->delete();
 
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha eliminado con éxito.');

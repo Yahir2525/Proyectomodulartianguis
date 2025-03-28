@@ -28,10 +28,19 @@ class PedidoFactory extends Factory
         return [
             'id_compra' => \App\Models\Compra::inRandomOrder()->value('id_compra') ?? null,
             'id_producto' => $productoId = \App\Models\Producto::inRandomOrder()->value('id_producto') ?? null,
-            'cantidad' => $this->faker->randomFloat(0, 1, 1000),
+            'cantidad' => $this->faker->numberBetween(1, 100),
             'precio_unitario' => \App\Models\Producto::where('id_producto', $productoId)->value('precio_unitario') ?? null,
-            'subtotal' => $pedido->subtotal ?? 0,
-            'total_pagar' => $pedido->total_pagar ?? 0,
+            'subtotal' => function ($attributes) {
+            return $attributes['precio_unitario'] * $attributes['cantidad'];
+            },
+            'total_pagar' => function ($attributes) {
+            return $attributes['subtotal'];
+            },
+
+            // 'total_pagar' => function ($attributes) {
+            // $total = 0; // Variable estática para acumular los subtotales
+            // $total += $attributes['subtotal']; // Sumar el subtotal actual
+            // return $total; }// Devolver el total acumulado
             'created_at' => now(),
             'updated_at' => now(),
         ];

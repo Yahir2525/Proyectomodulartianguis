@@ -12,46 +12,37 @@
 </head>
 <body>
 <section>
-@foreach ($compraIndex as $compra)
-                <center>
-                <table>
+  @if($compraIndex->isNotEmpty())
+        <br><h2>Tablas de compras registradas</h2>
+        <center>
+            <table border="1">
+                <tr>
+                    <th>ID de la compra</th>
+                    <th>Nombre del Cliente</th>
+                    <th>Monto</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Acciones</th>
+                </tr>
+                @foreach ($compraIndex as $compra)
                     <tr>
-                        <th colspan="2">Tabla de la compra: {{ $compra->id_compra }}</th>
-                    </tr>
-                    <tr>
-                        <th>Atributo</th>
-                        <th>Valor</th>
-                    </tr>
-                    <tr>
-                        <td>ID</td>
                         <td>{{ $compra->id_compra }}</td>
-                    </tr>
-                    <tr>
-                            <td>Nombre del Cliente</td>
-                            <td>{{ optional($compra->cliente)->nombre_usuario ?? 'Sin cliente' }}</td>
-                        </tr>
-                    <tr>
-                        <td>MONTO</td>
+                        <td>{{ optional($compra->cliente)->nombre_usuario ?? 'Sin cliente' }}</td>
                         <td>{{ number_format($compra->total_pagar, 2) }}</td>
-                    </tr>
-                    <tr>
-                        <td>Tipo</td>
                         <td>{{ $compra->created_at }}</td>
-                    </tr>
-                    <tr>
-                        <td>Cantidad</td>
                         <td>{{ $compra->updated_at }}</td>
+                        <td>
+                            <form action="{{ route('compra.destroy', $compra->id_compra) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="button is-danger">Eliminar Compra</button>
+                            </form>
+                        </td>
                     </tr>
-                    
-                </table>
-                <br>
-                <form action="{{ route('compra.destroy', $compra->id_compra) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <br><button type="submit" class="button is-danger">Eliminar Compra</button>
-                        </form>
-                        <br>
-                @endforeach 
+                @endforeach
+            </table>
+        </center>
+    @endif
 </section>
 </body>
 </html>
