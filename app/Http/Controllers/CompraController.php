@@ -40,6 +40,7 @@ class CompraController extends Controller
         $request->validate([
             'id_pedido' => 'required|integer|unique:pedidos,id_pedido',
             'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
+            'total_pagar' => 'required|numeric|min:0',
             'estado_compra' => 'required|boolean',
         ], [
             'id_pedido.required' => 'Debe seleccionar un pedido.',

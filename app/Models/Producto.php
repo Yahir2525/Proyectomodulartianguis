@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Producto extends Model
@@ -19,5 +20,10 @@ class Producto extends Model
     public function pedido(): BelongsTo
     {
         return $this->belongsTo(Producto::class, 'id_producto', 'id_producto');
+    }
+
+    public function carros(): BelongsToMany
+    {
+        return $this->belongsToMany(Carro::class, 'carros', 'id_producto', 'id_carro')->withPivot('cantidad');
     }
 }

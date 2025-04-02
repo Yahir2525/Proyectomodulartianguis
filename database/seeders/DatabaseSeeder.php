@@ -12,6 +12,7 @@ use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
+use App\Models\Carro;
 
 class DatabaseSeeder extends Seeder
 {
@@ -39,9 +40,10 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
+            VendedorSeeder::class,
             ClienteSeeder::class,
             ProductoSeeder::class,
-            VendedorSeeder::class,
+            CarroSeeder::class,
             CompraSeeder::class,
             PedidoSeeder::class,
             CreditoSeeder::class,

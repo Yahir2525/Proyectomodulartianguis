@@ -70,6 +70,11 @@
                             </tr>
                         </table>
                         <br>
+                        <form action="{{ url('/carro', $producto->id_producto) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <button>Añadir al carrito</button>
+                        </form><br>
                         <a href="{{ route('producto.edit', $producto->id_producto) }}" class="button is-primary">Editar Compra</a>
                     </center>
                 @endforeach 

@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('compras', function (Blueprint $table) {
             $table->id('id_compra');
             $table->string('nombre_usuario')->nullable();
+            $table->decimal('total_compra')->nullable();
             $table->boolean("estado_compra");
             $table->timestamps();
 

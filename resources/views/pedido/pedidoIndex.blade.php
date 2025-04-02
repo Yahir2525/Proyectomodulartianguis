@@ -71,7 +71,7 @@
             <h1>Principal de pedidos</h1>
             <br>
             <a href="{{ url('/pedido/create') }}" class="button is-info is-fullwidth">
-                Registrar una nueva compra
+                Registrar una nuevo pedido
             </a><br><br>
             <form action="{{ url('/pedido/showPedido') }}" method="GET"> 
                 <div class="sub">
@@ -117,13 +117,20 @@
                                     <td>
                                         <a href="{{ route('pedido.edit', $pedido->id_pedido) }}" class="button is-primary">Editar</a>
                                     </td>
+                                    
                                 </tr>
                                 @php $totalCompra += $pedido->subtotal; @endphp  <!-- Sumar el subtotal de cada pedido -->
+                                <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <br><button type="submit" class="button is-danger">Eliminar Pedido</button>
+                        </form>
                             @endforeach
                         </table>
                         <br><strong>Total a pagar por esta compra: {{ number_format($totalCompra, 2) }}</strong><br><br>
                     </center>
                 @endforeach
+                
             @endif
         </div>
     </section>

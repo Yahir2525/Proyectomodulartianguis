@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AbonoController;
+use App\Http\Controllers\CarroController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\Compra_productoController;
@@ -48,3 +49,5 @@ Route::resource('credito', CreditoController::class);
 Route::resource('producto', ProductoController::class);
 
 Route::resource('vendedor', VendedorController::class);
+
+Route::resource('carro', CarroController::class);

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id('id_pedido');
+            $table->boolean('estado_pedido');
             $table->unsignedBigInteger('id_compra')->nullable();
             $table->unsignedBigInteger('id_producto')->nullable();
             $table->integer('cantidad')->unsigned();
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->decimal('total_pagar', 10,2)->unsigned();
             $table->timestamps();
 
+            
             $table->foreign('id_compra')->references('id_compra')->on('compras')->onDelete('cascade');
             $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
 

@@ -53,7 +53,7 @@ class AbonoController extends Controller
             'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
             'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
         ]);
-        $abono = new Aceite();
+        $abono = new Abono();
         $abono->id_credito = $idCredito;
         $abono->monto_abono = $request->monto_abono;
         $abono->nombre_usuario = $nombre_usuario;

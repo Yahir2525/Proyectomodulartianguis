@@ -21,21 +21,9 @@ class Pedido extends Model
     {
         return $this->belongsTo(Compra::class, 'id_compra', 'id_compra');
     }
-    //     public function compraPorIdCompra(): BelongsTo
-    // {
-    //     return $this->belongsTo(Compra::class, 'id_compra', 'id_compra');
-    // }
         public function cliente(): BelongsTo
     {
         return $this->belongsTo(Cliente::class);
     }
     
-        public function producto(): HasMany
-    {
-        return $this->hasMany(Producto::class, 'id_producto', 'id_producto');
-    }
-    //     public function credito(): BelongsTo
-    // {
-    //     return $this->belongsTo(Credito::class, 'id_credito', 'id_credito');
-    // }
 }
