@@ -37,6 +37,10 @@
                         <td>{{ $cliente->id_cliente }}</td>
                     </tr>
                     <tr>
+                        <td>usuario</td>
+                        <td>{{ $cliente->id_user ?? 'Sin usuario' }}</td>
+                    </tr>
+                    <tr>
                         <td>Nombre</td>
                         <td>{{ $cliente->nombre }}</td>
                     </tr>

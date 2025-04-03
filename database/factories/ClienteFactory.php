@@ -26,12 +26,12 @@ class ClienteFactory extends Factory
     public function definition(): array
     {
         return [
+            'id_user' => \App\Models\User::inRandomOrder()->value('id_user') ?? null,
             'nombre' => $this->faker->name(),
             'genero' => $this->faker->randomElement(['M', 'F', 'O']),
             'edad' => $this->faker->numberBetween(18, 120),
             'telefono' => $this->faker->numerify('##########'),
             'direccion' => $this->faker->address(),
-            'correo' => $this->faker->unique()->safeEmail(),
             'nombre_usuario' => $this->faker->unique()->userName(),
             'created_at' => now(),
             'updated_at' => now(),

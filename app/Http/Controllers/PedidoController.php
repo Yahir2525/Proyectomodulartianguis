@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\User;
 use App\Models\Abono;
 use App\Models\Cliente;
 use App\Models\Compra;
@@ -57,6 +57,7 @@ class PedidoController extends Controller
 
         // ]);
         $pedido = new Pedido();
+        $pedido->estado = $request->estado_pedido;
         $pedido->id_compra = $request->input('id_compra');
         $pedido->id_producto = $request->input('id_producto');
         $pedido->cantidad = $request->input('cantidad');
@@ -138,7 +139,7 @@ class PedidoController extends Controller
             return redirect()->route('pedido.index')->with('error', 'El pedido no se encontró.');
         }
 
-       
+        $pedido->estado = $request->estado_pedido;
         $pedido->id_producto = $request->input('id_producto');
         $pedido->cantidad = $request->input('cantidad');
 

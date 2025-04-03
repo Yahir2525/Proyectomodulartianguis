@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\User;
 use App\Models\Carro;
 use App\Models\Abono;
 use App\Models\Cliente;

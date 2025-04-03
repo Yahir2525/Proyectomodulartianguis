@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\User;
 use App\Models\Abono;
 use App\Models\Cliente;
 use App\Models\Compra;
@@ -21,7 +21,6 @@ class ProductoController extends Controller
         $producto = new Producto();
         $productoIndex = Producto::all();
         return view('producto/productoIndex', compact ('productoIndex'));
-        //
     }
 
     /**

@@ -33,6 +33,11 @@ class Cliente extends Model
 
         public function pedido(): HasMany
     {
-        return $this->hasMany(Pedido::class);
+        return $this->hasMany(Pedido::class); 
+    }
+
+        public function users(): BelongTo
+    {
+        return $this->belongsTo(Users::class, 'id_user', 'id_user');
     }
 }

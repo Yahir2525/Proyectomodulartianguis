@@ -9,7 +9,13 @@ use App\Http\Controllers\Compra_productoController;
 use App\Http\Controllers\CreditoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\VendedorController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\PedidoController;
+
+
+
+Route::get('auth/login', [UserController::class, 'showSignupForm'])->name('login.form');
+Route::post('auth/registro', [UserController::class, 'registerUser'])->name('registro.usuario');
 
 
 Route::get('/', function () {
