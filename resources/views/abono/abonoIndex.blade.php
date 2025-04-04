@@ -47,7 +47,7 @@
                             </tr>
                     <tr>
                         <td>Nombre de usuario</td>
-                        <td>{{ optional($abono->cliente) ? $abono->nombre_usuario : 'No tiene usuario' }}</td>
+                        <td>{{ optional($abono->user) ? $abono->nombre_usuario : 'No tiene usuario' }}</td>
                         </tr>
                     <tr>
                         <td>Monto</td>

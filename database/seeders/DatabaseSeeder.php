@@ -13,6 +13,8 @@ use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
 use App\Models\Carro;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
 {
@@ -41,8 +43,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             UserSeeder::class,
-            VendedorSeeder::class,
-            ClienteSeeder::class,
+            RoleSeeder::class,
+            // VendedorSeeder::class,
+            // ClienteSeeder::class,
             ProductoSeeder::class,
             CarroSeeder::class,
             CompraSeeder::class,

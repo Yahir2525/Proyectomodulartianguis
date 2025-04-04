@@ -37,6 +37,11 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'genero' => $this->faker->randomElement(['M', 'F', 'O']),
+            'edad' => $this->faker->numberBetween(18, 120),
+            'telefono' => $this->faker->numerify('##########'),
+            'direccion' => $this->faker->address(),
+            'nombre_usuario' => $this->faker->unique()->userName(),
         ];
     }
 

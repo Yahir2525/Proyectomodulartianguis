@@ -27,7 +27,7 @@
                 @foreach ($compraIndex as $compra)
                     <tr>
                         <td>{{ $compra->id_compra }}</td>
-                        <td>{{ optional($compra->cliente)->nombre_usuario ?? 'Sin cliente' }}</td>
+                        <td>{{ optional($compra->user)->nombre_usuario ?? 'Sin cliente' }}</td>
                         <td>{{ number_format($compra->total_pagar, 2) }}</td>
                         <td>{{ $compra->created_at }}</td>
                         <td>{{ $compra->updated_at }}</td>

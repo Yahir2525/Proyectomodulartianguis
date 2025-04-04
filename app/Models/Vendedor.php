@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Vendedor extends Model
 {
-    use HasFactory;
+    // use HasFactory;
 
-    protected $table = 'vendedors';
-    protected $primaryKey = 'id_vendedor';
-    public $incrementing = true;
-    protected $keyType = 'int';
+    // protected $table = 'vendedors';
+    // protected $primaryKey = 'id_vendedor';
+    // public $incrementing = true;
+    // protected $keyType = 'int';
 }

@@ -19,9 +19,9 @@ class Credito extends Model
     protected $keyType = 'int';
 
 
-        public function cliente(): BelongsTo
+        public function user(): BelongsTo
     {
-        return $this->belongsTo(Cliente::class, 'nombre_usuario', 'nombre_usuario');
+        return $this->belongsTo(User::class, 'nombre_usuario', 'nombre_usuario');
     }
 
         public function compra(): BelongsTo

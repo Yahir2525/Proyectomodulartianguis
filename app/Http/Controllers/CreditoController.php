@@ -37,38 +37,38 @@ class CreditoController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'id_compra' => 'required|integer|unique:compras,id_compra',
-            'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
-            'fecha_liquidacion' => 'required|date|',
-            'fecha_vencimiento' => 'required|date|',
-            'estado' => 'required|boolean',
-            'saldo_total' => 'required|numeric',
-            'total_abonado' => 'required|numeric',
-            'saldo_pendiente' => 'required|numeric',
-        ], [
-            'id_compra.required' => 'Debe seleccionar una compra .',
-            'id_compra.integer' => 'El ID de la compra debe ser un número entero.',
-            'id_compra.unique' => 'El ID de la compra debe ser único.',
-            'nombre_usuario.required' => 'Debe seleccionar el cliente que solicita el credito.',
-            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
-            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
-            'fecha_liquidacion.required' => 'Es requerida una fecha de liquidación.',
-            'fecha_liquidacion.date' => 'Este dato debe ser una fecha.',
-            'fecha_vencimiento.required' => 'Es requerida una fecha de vencimiento.',
-            'fecha_vencimiento.date ' => 'Este dato debe ser una fecha.',
-            'estado.required' => 'Es requerido un estado del credito.',
-            'estado.boolean' => 'El estado debe ser activo o desactivo.',
-            'saldo_total.required' => 'El saldo total es obligatorio.',
-            'saldo_total.numeric' => 'El saldo total debe ser un número.',
-            'total_abonado.required' => 'El total abonado es obligatorio.',
-            'total_abonado.numeric' => 'El total abonado debe ser un número.',
-            'saldo_pendiente.required' => 'El saldo pendiente es obligatorio.',
-            'saldo_pendiente.numeric' => 'El saldo pendiente debe ser un número.',
-        ]);
+        // $request->validate([
+        //     'id_compra' => 'required|integer|unique:compras,id_compra',
+        //     'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
+        //     'fecha_liquidacion' => 'required|date|',
+        //     'fecha_vencimiento' => 'required|date|',
+        //     'estado' => 'required|boolean',
+        //     'saldo_total' => 'required|numeric',
+        //     'total_abonado' => 'required|numeric',
+        //     'saldo_pendiente' => 'required|numeric',
+        // ], [
+        //     'id_compra.required' => 'Debe seleccionar una compra .',
+        //     'id_compra.integer' => 'El ID de la compra debe ser un número entero.',
+        //     'id_compra.unique' => 'El ID de la compra debe ser único.',
+        //     'nombre_usuario.required' => 'Debe seleccionar el cliente que solicita el credito.',
+        //     'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
+        //     'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
+        //     'fecha_liquidacion.required' => 'Es requerida una fecha de liquidación.',
+        //     'fecha_liquidacion.date' => 'Este dato debe ser una fecha.',
+        //     'fecha_vencimiento.required' => 'Es requerida una fecha de vencimiento.',
+        //     'fecha_vencimiento.date ' => 'Este dato debe ser una fecha.',
+        //     'estado.required' => 'Es requerido un estado del credito.',
+        //     'estado.boolean' => 'El estado debe ser activo o desactivo.',
+        //     'saldo_total.required' => 'El saldo total es obligatorio.',
+        //     'saldo_total.numeric' => 'El saldo total debe ser un número.',
+        //     'total_abonado.required' => 'El total abonado es obligatorio.',
+        //     'total_abonado.numeric' => 'El total abonado debe ser un número.',
+        //     'saldo_pendiente.required' => 'El saldo pendiente es obligatorio.',
+        //     'saldo_pendiente.numeric' => 'El saldo pendiente debe ser un número.',
+        // ]);
         $credito = new Credito();
         $credito->id_compra = $idCompra;
-        $credito->nombre_usuario = $nombre_usuario;
+        $credito->nombre_usuario = $request->input('nombre_usuario');
         $credito->fecha_liquidacion = $request->fecha_liquidacion;
         $credito->fecha_vencimiento = $request->fecha_vencimiento;
         $credito->estado = $request->estado;
@@ -128,35 +128,35 @@ class CreditoController extends Controller
      */
     public function update(Request $request, Credito $credito)
     {
-        $request->validate([
-            'id_compra' => 'required|integer|unique:compras,id_compra',
-            'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
-            'fecha_liquidacion' => 'required|date|',
-            'fecha_vencimiento' => 'required|date|',
-            'estado' => 'required|boolean',
-            'saldo_total' => 'required|numeric',
-            'total_abonado' => 'required|numeric',
-            'saldo_pendiente' => 'required|numeric',
-        ], [
-            'id_compra.required' => 'Debe seleccionar una compra .',
-            'id_compra.integer' => 'El ID de la compra debe ser un número entero.',
-            'id_compra.unique' => 'El ID de la compra debe ser único.',
-            'nombre_usuario.required' => 'Debe seleccionar el cliente que solicita el credito.',
-            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
-            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
-            'fecha_liquidacion.required' => 'Es requerida una fecha de liquidación.',
-            'fecha_liquidacion.date' => 'Este dato debe ser una fecha.',
-            'fecha_vencimiento.required' => 'Es requerida una fecha de vencimiento.',
-            'fecha_vencimiento.date ' => 'Este dato debe ser una fecha.',
-            'estado.required' => 'Es requerido un estado del credito.',
-            'estado.boolean' => 'El estado debe ser activo o desactivo.',
-            'saldo_total.required' => 'El saldo total es obligatorio.',
-            'saldo_total.numeric' => 'El saldo total debe ser un número.',
-            'total_abonado.required' => 'El total abonado es obligatorio.',
-            'total_abonado.numeric' => 'El total abonado debe ser un número.',
-            'saldo_pendiente.required' => 'El saldo pendiente es obligatorio.',
-            'saldo_pendiente.numeric' => 'El saldo pendiente debe ser un número.',
-        ]);
+        // $request->validate([
+        //     'id_compra' => 'required|integer|unique:compras,id_compra',
+        //     'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
+        //     'fecha_liquidacion' => 'required|date|',
+        //     'fecha_vencimiento' => 'required|date|',
+        //     'estado' => 'required|boolean',
+        //     'saldo_total' => 'required|numeric',
+        //     'total_abonado' => 'required|numeric',
+        //     'saldo_pendiente' => 'required|numeric',
+        // ], [
+        //     'id_compra.required' => 'Debe seleccionar una compra .',
+        //     'id_compra.integer' => 'El ID de la compra debe ser un número entero.',
+        //     'id_compra.unique' => 'El ID de la compra debe ser único.',
+        //     'nombre_usuario.required' => 'Debe seleccionar el cliente que solicita el credito.',
+        //     'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
+        //     'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
+        //     'fecha_liquidacion.required' => 'Es requerida una fecha de liquidación.',
+        //     'fecha_liquidacion.date' => 'Este dato debe ser una fecha.',
+        //     'fecha_vencimiento.required' => 'Es requerida una fecha de vencimiento.',
+        //     'fecha_vencimiento.date ' => 'Este dato debe ser una fecha.',
+        //     'estado.required' => 'Es requerido un estado del credito.',
+        //     'estado.boolean' => 'El estado debe ser activo o desactivo.',
+        //     'saldo_total.required' => 'El saldo total es obligatorio.',
+        //     'saldo_total.numeric' => 'El saldo total debe ser un número.',
+        //     'total_abonado.required' => 'El total abonado es obligatorio.',
+        //     'total_abonado.numeric' => 'El total abonado debe ser un número.',
+        //     'saldo_pendiente.required' => 'El saldo pendiente es obligatorio.',
+        //     'saldo_pendiente.numeric' => 'El saldo pendiente debe ser un número.',
+        // ]);
         $credito = Credito::find($id);
         
         if (!$credito) {
@@ -164,7 +164,7 @@ class CreditoController extends Controller
         }
         $credito = new Credito();
         $credito->id_compra = $idCompra;
-        $credito->nombre_usuario = $nombre_usuario;
+        $credito->nombre_usuario = $request->input('nombre_usuario');
         $credito->fecha_liquidacion = $request->fecha_liquidacion;
         $credito->fecha_vencimiento = $request->fecha_vencimiento;
         $credito->estado = $request->estado;

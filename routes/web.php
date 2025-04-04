@@ -12,12 +12,6 @@ use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PedidoController;
 
-
-
-Route::get('auth/login', [UserController::class, 'showSignupForm'])->name('login.form');
-Route::post('auth/registro', [UserController::class, 'registerUser'])->name('registro.usuario');
-
-
 Route::get('/', function () {
     return view('admin');
 });
@@ -44,7 +38,7 @@ Route::get('/registro', function () {
 
 Route::resource('abono', AbonoController::class);
 
-Route::resource('cliente', ClienteController::class);
+Route::resource('user', UserController::class);
 
 Route::resource('compra', CompraController::class);
 

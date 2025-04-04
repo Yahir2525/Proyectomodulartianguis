@@ -37,25 +37,25 @@ class CompraController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'id_pedido' => 'required|integer|unique:pedidos,id_pedido',
-            'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
-            'total_pagar' => 'required|numeric|min:0',
-            'estado_compra' => 'required|boolean',
-        ], [
-            'id_pedido.required' => 'Debe seleccionar un pedido.',
-            'id_pedido.integer' => 'El ID del pedido debe ser un número entero.',
-            'id_pedido.unique' => 'El ID del pedido debe ser único.',
-            'nombre_usuario.required' => 'Debe seleccionar un cliente para la compra.',
-            'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto.',
-            'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
-            'estado_compra.required' => 'Debe seleccionar un estado de la compra.',
-            'estado_compra.boolean' => 'El estado debe ser activo o desactivo.', 
-        ]);
+        // $request->validate([
+        //     'id_pedido' => 'required|integer|unique:pedidos,id_pedido',
+        //     'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
+        //     'total_pagar' => 'required|numeric|min:0',
+        //     'estado_compra' => 'required|boolean',
+        // ], [
+        //     'id_pedido.required' => 'Debe seleccionar un pedido.',
+        //     'id_pedido.integer' => 'El ID del pedido debe ser un número entero.',
+        //     'id_pedido.unique' => 'El ID del pedido debe ser único.',
+        //     'nombre_usuario.required' => 'Debe seleccionar un cliente para la compra.',
+        //     'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto.',
+        //     'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
+        //     'estado_compra.required' => 'Debe seleccionar un estado de la compra.',
+        //     'estado_compra.boolean' => 'El estado debe ser activo o desactivo.', 
+        // ]);
         $compra = new Compra();
         // Revisar el id compraproducto
         $compra->id_pedido = $idPedido;
-        $compra->nombre_usuario = $$nombre_usuario;
+        $compra->nombre_usuario = $request->input('nombre_usuario');
         $compra->estado_compra = $request->estado_compra;
         
         if ($compra->save()) {
@@ -120,7 +120,7 @@ class CompraController extends Controller
             return redirect()->route('compra.compraIndex')->with('error', 'La compra no se encontró.');
         }
         $compra->id_pedido = $idPedido;
-        $compra->nombre_usuario = $nombre_usuario;
+        $compra->nombre_usuario = $request->input('nombre_usuario');
         $compra->estado_compra = $request->estado_compra;
         $compra->save();
         return redirect()->route('compra.compraIndex')->with('success', 'La compra se ha actualizado con éxito.');

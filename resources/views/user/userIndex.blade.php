@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Principal de clientes</title>
+    <title>Principal de users</title>
 </head>
 <body>
     <section>
         <div>
-            <h1>Principal de clientes</h1>
+            <h1>Principal de users</h1>
             <br>
-            <a href="{{ url('/cliente/create') }}" class="button is-info is-fullwidth">
+            <a href="{{ url('/user/create') }}" class="button is-info is-fullwidth">
                 Registrar una nueva compra
             </a><br><br>
-            <form action="{{ url('/cliente/showCliente') }}" method="GET"> 
+            <form action="{{ url('/user/showUser') }}" method="GET"> 
                 <div class="sub">
                     <label for="id">ID de compra a buscar:</label>
-                    <input type="text" id="id_cliente" name="id_cliente" placeholder="21" autofocus>
+                    <input type="text" id="id_user" name="id_user" placeholder="21" autofocus>
                 </div><br><br>
                 <input type="submit" id="enviar" name="enviar" value="buscar">
             </form>
-            @if($clienteIndex->isNotEmpty())
-                <br><h2>Tablas de clientes registrados</h2>
-                @foreach ($clienteIndex as $cliente)
+            @if($userIndex->isNotEmpty())
+                <br><h2>Tablas de users registrados</h2>
+                @foreach ($userIndex as $user)
                     <center>
                     <table>
                     <tr>
-                        <th colspan="2">Tabla del cliente: {{ $cliente->id_cliente }}</th>
+                        <th colspan="2">Tabla del user: {{ $user->id_user }}</th>
                     </tr>
                     <tr>
                         <th>Atributo</th>
@@ -34,55 +34,52 @@
                     </tr>
                     <tr>
                         <td>ID</td>
-                        <td>{{ $cliente->id_cliente }}</td>
-                    </tr>
-                    <tr>
-                        <td>usuario</td>
-                        <td>{{ $cliente->id_user ?? 'Sin usuario' }}</td>
+                        <td>{{ $user->id_user }}</td>
                     </tr>
                     <tr>
                         <td>Nombre</td>
-                        <td>{{ $cliente->nombre }}</td>
-                    </tr>
-                    <tr>
-                        <td>Genero</td>
-                        <td>{{ $cliente->genero }}</td>
-                    </tr>
-                    <tr>
-                        <td>Edad</td>
-                        <td>{{ $cliente->edad }}</td>
-                    </tr>
-                    <tr>
-                        <td>Telefono</td>
-                        <td>{{ $cliente->telefono }}</td>
-                    </tr>
-                    <tr>
-                        <td>Direccion</td>
-                        <td>{{ $cliente->direccion }}</td>
+                        <td>{{ $user->name }}</td>
                     </tr>
                     <tr>
                         <td>Correo</td>
-                        <td>{{ $cliente->correo}}</td>
+                        <td>{{ $user->email }}</td>
+                    </tr>
+                    <tr>
+                        <td>Genero</td>
+                        <td>{{ $user->genero }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Edad</td>
+                        <td>{{ $user->edad }}</td>
+                    </tr>
+                    <tr>
+                        <td>Telefono</td>
+                        <td>{{ $user->telefono }}</td>
+                    </tr>
+                    <tr>
+                        <td>Direccion</td>
+                        <td>{{ $user->direccion }}</td>
                     </tr>
                     <tr>
                         <td>Nombre_usuario</td>
-                        <td>{{ $cliente->nombre_usuario }}</td>
+                        <td>{{ $user->nombre_usuario }}</td>
                     </tr>
                     <tr>
                         <td>Creacion</td>
-                        <td>{{ $cliente->created_at }}</td>
+                        <td>{{ $user->created_at }}</td>
                     </tr>
                     <tr>
                         <td>Actualización</td>
-                        <td>{{ $cliente->updated_at }}</td>
+                        <td>{{ $user->updated_at }}</td>
                     </tr>
                 </table>
                         <br>
-                        <a href="{{ route('cliente.edit', $cliente->id_cliente) }}" class="button is-primary">Editar Cliente</a>
-                        <form action="{{ route('cliente.destroy', $cliente->id_cliente) }}" method="POST">
+                        <a href="{{ route('user.edit', $user->id_user) }}" class="button is-primary">Editar Cliente</a>
+                        <form action="{{ route('user.destroy', $user->id_user) }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <br><button type="submit" class="button is-danger">Eliminar Cliente</button>
+                        <br><button type="submit" class="button is-danger">Eliminar user</button>
                         </form>
                     </center>
                 @endforeach 

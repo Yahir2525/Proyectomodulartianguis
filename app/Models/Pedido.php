@@ -21,9 +21,9 @@ class Pedido extends Model
     {
         return $this->belongsTo(Compra::class, 'id_compra', 'id_compra');
     }
-        public function cliente(): BelongsTo
+        public function user(): BelongsTo
     {
-        return $this->belongsTo(Cliente::class);
+        return $this->belongsTo(User::class);
     }
     
 }
