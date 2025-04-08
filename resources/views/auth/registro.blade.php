@@ -18,8 +18,7 @@
                     @if(session('success'))
                         <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
-
-                    <form method="POST" action="{{ route('register') }}">
+                    <form>
                         @csrf
                         
                         <div class="mb-3">
@@ -46,10 +45,20 @@
                             <label class="form-label">Confirmar Contraseña</label>
                             <input type="password" name="password_confirmation" class="form-control" required>
                         </div>
+                        <br>
+                        <div>
+                            <input class="button is-block is-primary is-large is-fullwidth" type="reset" value="Limpiar datos">
+                        </div>
+                        <br>
 
                         <button type="submit" class="btn btn-primary w-100">Registrarse</button>
-                    </form>
-
+                    </form> 
+                    <br>
+                    <div>
+                    <a class="">
+                        <a href="/">Inicio</a><br>
+                        <a href="{{ url('/login') }}">Iniciar sesion</a>
+                    </div>
                 </div>
             </div>
         </div>

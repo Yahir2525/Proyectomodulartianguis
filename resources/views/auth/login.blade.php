@@ -7,7 +7,7 @@
         <meta name="description" content="Inicio de sesión" />
         <meta name="author" content="Juan y Yahir" />
         <title>Login</title>
-        <link href="{{asset('css/template.css')}}" rel="stylesheet" />
+        <!-- <link href="{{asset('css/template.css')}}" rel="stylesheet" /> -->
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     </head>
     <body class="bg-primary">
@@ -18,9 +18,6 @@
                     <hr class="login-hr">
                     <p class="subtitle has-text-black">Por favor ingrese sus datos</p>
                     <div class="box">
-                        <figure class="avatar">
-                            <img src="/img/icono.png" alt="Icono">
-                        </figure>
                         <form>
                             <div class="field">
                                 <div class="control">
@@ -33,10 +30,10 @@
                                 </div>
                             </div>
                             <div class="field">
-                                <label class="checkbox">
-                                <input type="checkbox"> Recordarme</label>
+                                <!-- <label class="checkbox"> -->
+                                <!-- <input type="checkbox"> Recordarme</label> -->
                             </div>
-                            <a href="{{ url('') }}" class="button is-block is-info is-large is-fullwidth">
+                            <a href="{{ url('/dashboard') }}" class="button is-block is-info is-large is-fullwidth">
                                 Conectarse
                             </a>
                             <br><br>
@@ -44,11 +41,13 @@
                             <input class="button is-block is-primary is-large is-fullwidth" type="reset" value="Limpiar datos">
                             </div>
                         </form>
-                            <br>
-                            <p class="has-text-purple">
-                                <a href="../">Inicio</a> &nbsp;·&nbsp;
-                                <a href="/cliente/create">Registrar</a>
-                            </p>
+                        <br>
+                        <br>
+                            <div>
+                            <a class="">
+                                <a href="/">Inicio</a> <br>
+                                <a href="{{ url('/registro') }}">Registrar</a>
+                            </div>
                     </div>
                 </div>
             </div>
