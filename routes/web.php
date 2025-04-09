@@ -11,6 +11,8 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
 
 Route::get('/', function () {
     return view('admin');
@@ -39,6 +41,7 @@ Route::get('/registro', function () {
 Route::resource('abono', AbonoController::class);
 
 Route::resource('user', UserController::class);
+// Route::resource('role', RoleController::class);
 
 Route::resource('compra', CompraController::class);
 
@@ -51,3 +54,15 @@ Route::resource('producto', ProductoController::class);
 Route::resource('vendedor', VendedorController::class);
 
 Route::resource('carro', CarroController::class);
+
+
+Route::group(['middleware' => ['role:administrador']], function() {
+
+    Route::resource('permission', PermissionController::class);
+    Route::resource('role', RoleController::class);
+    // Route::resource('user', UserController::class);
+
+});
+
+// Route::get('roles/{role}/give-permissions', [RoleController::class, 'addPermissionToRole']);
+// Route::put('roles/{role}/give-permissions', [RoleController::class, 'givePermissionToRole']);

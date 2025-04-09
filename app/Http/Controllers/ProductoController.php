@@ -192,7 +192,7 @@ class ProductoController extends Controller
         }
         
 
-        $cliente->delete();
+        $producto->delete();
 
         return redirect()->route('producto.productoIndex')->with('success', 'El producto se ha eliminado con éxito.');
         //

@@ -77,7 +77,7 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'El usuario no se encontró.');
                 // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
         }
-        return view('/user/editUsuario', ['user' => $user]);
+        return view('/user/editUser', ['user' => $user]);
     }
 
     /**
@@ -100,7 +100,7 @@ class UserController extends Controller
         $user->direccion = $request->input('direccion');
         $user->nombre_usuario = $request->input('nombre_usuario');
         $user->save();
-        return redirect()->route('user.userIndex')->with('success', 'El usuario se ha actualizado con éxito.');
+        return redirect()->route('user.ndex')->with('success', 'El usuario se ha actualizado con éxito.');
     }
 
     /**
@@ -113,24 +113,6 @@ class UserController extends Controller
         if (!$user) {
             return redirect()->route('user.index')->with('error', 'El user no se encontró.');
         }
-
-        // $compras = Compra::where('nombre_usuario', $id)->get();
-
-        // foreach ($compras as $item) {
-        //     $compra = Compra::find($item->id_compra);
-        //     if ($compra) {
-        //         $compra->delete();
-        //     }
-        // }
-
-        // $creditos = Credito::where('nombre_usuario', $id)->get();
-
-        // foreach ($creditos as $item) {
-        //     $credito = Credito::find($item->id_credito);
-        //     if ($credito) {
-        //         $credito->delete();
-        //     }
-        // }
 
         $user->delete();
 

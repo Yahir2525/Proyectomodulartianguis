@@ -23,23 +23,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-        // Producto::factory()->count(10)->create();
-
-        // Producto::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
-        // $this->call([
-        //     ProductoSeeder::class,
-        //     VendedorSeeder::class,
-        //     ClienteSeeder::class,
-        //     CompraSeeder::class,
-        //     CreditoSeeder::class,
-        //     AbonoSeeder::class,
-        //     PedidoSeeder::class,
-        // ]);
 
         $this->call([
             UserSeeder::class,

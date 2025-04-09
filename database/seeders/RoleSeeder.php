@@ -27,61 +27,67 @@ class RoleSeeder extends Seeder
         $viewAbonoPermission = Permission::create(['name' => 'view abono']);
         $createAbonoPermission = Permission::create(['name' => 'create abono']);
         $editAbonoPermission = Permission::create(['name' => 'edit abono']);
-        $showAbonoPermission = Permission::create(['name' => 'show abono']);
+        $deleteAbonoPermission = Permission::create(['name' => 'delete abono']);
 
         //Carro
         $viewCarroPermission = Permission::create(['name' => 'view carro']);
         $createCarroPermission = Permission::create(['name' => 'create carro']);
         $editCarroPermission = Permission::create(['name' => 'edit carro']);
-        $showCarroPermission = Permission::create(['name' => 'show carro']);
+        $deleteCarroPermission = Permission::create(['name' => 'delete carro']);
 
         //Compra
         $viewCompraPermission = Permission::create(['name' => 'view compra']);
         $createCompraPermission = Permission::create(['name' => 'create compra']);
         $editCompraPermission = Permission::create(['name' => 'edit compra']);
-        $showCompraPermission = Permission::create(['name' => 'show compra']);
+        $deleteCompraPermission = Permission::create(['name' => 'delete compra']);
 
         //Credito
         $viewCreditoPermission = Permission::create(['name' => 'view credito']);
         $createCreditoPermission = Permission::create(['name' => 'create credito']);
         $editCreditoPermission = Permission::create(['name' => 'edit credito']);
-        $showCreditoPermission = Permission::create(['name' => 'show credito']);
+        $deleteCreditoPermission = Permission::create(['name' => 'delete credito']);
 
         //Pedido
         $viewPedidoPermission = Permission::create(['name' => 'view pedido']);
         $createPedidoPermission = Permission::create(['name' => 'create pedido']);
         $editPedidoPermission = Permission::create(['name' => 'edit pedido']);
-        $showPedidoPermission = Permission::create(['name' => 'show pedido']);
+        $deletePedidoPermission = Permission::create(['name' => 'delete pedido']);
 
         //Producto
         $viewProductoPermission = Permission::create(['name' => 'view producto']);
         $createProductoPermission = Permission::create(['name' => 'create producto']);
         $editProductoPermission = Permission::create(['name' => 'edit producto']);
-        $showProductoPermission = Permission::create(['name' => 'show producto']);
+        $deleteProductoPermission = Permission::create(['name' => 'delete producto']);
 
          //User
         $viewUserPermission = Permission::create(['name' => 'view user']);
         $createUserPermission = Permission::create(['name' => 'create user']);
         $editUserPermission = Permission::create(['name' => 'edit user']);
-        $showUserPermission = Permission::create(['name' => 'show user']);
+        $deleteUserPermission = Permission::create(['name' => 'delete user']);
+
+        $viewRolePermission = Permission::create(['name' => 'view role']);
+        $createRolePermission = Permission::create(['name' => 'create role']);
+        $editRolePermission = Permission::create(['name' => 'edit role']);
+        $deleteRolePermission = Permission::create(['name' => 'delete role']);
 
         // Assign permissions to roles
-        $adminRole->givePermissionTo($viewAbonoPermission, $createAbonoPermission, $editAbonoPermission, $showAbonoPermission, 
-        $viewCarroPermission, $createCarroPermission, $editCarroPermission, $showCarroPermission,
-        $viewCompraPermission, $createCompraPermission, $editCompraPermission, $showCompraPermission,
-        $viewCreditoPermission, $createCreditoPermission, $editCreditoPermission, $showCreditoPermission,
-        $viewPedidoPermission, $createPedidoPermission, $editPedidoPermission, $showPedidoPermission,
-        $viewProductoPermission, $createProductoPermission, $editProductoPermission, $showProductoPermission,
-        $viewUserPermission, $createUserPermission, $editUserPermission, $showUserPermission,);
+        $adminRole->givePermissionTo($viewAbonoPermission, $createAbonoPermission, $editAbonoPermission, $deleteAbonoPermission, 
+        $viewCarroPermission, $createCarroPermission, $editCarroPermission, $deleteCarroPermission,
+        $viewCompraPermission, $createCompraPermission, $editCompraPermission, $deleteCompraPermission,
+        $viewCreditoPermission, $createCreditoPermission, $editCreditoPermission, $deleteCreditoPermission,
+        $viewPedidoPermission, $createPedidoPermission, $editPedidoPermission, $deletePedidoPermission,
+        $viewProductoPermission, $createProductoPermission, $editProductoPermission, $deleteProductoPermission,
+        $viewUserPermission, $createUserPermission, $editUserPermission, $deleteUserPermission,
+        $viewRolePermission, $createRolePermission,
+        $editRolePermission, $deleteRolePermission);
         
-        
-        $userRole->givePermissionTo($viewAbonoPermission, $showAbonoPermission,
-        $viewCarroPermission, $createCarroPermission, $editCarroPermission, $showCarroPermission,
-        $viewCompraPermission, $createCompraPermission, $editCompraPermission, $showCompraPermission,
-        $viewCreditoPermission, $showCreditoPermission,
-        $viewPedidoPermission, $createPedidoPermission, $editPedidoPermission, $showPedidoPermission,
-        $viewProductoPermission, $showProductoPermission,
-        $viewUserPermission, $editUserPermission, $showUserPermission,
+        $userRole->givePermissionTo($viewAbonoPermission, $deleteAbonoPermission,
+        $viewCarroPermission, $createCarroPermission, $editCarroPermission, $deleteCarroPermission,
+        $viewCompraPermission, $createCompraPermission, $editCompraPermission, $deleteCompraPermission,
+        $viewCreditoPermission, $deleteCreditoPermission,
+        $viewPedidoPermission, $createPedidoPermission, $editPedidoPermission, $deletePedidoPermission,
+        $viewProductoPermission, $deleteProductoPermission,
+        $viewUserPermission, $editUserPermission, $deleteUserPermission,
     
     );
 
