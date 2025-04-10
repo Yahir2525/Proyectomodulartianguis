@@ -31,8 +31,14 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                         <li><a class="dropdown-item" href="#!">Settings</a></li>
                         <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                        <li><a href="{{ url('/login') }}">Iniciar sesion</a></li>
                         <li><hr class="dropdown-divider" /></li>
-                        <li><a class="dropdown-item" href="#!">Logout</a></li>
+                        <li>
+                        <form method="POST" action="{{ url('/') }}">
+                        @csrf
+                        <button type="submit" class="dropdown-item">Logout</button>
+                        </form>
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -111,6 +117,11 @@
                 <main>
                     <div class="container-fluid px-4">
                         <h1 class="mt-4">Dashboard</h1>
+                        @if (Auth::check())
+                        <p>Sesión iniciada por: {{ Auth::user()->name }}</p>
+                        @else
+                        <p>No hay sesión activa.</p>
+                        @endif
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Dashboard</li>
                         </ol>

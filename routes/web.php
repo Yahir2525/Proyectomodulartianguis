@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AbonoController;
 use App\Http\Controllers\CarroController;
@@ -18,9 +20,33 @@ Route::get('/', function () {
     return view('admin');
 });
 
+// Route::get('/login', function () {
+//     return view('auth.login');
+// });
+
 Route::get('/login', function () {
-    return view('auth.login');
+    return view('auth.login'); // o tu vista personalizada
+})->name('login');
+
+Route::post('/login', function (\Illuminate\Http\Request $request) {
+    $credentials = $request->only('email', 'password');
+
+    if (Auth::attempt($credentials, $request->remember)) {
+        $request->session()->regenerate();
+        return redirect()->intended('/');
+    }
+
+    return back()->with('error', 'Correo o contraseña incorrectos');
 });
+
+
+Route::post('/', function (Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect('/'); // O donde tú quieras redirigir después de cerrar sesión
+})->name('logout');
 
 Route::get('/401', function () {
     return view('pages.401');

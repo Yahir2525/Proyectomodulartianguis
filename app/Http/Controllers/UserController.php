@@ -88,7 +88,7 @@ class UserController extends Controller
         $user = User::find($id);
     
         if (!$user) {
-            return redirect()->route('user.userIndex')->with('error', 'El user no se encontró.');
+            return redirect()->route('user.index')->with('error', 'El user no se encontró.');
         }
         $user = new User();
         $user->name = $request->input('name');
@@ -100,7 +100,7 @@ class UserController extends Controller
         $user->direccion = $request->input('direccion');
         $user->nombre_usuario = $request->input('nombre_usuario');
         $user->save();
-        return redirect()->route('user.ndex')->with('success', 'El usuario se ha actualizado con éxito.');
+        return redirect()->route('user.index')->with('success', 'El usuario se ha actualizado con éxito.');
     }
 
     /**

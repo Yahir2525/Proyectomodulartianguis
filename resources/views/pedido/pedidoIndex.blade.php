@@ -121,10 +121,10 @@
                                 </tr>
                                 @php $totalCompra += $pedido->subtotal; @endphp  <!-- Sumar el subtotal de cada pedido -->
                                 <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <br><button type="submit" class="button is-danger">Eliminar Pedido</button>
-                        </form>
+                                @csrf
+                                @method('DELETE')
+                                <br><button type="submit" class="button is-danger">Eliminar Pedido</button>
+                                </form>
                             @endforeach
                         </table>
                         <br><strong>Total a pagar por esta compra: {{ number_format($totalCompra, 2) }}</strong><br><br>
