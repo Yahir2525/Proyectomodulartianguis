@@ -40,7 +40,7 @@ Route::post('/login', function (\Illuminate\Http\Request $request) {
 });
 
 
-Route::post('/', function (Request $request) {
+Route::post('/logout', function (Request $request) {
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
@@ -67,7 +67,6 @@ Route::get('/registro', function () {
 Route::resource('abono', AbonoController::class);
 
 Route::resource('user', UserController::class);
-// Route::resource('role', RoleController::class);
 
 Route::resource('compra', CompraController::class);
 
@@ -80,7 +79,9 @@ Route::resource('producto', ProductoController::class);
 Route::resource('vendedor', VendedorController::class);
 
 Route::resource('carro', CarroController::class);
+// Route::resource('role', RoleController::class);
 
+// Route::resource('permission', PermissionController::class);
 
 Route::group(['middleware' => ['role:administrador']], function() {
 
@@ -90,5 +91,3 @@ Route::group(['middleware' => ['role:administrador']], function() {
 
 });
 
-// Route::get('roles/{role}/give-permissions', [RoleController::class, 'addPermissionToRole']);
-// Route::put('roles/{role}/give-permissions', [RoleController::class, 'givePermissionToRole']);

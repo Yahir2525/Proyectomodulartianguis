@@ -16,27 +16,17 @@ class RoleController extends Controller
         $this->middleware('permission:edit role', ['only' => ['update','edit']]);
         $this->middleware('permission:delete role', ['only' => ['destroy']]);
     }
-
-    // public function index()
-    // {
-    //     $roles = Role::get();
-    //     return view('role-permission.role.index', ['roles' => $roles]);
-    // }
-
+    
     public function index()
     {
         $role = new Role();
-
-        $roleIndex = User::all();
+        $roleIndex = Role::all();
         return view('role/roleIndex', compact ('roleIndex'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $permission = Permisssion::get();
+        $permission = Permission::get();
         return view('role/createRole', compact('permission'));
     }
 
@@ -57,20 +47,6 @@ class RoleController extends Controller
         return redirect('/role')->with('success', 'Role registrado correctamente.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    // public function edit($id)
-    // {
-    //     $user = User::find($id);
-
-    //     if (!$user) {
-    //         return redirect()->back()->with('error', 'El usuario no se encontró.');
-    //             // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
-    //     }
-    //     return view('/user/editUsuario', ['user' => $user]);
-    // }
-
     public function edit($id)
     {
         $role = Role::find($id);
@@ -82,8 +58,8 @@ class RoleController extends Controller
 
         return view('/role/editRole',[
             'role' => $role,
-            'permissions' => $permissions,
-            'rolePermissions' => $rolePermissions
+            'permission' => $permission,
+            'rolePermission' => $rolePermissions
         ]);
     }
 
@@ -99,24 +75,19 @@ class RoleController extends Controller
         ]);
 
         $role = Role::find($id);
-        $role->name = $reques->input('name');
+        $role->name = $request->input('name');
 
         $role->save();
 
         $role->syncPermissions($request->input('permission'));
         
-
-        // $role->update([
-        //     'name' => $request->name
-        // ]);
-
-        return redirect('/role')->with('success', 'Role registrado correctamente.');
+        return redirect('role.index')->with('success', 'Role registrado correctamente.');
     }
 
     public function destroy($id)
     {
         $role = Role::find($id);
         $role->delete();
-        return redirect()->route('role.index')->with('success', 'El usuario se ha eliminado con éxito.');
+        return redirect()->route('role.index')->with('success', 'El rol se ha eliminado con éxito.');
     }
 }

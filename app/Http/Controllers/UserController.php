@@ -13,9 +13,19 @@ use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('permission:view user', ['only' => ['index', 'show']]);
+        $this->middleware('permission:create user', ['only' => ['create','store']]);
+        $this->middleware('permission:edit user', ['only' => ['update','edit']]);
+        $this->middleware('permission:delete user', ['only' => ['destroy']]);
+    }
 
     public function index()
     {
@@ -30,7 +40,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('user/createUser');
+        $roles = Role::pluck('name','name')->all();
+        return view('user/createUser', compact('roles'));
     }
 
     /**
@@ -38,10 +49,21 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8|max:20',
+            'genero' => 'required',
+            'edad' => 'required',
+            'telefono' => 'required',
+            'direccion' => 'required',
+            'nombre_usuario' => 'required',
+            'roles' => 'required'
+        ]);
             $user = new User();
             $user->name = $request->input('name');
             $user->email = $request->input('email');
-            $user->password = bcrypt($request->input('password'));
+            $user->password = Hash::make($request->input('password'));
             $user->genero = $request->input('genero');
             $user->edad = $request->input('edad');
             $user->telefono = $request->input('telefono');
@@ -49,6 +71,8 @@ class UserController extends Controller
             $user->nombre_usuario = $request->input('nombre_usuario');
             
             $user->save();
+
+            $user->syncRoles($request->roles);
         return redirect('/user')->with('success', 'Usuario registrado correctamente.');
     }
 
@@ -72,12 +96,18 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = User::find($id);
+        $roles = Role::pluck('name','name')->all();
+        $userRoles = $user->roles->pluck('name','name')->all();
 
-        if (!$user) {
-            return redirect()->back()->with('error', 'El usuario no se encontró.');
-                // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
-        }
-        return view('/user/editUser', ['user' => $user]);
+        // if (!$user) {
+        //     return redirect()->back()->with('error', 'El usuario no se encontró.');
+        //         // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
+        // }
+        return view('/user/editUser', [
+            'user' => $user,
+            'roles' => $roles,
+            'userRoles' => $userRoles
+        ]);
     }
 
     /**
@@ -85,21 +115,37 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email'.id,
+            'password' => 'required|string|min:8|max:20',
+            'genero' => 'required',
+            'edad' => 'required',
+            'telefono' => 'required',
+            'direccion' => 'required',
+            'nombre_usuario' => 'required',
+            'roles' => 'required'
+        ]);
+        
         $user = User::find($id);
+        
     
-        if (!$user) {
-            return redirect()->route('user.index')->with('error', 'El user no se encontró.');
-        }
+        // if (!$user) {
+        //     return redirect()->route('user.index')->with('error', 'El user no se encontró.');
+        // }
         $user = new User();
         $user->name = $request->input('name');
         $user->email = $request->input('email');
-        $user->password = bcrypt($request->input('password'));
+        $user->password = Hash::make($request->input('password'));
         $user->genero = $request->input('genero');
         $user->edad = $request->input('edad');
         $user->telefono = $request->input('telefono');
         $user->direccion = $request->input('direccion');
         $user->nombre_usuario = $request->input('nombre_usuario');
         $user->save();
+
+        $user->syncRoles($request->roles);
+
         return redirect()->route('user.index')->with('success', 'El usuario se ha actualizado con éxito.');
     }
 
@@ -120,47 +166,3 @@ class UserController extends Controller
         return redirect()->route('user.index')->with('success', 'El usuario se ha eliminado con éxito.');
     }
 }
-
-
-//     public function showSignupForm()
-//     {
-//         return view('user.login');
-//     }
-
-//     public function registerUser(Request $request)
-//     {
-//         $request->validate([
-//             'name' => 'required|string|max:255',
-//             'email' => 'required|email|unique:users,email|max:255',
-//             'password' => 'required|string|min:6',
-//         ]);
-//         User::create([
-//             'name' => $request->name,
-//             'email' => $request->email,
-//             'password' => bcrypt($request->password),
-//         ]);
-
-//         // $role = '1';
-//         // $user->role()->associate($role);
-//         $user->save();
-
-//         return redirect('/login')->with('success', '¡Registro exitoso! Por favor, inicia sesión.');
-//     }
-//      /**
-//      * Destroy the user's session (logout).
-//      *
-//      * @param  \Illuminate\Http\Request  $request
-//      * @return \Illuminate\Http\RedirectResponse
-//     //  */
-//     public function destroy(Request $request)
-//     {
-//     //     Auth::logout();
-
-//     //     $request->session()->invalidate();
-
-//     //     $request->session()->regenerateToken();
-
-//     //     return redirect('/login')->with('success', 'Has cerrado sesión correctamente.');
-//     // }
-// }
-// }

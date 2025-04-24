@@ -89,7 +89,7 @@
 
     <section>
 
-    <div class="container mt-5">
+    <!-- <div class="container mt-5">
         <a href="{{ url('/role') }}" class="btn btn-primary mx-1">Roles</a>
         <a href="{{ url('/permission') }}" class="btn btn-info mx-1">Permissions</a>
         <a href="{{ url('/user') }}" class="btn btn-warning mx-1">Users</a>
@@ -136,7 +136,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($users as $user)
+                                @foreach ($userIndex as $user)
                                 <tr>
                                     <td>{{ $user->id_user }}</td>
                                     <td>{{ $user->name }}</td>
@@ -179,7 +179,7 @@
         </div>
     </div>
 
-    </section>
+    </section> -->
 
 
 </body>
