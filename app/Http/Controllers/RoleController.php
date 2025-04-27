@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('permission:view role', ['only' => ['index', 'show']]);
-        $this->middleware('permission:create role', ['only' => ['create','store']]);
-        $this->middleware('permission:edit role', ['only' => ['update','edit']]);
-        $this->middleware('permission:delete role', ['only' => ['destroy']]);
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('permission:view role', ['only' => ['index', 'show']]);
+    //     $this->middleware('permission:create role', ['only' => ['create','store']]);
+    //     $this->middleware('permission:edit role', ['only' => ['update','edit']]);
+    //     $this->middleware('permission:delete role', ['only' => ['destroy']]);
+    // }
     
     public function index()
     {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Paginas de roles</title>
 </head>
 <body>
 <div class="container mt-5">
@@ -18,6 +18,12 @@
 
                 @if (session('status'))
                     <div class="alert alert-success">{{ session('status') }}</div>
+                @endif
+
+                @if (Auth::check())
+                <p>Sesión iniciada por: {{ Auth::user()->name }}</p>
+                @else
+                <p>No hay sesión activa.</p>
                 @endif
 
                 <div class="card mt-3">
@@ -47,10 +53,10 @@
                                     <td>{{ $role->id }}</td>
                                     <td>{{ $role->name }}</td>
                                     <td>
-                                    <a href="{{ route('role.edit', $role->id_role) }}" class="button is-primary">Editar Rol</a>
+                                    <a href="{{ route('role.edit', $role->id) }}" class="button is-primary">Editar Rol</a>
 
                                         @can('edit role')
-                                        <a href="{{ route('role.edit', $role->id_role) }}" class="button is-primary">Editar Rol</a>
+                                        <a href="{{ route('role.edit', $role->id) }}" class="button is-primary">Editar Rol</a>
                                         @endcan
 
                                         @can('delete role')

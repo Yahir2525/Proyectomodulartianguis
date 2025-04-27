@@ -10,9 +10,22 @@
         <div>
             <h1>Principal de productos</h1>
             <br>
+            @if (Auth::check())
+            <p>Sesión iniciada por: {{ Auth::user()->name }}</p>
+            @else
+            <p>No hay sesión activa.</p>
+            @endif
+
+            @can('create producto') <!-- Verifica si el usuario tiene el permiso de crear un usuario -->
             <a href="{{ url('/producto/create') }}" class="button is-info is-fullwidth">
-                Registrar una nueva compra
+                Registrar una nuevo producto
             </a><br><br>
+            @else
+            <p>No tienes permiso para crear un usuario.</p>
+            @endcan
+            <!-- <a href="{{ url('/producto/create') }}" class="button is-info is-fullwidth">
+                Registrar una nueva compra
+            </a><br><br> -->
             <form action="{{ url('/producto/showProducto') }}" method="GET"> 
                 <div class="sub">
                     <label for="id">ID de compra a buscar:</label>

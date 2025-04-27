@@ -15,17 +15,18 @@ use App\Models\Vendedor;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+// use App\Http\Middleware\AdminRole;
 
 class UserController extends Controller
 {
 
-    public function __construct()
-    {
-        $this->middleware('permission:view user', ['only' => ['index', 'show']]);
-        $this->middleware('permission:create user', ['only' => ['create','store']]);
-        $this->middleware('permission:edit user', ['only' => ['update','edit']]);
-        $this->middleware('permission:delete user', ['only' => ['destroy']]);
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('is_admin', ['only' => ['index', 'show']]);
+    //     $this->middleware('permission:create user', ['only' => ['create','store']]);
+    //     $this->middleware('permission:edit user', ['only' => ['update','edit']]);
+    //     $this->middleware('permission:delete user', ['only' => ['destroy']]);
+    // }
 
     public function index()
     {

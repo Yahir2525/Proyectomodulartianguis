@@ -34,7 +34,7 @@
                         <li><a href="{{ url('/login') }}">Iniciar sesion</a></li>
                         <li><hr class="dropdown-divider" /></li>
                         <li>
-                        <form method="POST" action="{{ url('/') }}">
+                        <form method="POST" action="{{ url('logout') }}">
                         @csrf
                         <button type="submit" class="dropdown-item">Logout</button>
                         </form>

@@ -15,6 +15,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
+// use App\Http\Middleware\AdminRole;
 
 Route::get('/', function () {
     return view('admin');
@@ -66,7 +67,7 @@ Route::get('/registro', function () {
 
 Route::resource('abono', AbonoController::class);
 
-Route::resource('user', UserController::class);
+// Route::resource('user', UserController::class);
 
 Route::resource('compra', CompraController::class);
 
@@ -83,11 +84,11 @@ Route::resource('carro', CarroController::class);
 
 // Route::resource('permission', PermissionController::class);
 
-Route::group(['middleware' => ['role:administrador']], function() {
+Route::middleware(['is_admin'])->group(function() {
 
     Route::resource('permission', PermissionController::class);
     Route::resource('role', RoleController::class);
-    // Route::resource('user', UserController::class);
+    Route::resource('user', UserController::class);
 
 });
 
