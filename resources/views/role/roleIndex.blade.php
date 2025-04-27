@@ -60,7 +60,7 @@
                                         @endcan
 
                                         @can('delete role')
-                                        <form action="{{ route('role.destroy', $role->id_role) }}" method="POST">
+                                        <form action="{{ route('role.destroy', $role->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
                                         <br><button type="submit" class="button is-danger">Eliminar user</button>
