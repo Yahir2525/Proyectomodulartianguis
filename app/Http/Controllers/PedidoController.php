@@ -57,7 +57,7 @@ class PedidoController extends Controller
 
         // ]);
         $pedido = new Pedido();
-        $pedido->estado = $request->estado_pedido;
+        $pedido->estado_pedido = $request->estado_pedido;
         $pedido->id_compra = $request->input('id_compra');
         $pedido->id_producto = $request->input('id_producto');
         $pedido->cantidad = $request->input('cantidad');
@@ -139,7 +139,7 @@ class PedidoController extends Controller
             return redirect()->route('pedido.index')->with('error', 'El pedido no se encontró.');
         }
 
-        $pedido->estado = $request->estado_pedido;
+        // $pedido->estado_pedido = $request->estado_pedido;
         $pedido->id_producto = $request->input('id_producto');
         $pedido->cantidad = $request->input('cantidad');
 

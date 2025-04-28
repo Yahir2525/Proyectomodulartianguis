@@ -59,4 +59,19 @@ class User extends Authenticatable
         ];
     }
 
+        public function compras(): HasMany
+    {
+        return $this->hasMany(Compra::class, 'nombre_usuario', 'nombre_usuario');
+    }
+
+    public function creditos(): HasOne
+    {
+        return $this->hasOne(Credito::class, 'nombre_usuario', 'nombre_usuario');
+    }
+
+    public function abonos(): HasMany
+    {
+        return $this->hasMany(Abono::class, 'nombre_usuario', 'nombre_usuario');
+    }
+
 }

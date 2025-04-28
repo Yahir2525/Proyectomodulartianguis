@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-// use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 // use App\Models\Role;
 use App\Models\Abono;
@@ -116,25 +116,24 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email'.id,
-            'password' => 'required|string|min:8|max:20',
-            'genero' => 'required',
-            'edad' => 'required',
-            'telefono' => 'required',
-            'direccion' => 'required',
-            'nombre_usuario' => 'required',
-            'roles' => 'required'
-        ]);
+        // $request->validate([
+        //     'name' => 'required|string|max:255',
+        //     'email' => 'required|email|max:255|unique:users,email',
+        //     'password' => 'required|string|min:8|max:20',
+        //     'genero' => 'required',
+        //     'edad' => 'required',
+        //     'telefono' => 'required',
+        //     'direccion' => 'required',
+        //     'nombre_usuario' => 'required',
+        //     'roles' => 'required'
+        // ]);
         
-        $user = User::find($id);
+        $user = User::find($user->id_user);
         
     
-        // if (!$user) {
-        //     return redirect()->route('user.index')->with('error', 'El user no se encontró.');
-        // }
-        $user = new User();
+        if (!$user) {
+            return redirect()->route('user.index')->with('error', 'El user no se encontró.');
+        }
         $user->name = $request->input('name');
         $user->email = $request->input('email');
         $user->password = Hash::make($request->input('password'));
@@ -142,10 +141,11 @@ class UserController extends Controller
         $user->edad = $request->input('edad');
         $user->telefono = $request->input('telefono');
         $user->direccion = $request->input('direccion');
-        $user->nombre_usuario = $request->input('nombre_usuario');
         $user->save();
 
-        $user->syncRoles($request->roles);
+        if($request->has('roles')){
+            $user->syncRoles($request->roles);
+        }
 
         return redirect()->route('user.index')->with('success', 'El usuario se ha actualizado con éxito.');
     }
@@ -153,9 +153,24 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(User $user, Compra $compra, Credito $credito, Abono $abono)
     {
-        $user = User::find($id);
+        $user = User::find($user->id_user);
+
+        if ($user->compras()->exists()) {
+            // Retornar con un mensaje amigable
+            return redirect()->back()->with('error', 'No se puede eliminar el usuario porque tiene compras asociadas.');
+        }
+
+        if ($user->creditos()->exists()) {
+            // Retornar con un mensaje amigable
+            return redirect()->back()->with('error', 'No se puede eliminar el usuario porque tiene creditos asociados.');
+        }
+
+        if ($user->abonos()->exists()) {
+            // Retornar con un mensaje amigable
+            return redirect()->back()->with('error', 'No se puede eliminar el usuario porque tiene abonos asociadas.');
+        }
 
         if (!$user) {
             return redirect()->route('user.index')->with('error', 'El user no se encontró.');

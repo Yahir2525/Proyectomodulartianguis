@@ -155,9 +155,9 @@ class AbonoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Abono $abono)
     {
-        $abono = Abono::find($id);
+        $abono = Abono::find($abono->id_user);
 
         // if ($aceite->archivo_ubicacion) {
         //     Storage::delete($aceite->archivo_ubicacion);

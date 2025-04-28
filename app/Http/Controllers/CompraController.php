@@ -129,9 +129,9 @@ class CompraController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id, Pedido $pedido)
+    public function destroy(Compra $compra)
     {    
-        $compra = Compra::find($id);
+        $compra = Compra::find($compra->id_compra);
 
         // if ($aceite->archivo_ubicacion) {
         //     Storage::delete($aceite->archivo_ubicacion);
@@ -144,8 +144,8 @@ class CompraController extends Controller
 
         $compra->delete();
 
-        $pedido = Pedido::where('id_pedido', $id)->get();
-        $pedido->delete();
+        // $pedido = Pedido::where('id_pedido', $id)->get();
+        // $pedido->delete();
 
         return redirect()->route('compra.index')->with('success', 'La compra se ha eliminado con éxito.');
     }
