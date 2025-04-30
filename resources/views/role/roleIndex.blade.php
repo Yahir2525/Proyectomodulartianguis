@@ -1,81 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paginas de roles</title>
+    <title>Página de roles</title>
 </head>
 <body>
-<div class="container mt-5">
-        <a href="{{ url('role') }}" class="btn btn-primary mx-1">Roles</a>
-        <a href="{{ url('permission') }}" class="btn btn-info mx-1">Permissions</a>
-        <a href="{{ url('user') }}" class="btn btn-warning mx-1">Users</a>
+    <div>
+        <a href="{{ url('role') }}">Roles</a> |
+        <a href="{{ url('permission') }}">Permisos</a> |
+        <a href="{{ url('user') }}">Usuarios</a>
     </div>
 
-    <div class="container mt-2">
-        <div class="row">
-            <div class="col-md-12">
+    <div>
+        @if (session('status'))
+            <p>{{ session('status') }}</p>
+        @endif
 
-                @if (session('status'))
-                    <div class="alert alert-success">{{ session('status') }}</div>
-                @endif
+        @if (Auth::check())
+            <p>Sesión iniciada por: {{ Auth::user()->name }}</p>
+        @else
+            <p>No hay sesión activa.</p>
+        @endif
 
-                @if (Auth::check())
-                <p>Sesión iniciada por: {{ Auth::user()->name }}</p>
-                @else
-                <p>No hay sesión activa.</p>
-                @endif
+        <h2>Listado de Roles y Permisos</h2>
 
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h4>
-                            Roles
-                            @can('create role')
-                            <a href="{{ url('/user/create') }}" class="button is-info is-fullwidth">
-                            Registrar una nueva compra
-                            </a><br><br>
-                            @endcan
-                        </h4>
-                    </div>
-                    <div class="card-body">
+        @can('create role')
+            <a href="{{ url('/user/create') }}">Registrar nuevo rol</a><br><br>
+        @endcan
 
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Id</th>
-                                    <th>Name</th>
-                                    <th width="40%">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($roleIndex as $role)
-                                <tr>
-                                    <td>{{ $role->id }}</td>
-                                    <td>{{ $role->name }}</td>
-                                    <td>
-                                    <a href="{{ route('role.edit', $role->id) }}" class="button is-primary">Editar Rol</a>
-
-                                        @can('edit role')
-                                        <a href="{{ route('role.edit', $role->id) }}" class="button is-primary">Editar Rol</a>
-                                        @endcan
-
-                                        @can('delete role')
-                                        <form action="{{ route('role.destroy', $role->id) }}" method="POST">
+        <table border="1" cellspacing="0" cellpadding="8">
+            <thead>
+                <tr>
+                    <th>ID Rol</th>
+                    <th>Nombre Rol</th>
+                    <th>Permiso</th>
+                    <th>Quitar Permiso</th>
+                    <th>Editar Rol</th>
+                    <th>Eliminar Rol</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($roleIndex as $role)
+                    @forelse ($role->permissions as $permission)
+                        <tr>
+                            <td>{{ $role->id }}</td>
+                            <td>{{ $role->name }}</td>
+                            <td>{{ $permission->name }}</td>
+                            <td>
+                                <form action="{{ route('role.permission.destroy', [$role->id, $permission->id]) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit">Quitar</button>
+                                </form>
+                            </td>
+                            <td>
+                                @can('edit role')
+                                    <a href="{{ route('role.edit', $role->id) }}">Editar</a>
+                                @endcan
+                            </td>
+                            <td>
+                                @if ($loop->first)
+                                    <form action="{{ route('role.destroy', $role->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <br><button type="submit" class="button is-danger">Eliminar user</button>
-                                        </form>
-                                        @endcan
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-
-                    </div>
-                </div>
-            </div>
-        </div>
+                                        <button type="submit">Eliminar</button>
+                                    </form>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td>{{ $role->id }}</td>
+                            <td>{{ $role->name }}</td>
+                            <td colspan="4">Este rol no tiene permisos asignados.</td>
+                        </tr>
+                    @endforelse
+                @endforeach
+            </tbody>
+        </table>
     </div>
 </body>
 </html>
+
+
+<!-- 
+esto es para no repetir rol por cada permiso
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de roles</title>
+</head>
+<body>
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url('role') }}">Roles</a> |
+        <a href="{{ url('permission') }}">Permisos</a> |
+        <a href="{{ url('user') }}">Usuarios</a>
+    </div>
+
+    <div>
+        @if (session('status'))
+            <p><strong>{{ session('status') }}</strong></p>
+        @endif
+
+        @if (Auth::check())
+            <p>Sesión iniciada por: <strong>{{ Auth::user()->name }}</strong></p>
+        @else
+            <p><strong>No hay sesión activa.</strong></p>
+        @endif
+
+        <h2>Roles</h2>
+
+        @can('create role')
+            <p><a href="{{ url('/user/create') }}">Registrar nuevo rol</a></p>
+        @endcan
+
+        <table border="1" cellspacing="0" cellpadding="8" style="width: 100%; text-align: left;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Permisos</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($roleIndex as $role)
+                    <tr>
+                        <td>{{ $role->id }}</td>
+                        <td>{{ $role->name }}</td>
+                        <td>
+                            @if ($role->permissions->isNotEmpty())
+                                {{ $role->permissions->pluck('name')->join(', ') }}
+                            @else
+                                Sin permisos asignados
+                            @endif
+                        </td>
+                        <td>
+                            @can('edit role')
+                                <a href="{{ route('role.edit', $role->id) }}">Editar</a>
+                            @endcan
+
+                            @can('delete role')
+                                <form action="{{ route('role.destroy', $role->id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit">Eliminar</button>
+                                </form>
+                            @endcan
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</body>
+</html> -->

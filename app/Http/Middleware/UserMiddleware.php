@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminRole
+class UserMiddleware
 {
     /**
      * Handle an incoming request.
@@ -16,12 +16,11 @@ class AdminRole
      */
     public function handle(Request $request, Closure $next): Response
     {
-        echo "Esto es una prueba";
-        if(Auth::check() && Auth::user()->hasRole('administrador')){
+        echo "Permitido para users";
+        if(Auth::check()){
         return $next($request);
         }
 
         abort('401');
     }
 }
- 

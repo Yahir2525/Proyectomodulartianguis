@@ -10,35 +10,40 @@
         <div>
             <h1>Principal de pedidos</h1>
             <br>
-            <!-- <form action="{{ url('/pedido/showPedido') }}" method="GET"> 
-                <div class="sub">
-                    <label for="id">ID de compra a buscar:</label>
-                    <input type="text" id="id" name="id_pedido" placeholder="21" autofocus>
-                </div><br><br>
-                <input type="submit" id="enviar" name="enviar" value="buscar">
-            </form> -->
-            @if($carroIndex->isNotEmpty())                
-                    <center>
-                    @foreach ($carroIndex as $carrito)
-                        <table border="1">
-                        @foreach($carrito->productos as $producto)
-                        {{$producto->nombre}}
-                        {{$producto->pivot->cantidad}}
-                        {{$producto->precio_unitario}}
-                        {{$producto->pivot->cantidad * $producto->precio_unitario}}
-                        
+
+            @if($carroIndex->isNotEmpty())
+                <table border="1" cellspacing="0" cellpadding="5">
+                    <thead>
+                        <tr>
+                            <th>ID del carrito</th>
+                            <th>Nombre del producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio unitario</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($carroIndex as $carrito)
+                            @foreach ($carrito->productos as $producto)
+                                <tr>
+                                    <td>{{ $carrito->id_carro }}</td>
+                                    <td>{{ $producto->nombre }}</td>
+                                    <td>{{ $producto->pivot->cantidad }}</td>
+                                    <td>{{ $producto->precio_unitario }}</td>
+                                    <td>{{ $producto->pivot->cantidad * $producto->precio_unitario }}</td>
+                                </tr>
+                            @endforeach
                         @endforeach
-                        @endforeach
-                        @php 
-                        $totalCarrito = $carroIndex->flatMap->productos->sum
-                        (function($producto)
-                        {
-                            return $producto->pivot->cantidad * $producto->precio_unitario;
-                        });
-                        @endphp
-                        total: {{$totalCarrito}}
-                    </table>
-                    </center>
+                    </tbody>
+                </table>
+
+                @php 
+                    $totalCarrito = $carroIndex->flatMap->productos->sum(function($producto) {
+                        return $producto->pivot->cantidad * $producto->precio_unitario;
+                    });
+                @endphp
+
+                <p><strong>Total: {{ $totalCarrito }}</strong></p>
             @endif
         </div>
     </section>

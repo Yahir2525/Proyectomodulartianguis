@@ -10,9 +10,10 @@
         <div>
             <h1>Principal de users</h1>
             <br>
-            <a href="{{ url('/user/create') }}" class="button is-info is-fullwidth">
-                Registrar una nueva compra
-            </a><br><br>
+
+            @can('create user')
+                <a href="{{ url('/user/create') }}" class="btn btn-primary float-end">Añadir un usuario</a>
+            @endcan
             <form action="{{ url('/user/showUser') }}" method="GET"> 
                 <div class="sub">
                     <label for="id">ID de compra a buscar:</label>
@@ -75,12 +76,16 @@
                     </tr>
                 </table>
                         <br>
-                        <a href="{{ route('user.edit', $user->id_user) }}" class="button is-primary">Editar Cliente</a>
-                        <form action="{{ route('user.destroy', $user->id_user) }}" method="POST">
+                        @can('edit user')
+                        <a href="{{ url('user.edit', $user->id_user) }}" class="btn btn-success">Edit</a>
+                        @endcan
+                        @can('delete user')
+                        <form action="{{ url('/user', $user->id_user) }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <br><button type="submit" class="button is-danger">Eliminar user</button>
+                        <br><button type="submit" class="button is-danger">Eliminar Pedido</button>
                         </form>
+                        @endcan
                     </center>
                 @endforeach 
             @endif

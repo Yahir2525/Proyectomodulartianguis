@@ -1,81 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paginas de roles</title>
+    <title>Página de roles</title>
 </head>
 <body>
-<div class="container mt-5">
-        <a href="{{ url('role') }}" class="btn btn-primary mx-1">Roles</a>
-        <a href="{{ url('permission') }}" class="btn btn-info mx-1">Permissions</a>
-        <a href="{{ url('user') }}" class="btn btn-warning mx-1">Users</a>
+    <div>
+        <a href="{{ url('role') }}">Roles</a> |
+        <a href="{{ url('permission') }}">Permissions</a> |
+        <a href="{{ url('user') }}">Users</a>
     </div>
 
-    <div class="container mt-2">
-        <div class="row">
-            <div class="col-md-12">
+    <div>
+        @if (session('status'))
+            <p>{{ session('status') }}</p>
+        @endif
 
-                @if (session('status'))
-                    <div class="alert alert-success">{{ session('status') }}</div>
-                @endif
+        @if (Auth::check())
+            <p>Sesión iniciada por: {{ Auth::user()->name }}</p>
+        @else
+            <p>No hay sesión activa.</p>
+        @endif
 
-                @if (Auth::check())
-                <p>Sesión iniciada por: {{ Auth::user()->name }}</p>
-                @else
-                <p>No hay sesión activa.</p>
-                @endif
+        <h2>Roles</h2>
 
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h4>
-                            Roles
-                            @can('create permission')
-                            <a href="{{ url('/permission/create') }}" class="button is-info is-fullwidth">
-                            Registrar una nueva compra
-                            </a><br><br>
+        @can('create permission')
+            <a href="{{ url('/permission/create') }}">Registrar nuevo permiso</a><br><br>
+        @endcan
+
+        <table border="1" cellspacing="0" cellpadding="5">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($permissionIndex as $permission)
+                    <tr>
+                        <td>{{ $permission->id }}</td>
+                        <td>{{ $permission->name }}</td>
+                        <td>
+                            @can('edit permission')
+                                <a href="{{ route('permission.edit', $permission->id) }}">Editar</a>
                             @endcan
-                        </h4>
-                    </div>
-                    <div class="card-body">
 
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Id</th>
-                                    <th>Name</th>
-                                    <th width="40%">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($permissionIndex as $permission)
-                                <tr>
-                                    <td>{{ $permission->id }}</td>
-                                    <td>{{ $permission->name }}</td>
-                                    <td>
-                                    <a href="{{ route('permission.edit', $permission->id) }}" class="button is-primary">Editar Permiso</a>
-
-                                        @can('edit permission')
-                                        <a href="{{ route('permission.edit', $permission->id) }}" class="button is-primary">Editar Permiso</a>
-                                        @endcan
-
-                                        @can('delete permission')
-                                        <form action="{{ route('permission.destroy', $permission->id) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <br><button type="submit" class="button is-danger">Eliminar user</button>
-                                        </form>
-                                        @endcan
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-
-                    </div>
-                </div>
-            </div>
-        </div>
+                            @can('delete permission')
+                                <form action="{{ route('permission.destroy', $permission->id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit">Eliminar</button>
+                                </form>
+                            @endcan
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

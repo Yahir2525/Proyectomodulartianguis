@@ -84,9 +84,22 @@ class RoleController extends Controller
         return redirect('role.index')->with('success', 'Role registrado correctamente.');
     }
 
-    public function destroy($id)
+    public function destroyPermissionFromRole(Role $role, Permission $permission)
     {
-        $role = Role::find($id);
+    $role = Role::find($role->id);
+    $permission = Permission::find($permission->id);
+
+    // Elimina solo la relación entre el rol y el permiso
+    $role->revokePermissionTo($permission);
+
+    return redirect()->back()->with('success', 'Permiso eliminado del rol correctamente.');
+    }
+
+
+    public function destroy(Role $role, Permission $permission)
+    {
+        $role = Role::find($role->id);
+        $permission = Permission::find($permission->id);
         $role->delete();
         return redirect()->route('role.index')->with('success', 'El rol se ha eliminado con éxito.');
     }

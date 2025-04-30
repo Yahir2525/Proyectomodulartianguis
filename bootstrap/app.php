@@ -1,5 +1,6 @@
 <?php
 use App\Http\Middleware\AdminRole;
+use App\Http\Middleware\UserMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,7 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'is_admin'=> AdminRole::class,
-            'permission' => \Spatie\Permission\Middlewares\Permission::class,
+            // 'permission' => \Spatie\Permission\Middlewares\Permission::class,
+
+            'is_user'=> UserMiddleware::class,
             // 'auth' => \App\Http\Middleware\Authenticate::class, 
             // 'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
             // 'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,

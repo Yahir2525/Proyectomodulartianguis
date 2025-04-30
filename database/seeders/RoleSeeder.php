@@ -83,8 +83,7 @@ class RoleSeeder extends Seeder
         $viewPedidoPermission, $createPedidoPermission, $editPedidoPermission, $deletePedidoPermission,
         $viewProductoPermission, $createProductoPermission, $editProductoPermission, $deleteProductoPermission,
         $viewUserPermission, $createUserPermission, $editUserPermission, $deleteUserPermission,
-        $viewRolePermission, $createRolePermission,
-        $editRolePermission, $deleteRolePermission, $viewPermission, $createPermission,
+        $viewRolePermission, $createRolePermission, $editRolePermission, $deleteRolePermission, $viewPermission, $createPermission,
         $editPermission, $deletePermission);
         
         $userRole->givePermissionTo($viewAbonoPermission, $deleteAbonoPermission,
@@ -93,7 +92,7 @@ class RoleSeeder extends Seeder
         $viewCreditoPermission, $deleteCreditoPermission,
         $viewPedidoPermission, $createPedidoPermission, $editPedidoPermission, $deletePedidoPermission,
         $viewProductoPermission, $deleteProductoPermission,
-        $viewUserPermission, $editUserPermission, $deleteUserPermission,
+        $viewUserPermission, $editUserPermission,
     
     );
 

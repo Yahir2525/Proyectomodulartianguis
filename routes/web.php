@@ -65,9 +65,10 @@ Route::get('/registro', function () {
     return view('auth.registro');
 });
 
-Route::resource('abono', AbonoController::class);
 
-// Route::resource('user', UserController::class);
+Route::middleware(['is_user'])->group(function() {
+
+Route::resource('abono', AbonoController::class);
 
 Route::resource('compra', CompraController::class);
 
@@ -80,6 +81,11 @@ Route::resource('producto', ProductoController::class);
 Route::resource('vendedor', VendedorController::class);
 
 Route::resource('carro', CarroController::class);
+});
+
+
+
+
 // Route::resource('role', RoleController::class);
 
 // Route::resource('permission', PermissionController::class);
@@ -88,6 +94,7 @@ Route::middleware(['is_admin'])->group(function() {
 
     Route::resource('permission', PermissionController::class);
     Route::resource('role', RoleController::class);
+    Route::delete('/role/{role}/permission/{permission}', [RoleController::class, 'destroyPermissionFromRole'])->name('role.permission.destroy');
     Route::resource('user', UserController::class);
 
 });
