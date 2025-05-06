@@ -23,7 +23,11 @@ class Pedido extends Model
     }
         public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'nombre_usuario', 'nombre_usuario');
+    }
+    public function productos(): BelongsToMany
+    {
+        return $this->BelongsToMany(Producto::class, 'carros','id_carro', 'id_producto')->withPivot('cantidad');
     }
     
 }

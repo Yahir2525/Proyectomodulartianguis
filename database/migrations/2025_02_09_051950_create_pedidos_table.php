@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id('id_pedido');
-            $table->boolean('estado_pedido');
             $table->unsignedBigInteger('id_compra')->nullable();
             $table->unsignedBigInteger('id_producto')->nullable();
             $table->integer('cantidad')->unsigned();

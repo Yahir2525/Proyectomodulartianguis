@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 class Carro extends Model
@@ -17,8 +18,21 @@ class Carro extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
+    protected $fillable = [
+        'id_compra', // <- agrega esto si lo vas a llenar con update o create
+    ];
+
     public function productos(): BelongsToMany
     {
-        return $this->BelongsToMany(Producto::class, 'carros','id_carro', 'id_producto')->withPivot('cantidad');
+        return $this->belongsToMany(Producto::class, 'carros','id_carro', 'id_producto')->withPivot('cantidad');
+    }
+    
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'nombre_usuario', 'nombre_usuario');
+    }
+    public function compra(): BelongsTo
+    {
+        return $this->belongsTo(Compra::class, 'id_compra', 'id_compra');
     }
 }

@@ -6,10 +6,12 @@ use App\Models\Abono;
 use App\Models\Cliente;
 use App\Models\Compra;
 use App\Models\Credito;
+use App\Models\Carro;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CompraController extends Controller
 {
@@ -52,11 +54,43 @@ class CompraController extends Controller
         //     'estado_compra.required' => 'Debe seleccionar un estado de la compra.',
         //     'estado_compra.boolean' => 'El estado debe ser activo o desactivo.', 
         // ]);
+
+        // $compra = Compra::create([
+        //     'id_usuario' => auth()->id(),
+        //     'estado_compra' => 1,
+        // ]);
+    
+        // // 2. Obtener los productos del carrito
+        // $carros = Carro::with('producto')->where('nombre_usuario', auth()->nombre_usuario())->get();
+    
+        // // 3. Crear order_products desde el carrito
+        // foreach ($carros as $carro) {
+        //     $pedido = new Perido();
+        //         $pedido->id_compra = $request->input('id_compra');
+        //         $pedido->id_producto = $request->input('id_producto');
+        //         $pedido->cantidad = $request->input('cantidad');
+        //         $pedido->precio_unitario = $request->precio_unitario;
+        //         $pedido->subtotal += $pedido->precio_unitario * $pedido->cantidad;
+        //         $pedido->total_pagar += $pedido->subtotal;
+        // }
+    
+        // 4. Vaciar el carrito
+        // Carro::where('nombre_usuario', auth()->id())->delete();
+    
         $compra = new Compra();
-        // Revisar el id compraproducto
-        $compra->id_pedido = $idPedido;
+        $compra->id_compra = $request->input('id_compra');
         $compra->nombre_usuario = $request->input('nombre_usuario');
         $compra->estado_compra = $request->estado_compra;
+
+        $carros = Carro::whereNull('id_compra')->get();
+    
+        foreach ($carros as $carro) {
+            $carro->update([
+                $compra->id_compra = $request->input('id_compra') // Actualiza el carrito con el id_compra
+            ]);
+            // dd($compra);
+        }
+
         
         if ($compra->save()) {
             return redirect('/compra')->with('success', 'Compra registrado correctamente.');
@@ -119,8 +153,6 @@ class CompraController extends Controller
         if (!$compra) {
             return redirect()->route('compra.compraIndex')->with('error', 'La compra no se encontró.');
         }
-        $compra->id_pedido = $idPedido;
-        $compra->nombre_usuario = $request->input('nombre_usuario');
         $compra->estado_compra = $request->estado_compra;
         $compra->save();
         return redirect()->route('compra.compraIndex')->with('success', 'La compra se ha actualizado con éxito.');

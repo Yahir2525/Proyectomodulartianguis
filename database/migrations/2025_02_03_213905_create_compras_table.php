@@ -15,15 +15,10 @@ return new class extends Migration
         Schema::create('compras', function (Blueprint $table) {
             $table->id('id_compra');
             $table->string('nombre_usuario')->nullable();
-            $table->decimal('total_compra')->nullable();
             $table->boolean("estado_compra");
             $table->timestamps();
 
-            $table->foreign('nombre_usuario')
-            ->references('nombre_usuario')
-            ->on('users')
-            ->onDelete('restrict')
-            ->onUpdate('cascade');
+            $table->foreign('nombre_usuario')->references('nombre_usuario')->on('users')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

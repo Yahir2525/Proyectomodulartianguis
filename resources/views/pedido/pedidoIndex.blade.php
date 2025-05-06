@@ -90,10 +90,11 @@
                         <table border="1">
                             <tr>
                                 <th>Pedido</th>
+                                <th>Compra</th>
                                 <th>Producto</th>
                                 <th>Cantidad</th>
-                                <th>Precio unitario</th>
                                 <th>Subtotal</th>
+                                <th>Total</th>
                                 <th>Creado</th>
                                 <th>Actualizado</th>
                                 <th>Acciones</th>

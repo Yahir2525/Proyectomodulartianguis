@@ -16,6 +16,8 @@
                     <thead>
                         <tr>
                             <th>ID del carrito</th>
+                            <th>Nombre de usuario</th>
+                            <th>ID del producto</th>
                             <th>Nombre del producto</th>
                             <th>Cantidad</th>
                             <th>Precio unitario</th>
@@ -27,6 +29,8 @@
                             @foreach ($carrito->productos as $producto)
                                 <tr>
                                     <td>{{ $carrito->id_carro }}</td>
+                                    <td>{{ optional($carrito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
+                                    <td>{{ $producto->id_producto }}</td>
                                     <td>{{ $producto->nombre }}</td>
                                     <td>{{ $producto->pivot->cantidad }}</td>
                                     <td>{{ $producto->precio_unitario }}</td>
@@ -44,8 +48,18 @@
                 @endphp
 
                 <p><strong>Total: {{ $totalCarrito }}</strong></p>
+
+                <!-- Formulario para finalizar la compra -->
+                <form action="{{ url('carro') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="total_compra" value="{{ $totalCarrito }}">
+                    <button type="submit">Finalizar compra</button>
+                </form>
+            @else
+                <p>No hay productos en el carrito.</p>
             @endif
         </div>
     </section>
 </body>
 </html>
+

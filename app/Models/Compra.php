@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 
 class Compra extends Model
 {
@@ -24,8 +26,12 @@ class Compra extends Model
     {
         return $this->hasMany(Credito::class, 'id_compra', 'id_compra');
     }
-        public function pedido(): HasOne
+        public function pedido(): HasMany
     {
-        return $this->hasOne(Pedido::class, 'id_compra', 'id_compra');
+        return $this->hasMany(Pedido::class, 'id_compra', 'id_compra');
+    }
+    public function carro(): BelongsTo
+    {
+        return $this->belongsTo(Carro::class, 'id_compra', 'id_carro');
     }
 }

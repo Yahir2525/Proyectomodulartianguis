@@ -43,6 +43,8 @@ class CarroController extends Controller
         }
 
         $carro = new Carro();
+        $carro->nombre_usuario = $request->input('nombre_usuario');
+        $carro->id_compra = $request->input('id_compra');
         $carro->id_producto = $request->input('id_producto');
         $carro->cantidad = 1;
         $carro->estado_producto = 1;
@@ -75,7 +77,7 @@ class CarroController extends Controller
     public function update(Request $request, Carro $carro)
     {
         $carro = Carro::find($carro->id_carro);
-
+        // $carro->id_producto = $request->input('id_producto');
         $carro->cantidad = $request->input('cantidad');
         $carro->estado_producto = $request->input('estado_producto');
         

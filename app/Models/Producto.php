@@ -17,9 +17,9 @@ class Producto extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
-    public function pedido(): BelongsTo
+    public function pedidos(): BelongsTo
     {
-        return $this->belongsTo(Producto::class, 'id_producto', 'id_producto');
+        return $this->belongsToMany(Producto::class, 'pedidos', 'id_producto', 'id_pedido')->withPivot('cantidad');
     }
 
     public function carros(): BelongsToMany

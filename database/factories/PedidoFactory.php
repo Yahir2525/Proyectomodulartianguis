@@ -26,7 +26,6 @@ class PedidoFactory extends Factory
     public function definition(): array
     {
         return [
-            'estado_pedido' => $this->faker->randomElement(['1', '0']),
             'id_compra' => \App\Models\Compra::inRandomOrder()->value('id_compra') ?? null,
             'id_producto' => $productoId = \App\Models\Producto::inRandomOrder()->value('id_producto') ?? null,
             'cantidad' => $this->faker->numberBetween(1, 100),
@@ -37,11 +36,10 @@ class PedidoFactory extends Factory
             'total_pagar' => function ($attributes) {
             return $attributes['subtotal'];
             },
-
-            // 'total_pagar' => function ($attributes) {
-            // $total = 0; // Variable estática para acumular los subtotales
-            // $total += $attributes['subtotal']; // Sumar el subtotal actual
-            // return $total; }// Devolver el total acumulado
+            'total_pagar' => function ($attributes) {
+            $total = 0; // Variable estática para acumular los subtotales
+            $total += $attributes['subtotal']; // Sumar el subtotal actual
+            return $total; },// Devolver el total acumulado
             'created_at' => now(),
             'updated_at' => now(),
         ];

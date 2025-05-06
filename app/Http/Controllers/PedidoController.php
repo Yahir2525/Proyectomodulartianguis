@@ -57,8 +57,6 @@ class PedidoController extends Controller
 
         // ]);
         $pedido = new Pedido();
-        $pedido->estado_pedido = $request->estado_pedido;
-        $pedido->id_compra = $request->input('id_compra');
         $pedido->id_producto = $request->input('id_producto');
         $pedido->cantidad = $request->input('cantidad');
 
@@ -67,8 +65,7 @@ class PedidoController extends Controller
         $pedido->total_pagar += $pedido->subtotal;        
         if ($pedido->save()) {
             return redirect('/pedido')->with('success', 'Pedido registrado correctamente.');
-        } else {
-        } 
+        }
 
     //     $compra = Compra::find($idCompra);
 

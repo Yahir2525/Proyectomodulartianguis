@@ -19,16 +19,17 @@
                 <tr>
                     <th>ID de la compra</th>
                     <th>Nombre del Cliente</th>
-                    <th>Monto</th>
+                    <th>Estado</th>
                     <th>Tipo</th>
                     <th>Cantidad</th>
                     <th>Acciones</th>
                 </tr>
                 @foreach ($compraIndex as $compra)
+           
                     <tr>
                         <td>{{ $compra->id_compra }}</td>
                         <td>{{ optional($compra->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                        <td>{{ number_format($compra->total_pagar, 2) }}</td>
+                        <td>{{ $compra->estado_compra }}</td>
                         <td>{{ $compra->created_at }}</td>
                         <td>{{ $compra->updated_at }}</td>
                         <td>
@@ -39,6 +40,7 @@
                             </form>
                         </td>
                     </tr>
+                 
                 @endforeach
             </table>
         </center>
