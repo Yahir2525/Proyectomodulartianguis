@@ -24,11 +24,9 @@ class CarroFactory extends Factory
     public function definition(): array
     {
         return [
-            'nombre_usuario' => $nombre_usuario = \App\Models\User::inRandomOrder()->value('nombre_usuario') ?? null,
-            'id_producto' => $productoId = \App\Models\Producto::inRandomOrder()->value('id_producto'),
-            'id_compra' => null,
+            'id_pedido' => \App\Models\Pedido::inRandomOrder()->value('id_pedido') ?? null,
+            'id_producto' => $producto = Producto::inRandomOrder()->first()?->id_producto ?? null,
             'cantidad' => $this->faker->numberBetween(1, 100),
-            'estado_producto' => $this->faker->randomElement(['1', '0']),
         ];
     }
 }

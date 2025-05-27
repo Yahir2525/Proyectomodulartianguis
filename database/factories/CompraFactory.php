@@ -30,10 +30,10 @@ class CompraFactory extends Factory
     {
         return [
 
-            'nombre_usuario' => $nombre_usuario = \App\Models\User::inRandomOrder()->value('nombre_usuario') ?? null,
-            'estado_compra' => $this->faker->randomElement(['1', '0']),
-            'created_at' => now(),
-            'updated_at' => now(),
+            // 'nombre_usuario' => $nombre_usuario = \App\Models\User::inRandomOrder()->value('nombre_usuario') ?? null,
+            // 'estado_compra' => $this->faker->randomElement(['1', '0']),
+            // 'created_at' => now(),
+            // 'updated_at' => now(),
         ];
     }
 }

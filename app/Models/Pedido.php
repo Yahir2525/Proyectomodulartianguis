@@ -17,17 +17,12 @@ class Pedido extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
-        public function compra(): BelongsTo
+        public function carro(): HasMany
     {
-        return $this->belongsTo(Compra::class, 'id_compra', 'id_compra');
+        return $this->hasMany(Carro::class, 'id_pedido', 'id_pedido');
     }
         public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'nombre_usuario', 'nombre_usuario');
+        return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
-    public function productos(): BelongsToMany
-    {
-        return $this->BelongsToMany(Producto::class, 'carros','id_carro', 'id_producto')->withPivot('cantidad');
-    }
-    
 }

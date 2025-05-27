@@ -89,30 +89,21 @@
                         <h3>Pedidos de la Compra ID: {{ $id_compra }}</h3>
                         <table border="1">
                             <tr>
-                                <th>Pedido</th>
-                                <th>Compra</th>
-                                <th>Producto</th>
-                                <th>Cantidad</th>
-                                <th>Subtotal</th>
-                                <th>Total</th>
+                                <th>ID pedido</th>
+                                <th>Nombre usuario</th>
+                                <th>Estado del pedido</th>
+                                <th>Total del pedido</th>
                                 <th>Creado</th>
                                 <th>Actualizado</th>
                                 <th>Acciones</th>
                             </tr>
-                            @php $totalCompra = 0; @endphp  <!-- Variable para sumar los subtotales de la compra -->
                             @foreach ($pedidos as $pedido)
                                 <tr>
                                     <td>{{ $pedido->id_pedido }}</td>
-                                    <td>{{ optional($pedido->producto) ? $pedido->id_producto : 'No tiene producto' }}</td>
-                                    <td>
-                                        <form action="" method="POST">
-                                            @csrf
-                                            @method('GET')
-                                            <input type="number" name="cantidad" value="{{ number_format($pedido->cantidad, 2) }}" style="width: 50px;" min="1" step="1" required>
-                                        </form>
-                                    </td>
-                                    <td>{{ optional($pedido->producto) ? $pedido->precio_unitario : 'No tiene precio' }}</td>
-                                    <td>{{ number_format($pedido->subtotal, 2) }}</td>
+                                    <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin cliente' }}</td>
+                                    
+                                    
+                                    
                                     <td>{{ $pedido->created_at }}</td>
                                     <td>{{ $pedido->updated_at }}</td>
                                     <td>

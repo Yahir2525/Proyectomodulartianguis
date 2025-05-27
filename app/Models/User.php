@@ -58,24 +58,21 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
-        public function compra(): HasMany
+        public function pedido(): HasMany
     {
-        return $this->hasMany(Compra::class, 'nombre_usuario', 'nombre_usuario');
+        return $this->hasMany(Pedido::class, 'id_user', 'id_hser');
     }
-
         public function credito(): HasOne
     {
         return $this->hasOne(Credito::class, 'nombre_usuario', 'nombre_usuario');
     }
-
         public function abono(): HasMany
     {
         return $this->hasMany(Abono::class, 'nombre_usuario', 'nombre_usuario');
     }
-        public function carro(): HasOne
+        public function carro(): HasMany
     {
-        return $this->hasOne(Carro::class, 'nombre_usuario', 'nombre_usuario');
+        return $this->hasMany(Carro::class);
     }
 
 }

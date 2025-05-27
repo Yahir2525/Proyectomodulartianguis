@@ -23,12 +23,6 @@ class Credito extends Model
     {
         return $this->belongsTo(User::class, 'nombre_usuario', 'nombre_usuario');
     }
-
-        public function compra(): BelongsTo
-    {
-        return $this->belongsTo(Compra::class, 'id_compra', 'id_compra');
-    }
-
     public function abono(): HasMany
     {
         return $this->hasMany(Abono::class, 'id_credito', 'id_credito');

@@ -26,13 +26,12 @@ class Carro extends Model
     {
         return $this->belongsToMany(Producto::class, 'carros','id_carro', 'id_producto')->withPivot('cantidad');
     }
-    
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'nombre_usuario', 'nombre_usuario');
+        return $this->belongsTo(User::class);
     }
-    public function compra(): BelongsTo
+    public function pedido(): BelongsTo
     {
-        return $this->belongsTo(Compra::class, 'id_compra', 'id_compra');
+        return $this->belongsTo(Pedido::class, 'id_pedido', 'id_pedido');
     }
 }

@@ -42,13 +42,16 @@ class CarroController extends Controller
             return redirect()->back()->with('error', 'El producto ya está.');        
         }
 
+        $producto = Producto::where('id_producto', $request->input('id_producto'))->first();
+
+        if (!$producto) {
+            return redirect()->back()->with('error', 'Producto no encontrado.');
+        }
+
         $carro = new Carro();
-        $carro->nombre_usuario = $request->input('nombre_usuario');
-        $carro->id_compra = $request->input('id_compra');
+        $carro->id_pedido = $request->input('id_pedido');
         $carro->id_producto = $request->input('id_producto');
         $carro->cantidad = 1;
-        $carro->estado_producto = 1;
-
 
         if ($carro->save()) {
             return redirect('/carro')->with('success', 'Carro registrado correctamente.');
@@ -77,10 +80,8 @@ class CarroController extends Controller
     public function update(Request $request, Carro $carro)
     {
         $carro = Carro::find($carro->id_carro);
-        // $carro->id_producto = $request->input('id_producto');
+        $carro->id_producto = $request->input('id_producto');
         $carro->cantidad = $request->input('cantidad');
-        $carro->estado_producto = $request->input('estado_producto');
-        
 
         if (!$carro) {
             return redirect()->route('carro.index')->with('error', 'El carro no se encontró.');

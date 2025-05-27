@@ -16,9 +16,9 @@
                     <thead>
                         <tr>
                             <th>ID del carrito</th>
-                            <th>Nombre de usuario</th>
                             <th>ID del producto</th>
                             <th>Nombre del producto</th>
+                            <th>Estado del producto</th>
                             <th>Cantidad</th>
                             <th>Precio unitario</th>
                             <th>Subtotal</th>
@@ -27,11 +27,17 @@
                     <tbody>
                         @foreach ($carroIndex as $carrito)
                             @foreach ($carrito->productos as $producto)
+
+                            
+                            @php
+                            $piezas_disponibles = $producto->piezas - $producto->pivot->cantidad;
+<!-- HACER QUE SE HAGA BIEN LA SUMA DE PIEZAS DISPONIBLES -140 -->
+                            @endphp
                                 <tr>
                                     <td>{{ $carrito->id_carro }}</td>
-                                    <td>{{ optional($carrito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
                                     <td>{{ $producto->id_producto }}</td>
                                     <td>{{ $producto->nombre }}</td>
+                                    <td>{{ $piezas_disponibles}}</td>
                                     <td>{{ $producto->pivot->cantidad }}</td>
                                     <td>{{ $producto->precio_unitario }}</td>
                                     <td>{{ $producto->pivot->cantidad * $producto->precio_unitario }}</td>
@@ -40,7 +46,6 @@
                         @endforeach
                     </tbody>
                 </table>
-
                 @php 
                     $totalCarrito = $carroIndex->flatMap->productos->sum(function($producto) {
                         return $producto->pivot->cantidad * $producto->precio_unitario;
