@@ -101,17 +101,14 @@
                                 <tr>
                                     <td>{{ $pedido->id_pedido }}</td>
                                     <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                                    
-                                    
-                                    
+                                    <td>{{ $pedido->subtotal }}</td>
+                                    <td>{{ $pedido->estado_pedido }}</td>
                                     <td>{{ $pedido->created_at }}</td>
                                     <td>{{ $pedido->updated_at }}</td>
                                     <td>
                                         <a href="{{ route('pedido.edit', $pedido->id_pedido) }}" class="button is-primary">Editar</a>
                                     </td>
-                                    
                                 </tr>
-                                @php $totalCompra += $pedido->subtotal; @endphp  <!-- Sumar el subtotal de cada pedido -->
                                 <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
@@ -119,7 +116,7 @@
                                 </form>
                             @endforeach
                         </table>
-                        <br><strong>Total a pagar por esta compra: {{ number_format($totalCompra, 2) }}</strong><br><br>
+                        
                     </center>
                 @endforeach
                 

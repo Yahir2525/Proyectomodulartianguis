@@ -10,7 +10,27 @@
         <div class="hero-body">
                     <h1 class="title">Registrar compras</h1>
                     <hr class="login-hr">
-                        <p class="subtitle has-text-white">Ingresa los datos</p>
+
+                    @php
+                        $idPedido = request('id_pedido');
+                        $totalPedido = request('total');
+                    @endphp
+
+                    <h1>Registrar Pedido #{{ $idPedido }}</h1>
+
+                    <form action="{{ url('/pedido') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="id_pedido" value="{{ $idPedido }}">
+                        
+                        <label>Total:</label>
+                        <input type="text" name="total" value="{{ $totalPedido }}" readonly>
+
+                        <!-- Otros campos -->
+
+                        <button type="submit">Guardar pedido</button>
+                    </form>
+
+                        <!-- <p class="subtitle has-text-white">Ingresa los datos</p>
                             <div class="box">
                                 <form action="{{ url('/pedido') }}" method="POST"> 
                                 @csrf
@@ -42,7 +62,7 @@
                                     <div class="control">
                                                 <button class="button is-block is-info is-large is-fullwidth" type="submit">
                                                 Enviar</button>
-                                            </div>
+                                            </div> -->
                                 </form><br>
                                     <p class="has-text-purple">
                                     <a href="/">Inicio</a>;

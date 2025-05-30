@@ -30,9 +30,9 @@ class PedidoController extends Controller
     {
         $pedido = new Pedido();
         $pedido->id_user = $request->input('id_user');
-        $pedido->cantidad = $request->input('cantidad');
-        $pedido->estado_pedido = 1;      
-        $pedido->total_pagar = $carro->input('totalCarrito');
+      
+        $pedido->subtotal = $request->input('total');
+        $pedido->estado_pedido = 1;
         if ($pedido->save()) {
             return redirect('/pedido')->with('success', 'Pedido registrado correctamente.');
         }

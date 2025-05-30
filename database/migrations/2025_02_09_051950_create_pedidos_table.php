@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id('id_pedido');
             $table->unsignedBigInteger('id_user')->nullable();
+            $table->decimal('subtotal')->nullable();
             $table->boolean('estado_pedido');
             $table->timestamps();
 

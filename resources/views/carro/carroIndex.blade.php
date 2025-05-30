@@ -12,54 +12,73 @@
             <br>
 
             @if($carroIndex->isNotEmpty())
-                <table border="1" cellspacing="0" cellpadding="5">
-                    <thead>
-                        <tr>
-                            <th>ID del carrito</th>
-                            <th>ID del producto</th>
-                            <th>Nombre del producto</th>
-                            <th>Estado del producto</th>
-                            <th>Cantidad</th>
-                            <th>Precio unitario</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($carroIndex as $carrito)
-                            @foreach ($carrito->productos as $producto)
 
-                            
-                            @php
-                            $piezas_disponibles = $producto->piezas - $producto->pivot->cantidad;
-<!-- HACER QUE SE HAGA BIEN LA SUMA DE PIEZAS DISPONIBLES -140 -->
-                            @endphp
-                                <tr>
-                                    <td>{{ $carrito->id_carro }}</td>
-                                    <td>{{ $producto->id_producto }}</td>
-                                    <td>{{ $producto->nombre }}</td>
-                                    <td>{{ $piezas_disponibles}}</td>
-                                    <td>{{ $producto->pivot->cantidad }}</td>
-                                    <td>{{ $producto->precio_unitario }}</td>
-                                    <td>{{ $producto->pivot->cantidad * $producto->precio_unitario }}</td>
-                                </tr>
-                            @endforeach
-                        @endforeach
-                    </tbody>
-                </table>
-                @php 
-                    $totalCarrito = $carroIndex->flatMap->productos->sum(function($producto) {
-                        return $producto->pivot->cantidad * $producto->precio_unitario;
-                    });
+                @php
+                    // Inicializar el acumulador de reservas
+                    $reservasAcumuladas = [];
+
+                    // Agrupar carritos por id_pedido (por si no lo hiciste en el controlador)
+                    $carrosPorPedido = $carroIndex->groupBy('id_pedido');
                 @endphp
 
-                <p><strong>Total: {{ $totalCarrito }}</strong></p>
+                @foreach($carrosPorPedido as $idPedido => $carros)
+                    <h2>Pedido #{{ $idPedido }}</h2>
 
-                <!-- Formulario para finalizar la compra -->
-                <form action="{{ url('carro') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="total_compra" value="{{ $totalCarrito }}">
-                    <button type="submit">Finalizar compra</button>
-                </form>
+                    <table border="1" cellspacing="0" cellpadding="5">
+                        <thead>
+                            <tr>
+                                <th>ID del carrito</th>
+                                <th>ID del pedido</th>
+                                <th>ID del producto</th>
+                                <th>Nombre del producto</th>
+                                <th>Estado del producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio unitario</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $totalPedido = 0;
+                            @endphp
+                            @foreach ($carros as $carrito)
+                                @foreach ($carrito->productos as $producto)
+                                    @php
+                                        $id = $producto->id_producto;
+                                        $stockOriginal = $producto->piezas;
+
+                                        $reservadoAntes = $reservasAcumuladas[$id] ?? 0;
+                                        $piezas_disponibles = $stockOriginal - $reservadoAntes;
+
+                                        $reservasAcumuladas[$id] = $reservadoAntes + $producto->pivot->cantidad;
+
+                                        $subtotal = $producto->pivot->cantidad * $producto->precio_unitario;
+                                        $totalPedido += $subtotal;
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $carrito->id_carro }}</td>
+                                        <td>{{ $carrito->id_pedido }}</td>
+                                        <td>{{ $producto->id_producto }}</td>
+                                        <td>{{ $producto->nombre }}</td>
+                                        <td>{{ $piezas_disponibles }}</td>
+                                        <td>{{ $producto->pivot->cantidad }}</td>
+                                        <td>{{ $producto->precio_unitario }}</td>
+                                        <td>{{ $subtotal }}</td>
+                                    </tr>
+                                @endforeach
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <p><strong>Total del Pedido #{{ $idPedido }}: {{ $totalPedido }}</strong></p>
+
+                    <!-- Formulario para finalizar este pedido -->
+                    <a href="{{ url('/pedido/create') }}?id_pedido={{ $idPedido }}&total={{ $totalPedido }}">
+                        <button>Finalizar compra de Pedido #{{ $idPedido }}</button>
+                    </a>
+                    <hr>
+                @endforeach
+
             @else
                 <p>No hay productos en el carrito.</p>
             @endif
@@ -67,4 +86,3 @@
     </section>
 </body>
 </html>
-
