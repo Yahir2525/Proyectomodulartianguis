@@ -66,7 +66,7 @@
                                 </form><br>
                                     <p class="has-text-purple">
                                     <a href="/">Inicio</a>;
-                                    <a href="/compras">Regresar</a>
+                                    <a href="/pedido">Regresar</a>
                                     </p>
 
                             </div>

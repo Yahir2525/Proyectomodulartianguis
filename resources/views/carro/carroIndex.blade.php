@@ -73,9 +73,12 @@
                     <p><strong>Total del Pedido #{{ $idPedido }}: {{ $totalPedido }}</strong></p>
 
                     <!-- Formulario para finalizar este pedido -->
-                    <a href="{{ url('/pedido/create') }}?id_pedido={{ $idPedido }}&total={{ $totalPedido }}">
-                        <button>Finalizar compra de Pedido #{{ $idPedido }}</button>
-                    </a>
+                    <form action="{{ route('pedido.update', $idPedido) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="total" value="{{ $totalPedido }}">
+                        <button type="submit">Actualizar total y ver pedidos</button>
+                    </form>
                     <hr>
                 @endforeach
 

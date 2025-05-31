@@ -31,7 +31,7 @@ class PedidoController extends Controller
         $pedido = new Pedido();
         $pedido->id_user = $request->input('id_user');
       
-        $pedido->subtotal = $request->input('total');
+        
         $pedido->estado_pedido = 1;
         if ($pedido->save()) {
             return redirect('/pedido')->with('success', 'Pedido registrado correctamente.');
@@ -61,9 +61,9 @@ class PedidoController extends Controller
         if (!$pedido) {
             return redirect()->route('pedido.index')->with('error', 'El pedido no se encontró.');
         }
-
-        $pedido->estado_pedido = $request->input('estado_pedido');
-        $pedido->cantidad = $request->input('cantidad');   
+        if ($request->has('total')) {
+        $pedido->total_pedido = $request->input('total');}
+        // $pedido->estado_pedido = $request->input('estado_pedido');
         $pedido->save();
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha actualizado con éxito.');
     }

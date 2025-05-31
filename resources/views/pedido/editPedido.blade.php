@@ -8,32 +8,28 @@
     <link href="https://fonts.googleapis.com/css?family=Questrial&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ asset('css/compras/editCompras.css') }}">
-    <title>Editar compra</title>
+    <title>Edit Pedidos</title>
 </head>
 <body>
 <section class="hero is-success is-fullheight">
     <div class="hero-body">
         <div class="container has-text-centered">
             <div class="column is-4 is-offset-4">
-                <h1 class="title">Editar Compra</h1>
+                <h1 class="title">Editar Pedido</h1>
                 <hr class="login-hr">
                 <p class="subtitle has-text-white">Ingresa los nuevos datos</p>
+
+                @php
+                    $idPedido = request('id_pedido');
+                    $totalPedido = request('total');
+                @endphp
+
                 <div class="box">
                     <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
                     @csrf
                     @method('PUT')
-                        <div class="field">
-                            <label class="label" for="id_producto">Producto:</label>
-                            <div class="control">
-                                <input class="input" type="id" id="id_producto" name="id_producto" value="{{ $pedido->id_producto }}">
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label class="label" for="cantidad">Cantidad:</label>
-                            <div class="control">
-                                <input class="input" type="number" id="cantidad" name="cantidad" value="{{ $pedido->cantidad }}">
-                            </div>
-                        </div>
+                        <label>Total:</label>
+                        <input type="text" name="total" value="{{ $totalPedido }}">
                         <div class="field">
                             <div class="control">
                                 <button class="button is-block is-info is-large is-fullwidth" type="submit">Guardar cambios</button>

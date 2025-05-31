@@ -8,7 +8,6 @@
 <body>
     <section>
         <h1>Principal de abonos</h1><br>
-        <h1>YA PASÉ LA VARIABLE TOTAL PEDIDO A LA TABLA PEDIDO AHORA SIGUE EDITAR UN PEDIDO NO CREARLO</h1>
         @can('create abono')
             <a href="{{ url('/abono/create') }}">Registrar nuevo abono</a>
         @endcan
