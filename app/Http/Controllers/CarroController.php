@@ -11,6 +11,8 @@ use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class CarroController extends Controller
 {
@@ -19,10 +21,13 @@ class CarroController extends Controller
      */
     public function index()
     {
+        $userId = Auth::id();
+
         $carro = new Carro ();
 
+
         Carro::all();
-        $carroIndex = Carro::with('productos')->get();
+        $carroIndex = Carro::with('productos')->where('id_user', $userId)->get();
         // dd($carroIndex);
         return view('carro/carroIndex', compact ('carroIndex'));
     }
@@ -49,6 +54,7 @@ class CarroController extends Controller
         }
 
         $carro = new Carro();
+        $carro->id_user = $request->input('id_user');
         $carro->id_pedido = $request->input('id_pedido');
         $carro->id_producto = $request->input('id_producto');
         $carro->cantidad = 1;

@@ -28,7 +28,7 @@ class AbonoFactory extends Factory
         $credito = \App\Models\Credito::inRandomOrder()->first();
         return [
             'id_credito' => $credito?->id_credito,
-            'nombre_usuario' => $credito?->nombre_usuario, 
+            'id_user' => \App\Models\User::inRandomOrder()->value('id_user') ?? null, 
             'monto_abono' => $this->faker->randomFloat(2, 1, 1000),
             'created_at' => now(),
             'updated_at' => now(),

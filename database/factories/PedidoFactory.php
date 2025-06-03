@@ -8,6 +8,7 @@ use App\Models\Usuario;
 use App\Models\Compra;
 use App\Models\Credito;
 use App\Models\Pedido;
+use App\Models\Carro;
 use App\Models\Producto;
 use App\Models\Vendedor;
 /**

@@ -27,7 +27,7 @@ class CreditoFactory extends Factory
     {
         $compra = \App\Models\Compra::inRandomOrder()->first();
         return [
-            'nombre_usuario' => $compra?->nombre_usuario, 
+            'id_user' => \App\Models\User::inRandomOrder()->value('id_user') ?? null, 
             'fecha_liquidacion' => $this->faker->dateTime(),
             'fecha_vencimiento' => $this->faker->dateTimeBetween('2020-01-01', '2024-12-31'),
             'estado' => $this->faker->randomElement([true, false]),

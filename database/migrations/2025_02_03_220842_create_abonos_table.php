@@ -16,14 +16,14 @@ return new class extends Migration
             $table->id('id_abono');
             //Forma de declarar llaves foraneas
             $table->unsignedBigInteger('id_credito')->nullable();
-            $table->string('nombre_usuario')->nullable();
+            $table->unsignedBigInteger('id_user')->nullable();
             $table->decimal('monto_abono', 10,2)->unsigned();
             $table->timestamps();
 
             $table->foreign('id_credito')->references('id_credito')->on('creditos')->onDelete('cascade');
 
-            $table->foreign('nombre_usuario')
-            ->references('nombre_usuario')
+            $table->foreign('id_user')
+            ->references('id_user')
             ->on('users')
             ->onDelete('cascade');
         });

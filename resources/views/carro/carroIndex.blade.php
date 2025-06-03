@@ -10,7 +10,7 @@
         <div>
             <h1>Principal de pedidos</h1>
             <br>
-
+            @if(Auth::check())
             @if($carroIndex->isNotEmpty())
 
                 @php
@@ -22,12 +22,13 @@
                 @endphp
 
                 @foreach($carrosPorPedido as $idPedido => $carros)
-                    <h2>Pedido #{{ $idPedido }}</h2>
+                    <h2>Numero de pedido #{{ $idPedido }}</h2>
 
                     <table border="1" cellspacing="0" cellpadding="5">
                         <thead>
                             <tr>
                                 <th>ID del carrito</th>
+                                <th>ID del usuario</th>
                                 <th>ID del pedido</th>
                                 <th>ID del producto</th>
                                 <th>Nombre del producto</th>
@@ -57,6 +58,7 @@
                                     @endphp
                                     <tr>
                                         <td>{{ $carrito->id_carro }}</td>
+                                        <td>{{ $carrito->id_user }}</td>
                                         <td>{{ $carrito->id_pedido }}</td>
                                         <td>{{ $producto->id_producto }}</td>
                                         <td>{{ $producto->nombre }}</td>
@@ -84,6 +86,7 @@
 
             @else
                 <p>No hay productos en el carrito.</p>
+            @endif
             @endif
         </div>
     </section>

@@ -23,8 +23,10 @@ class CarroFactory extends Factory
      */
     public function definition(): array
     {
+        $pedido = \App\Models\Pedido::inRandomOrder()->first();
         return [
-            'id_pedido' => \App\Models\Pedido::inRandomOrder()->value('id_pedido') ?? null,
+            'id_user' => $pedido?->id_user,
+            'id_pedido' => $pedido?->id_pedido,
             'id_producto' => $producto = Producto::inRandomOrder()->first()?->id_producto ?? null,
             'cantidad' => $this->faker->numberBetween(1, 100),
         ];

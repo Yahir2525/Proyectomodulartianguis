@@ -70,7 +70,7 @@
         <div>
             <h1>Principal de pedidos</h1>
             <br>
-
+           
             @php
                 $idPedido = request('id_pedido');
                 $totalPedido = request('total');
@@ -125,6 +125,7 @@
                     </table>
                 </center>
             @endif
+            
         </div>
     </section>
 </body>

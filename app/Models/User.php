@@ -72,7 +72,7 @@ class User extends Authenticatable
     }
         public function carro(): HasMany
     {
-        return $this->hasMany(Carro::class);
+        return $this->hasMany(Carro::class, 'id_user', 'id_user');
     }
 
 }

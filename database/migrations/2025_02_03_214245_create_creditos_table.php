@@ -14,7 +14,7 @@ return new class extends Migration
         // Creación de la tabla Creditos
         Schema::create('creditos', function (Blueprint $table) {
             $table->id('id_credito');
-            $table->string('nombre_usuario')->nullable();
+            $table->unsignedBigInteger('id_user')->nullable();
             $table->dateTime('fecha_liquidacion');
             $table->dateTime('fecha_vencimiento');
             $table->boolean('estado');
@@ -24,8 +24,8 @@ return new class extends Migration
             $table->timestamps();
 
 
-            $table->foreign('nombre_usuario')
-            ->references('nombre_usuario')
+            $table->foreign('id_user')
+            ->references('id_user')
             ->on('users')
             ->onDelete('cascade');
         });

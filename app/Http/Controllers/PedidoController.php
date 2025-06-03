@@ -10,6 +10,7 @@ use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PedidoController extends Controller
 {
@@ -61,6 +62,7 @@ class PedidoController extends Controller
         if (!$pedido) {
             return redirect()->route('pedido.index')->with('error', 'El pedido no se encontró.');
         }
+
         if ($request->has('total')) {
         $pedido->total_pedido = $request->input('total');}
         // $pedido->estado_pedido = $request->input('estado_pedido');
