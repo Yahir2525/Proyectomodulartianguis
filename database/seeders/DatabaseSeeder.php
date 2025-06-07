@@ -28,9 +28,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             RoleSeeder::class,
             ProductoSeeder::class,
+            CreditoSeeder::class,
             PedidoSeeder::class,
             CarroSeeder::class,
-            CreditoSeeder::class,
             AbonoSeeder::class,
         ]);
 

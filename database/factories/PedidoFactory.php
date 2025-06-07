@@ -28,7 +28,10 @@ class PedidoFactory extends Factory
     {
         return [
             'id_user' => \App\Models\User::inRandomOrder()->value('id_user') ?? null,
+            'id_credito' => null,
             'estado_pedido' => $this->faker->randomElement(['1', '0']),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

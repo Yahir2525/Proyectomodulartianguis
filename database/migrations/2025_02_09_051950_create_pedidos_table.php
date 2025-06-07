@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id('id_pedido');
             $table->unsignedBigInteger('id_user')->nullable();
+            $table->unsignedBigInteger('id_credito')->nullable();
             $table->decimal('total_pedido')->nullable();
             $table->boolean('estado_pedido');
             $table->timestamps();
 
             $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');
+            $table->foreign('id_credito')->references('id_credito')->on('creditos')->onDelete('cascade');
             
         });
     }

@@ -25,4 +25,9 @@ class Pedido extends Model
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
+        public function credito(): HasMany
+    {
+        return $this->hasMany(Credito::class, 'id_credito', 'id_credito');
+    }
+    
 }

@@ -1,63 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Principal de pedidos</title>
-</head>
-<body>
-    <section>
-        <div>
-            <h1>Principal de pedidos</h1>
-            <br>
-            <a href="{{ url('/pedido/create') }}" class="button is-info is-fullwidth">
-                Registrar una nueva compra
-            </a><br><br>
-            <form action="{{ url('/pedido/showPedido') }}" method="GET"> 
-                <div class="sub">
-                    <label for="id">ID de compra a buscar:</label>
-                    <input type="text" id="id" name="id_pedido" placeholder="21" autofocus>
-                </div><br><br>
-                <input type="submit" id="enviar" name="enviar" value="buscar">
-            </form>
-            @if($pedidoIndex->isNotEmpty())
-                <br><h2>Tablas de pedidos registrados</h2>
-                <center>
-                    <table border="1">
-                        <tr>
-                            <th>Pedido</th>
-                            <th>Pedido</th>
-                            <th>Producto</th>
-                            <th>Cantidad</th>
-                            <th>Precio unitario</th>
-                            <th>Subtotal</th>
-                            <th>Creado</th>
-                            <th>Actualizado</th>
-                            <th>Acciones</th>
-                        </tr>
-                        @foreach ($pedidoIndex as $pedido)
-                        <tr>
-                            <td>{{ $pedido->id_pedido }}</td>
-                            <td>{{ optional($pedido->producto) ? $pedido->id_producto : 'No tiene producto' }}</td>
-                            <td>{{ number_format($pedido->cantidad, 2) }}</td>
-                            <td>{{ optional($pedido->producto) ? $pedido->precio_unitario : 'No tiene precio' }}</td>
-                            <td>{{ number_format($pedido->subtotal, 2) }}</td>
-                            <td>{{ $pedido->created_at }}</td>
-                            <td>{{ $pedido->updated_at }}</td>
-                            <td>
-                                <a href="{{ route('pedido.edit', $pedido->id_pedido) }}" class="button is-primary">Editar</a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </table>
-                    <br><strong>Total a pagar: {{ number_format($pedidoIndex->sum('total_pagar'), 2) }}</strong></br>
-                </center>
-            @endif
-        </div>
-    </section>
-</body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -70,11 +10,12 @@
         <div>
             <h1>Principal de pedidos</h1>
             <br>
-           
+            @if(Auth::check())
             @php
                 $idPedido = request('id_pedido');
                 $totalPedido = request('total');
             @endphp
+            
 
             <a href="{{ url('/pedido/create') }}" class="button is-info is-fullwidth">
                 Registrar un nuevo pedido
@@ -89,12 +30,18 @@
             </form>
 
             @if($pedidoIndex->isNotEmpty())
-                <br><h2>Tabla de pedidos registrados</h2>
+                @php
+                    // Agrupar carritos por id_pedido (por si no lo hiciste en el controlador)
+                    $pedidosPorUsuario = $pedidoIndex->groupBy('id_user');
+                @endphp
+                @foreach($pedidosPorUsuario as $idUser => $pedidos)
+                <br><h2>Tabla de pedidos registrados #{{ $idUser }}</h2>
                 <center>
                     <table border="1">
                         <tr>
                             <th>ID pedido</th>
                             <th>Nombre usuario</th>
+                            <th>Creditos del usuario</th>
                             <th>Total del pedido</th>
                             <th>Estado del pedido</th>
                             <th>Creado</th>
@@ -102,10 +49,11 @@
                             <th colspan="2">Acciones</th>
                         </tr>
 
-                        @foreach ($pedidoIndex as $pedido)
+                        @foreach ($pedidos as $pedido)
                             <tr>
                                 <td>{{ $pedido->id_pedido }}</td>
                                 <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin cliente' }}</td>
+                                <td>{{}}
                                 <td>{{ $pedido->total_pedido }}</td>
                                 <td>{{ $pedido->estado_pedido }}</td>
                                 <td>{{ $pedido->created_at }}</td>
@@ -120,12 +68,19 @@
                                         <button type="submit" class="button is-danger">Eliminar Pedido</button>
                                     </form>
                                 </td>
+                                <form action="{{ route('credito.update', $idCredito) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="total" value="{{ $totalPedido }}">
+                                    <button type="submit">Actualizar total y ver pedidos</button>
+                                </form>
                             </tr>
+                        @endforeach
                         @endforeach
                     </table>
                 </center>
             @endif
-            
+            @endif
         </div>
     </section>
 </body>

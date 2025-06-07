@@ -37,7 +37,7 @@
             @foreach ($creditoIndex as $credito)
                 <tr>
                     <td>{{ $credito->id_credito }}</td>
-                    <td>{{ optional($credito->compra)->nombre_usuario ?? 'Sin cliente' }}</td>
+                    <td>{{ optional($credito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
                     <td>{{ number_format($credito->saldo_total, 2) }}</td>
                     <td>{{ number_format($credito->total_abonado, 2) }}</td>
                     <td>{{ $credito->fecha_liquidacion }}</td>

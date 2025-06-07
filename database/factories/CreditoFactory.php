@@ -32,8 +32,6 @@ class CreditoFactory extends Factory
             'fecha_vencimiento' => $this->faker->dateTimeBetween('2020-01-01', '2024-12-31'),
             'estado' => $this->faker->randomElement([true, false]),
             'saldo_total' => $credito->saldo_total ?? 0,
-            'total_abonado' => $credito->total_abonado ?? 0,
-            'saldo_pendiente' => $credito->saldo_pendiente ?? 0, 
             'created_at' => now(),
             'updated_at' => now(),
         ];

@@ -38,28 +38,10 @@ class AbonoController extends Controller
      */
     public function store(Request $request)
     {
-        // $request->validate([
-        //     'id_credito' => 'required|integer|unique:creditos,id_credito',
-        //     'monto_abono' => 'required|numeric|min:0',
-        //     'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
-        // ], [
-        //     'id_credito.required' => 'Debe seleccionar un crédito.',
-        //     'id_credito.integer' => 'El ID del crédito debe ser un número entero.',
-        //     'id_credito.unique' => 'El ID del crédito debe ser único.',
-        //     'monto_abono.required' => 'El monto del abono es obligatorio.',
-        //     'monto_abono.numeric' => 'El monto del abono debe ser un número.',
-        //     'monto_abono.min' => 'El monto del abono no puede ser negativo.',
-        //     'nombre_usuario.required' => 'Debe seleccionar el cliente que da el abono.',
-        //     'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
-        //     'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
-        // ]);
         $abono = new Abono();
-        $abono->id_credito = $idCredito;
+        $abono->id_credito = $request->input('id_credito');
+        $abono->id_user = $request->input('id_user');
         $abono->monto_abono = $request->monto_abono;
-        $abono->nombre_usuario = $nombre_usuario;
-
-
-        
         
         if ($abono->save()) {
             return redirect('/abono')->with('success', 'Abono registrado correctamente.');
@@ -108,21 +90,6 @@ class AbonoController extends Controller
      */
     public function update(Request $request, Abono $abono)
     {
-        // $request->validate([
-        //     'id_credito' => 'required|integer|unique:creditos,id_credito',
-        //     'monto_abono' => 'required|numeric|min:0',
-        //     'nombre_usuario' => 'required|string|unique:clientes,nombre_usuario',
-        // ], [
-        //     'id_credito.required' => 'Debe seleccionar un crédito.',
-        //     'id_credito.integer' => 'El ID del crédito debe ser un número entero.',
-        //     'id_credito.unique' => 'El ID del crédito debe ser único.',
-        //     'monto_abono.required' => 'El monto del abono es obligatorio.',
-        //     'monto_abono.numeric' => 'El monto del abono debe ser un número.',
-        //     'monto_abono.min' => 'El monto del abono no puede ser negativo.',
-        //     'nombre_usuario.required' => 'Debe seleccionar el cliente que da el abono.',
-        //     'nombre_usuario.string' => 'El nombre de usuario debe ser una cadena de texto',
-        //     'nombre_usuario.unique' => 'El nombre del usuario seleccionado debe ser único.',
-        // ]);
         $abono = Abono::find($id);
     
         if (!$abono) {

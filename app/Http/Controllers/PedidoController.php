@@ -31,7 +31,7 @@ class PedidoController extends Controller
     {
         $pedido = new Pedido();
         $pedido->id_user = $request->input('id_user');
-      
+        $pedido->id_credito = $request->input('id_credito');
         
         $pedido->estado_pedido = 1;
         if ($pedido->save()) {
@@ -62,7 +62,7 @@ class PedidoController extends Controller
         if (!$pedido) {
             return redirect()->route('pedido.index')->with('error', 'El pedido no se encontró.');
         }
-
+        $pedido->id_credito = $request->input('id_credito');
         if ($request->has('total')) {
         $pedido->total_pedido = $request->input('total');}
         // $pedido->estado_pedido = $request->input('estado_pedido');
