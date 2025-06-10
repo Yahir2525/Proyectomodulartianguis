@@ -25,7 +25,6 @@ class CarroController extends Controller
 
         $carro = new Carro ();
 
-
         Carro::all();
         $carroIndex = Carro::with('productos')->where('id_user', $userId)->get();
         // dd($carroIndex);

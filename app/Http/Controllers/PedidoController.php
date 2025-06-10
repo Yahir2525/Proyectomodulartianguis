@@ -16,10 +16,13 @@ class PedidoController extends Controller
 {
     public function index()
     {
+        $userId = Auth::id();
+
         $pedido = new Pedido ();
 
         $pedidoIndex = Pedido::all();
-        return view('pedido/pedidoIndex', compact ('pedidoIndex'));
+        $creditos = Credito::all()->groupBy('id_user'); // Agrupar por usuario
+        return view('pedido/pedidoIndex', compact ('pedidoIndex','creditos'));
     }
 
     public function create()

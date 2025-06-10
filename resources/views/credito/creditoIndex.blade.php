@@ -13,6 +13,7 @@
             <a href="{{ url('/credito/create') }}" class="button is-info is-fullwidth">
                 Registrar una nuevo credito
             </a><br><br>
+            @if(Auth::check())
             <form action="{{ url('/credito/showCredito') }}" method="GET"> 
                 <div class="sub">
                     <label for="id">ID de compra a buscar:</label>
@@ -21,36 +22,35 @@
                 <input type="submit" id="enviar" name="enviar" value="buscar">
             </form>
             @if($creditoIndex->isNotEmpty())
-    <br><h2>Tablas de créditos registrados</h2>
-    <center>
-        <table border="1">
-            <tr>
-                <th>ID del crédito</th>
-                <th>Nombre del Cliente</th>
-                <th>Saldo Total</th>
-                <th>Total Abonado</th>
-                <th>Fecha de Liquidación</th>
-                <th>Fecha de Vencimiento</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-            @foreach ($creditoIndex as $credito)
-                <tr>
-                    <td>{{ $credito->id_credito }}</td>
-                    <td>{{ optional($credito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                    <td>{{ number_format($credito->saldo_total, 2) }}</td>
-                    <td>{{ number_format($credito->total_abonado, 2) }}</td>
-                    <td>{{ $credito->fecha_liquidacion }}</td>
-                    <td>{{ $credito->fecha_vencimiento }}</td>
-                    <td>{{ $credito->estado ? 'Activo' : 'Inactivo' }}</td>
-                    <td>
-                        <a href="{{ route('credito.edit', $credito->id_credito) }}" class="button is-primary">Editar</a>
-                    </td>
-                </tr>
-            @endforeach
-        </table>
-    </center>
-@endif
+            <br><h2>Tablas de créditos registrados</h2>
+            <center>
+                <table border="1">
+                    <tr>
+                        <th>ID del crédito</th>
+                        <th>Nombre del Cliente</th>
+                        <th>Fecha de Liquidación</th>
+                        <th>Fecha de Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Saldo Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                    @foreach ($creditoIndex as $credito)
+                        <tr>
+                            <td>{{ $credito->id_credito }}</td>
+                            <td>{{ optional($credito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
+                            <td>{{ $credito->fecha_liquidacion }}</td>
+                            <td>{{ $credito->fecha_vencimiento }}</td>
+                            <td>{{ $credito->estado ? 'Activo' : 'Inactivo' }}</td>
+                            <td>{{ $credito->saldo_total}}</td>
+                            <td>
+                                <a href="{{ route('credito.edit', $credito->id_credito) }}" class="button is-primary">Editar</a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </table>
+            </center>
+        @endif
+        @endif
         </div>
     </section>
 </body>
