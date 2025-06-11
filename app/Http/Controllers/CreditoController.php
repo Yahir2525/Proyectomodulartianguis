@@ -48,6 +48,7 @@ class CreditoController extends Controller
         $credito->fecha_vencimiento = $request->fecha_vencimiento;
         $credito->estado = $request->estado;
 
+
         if ($credito->save()) {
             return redirect('/credito')->with('success', 'Credito registrado correctamente.');
         } else {
@@ -88,16 +89,13 @@ class CreditoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Credito $credito, Pedido $pedido)
+    public function update(Request $request, Credito $credito)
     {
         $credito = Credito::find($credito->id_credito);
         
         if (!$credito) {
             return redirect()->route('credito.index')->with('error', 'El credito no se encontró.');
         }
-
-        $pedido = Pedido::findOrFail($pedido->id_pedido);
-        $pedido->id_credito = $request->input('id_credito');
         if ($request->has('total')) {
         $credito->saldo_total = $request->input('total');}
         

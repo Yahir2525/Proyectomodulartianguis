@@ -62,9 +62,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Pedido::class, 'id_user', 'id_user');
     }
-        public function credito(): HasOne
+        public function credito(): HasMany
     {
-        return $this->hasOne(Credito::class, 'id_user', 'id_user');
+        return $this->hasMany(Credito::class, 'id_user', 'id_user');
     }
         public function abono(): HasMany
     {

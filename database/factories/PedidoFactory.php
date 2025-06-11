@@ -26,9 +26,10 @@ class PedidoFactory extends Factory
     
     public function definition(): array
     {
+        $credito = \App\Models\Credito::inRandomOrder()->first();
         return [
-            'id_user' => \App\Models\User::inRandomOrder()->value('id_user') ?? null,
-            'id_credito' => null,
+            'id_user' => $credito?->id_user,
+            'id_credito' => $credito?->id_credito,
             'estado_pedido' => $this->faker->randomElement(['1', '0']),
             'created_at' => now(),
             'updated_at' => now(),

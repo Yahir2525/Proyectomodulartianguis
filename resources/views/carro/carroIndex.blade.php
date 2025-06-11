@@ -8,11 +8,10 @@
 <body>
     <section>
         <div>
-            <h1>Principal de pedidos</h1>
+            <h1>Principal de carros</h1>
             <br>
             @if(Auth::check())
             @if($carroIndex->isNotEmpty())
-
                 @php
                     // Inicializar el acumulador de reservas
                     $reservasAcumuladas = [];

@@ -15,10 +15,10 @@ return new class extends Migration
         Schema::create('creditos', function (Blueprint $table) {
             $table->id('id_credito');
             $table->unsignedBigInteger('id_user')->nullable();
+            $table->decimal('saldo_total')->nullable();
             $table->dateTime('fecha_liquidacion');
             $table->dateTime('fecha_vencimiento');
             $table->boolean('estado');
-            $table->decimal('saldo_total', 10,2)->nullable();
             $table->timestamps();
 
 

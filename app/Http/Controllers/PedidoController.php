@@ -21,8 +21,8 @@ class PedidoController extends Controller
         $pedido = new Pedido ();
 
         $pedidoIndex = Pedido::all();
-        $creditos = Credito::all()->groupBy('id_user'); // Agrupar por usuario
-        return view('pedido/pedidoIndex', compact ('pedidoIndex','creditos'));
+        $pedidoIndex = Pedido::where('id_user', $userId)->get();
+        return view('pedido/pedidoIndex', compact ('pedidoIndex',));
     }
 
     public function create()
@@ -65,10 +65,8 @@ class PedidoController extends Controller
         if (!$pedido) {
             return redirect()->route('pedido.index')->with('error', 'El pedido no se encontró.');
         }
-        $pedido->id_credito = $request->input('id_credito');
         if ($request->has('total')) {
         $pedido->total_pedido = $request->input('total');}
-        // $pedido->estado_pedido = $request->input('estado_pedido');
         $pedido->save();
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha actualizado con éxito.');
     }

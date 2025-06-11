@@ -27,7 +27,7 @@ class CarroController extends Controller
 
         Carro::all();
         $carroIndex = Carro::with('productos')->where('id_user', $userId)->get();
-        // dd($carroIndex);
+
         return view('carro/carroIndex', compact ('carroIndex'));
     }
 
