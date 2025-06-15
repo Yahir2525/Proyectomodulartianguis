@@ -19,9 +19,10 @@ class Carro extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'id_compra', // <- agrega esto si lo vas a llenar con update o create
+    'id_user',
+    'id_pedido',
+    // otros campos si los hay
     ];
-
     public function productos(): BelongsToMany
     {
         return $this->belongsToMany(Producto::class, 'carros','id_carro', 'id_producto')->withPivot('cantidad');

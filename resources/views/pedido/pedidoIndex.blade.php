@@ -6,74 +6,85 @@
     <title>Principal de pedidos</title>
 </head>
 <body>
-    <section>
-        <div>
-            <h1>Principal de pedidos</h1><br>
-            @if(Auth::check())
-                <a href="{{ url('/pedido/create') }}" class="button is-info is-fullwidth">
-                    Registrar un nuevo pedido
-                </a><br><br>
-                <form action="{{ url('/pedido/showPedido') }}" method="GET"> 
-                    <div class="sub">
-                        <label for="id">ID de compra a buscar:</label>
-                        <input type="text" id="id" name="id_pedido" placeholder="21" autofocus>
-                    </div><br><br>
-                    <input type="submit" id="enviar" name="enviar" value="Buscar">
-                </form>
-                @if($pedidoIndex->isNotEmpty())
-                    @php
-                        $pedidosPorCredito = $pedidoIndex->groupBy('id_credito');
-                    @endphp
-                    @foreach($pedidosPorCredito as $idCredito => $pedidos)
-                        <br><h2>Pedidos del usuario #{{ $idCredito }}</h2>
-                        <center>
-                            <table border="1">
-                                <tr>
-                                    <th>ID pedido</th>
-                                    <th>Nombre usuario</th>
-                                    <th>Total del pedido</th>
-                                    <th>Créditos del usuario</th>
-                                    <th>Acción</th>
-                                    
-                                    <th>Estado del pedido</th>
-                                    <th>Creado</th>
-                                    <th>Actualizado</th>
-                                    <th>Editar</th>
-                                    <th>Eliminar</th>
-                                </tr>
-                                @foreach ($pedidos as $pedido)
-                                    <tr>
-                                        <td>{{ $pedido->id_pedido }}</td>
-                                        <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                                        <td>{{$idCredito}}</td>
-                                            <form action="{{ route('credito.update', $idCredito) }}" method="POST">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="total" value="{{ $pedido->total_pedido }}">
-                                                <button type="submit">Asignar / Cambiar crédito</button>
-                                            </form>
-                                        <td>{{ $pedido->total_pedido }}</td>
-                                        <td>{{ $pedido->estado_pedido }}</td>
-                                        <td>{{ $pedido->created_at }}</td>
-                                        <td>{{ $pedido->updated_at }}</td>
-                                        <td>
-                                            <a href="{{ route('pedido.edit', $pedido->id_pedido) }}?total={{ $pedido->total_pedido }}">Editar</a>
-                                        </td>
-                                        <td>
-                                            <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="button is-danger">Eliminar</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </table>
-                        </center>
-                    @endforeach
-                @endif
-            @endif
-        </div>
-    </section>
+    <h1>Principal de pedidos</h1>
+
+    @if(Auth::check())
+        <p>
+            <a href="{{ url('/pedido/create') }}">Registrar un nuevo pedido</a>
+        </p>
+
+        <form action="{{ url('/pedido/showPedido') }}" method="GET">
+            <label for="id">ID de compra a buscar:</label>
+            <input type="text" id="id" name="id_pedido" placeholder="21" autofocus>
+            <input type="submit" value="Buscar">
+        </form>
+
+        @if($pedidoIndex->isNotEmpty())
+            @php
+                $pedidosPorCredito = $pedidoIndex->groupBy('id_credito');
+            @endphp
+
+            @foreach($pedidosPorCredito as $idCredito => $pedidos)
+                <h2>Pedidos del usuario #{{ $idCredito ?? 'Sin crédito' }}</h2>
+
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID pedido</th>
+                            <th>Nombre usuario</th>
+                            <th>ID crédito</th>
+                            <th>Total del pedido</th>
+                            <th>Estado</th>
+                            <th>Creado</th>
+                            <th>Actualizado</th>
+                            <th>Editar</th>
+                            <th>Eliminar</th>
+                            <th>Crédito</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($pedidos as $pedido)
+                            <tr>
+                                <td>{{ $pedido->id_pedido }}</td>
+                                <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin cliente' }}</td>
+                                <td>{{ $idCredito ?? 'N/A' }}</td>
+                                <td>{{ $pedido->total_pedido }}</td>
+                                <td>{{ $pedido->estado_pedido }}</td>
+                                <td>{{ $pedido->created_at }}</td>
+                                <td>{{ $pedido->updated_at }}</td>
+                                <td>
+                                    <a href="{{ route('pedido.edit', $pedido->id_pedido) }}?total={{ $pedido->total_pedido }}">Editar</a>
+                                </td>
+                                <td>
+                                    <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit">Eliminar</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    @if(!$pedido->id_credito)
+                                        <form action="{{ route('credito.update', $pedido->id_pedido) }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="total" value="{{ $pedido->total_pedido }}">
+                                            <input type="hidden" name="id_usuario" value="{{ $pedido->id_usuario }}">
+                                            <button type="submit">Crear crédito</button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('credito.update', $pedido->id_credito) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="total" value="{{ $pedido->total_pedido }}">
+                                            <button type="submit">Actualizar crédito</button>
+                                        </form>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endforeach
+        @endif
+    @endif
 </body>
 </html>

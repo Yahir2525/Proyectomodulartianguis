@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Compra</title>
+    <title>Crear Pedido</title>
 </head>
 <body>
 <section class="hero is-success is-fullheight">
         <div class="hero-body">
-                    <h1 class="title">Registrar compras</h1>
+                    <h1 class="title">Registrar pedido</h1>
                     <hr class="login-hr">
 
                     @php
@@ -24,8 +24,6 @@
                         
                         <label>Total:</label>
                         <input type="text" name="total" value="{{ $totalPedido }}" readonly>
-
-                        <!-- Otros campos -->
 
                         <button type="submit">Guardar pedido</button>
                     </form>

@@ -36,7 +36,11 @@ class CarroController extends Controller
      */
     public function create()
     {
-        return view('carro/createCarro');
+        $usuarioId = Auth::id();
+
+        // Obtener los pedidos activos del usuario logueado
+        $productos = Producto::all(); // Traer todos los productos
+        return view('carro/createCarro', compact('usuarioId', 'productos'));
     }
 
     public function store(Request $request)
@@ -53,7 +57,7 @@ class CarroController extends Controller
         }
 
         $carro = new Carro();
-        $carro->id_user = $request->input('id_user');
+        $carro->id_user = $request->input('id_usuario');
         $carro->id_pedido = $request->input('id_pedido');
         $carro->id_producto = $request->input('id_producto');
         $carro->cantidad = 1;

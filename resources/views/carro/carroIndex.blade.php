@@ -9,8 +9,17 @@
     <section>
         <div>
             <h1>Principal de carros</h1>
-            <br>
             @if(Auth::check())
+            <p>
+                <a href="{{ url('/carro/create') }}">Registrar un nuevo carro</a>
+            </p>
+
+            <form action="{{ url('/carro/showCarro') }}" method="GET">
+                <label for="id">ID de carro a buscar:</label>
+                <input type="text" id="id" name="id_carro" placeholder="21" autofocus>
+                <input type="submit" value="Buscar">
+            </form>
+            <br><br>
             @if($carroIndex->isNotEmpty())
                 @php
                     // Inicializar el acumulador de reservas
