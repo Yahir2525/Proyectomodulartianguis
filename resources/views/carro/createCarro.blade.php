@@ -34,12 +34,29 @@
             @endforeach
         </select>
         <br><br>
-
-        <!-- Pedido (puedes eliminar esto si no lo usas aún) -->
-        <label for="id_pedido">ID del pedido (si aplica):</label>
-        <input type="number" name="id_pedido">
+        
+        <!-- Cantidad -->
+        <label for="cantidad">Cantidad:</label>
+        <input type="number" name="cantidad" min="1" required>
         <br><br>
-
+        @if($pedidosUsuario->isNotEmpty())
+        <!-- Seleccionar pedido existente -->
+        <label for="id_pedido">Selecciona un pedido existente:</label>
+        <select name="id_pedido">
+            <option value="">-- Ninguno --</option>
+            @foreach($pedidosUsuario as $pedido)
+                <option value="{{ $pedido->id_pedido }}">Pedido #{{ $pedido->id_pedido }}</option>
+            @endforeach
+        </select>
+        <br><br>
+        @else
+        <!-- Casilla para solicitar uno nuevo -->
+        <label>
+            <input type="checkbox" name="nuevo_pedido" value="1">
+            Crear un nuevo pedido
+        </label>
+        <br><br>
+        @endif
         <button type="submit">Agregar al carrito</button>
     </form>
 

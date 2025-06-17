@@ -56,6 +56,32 @@ class CreditoController extends Controller
         }
     }
 
+    public function crearDesdePedido(Request $request, Pedido $pedido)
+    {
+        $pedido = Pedido::find($pedido->id_pedido);
+        if (!$pedido) {
+            return back()->with('error', 'Pedido no encontrado.');
+        }
+
+        if ($pedido->id_credito) {
+            return back()->with('error', 'Este pedido ya tiene un crédito asignado.');
+        }
+
+        $credito = new Credito();
+        $credito->id_user = $request->input('id_user');
+        $credito->fecha_liquidacion = $request->input('fecha_liquidacion') ?? now();
+        $credito->fecha_vencimiento = $request->input('fecha_vencimiento') ?? now()->addDays(30);
+        $credito->estado = 1;
+        $credito->save();
+
+        // Asignar crédito al pedido
+        $pedido->id_credito = $credito->id_credito;
+        $pedido->save();
+
+        return redirect('/credito')->with('success', 'Credito registrado correctamente.');
+    }
+
+
     /**
      * Display the specified resource.
      */

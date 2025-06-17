@@ -81,6 +81,10 @@ Route::resource('producto', ProductoController::class);
 Route::resource('vendedor', VendedorController::class);
 
 Route::resource('carro', CarroController::class);
+
+
+Route::post('/credito/crear/{pedido}', [CreditoController::class, 'crearDesdePedido'])->name('credito.crearDesdePedido');
+
 });
 
 

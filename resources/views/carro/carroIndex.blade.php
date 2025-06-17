@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Principal de pedidos</title>
+    <title>Principal de carros</title>
 </head>
 <body>
     <section>
@@ -37,13 +37,16 @@
                             <tr>
                                 <th>ID del carrito</th>
                                 <th>ID del usuario</th>
+                                <th>Nombre del usuario</th>
                                 <th>ID del pedido</th>
                                 <th>ID del producto</th>
                                 <th>Nombre del producto</th>
-                                <th>Estado del producto</th>
+                                <th>Piezas disponibles</th>
                                 <th>Cantidad</th>
                                 <th>Precio unitario</th>
                                 <th>Subtotal</th>
+                                <th>Editar</th>
+                                <th>Eliminar</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -67,6 +70,7 @@
                                     <tr>
                                         <td>{{ $carrito->id_carro }}</td>
                                         <td>{{ $carrito->id_user }}</td>
+                                        <td>{{ optional($carrito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
                                         <td>{{ $carrito->id_pedido }}</td>
                                         <td>{{ $producto->id_producto }}</td>
                                         <td>{{ $producto->nombre }}</td>
@@ -74,12 +78,21 @@
                                         <td>{{ $producto->pivot->cantidad }}</td>
                                         <td>{{ $producto->precio_unitario }}</td>
                                         <td>{{ $subtotal }}</td>
+                                        <td>
+                                        <a href="{{ route('carro.edit', $carrito->id_carro) }}">Editar</a>
+                                        </td>
+                                        <td>
+                                            <form action="{{ url('/carro', $carrito->id_carro) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit">Eliminar</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 @endforeach
                             @endforeach
                         </tbody>
                     </table>
-
                     <p><strong>Total del Pedido #{{ $idPedido }}: {{ $totalPedido }}</strong></p>
 
                     <!-- Formulario para finalizar este pedido -->

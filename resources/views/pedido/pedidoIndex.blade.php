@@ -64,10 +64,13 @@
                                 </td>
                                 <td>
                                     @if(!$pedido->id_credito)
-                                        <form action="{{ route('credito.update', $pedido->id_pedido) }}" method="POST">
+                                        <form action="{{ route('credito.crearDesdePedido', $pedido->id_pedido) }}" method="POST">
                                             @csrf
+                                            <input type="hidden" name="nuevo_credito" value="1">
                                             <input type="hidden" name="total" value="{{ $pedido->total_pedido }}">
-                                            <input type="hidden" name="id_usuario" value="{{ $pedido->id_usuario }}">
+                                            <input type="hidden" name="id_user" value="{{ $pedido->id_user }}">
+                                            <input type="date" name="fecha_liquidacion" required>
+                                            <input type="date" name="fecha_vencimiento" required>
                                             <button type="submit">Crear crédito</button>
                                         </form>
                                     @else

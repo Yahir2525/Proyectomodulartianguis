@@ -32,10 +32,10 @@ class PedidoController extends Controller
 
     public function store(Request $request)
     {
+
         $pedido = new Pedido();
         $pedido->id_user = $request->input('id_user');
-        $pedido->id_credito = $request->input('id_credito');
-        
+        $pedido->id_credito = $request->input("id_credito");
         $pedido->estado_pedido = 1;
         if ($pedido->save()) {
             return redirect('/pedido')->with('success', 'Pedido registrado correctamente.');
