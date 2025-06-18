@@ -26,11 +26,11 @@
                     $reservasAcumuladas = [];
 
                     // Agrupar carritos por id_pedido (por si no lo hiciste en el controlador)
-                    $carrosPorPedido = $carroIndex->groupBy('id_pedido');
+                    $carrosPorDetalle = $carroIndex->groupBy('id_detalle');
                 @endphp
 
-                @foreach($carrosPorPedido as $idPedido => $carros)
-                    <h2>Numero de pedido #{{ $idPedido }}</h2>
+                @foreach($carrosPorPedido as $idDetalle => $carros)
+                    <h2>Numero de pedido #{{ $idDetalle }}</h2>
 
                     <table border="1" cellspacing="0" cellpadding="5">
                         <thead>
@@ -38,7 +38,7 @@
                                 <th>ID del carrito</th>
                                 <th>ID del usuario</th>
                                 <th>Nombre del usuario</th>
-                                <th>ID del pedido</th>
+                                <th>ID del detalle</th>
                                 <th>ID del producto</th>
                                 <th>Nombre del producto</th>
                                 <th>Piezas disponibles</th>
@@ -71,7 +71,7 @@
                                         <td>{{ $carrito->id_carro }}</td>
                                         <td>{{ $carrito->id_user }}</td>
                                         <td>{{ optional($carrito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                                        <td>{{ $carrito->id_pedido }}</td>
+                                        <td>{{ $carrito->id_detalle }}</td>
                                         <td>{{ $producto->id_producto }}</td>
                                         <td>{{ $producto->nombre }}</td>
                                         <td>{{ $piezas_disponibles }}</td>
@@ -93,14 +93,14 @@
                             @endforeach
                         </tbody>
                     </table>
-                    <p><strong>Total del Pedido #{{ $idPedido }}: {{ $totalPedido }}</strong></p>
+                    <p><strong>Total del Detalle #{{ $idDetalle }}: {{ $totalPedido }}</strong></p>
 
                     <!-- Formulario para finalizar este pedido -->
-                    <form action="{{ route('pedido.update', $idPedido) }}" method="POST" style="display:inline;">
+                    <form action="{{ route('detalle.update', $idDetalle) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="total" value="{{ $totalPedido }}">
-                        <button type="submit">Actualizar total y ver pedidos</button>
+                        <button type="submit">Actualizar total y ver detalle</button>
                     </form>
                     <hr>
                 @endforeach

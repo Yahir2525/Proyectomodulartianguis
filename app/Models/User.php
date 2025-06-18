@@ -74,5 +74,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Carro::class, 'id_user', 'id_user');
     }
+        public function detallePedido(): HasMany
+    {
+        return $this->hasMany(DetallePedido::class, 'id_user', 'id_user');
+    }
 
 }

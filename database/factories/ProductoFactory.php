@@ -4,9 +4,11 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Abono;
+use App\Models\User;
 use App\Models\Cliente;
 use App\Models\Compra;
 use App\Models\Credito;
+use App\Models\DetallePedido;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;

@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id('id_detalle');
             $table->unsignedBigInteger('id_user')->nullable();
             $table->unsignedBigInteger('id_pedido')->nullable();
+            $table->decimal('total_carro')->nullable();
+            $table->boolean('estado_carro');
             $table->timestamps();
 
             $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');

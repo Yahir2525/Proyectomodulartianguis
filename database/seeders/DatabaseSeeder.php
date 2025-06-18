@@ -9,6 +9,7 @@ use App\Models\Cliente;
 use App\Models\Abono;
 use App\Models\Compra;
 use App\Models\Credito;
+use App\Models\DetallePedido;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
@@ -29,6 +30,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             ProductoSeeder::class,
             CreditoSeeder::class,
+            DetallePedidoSeeder::class,
             PedidoSeeder::class,
             CarroSeeder::class,
             AbonoSeeder::class,

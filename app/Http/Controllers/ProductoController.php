@@ -8,6 +8,7 @@ use App\Models\Compra;
 use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\Producto;
+use App\Models\DetallePedido;
 use App\Models\Vendedor;
 use Illuminate\Http\Request;
 

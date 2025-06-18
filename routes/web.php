@@ -7,6 +7,7 @@ use App\Http\Controllers\AbonoController;
 use App\Http\Controllers\CarroController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\CompraController;
+use App\Http\Controllers\DetallePedidoController;
 use App\Http\Controllers\Compra_productoController;
 use App\Http\Controllers\CreditoController;
 use App\Http\Controllers\ProductoController;
@@ -46,7 +47,7 @@ Route::post('/logout', function (Request $request) {
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
-    return redirect('/'); // O donde tú quieras redirigir después de cerrar sesión
+    return redirect('/');
 })->name('logout');
 
 Route::get('/401', function () {
@@ -82,12 +83,14 @@ Route::resource('vendedor', VendedorController::class);
 
 Route::resource('carro', CarroController::class);
 
+Route::resource('detalle', DetallePedidoController::class);
+
 
 Route::post('/credito/crear/{pedido}', [CreditoController::class, 'crearDesdePedido'])->name('credito.crearDesdePedido');
 
+Route::post('/pedido/crear/{detalle}', [PedidoController::class, 'crearDesdeDetalle'])->name('pedido.crearDesdeDetalle');
+
 });
-
-
 
 
 // Route::resource('role', RoleController::class);

@@ -20,7 +20,7 @@ class Carro extends Model
 
     protected $fillable = [
     'id_user',
-    'id_pedido',
+    'id_detalle',
     // otros campos si los hay
     ];
     public function productos(): BelongsToMany
@@ -31,8 +31,8 @@ class Carro extends Model
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
-    public function pedido(): BelongsTo
+    public function detallePedido(): BelongsTo
     {
-        return $this->belongsTo(Pedido::class, 'id_pedido', 'id_pedido');
+        return $this->belongsTo(DetallePedido::class, 'id_detalle', 'id_detalle');
     }
 }

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Compra;
 use App\Models\Carro;
 use App\Models\Credito;
+use App\Models\DetallePedido;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
@@ -23,10 +24,10 @@ class CarroFactory extends Factory
      */
     public function definition(): array
     {
-        $pedido = \App\Models\Pedido::inRandomOrder()->first();
+        $detalle = \App\Models\DetallePedido::inRandomOrder()->first();
         return [
-            'id_user' => $pedido?->id_user,
-            'id_pedido' => $pedido?->id_pedido,
+            'id_user' => $detalle?->id_user,
+            'id_detalle' => $detalle?->id_detalle,
             'id_producto' => $producto = Producto::inRandomOrder()->first()?->id_producto ?? null,
             'cantidad' => $this->faker->numberBetween(1, 100),
         ];

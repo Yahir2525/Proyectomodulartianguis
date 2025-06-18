@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
-// use App\Models\Role;
 use App\Models\Abono;
 use App\Models\Cliente;
 use App\Models\Compra;
@@ -12,6 +11,7 @@ use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
+use App\Models\DetallePedido;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
@@ -100,10 +100,6 @@ class UserController extends Controller
         $roles = Role::pluck('name','name')->all();
         $userRoles = $user->roles->pluck('name','name')->all();
 
-        // if (!$user) {
-        //     return redirect()->back()->with('error', 'El usuario no se encontró.');
-        //         // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
-        // }
         return view('/user/editUser', [
             'user' => $user,
             'roles' => $roles,
@@ -111,9 +107,6 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, User $user)
     {
         // $request->validate([
@@ -150,9 +143,7 @@ class UserController extends Controller
         return redirect()->route('user.index')->with('success', 'El usuario se ha actualizado con éxito.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    
     public function destroy(User $user, Compra $compra, Credito $credito, Abono $abono)
     {
         $user = User::find($user->id_user);

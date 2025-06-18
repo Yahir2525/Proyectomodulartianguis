@@ -6,6 +6,7 @@ use App\Models\Abono;
 use App\Models\Cliente;
 use App\Models\Compra;
 use App\Models\Credito;
+use App\Models\DetallePedido;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
@@ -40,6 +41,30 @@ class PedidoController extends Controller
         if ($pedido->save()) {
             return redirect('/pedido')->with('success', 'Pedido registrado correctamente.');
         }
+    }
+
+    public function crearDesdeDetalle(Request $request, DetallePedido $detallePedido)
+    {
+        $detallePedido = DetallePedido::find($detallePedido->id_detalle);
+        if (!$detallePedido) {
+            return back()->with('error', 'Detalle no encontrado.');
+        }
+
+        if ($detallePedido->id_pedido) {
+            return back()->with('error', 'Este detalle ya tiene un pedido asignado.');
+        }
+
+        $pedido = new Credito();
+        $pedido->id_user = $request->input('id_user');
+        $pedido->id_credito = $request->input("id_credito");
+        $pedido->estado_pedido = 1;
+        $pedido->save();
+
+        // Asignar crédito al pedido
+        $detallePedido->id_pedido = $pedido->id_pedido;
+        $detallePedido->save();
+
+        return redirect('/pedido')->with('success', 'Pedido registrado correctamente.');
     }
 
     public function show(Request $request)
