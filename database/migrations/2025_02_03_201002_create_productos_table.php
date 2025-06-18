@@ -6,15 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         // Creación de la tabla Productos
         Schema::create('productos', function (Blueprint $table) {
             $table->id('id_producto');
             $table->string('nombre',40);
+            $table->string('tipo');
             $table->string('material',20);
             $table->string('color', 10)->nullable();
             $table->string('tamanio', 25);

@@ -26,7 +26,8 @@ class ProductoFactory extends Factory
     public function definition(): array
     {
         return [
-            'nombre' => $this->faker->word(),
+            'nombre' => $this->faker->randomElement(['Colcha', 'Sabana', 'Cortina', 'Toalla']),
+            'tipo' => $this->faker->randomElement(['Bata', 'Cobija', 'Mantel', 'Almohada']),
             'material' => $this->faker->randomElement(['Algodon', 'Poliester', 'Fibra']),
             'color' => $this->faker->randomElement(['Rojo', 'Azul', 'Verde', 'Negro', 'Blanco']),
             'tamanio' => $this->faker->randomElement(['S', 'M', 'L', 'XL']),

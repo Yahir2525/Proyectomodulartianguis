@@ -34,63 +34,57 @@
                 <input type="submit" id="enviar" name="enviar" value="buscar">
             </form>
             @if($productoIndex->isNotEmpty())
-                <br><h2>Tablas de productos registrados</h2>
-                @foreach ($productoIndex as $producto)
-                    <center>
-                        <table>
+                <h2>Productos Registrados</h2>
+                @php
+                    $agrupadosPorTipo = $productoIndex->groupBy('tipo');
+                @endphp
+                @foreach ($agrupadosPorTipo as $tipo => $productos)
+                    <h3>Tipo: {{ ucfirst($tipo) }}</h3>
+
+                    <table border="1" cellpadding="5" cellspacing="0">
+                        <thead>
                             <tr>
-                                <th colspan="2">Tabla del producto: {{ $producto->id_producto }}</th>
+                                <th>ID producto</th>
+                                <th>Nombre</th>
+                                <th>Material</th>
+                                <th>Color</th>
+                                <th>Tamaño</th>
+                                <th>Precio unitario</th>
+                                <th>Piezas</th>
+                                <th>Creado</th>
+                                <th>Actualizado</th>
+                                <th>Añadir al carrito</th>
+                                <th>Editar</th>
                             </tr>
-                            <tr>
-                                <th>Atributo</th>
-                                <th>Valor</th>
-                            </tr>
-                            <tr>
-                                <td>ID del producto</td>
-                                <td>{{ $producto->id_producto }}</td>
-                            </tr>
-                            <tr>
-                                <td>Nombre</td>
-                                <td>{{ $producto->nombre }}</td>
-                            </tr>
-                            <tr>
-                                <td>Material</td>
-                                <td>{{ $producto->material}}</td>
-                            </tr>
-                            <tr>
-                                <td>Color</td>
-                                <td>{{ $producto->color }}</td>
-                            </tr>
-                            <tr>
-                                <td>Tamaño</td>
-                                <td>{{ $producto->tamanio }}</td>
-                            </tr>
-                            <tr>
-                                <td>Precio unitario</td>
-                                <td>{{ number_format($producto->precio_unitario, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Piezas</td>
-                                <td>{{ number_format($producto->piezas) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Creado</td>
-                                <td>{{ $producto->created_at }}</td>
-                            </tr>
-                            <tr>
-                                <td>Actualizado</td>
-                                <td>{{ $producto->updated_at }}</td>
-                            </tr>
-                        </table>
-                        <br>
-                        <form action="{{ url('/carro', $producto->id_producto) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <button>Añadir al carrito</button>
-                        </form><br>
-                        <a href="{{ route('producto.edit', $producto->id_producto) }}" class="button is-primary">Editar Compra</a>
-                    </center>
-                @endforeach 
+                        </thead>
+                        <tbody>
+                            @foreach ($productos as $producto)
+                                <tr>
+                                    <td>{{ $producto->id_producto }}</td>
+                                    <td>{{ $producto->nombre }}</td>
+                                    <td>{{ $producto->material }}</td>
+                                    <td>{{ $producto->color }}</td>
+                                    <td>{{ $producto->tamanio }}</td>
+                                    <td>${{ number_format($producto->precio_unitario, 2) }}</td>
+                                    <td>{{ number_format($producto->piezas) }}</td>
+                                    <td>{{ $producto->created_at }}</td>
+                                    <td>{{ $producto->updated_at }}</td>
+                                    <td>
+                                        <form action="{{ url('/carro', $producto->id_producto) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <button>Añadir</button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('producto.edit', $producto->id_producto) }}">Editar</a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <br>
+                @endforeach
             @endif
         </div>
     </section>
