@@ -88,6 +88,8 @@ Route::resource('detalle', DetallePedidoController::class);
 
 Route::post('/credito/crear/{pedido}', [CreditoController::class, 'crearDesdePedido'])->name('credito.crearDesdePedido');
 
+Route::post('/carro/agregar-multiples', [CarroController::class, 'agregarMultiples'])->name('carro.agregarMultiples');
+
 });
 
 

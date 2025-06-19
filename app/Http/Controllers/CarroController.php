@@ -96,6 +96,51 @@ class CarroController extends Controller
         return redirect('/carro')->with('success', 'Producto agregado al carrito.');
     }
 
+    public function agregarMultiples(Request $request)
+    {
+        $userId = $request->input('id_user');
+        $idPedido = $request->input('id_pedido');
+        $seleccionados = $request->input('productos_seleccionados', []);
+        $cantidades = $request->input('cantidades', []);
+
+        if (empty($seleccionados)) {
+            return back()->with('error', 'No seleccionaste ningún producto.');
+        }
+
+        foreach ($seleccionados as $idProducto) {
+            $producto = Producto::find($idProducto);
+            if (!$producto) continue;
+
+            $cantidad = isset($cantidades[$idProducto]) ? (int)$cantidades[$idProducto] : 0;
+            if ($cantidad <= 0) continue;
+
+            // Validar que el producto no esté ya en el carrito de ese pedido
+            $existe = Carro::where('id_user', $userId)
+                ->where('id_pedido', $idPedido)
+                ->where('id_producto', $idProducto)
+                ->exists();
+            if ($existe) continue;
+
+            // Validar stock
+            $reservadas = Carro::where('id_producto', $idProducto)->sum('cantidad');
+            $disponibles = max(0, $producto->piezas - $reservadas);
+
+            if ($cantidad > $disponibles) {
+                return back()->with('error', 'No hay suficientes piezas de "' . $producto->nombre . '". Solo quedan ' . $disponibles);
+            }
+
+            // Guardar en tabla carro
+            $carro = new Carro();
+            $carro->id_user = $userId;
+            $carro->id_pedido = $idPedido;
+            $carro->id_producto = $idProducto;
+            $carro->cantidad = $cantidad;
+            $carro->save();
+        }
+
+        return redirect('/carro')->with('success', 'Productos agregados al carrito.');
+    }
+
     public function show(Request $request)
     {
         $id = $request->input('id_carro');

@@ -4,21 +4,23 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Abono;
 use App\Models\Cliente;
-use App\Models\Compra;
+use App\Models\Carro;
 use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\DetallePedido;
 use App\Models\Vendedor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductoController extends Controller
 {
     public function index()
     {
         $producto = new Producto();
+        $pedidosUsuario = Carro::where('id_user', Auth::id())->get()->unique('id_carro');
         $productoIndex = Producto::all();
-        return view('producto/productoIndex', compact ('productoIndex'));
+        return view('producto/productoIndex', compact ('productoIndex', 'pedidosUsuario'));
     }
 
     public function create()
