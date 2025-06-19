@@ -21,9 +21,15 @@ class DetallePedido extends Model
     protected $fillable = [
     'id_user',
     'id_pedido',
+    
     // otros campos si los hay
     ];
     
+
+    protected $attributes = [
+    'estado_carro' => 1,
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');

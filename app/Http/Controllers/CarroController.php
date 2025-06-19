@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use App\Models\Carro;
 use App\Models\Abono;
@@ -14,42 +15,46 @@ use App\Models\Vendedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-
 class CarroController extends Controller
 {
     public function index()
     {
         $userId = Auth::id();
-
-        $carro = new Carro ();
-
-        Carro::all();
         $carroIndex = Carro::with('productos')->where('id_user', $userId)->get();
-
-        return view('carro/carroIndex', compact ('carroIndex'));
+        return view('carro/carroIndex', compact('carroIndex'));
     }
 
     public function create()
     {
         $usuarioId = Auth::id();
         $detallesUsuario = DetallePedido::where('id_user', $usuarioId)->get();
+
+        $reservas = Carro::selectRaw('id_producto, SUM(cantidad) as reservadas')
+            ->groupBy('id_producto')
+            ->pluck('reservadas', 'id_producto');
+
         $productos = Producto::all();
-        return view('carro/createCarro', compact('usuarioId', 'detallesUsuario','productos'));
+
+        foreach ($productos as $producto) {
+            $producto->piezas_disponibles = $producto->piezas - ($reservas[$producto->id_producto] ?? 0);
+        }
+
+        return view('carro/createCarro', compact('usuarioId', 'detallesUsuario', 'productos'));
     }
 
     public function store(Request $request)
     {
         $userId = $request->input('id_user');
-        
+
         if ($request->has('nuevo_detalle')) {
             $detallePedido = new DetallePedido();
-            $detallePedido->id_user = $request->input('id_user');
+            $detallePedido->id_user = $userId;
             $detallePedido->id_pedido = $request->input('id_pedido');
+            $detallePedido->estado_carro = 1;
             $detallePedido->save();
             $detallePedidoId = $detallePedido->id_detalle;
         } else {
             $detallePedidoId = $request->input('id_detalle');
-
             if (!$detallePedidoId) {
                 return redirect()->back()->with('error', 'Debes seleccionar un pedido o crear uno nuevo.');
             }
@@ -60,23 +65,34 @@ class CarroController extends Controller
             return redirect()->back()->with('error', 'Producto no encontrado.');
         }
 
-        $existeProducto = Carro::where('id_user', $userId)->where('id_pedido', $pedidoId)->where('id_producto', $producto->id_producto)->first();
+        $cantidadSolicitada = $request->input('cantidad');
+        if ($cantidadSolicitada <= 0) {
+            return redirect()->back()->with('error', 'La cantidad debe ser mayor a 0.');
+        }
+
+        $existeProducto = Carro::where('id_user', $userId)
+            ->where('id_detalle', $detallePedidoId)
+            ->where('id_producto', $producto->id_producto)
+            ->first();
 
         if ($existeProducto) {
             return redirect()->back()->with('error', 'Este producto ya está en el carrito.');
         }
 
-        $cantidad = $request->input('cantidad');
-        if ($producto->piezas < $cantidad) {
-            return redirect()->back()->with('error', 'No hay suficientes piezas disponibles.');
+        $carrosReservados = Carro::where('id_producto', $producto->id_producto)->sum('cantidad');
+        $piezasDisponibles = max(0, $producto->piezas - $carrosReservados);
+
+        if ($cantidadSolicitada > $piezasDisponibles) {
+            return redirect()->back()->with('error', 'No hay suficientes piezas disponibles. Solo quedan ' . $piezasDisponibles . ' disponibles.');
         }
 
         $carro = new Carro();
-        $carro->id_user = $request->input('id_user');
+        $carro->id_user = $userId;
         $carro->id_detalle = $detallePedidoId;
         $carro->id_producto = $producto->id_producto;
-        $carro->cantidad = $cantidad;
+        $carro->cantidad = $cantidadSolicitada;
         $carro->save();
+
         return redirect('/carro')->with('success', 'Producto agregado al carrito.');
     }
 
@@ -92,36 +108,53 @@ class CarroController extends Controller
 
     public function edit(Carro $carro)
     {
-        $carro = Carro::find($carro->id_carro);
+        $reservas = Carro::selectRaw('id_producto, SUM(cantidad) as reservadas')
+            ->groupBy('id_producto')
+            ->pluck('reservadas', 'id_producto');
+
         $productos = Producto::all();
-        $detallesUsuario = DetallePedido::where('id_user', auth()->id())->get(); // o como obtengas los pedidos del usuario
+
+        foreach ($productos as $producto) {
+            $producto->piezas_disponibles = $producto->piezas - ($reservas[$producto->id_producto] ?? 0);
+        }
+
+        $detallesUsuario = DetallePedido::where('id_user', auth()->id())->get();
         return view('carro.editCarro', compact('carro', 'productos', 'detallesUsuario'));
     }
 
     public function update(Request $request, Carro $carro)
     {
-        $carro = Carro::find($carro->id_carro);
-        $carro->id_producto = $request->input('id_producto');
-        $carro->id_detalle = $request->input('id_detalle'); 
-        $carro->cantidad = $request->input('cantidad');
-
-        if (!$carro) {
-            return redirect()->route('carro.index')->with('error', 'El carro no se encontró.');
+        $producto = Producto::find($request->input('id_producto'));
+        if (!$producto) {
+            return redirect()->back()->with('error', 'Producto no encontrado.');
         }
 
+        $cantidadSolicitada = $request->input('cantidad');
+        if ($cantidadSolicitada <= 0) {
+            return redirect()->back()->with('error', 'La cantidad debe ser mayor a 0.');
+        }
+
+        $carrosReservados = Carro::where('id_producto', $producto->id_producto)
+            ->where('id_carro', '!=', $carro->id_carro)
+            ->sum('cantidad');
+
+        $piezasDisponibles = max(0, $producto->piezas - $carrosReservados);
+
+        if ($cantidadSolicitada > $piezasDisponibles) {
+            return redirect()->back()->with('error', 'No hay suficientes piezas disponibles. Solo quedan ' . $piezasDisponibles . ' disponibles.');
+        }
+
+        $carro->id_producto = $producto->id_producto;
+        $carro->id_detalle = $request->input('id_detalle');
+        $carro->cantidad = $cantidadSolicitada;
         $carro->save();
+
         return redirect()->route('carro.index')->with('success', 'El carro se ha actualizado con éxito.');
     }
 
     public function destroy(Carro $carro)
     {
-        $carro = Carro::find($carro->id_carro);
-        
-        if (!$carro) {
-            return redirect()->route('carro.index')->with('error', 'El carro no se encontró.');
-        }
         $carro->delete();
-
         return redirect()->route('carro.index')->with('success', 'El carro se ha eliminado con éxito.');
     }
 }

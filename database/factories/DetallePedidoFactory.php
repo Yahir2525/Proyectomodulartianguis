@@ -22,12 +22,15 @@ class DetallePedidoFactory extends Factory
      *
      * @return array<string, mixed>
      */
+
+    protected $model = DetallePedido::class;
+
     public function definition(): array
     {
         $pedido = \App\Models\Pedido::inRandomOrder()->first();
         return [
             'id_user' => $pedido?->id_user,
-            'id_pedido' => $pedido?->id_credito,
+            'id_pedido' => $pedido?->id_pedido,
             'estado_carro' => $this->faker->randomElement(['1', '0']),
             'created_at' => now(),
             'updated_at' => now(),

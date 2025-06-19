@@ -26,7 +26,6 @@ class CreditoFactory extends Factory
 
     public function definition(): array
     {
-        $compra = \App\Models\Compra::inRandomOrder()->first();
         return [
             'id_user' => \App\Models\User::inRandomOrder()->value('id_user') ?? null, 
             'fecha_liquidacion' => $this->faker->dateTime(),

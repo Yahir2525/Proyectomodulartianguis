@@ -32,10 +32,12 @@
                         <thead>
                             <tr>
                                 <th>ID del detalle</th>
-                                <th>ID del usuario</th>
                                 <th>Nombre del usuario</th>
                                 <th>ID del pedido</th>
                                 <th>Total</th>
+                                <th>Estado del detalle</th>
+                                <th>Fecha de creación</th>
+                                <th>Última actualización</th>
                                 <th>Editar</th>
                                 <th>Eliminar</th>
                             </tr>
@@ -65,12 +67,12 @@
                                         <form action="{{ route('detalle.crearDesdeDetalle', $detalle->id_detalle) }}" method="POST">
                                             @csrf
                                             <input type="hidden" name="nuevo_pedido" value="1">
-                                            <input type="hidden" name="total" value="{{ $pedido->total_pedido }}">
-                                            <input type="hidden" name="id_user" value="{{ $pedido->id_user }}">
+                                            <input type="hidden" name="total" value="{{ $detalle->total_carro }}">
+                                            <input type="hidden" name="id_user" value="{{ $detalle->id_user }}">
                                             <button type="submit">Crear pedido</button>
                                         </form>
                                     @else
-                                        <form action="{{ route('detalle.update', $detalle->id_pedido) }}" method="POST">
+                                        <form action="{{ route('detalle.update', $detalle->id_detalle) }}" method="POST">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="total" value="{{ $detalle->total_carro }}">
@@ -78,6 +80,7 @@
                                         </form>
                                     @endif
                                 </td>
+                                <!-- Falta mandar total al pedido -->
                             </tr>
                         @endforeach
                         </tbody>

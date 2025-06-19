@@ -27,8 +27,8 @@
             <option value="">Selecciona un producto</option>
             @foreach($productos as $producto)
                 <option value="{{ $producto->id_producto }}"
-                    {{ $producto->id_producto == $carro->id_producto ? 'selected' : '' }}>
-                    {{ $producto->nombre }} - {{ $producto->piezas }} piezas disponibles
+                    {{ isset($carro) && $producto->id_producto == $carro->id_producto ? 'selected' : '' }}>
+                    {{ $producto->nombre }} - {{ $producto->piezas_disponibles }} piezas disponibles
                 </option>
             @endforeach
         </select>
@@ -40,14 +40,11 @@
         <br><br>
 
         <!-- Pedido -->
-        <label for="id_pedido">Pedido:</label>
-        <select name="id_pedido" required>
-            <option value="">Selecciona un pedido</option>
-            @foreach($pedidosUsuario as $pedido)
-                <option value="{{ $pedido->id_pedido }}"
-                    {{ $pedido->id_pedido == $carro->id_pedido ? 'selected' : '' }}>
-                    Pedido #{{ $pedido->id_pedido }}
-                </option>
+        <label for="id_detalle">Selecciona un pedido existente:</label>
+        <select name="id_detalle">
+            <option value="">-- Ninguno --</option>
+            @foreach($detallesUsuario as $detallePedido)
+                <option value="{{ $detallePedido->id_detalle }}">Detalle #{{ $detallePedido->id_detalle }}</option>
             @endforeach
         </select>
         <br><br>

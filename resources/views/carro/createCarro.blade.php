@@ -28,8 +28,9 @@
         <select name="id_producto" required>
             <option value="">Selecciona un producto</option>
             @foreach($productos as $producto)
-                <option value="{{ $producto->id_producto }}">
-                    {{ $producto->nombre }} - {{ $producto->piezas }} piezas disponibles
+                <option value="{{ $producto->id_producto }}"
+                    {{ isset($carro) && $producto->id_producto == $carro->id_producto ? 'selected' : '' }}>
+                    {{ $producto->nombre }} - {{ $producto->piezas_disponibles }} piezas disponibles
                 </option>
             @endforeach
         </select>
@@ -39,13 +40,13 @@
         <label for="cantidad">Cantidad:</label>
         <input type="number" name="cantidad" min="1" required>
         <br><br>
-        @if($pedidosUsuario->isNotEmpty())
+        @if($detallesUsuario->isNotEmpty())
         <!-- Seleccionar pedido existente -->
-        <label for="id_pedido">Selecciona un pedido existente:</label>
-        <select name="id_pedido">
+        <label for="id_detalle">Selecciona un pedido existente:</label>
+        <select name="id_detalle">
             <option value="">-- Ninguno --</option>
-            @foreach($pedidosUsuario as $pedido)
-                <option value="{{ $pedido->id_pedido }}">Pedido #{{ $pedido->id_pedido }}</option>
+            @foreach($detallesUsuario as $detallePedido)
+                <option value="{{ $detallePedido->id_detalle }}">Detalle #{{ $detallePedido->id_detalle }}</option>
             @endforeach
         </select>
         <br><br>

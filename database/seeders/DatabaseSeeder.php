@@ -30,8 +30,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             ProductoSeeder::class,
             CreditoSeeder::class,
-            DetallePedidoSeeder::class,
             PedidoSeeder::class,
+            DetallePedidoSeeder::class,
             CarroSeeder::class,
             AbonoSeeder::class,
         ]);

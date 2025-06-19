@@ -8,7 +8,7 @@
     <h1>Carro #{{ $carro->id_carro }}</h1>
 
     <p><strong>Usuario:</strong> {{ optional($carro->user)->nombre_usuario ?? 'Sin usuario' }}</p>
-    <p><strong>ID Pedido:</strong> {{ $carro->id_pedido }}</p>
+    <p><strong>ID Detalle:</strong> {{ $carro->id_detalle }}</p>
 
     @if ($carro->productos->isEmpty())
         <p>Este carro no tiene productos.</p>
@@ -19,7 +19,7 @@
                     <th>ID Carro</th>
                     <th>ID Usuario</th>
                     <th>Nombre de usuario</th>
-                    <th>ID Pedido</th>
+                    <th>ID detalle</th>
                     <th>ID Producto</th>
                     <th>Nombre del Producto</th>
                     <th>Piezas disponibles</th>
@@ -49,7 +49,7 @@
                         <td>{{ $carro->id_carro }}</td>
                         <td>{{ $carro->id_user }}</td>
                         <td>{{ optional($carro->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                        <td>{{ $carro->id_pedido }}</td>
+                        <td>{{ $carro->id_detalle}}</td>
                         <td>{{ $producto->id_producto }}</td>
                         <td>{{ $producto->nombre }}</td>
                         <td>{{ $piezas_disponibles }}</td>
