@@ -31,7 +31,7 @@ class PedidoFactory extends Factory
         return [
             'id_user' => $credito?->id_user,
             'id_credito' => $credito?->id_credito,
-            'estado_pedido' => $this->faker->randomElement(['1', '0']),
+            'estado_pedido' => $this->faker->randomElement([true, false]),
             'created_at' => now(),
             'updated_at' => now(),
         ];

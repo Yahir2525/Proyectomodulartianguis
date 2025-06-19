@@ -70,6 +70,8 @@ class CreditoController extends Controller
 
         $credito = new Credito();
         $credito->id_user = $request->input('id_user');
+        if ($request->has('total')) {
+        $credito->saldo_total = $request->input('total');}
         $credito->fecha_liquidacion = $request->input('fecha_liquidacion') ?? now();
         $credito->fecha_vencimiento = $request->input('fecha_vencimiento') ?? now()->addDays(30);
         $credito->estado = 1;

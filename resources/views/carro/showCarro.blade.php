@@ -13,13 +13,20 @@
     @if ($carro->productos->isEmpty())
         <p>Este carro no tiene productos.</p>
     @else
+        @php
+            // Obtener reservas totales globales por producto
+            $reservasGlobales = \App\Models\Carro::selectRaw('id_producto, SUM(cantidad) as reservadas')
+                ->groupBy('id_producto')
+                ->pluck('reservadas', 'id_producto');
+        @endphp
+
         <table border="1" cellpadding="6">
             <thead>
                 <tr>
                     <th>ID Carro</th>
                     <th>ID Usuario</th>
                     <th>Nombre de usuario</th>
-                    <th>ID detalle</th>
+                    <th>ID Detalle</th>
                     <th>ID Producto</th>
                     <th>Nombre del Producto</th>
                     <th>Piezas disponibles</th>
@@ -29,27 +36,22 @@
                 </tr>
             </thead>
             <tbody>
-                @php
-                    $total = 0;
-                    $reservasAcumuladas = [];
-                @endphp
+                @php $total = 0; @endphp
                 @foreach ($carro->productos as $producto)
                     @php
                         $id = $producto->id_producto;
                         $stockOriginal = $producto->piezas;
-
-                        $reservadoAntes = $reservasAcumuladas[$id] ?? 0;
-                        $piezas_disponibles = $stockOriginal - $reservadoAntes;
-
-                        $reservasAcumuladas[$id] = $reservadoAntes + $producto->pivot->cantidad;
+                        $reservado = $reservasGlobales[$id] ?? 0;
+                        $piezas_disponibles = max(0, $stockOriginal - $reservado);
 
                         $subtotal = $producto->pivot->cantidad * $producto->precio_unitario;
+                        $total += $subtotal;
                     @endphp
                     <tr>
                         <td>{{ $carro->id_carro }}</td>
                         <td>{{ $carro->id_user }}</td>
                         <td>{{ optional($carro->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                        <td>{{ $carro->id_detalle}}</td>
+                        <td>{{ $carro->id_detalle }}</td>
                         <td>{{ $producto->id_producto }}</td>
                         <td>{{ $producto->nombre }}</td>
                         <td>{{ $piezas_disponibles }}</td>
@@ -60,6 +62,8 @@
                 @endforeach
             </tbody>
         </table>
+
+        <p><strong>Total del carrito:</strong> {{ $total }}</p>
     @endif
 
     <br>

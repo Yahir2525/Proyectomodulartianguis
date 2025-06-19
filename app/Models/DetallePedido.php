@@ -11,35 +11,35 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DetallePedido extends Model
 {
-    use HasFactory;
+    // use HasFactory;
 
-    protected $table = 'detalle_pedidos';
-    protected $primaryKey = 'id_detalle';
-    public $incrementing = true;
-    protected $keyType = 'int';
+    // protected $table = 'detalle_pedidos';
+    // protected $primaryKey = 'id_detalle';
+    // public $incrementing = true;
+    // protected $keyType = 'int';
 
-    protected $fillable = [
-    'id_user',
-    'id_pedido',
+    // protected $fillable = [
+    // 'id_user',
+    // 'id_pedido',
     
-    // otros campos si los hay
-    ];
+    // // otros campos si los hay
+    // ];
     
 
-    protected $attributes = [
-    'estado_carro' => 1,
-    ];
+    // protected $attributes = [
+    // 'estado_carro' => 1,
+    // ];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'id_user', 'id_user');
-    }
-    public function pedido(): BelongsTo
-    {
-        return $this->belongsTo(Pedido::class, 'id_pedido', 'id_pedido');
-    }
-    public function carro(): HasMany
-    {
-        return $this->hasMany(Carro::class, 'id_detalle', 'id_detalle');
-    }
+    // public function user(): BelongsTo
+    // {
+    //     return $this->belongsTo(User::class, 'id_user', 'id_user');
+    // }
+    // public function pedido(): BelongsTo
+    // {
+    //     return $this->belongsTo(Pedido::class, 'id_pedido', 'id_pedido');
+    // }
+    // public function carro(): HasMany
+    // {
+    //     return $this->hasMany(Carro::class, 'id_detalle', 'id_detalle');
+    // }
 }

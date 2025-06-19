@@ -40,11 +40,11 @@
         <br><br>
 
         <!-- Pedido -->
-        <label for="id_detalle">Selecciona un pedido existente:</label>
-        <select name="id_detalle">
+        <label for="id_pedido">Selecciona un pedido existente:</label>
+        <select name="id_pedido">
             <option value="">-- Ninguno --</option>
-            @foreach($detallesUsuario as $detallePedido)
-                <option value="{{ $detallePedido->id_detalle }}">Detalle #{{ $detallePedido->id_detalle }}</option>
+            @foreach($pedidosUsuario as $pedido)
+                <option value="{{ $pedido->id_pedido }}">Pedido #{{ $pedido->id_pedido }}</option>
             @endforeach
         </select>
         <br><br>

@@ -31,7 +31,6 @@ class DatabaseSeeder extends Seeder
             ProductoSeeder::class,
             CreditoSeeder::class,
             PedidoSeeder::class,
-            DetallePedidoSeeder::class,
             CarroSeeder::class,
             AbonoSeeder::class,
         ]);

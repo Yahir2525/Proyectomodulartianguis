@@ -27,7 +27,7 @@ class CarroController extends Controller
     public function create()
     {
         $usuarioId = Auth::id();
-        $detallesUsuario = DetallePedido::where('id_user', $usuarioId)->get();
+        $pedidosUsuario = Pedido::where('id_user', $usuarioId)->get();
 
         $reservas = Carro::selectRaw('id_producto, SUM(cantidad) as reservadas')
             ->groupBy('id_producto')
@@ -39,23 +39,23 @@ class CarroController extends Controller
             $producto->piezas_disponibles = $producto->piezas - ($reservas[$producto->id_producto] ?? 0);
         }
 
-        return view('carro/createCarro', compact('usuarioId', 'detallesUsuario', 'productos'));
+        return view('carro/createCarro', compact('usuarioId', 'pedidosUsuario', 'productos'));
     }
 
     public function store(Request $request)
     {
         $userId = $request->input('id_user');
 
-        if ($request->has('nuevo_detalle')) {
-            $detallePedido = new DetallePedido();
-            $detallePedido->id_user = $userId;
-            $detallePedido->id_pedido = $request->input('id_pedido');
-            $detallePedido->estado_carro = 1;
-            $detallePedido->save();
-            $detallePedidoId = $detallePedido->id_detalle;
+        if ($request->has('nuevo_pedido')) {
+            $pedido = new Pedido();
+            $pedido->id_user = $userId;
+            $pedido->id_credito = $request->input('id_credito');
+            $pedido->estado_pedido = 1;
+            $pedido->save();
+            $pedidoId = $pedido->id_pedido;
         } else {
-            $detallePedidoId = $request->input('id_detalle');
-            if (!$detallePedidoId) {
+            $pedidoId = $request->input('id_pedido');
+            if (!$pedidoId) {
                 return redirect()->back()->with('error', 'Debes seleccionar un pedido o crear uno nuevo.');
             }
         }
@@ -71,7 +71,7 @@ class CarroController extends Controller
         }
 
         $existeProducto = Carro::where('id_user', $userId)
-            ->where('id_detalle', $detallePedidoId)
+            ->where('id_pedido', $pedidoId)
             ->where('id_producto', $producto->id_producto)
             ->first();
 
@@ -88,7 +88,7 @@ class CarroController extends Controller
 
         $carro = new Carro();
         $carro->id_user = $userId;
-        $carro->id_detalle = $detallePedidoId;
+        $carro->id_pedido = $pedidoId;
         $carro->id_producto = $producto->id_producto;
         $carro->cantidad = $cantidadSolicitada;
         $carro->save();
@@ -103,7 +103,19 @@ class CarroController extends Controller
         if (!$carro) {
             return redirect()->back()->with('error', 'El carro no se encontró.');
         }
-        return view('/carro/showCarro', ['carro' => $carro]);
+
+        $reservas = Carro::selectRaw('id_producto, SUM(cantidad) as reservadas')
+            ->groupBy('id_producto')
+            ->pluck('reservadas', 'id_producto');
+
+        $productos = Producto::all();
+
+        foreach ($productos as $producto) {
+            $producto->piezas_disponibles = $producto->piezas - ($reservas[$producto->id_producto] ?? 0);
+        }
+
+        
+        return view('/carro/showCarro', compact('carro', 'productos'));
     }
 
     public function edit(Carro $carro)
@@ -118,8 +130,8 @@ class CarroController extends Controller
             $producto->piezas_disponibles = $producto->piezas - ($reservas[$producto->id_producto] ?? 0);
         }
 
-        $detallesUsuario = DetallePedido::where('id_user', auth()->id())->get();
-        return view('carro.editCarro', compact('carro', 'productos', 'detallesUsuario'));
+        $pedidosUsuario = Pedido::where('id_user', auth()->id())->get();
+        return view('carro.editCarro', compact('carro', 'productos', 'pedidosUsuario'));
     }
 
     public function update(Request $request, Carro $carro)
@@ -145,7 +157,7 @@ class CarroController extends Controller
         }
 
         $carro->id_producto = $producto->id_producto;
-        $carro->id_detalle = $request->input('id_detalle');
+        $carro->id_pedido = $request->input('id_pedido');
         $carro->cantidad = $cantidadSolicitada;
         $carro->save();
 

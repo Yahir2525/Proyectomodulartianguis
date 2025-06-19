@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -72,7 +72,7 @@
                                             <button type="submit">Crear pedido</button>
                                         </form>
                                     @else
-                                        <form action="{{ route('detalle.update', $detalle->id_detalle) }}" method="POST">
+                                        <form action="{{ route('pedido.update', $idPedido) }}" method="POST">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="total" value="{{ $detalle->total_carro }}">
@@ -80,7 +80,6 @@
                                         </form>
                                     @endif
                                 </td>
-                                <!-- Falta mandar total al pedido -->
                             </tr>
                         @endforeach
                         </tbody>
@@ -92,4 +91,4 @@
         </div>
     </section>
 </body>
-</html>
+</html> -->

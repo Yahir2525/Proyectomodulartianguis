@@ -40,23 +40,26 @@
         <label for="cantidad">Cantidad:</label>
         <input type="number" name="cantidad" min="1" required>
         <br><br>
-        @if($detallesUsuario->isNotEmpty())
-        <!-- Seleccionar pedido existente -->
-        <label for="id_detalle">Selecciona un pedido existente:</label>
-        <select name="id_detalle">
-            <option value="">-- Ninguno --</option>
-            @foreach($detallesUsuario as $detallePedido)
-                <option value="{{ $detallePedido->id_detalle }}">Detalle #{{ $detallePedido->id_detalle }}</option>
-            @endforeach
-        </select>
-        <br><br>
+        @if($pedidosUsuario->isNotEmpty())
+            <!-- Seleccionar pedido existente -->
+            <label for="id_pedido">Selecciona un pedido existente:</label>
+            <select name="id_pedido">
+                <option value="">-- Ninguno --</option>
+                @foreach($pedidosUsuario as $pedido)
+                    <option value="{{ $pedido->id_pedido }}"
+                        {{ session('pedido_reciente') == $pedido->id_pedido ? 'selected' : '' }}>
+                        Pedido #{{ $pedido->id_pedido }}
+                    </option>
+                @endforeach
+            </select>
+            <br><br>
         @else
-        <!-- Casilla para solicitar uno nuevo -->
-        <label>
-            <input type="checkbox" name="nuevo_pedido" value="1">
-            Crear un nuevo pedido
-        </label>
-        <br><br>
+            <!-- Casilla para solicitar uno nuevo -->
+            <label>
+                <input type="checkbox" name="nuevo_pedido" value="1">
+                Crear un nuevo pedido
+            </label>
+            <br><br>
         @endif
         <button type="submit">Agregar al carrito</button>
     </form>

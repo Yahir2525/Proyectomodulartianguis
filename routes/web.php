@@ -88,8 +88,6 @@ Route::resource('detalle', DetallePedidoController::class);
 
 Route::post('/credito/crear/{pedido}', [CreditoController::class, 'crearDesdePedido'])->name('credito.crearDesdePedido');
 
-Route::post('/pedido/crear/{detalle}', [PedidoController::class, 'crearDesdeDetalle'])->name('pedido.crearDesdeDetalle');
-
 });
 
 

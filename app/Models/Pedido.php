@@ -17,9 +17,9 @@ class Pedido extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
-        public function detallePedido(): HasOne
+        public function carro(): HasMany
     {
-        return $this->hasOne(DetallePedido::class, 'id_pedido', 'id_pedido');
+        return $this->hasMany(Carro::class, 'id_detalle', 'id_detalle');
     }
         public function user(): BelongsTo
     {

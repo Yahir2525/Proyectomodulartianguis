@@ -13,6 +13,11 @@ class CarroSeeder extends Seeder
      */
     public function run(): void
     {
-        Carro::factory()->count(10)->create();
+        foreach (range(1, 50) as $i) {
+            $data = Carro::factory()->make();
+            if (!empty($data->id_producto)) {
+                $data->save();
+            }
+        }
     }
 }

@@ -37,34 +37,11 @@ class PedidoController extends Controller
         $pedido = new Pedido();
         $pedido->id_user = $request->input('id_user');
         $pedido->id_credito = $request->input("id_credito");
-        $pedido->estado_pedido = 1;
+        $pedido->estado_pedido = $request->input("estado_pedido"); // <-- corregido
+
         if ($pedido->save()) {
-            return redirect('/pedido')->with('success', 'Pedido registrado correctamente.');
+            return redirect('/carro/create')->with('pedido_reciente', $pedido->id_pedido);
         }
-    }
-
-    public function crearDesdeDetalle(Request $request, DetallePedido $detallePedido)
-    {
-        $detallePedido = DetallePedido::find($detallePedido->id_detalle);
-        if (!$detallePedido) {
-            return back()->with('error', 'Detalle no encontrado.');
-        }
-
-        if ($detallePedido->id_pedido) {
-            return back()->with('error', 'Este detalle ya tiene un pedido asignado.');
-        }
-
-        $pedido = new Credito();
-        $pedido->id_user = $request->input('id_user');
-        $pedido->id_credito = $request->input("id_credito");
-        $pedido->estado_pedido = 1;
-        $pedido->save();
-
-        // Asignar crédito al pedido
-        $detallePedido->id_pedido = $pedido->id_pedido;
-        $detallePedido->save();
-
-        return redirect('/pedido')->with('success', 'Pedido registrado correctamente.');
     }
 
     public function show(Request $request)
