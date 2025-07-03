@@ -24,6 +24,6 @@ class Producto extends Model
 
     public function carros(): BelongsToMany
     {
-        return $this->belongsToMany(Carro::class, 'carros', 'id_producto', 'id_carro')->withPivot('cantidad');
+        return $this->belongsToMany(Carro::class, 'carro_productos', 'id_producto', 'id_carro')->withPivot('cantidad');
     }
 }

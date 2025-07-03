@@ -19,15 +19,15 @@ class Pedido extends Model
 
         public function carro(): HasMany
     {
-        return $this->hasMany(Carro::class, 'id_detalle', 'id_detalle');
+        return $this->hasMany(Carro::class, 'id_pedido', 'id_pedido');
     }
         public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
-        public function credito(): HasMany
+        public function credito(): BelongsTo
     {
-        return $this->hasMany(Credito::class, 'id_credito', 'id_credito');
+        return $this->belongsTo(Credito::class, 'id_credito', 'id_credito');
     }
     
 }

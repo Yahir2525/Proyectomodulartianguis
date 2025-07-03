@@ -33,6 +33,7 @@
                         <th>Estado</th>
                         <th>Saldo Total</th>
                         <th>Acciones</th>
+                        <th>Eliminar</th>
                     </tr>
                     @foreach ($creditoIndex as $credito)
                         <tr>
@@ -44,6 +45,13 @@
                             <td>{{ $credito->saldo_total}}</td>
                             <td>
                                 <a href="{{ route('credito.edit', $credito->id_credito) }}" class="button is-primary">Editar</a>
+                            </td>
+                            <td>
+                                    <form action="{{ url('/credito', $credito->id_credito) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit">Eliminar</button>
+                                    </form>
                             </td>
                         </tr>
                     @endforeach

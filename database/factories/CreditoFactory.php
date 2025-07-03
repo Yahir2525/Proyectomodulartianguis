@@ -10,7 +10,6 @@ use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\DetallePedido;
 use App\Models\Producto;
-use App\Models\Vendedor;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Credito>
  */

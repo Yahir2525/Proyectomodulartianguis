@@ -139,15 +139,11 @@ class CreditoController extends Controller
     {
         $credito = Credito::find($id);
 
-        // if ($aceite->archivo_ubicacion) {
-        //     Storage::delete($aceite->archivo_ubicacion);
-        // }
-
         if (!$credito) {
             return redirect()->route('credito.index')->with('error', 'El credito no se encontró.');
         }
 
-        $abonos = Abono::where('id_cliente', $id)->get();
+        $abonos = Abono::where('id_user', $id)->get();
 
         foreach ($abonos as $item) {
             $abono = Abono::find($item->id_abono);

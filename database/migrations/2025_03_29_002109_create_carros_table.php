@@ -15,8 +15,6 @@ return new class extends Migration
             $table->id('id_carro');
             $table->unsignedBigInteger('id_user')->nullable();
             $table->unsignedBigInteger('id_pedido')->nullable();
-            $table->unsignedBigInteger('id_producto')->nullable();
-            $table->integer('cantidad');
             $table->timestamps();
 
             $table->foreign('id_user')
@@ -25,9 +23,6 @@ return new class extends Migration
             ->onDelete('cascade');
             
             $table->foreign('id_pedido')->references('id_pedido')->on('pedidos')->onDelete('cascade');
-            
-            $table->foreign('id_producto')->references('id_producto')->on('productos')->onDelete('cascade');
-            
         }); 
     }
 

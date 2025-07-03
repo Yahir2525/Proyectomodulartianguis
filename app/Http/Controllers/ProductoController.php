@@ -1,31 +1,21 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\User;
-use App\Models\Abono;
-use App\Models\Cliente;
-use App\Models\Carro;
-use App\Models\Credito;
-use App\Models\Pedido;
+
 use App\Models\Producto;
-use App\Models\DetallePedido;
-use App\Models\Vendedor;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ProductoController extends Controller
 {
     public function index()
     {
-        $producto = new Producto();
-        $pedidosUsuario = Carro::where('id_user', Auth::id())->get()->unique('id_carro');
         $productoIndex = Producto::all();
-        return view('producto/productoIndex', compact ('productoIndex', 'pedidosUsuario'));
+        return view('producto.productoIndex', compact('productoIndex'));
     }
 
     public function create()
     {
-        return view('producto/createProducto');
+        return view('producto.createProducto');
     }
 
     public function store(Request $request)
@@ -40,38 +30,37 @@ class ProductoController extends Controller
         $producto->precio_unitario = $request->input('precio_unitario');
         $producto->piezas = $request->input('piezas');
         $producto->save();
-    return redirect('/producto')->with('success', 'Producto registrado correctamente.');
+
+        return redirect('/producto')->with('success', 'Producto registrado correctamente.');
     }
 
-    public function show(Request $request)
+    public function show($id)
     {
-        $id = $request->input('id_producto');
         $producto = Producto::find($id);
-            
         if (!$producto) {
-            return redirect()->back()->with('error', 'El producto no se encontró.');
+            return back()->with('error', 'Producto no encontrado.');
         }
-        return view('/producto/showProducto', ['producto' => $producto]);
-        //
+
+        return view('producto.showProducto', compact('producto'));
     }
 
-    public function edit(Producto $producto)
+    public function edit($id)
     {
-        $producto = Producto::find($producto->id_producto);
+        $producto = Producto::find($id);
         if (!$producto) {
-            return redirect()->back()->with('error', 'El pedido no se encontró.');
+            return back()->with('error', 'Producto no encontrado.');
         }
-        return view('/producto/editProducto', ['producto' => $producto]);   
+
+        return view('producto.editProducto', compact('producto'));
     }
 
-    public function update(Request $request, Producto $producto)
+    public function update(Request $request, $id)
     {
-        $producto = Producto::find($producto->id_producto);
-    
+        $producto = Producto::find($id);
         if (!$producto) {
-            return redirect()->route('producto.productoIndex')->with('error', 'El producto no se encontró.');
+            return redirect()->route('producto.index')->with('error', 'Producto no encontrado.');
         }
-        $producto = new Producto();
+
         $producto->nombre = $request->input('nombre');
         $producto->tipo = $request->input('tipo');
         $producto->material = $request->input('material');
@@ -81,20 +70,19 @@ class ProductoController extends Controller
         $producto->precio_unitario = $request->input('precio_unitario');
         $producto->piezas = $request->input('piezas');
         $producto->save();
-        return redirect()->route('producto.index')->with('success', 'El producto se ha actualizado con éxito.');
-        //
+
+        return redirect()->route('producto.index')->with('success', 'Producto actualizado correctamente.');
     }
 
-    public function destroy(Producto $producto)
+    public function destroy($id)
     {
-        $producto = Producto::find($producto->id_producto);
-
+        $producto = Producto::find($id);
         if (!$producto) {
-            return redirect()->route('producto.index')->with('error', 'El producto no se encontró.');
+            return redirect()->route('producto.index')->with('error', 'Producto no encontrado.');
         }
-        
+
         $producto->delete();
 
-        return redirect()->route('producto.index')->with('success', 'El producto se ha eliminado con éxito.');
+        return redirect()->route('producto.index')->with('success', 'Producto eliminado.');
     }
 }

@@ -7,7 +7,8 @@ use App\Models\User;
 use App\Models\Carro;
 use App\Models\Pedido;
 use App\Models\Producto;
-
+use App\Models\Abono;
+use App\Models\Credito;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Carro>
  */
@@ -15,28 +16,13 @@ class CarroFactory extends Factory
 {
     public function definition(): array
     {
-        $pedido = Pedido::inRandomOrder()->first();
-        $producto = Producto::inRandomOrder()->first();
+        $pedido = \App\Models\Pedido::inRandomOrder()->first();
 
-        if (!$pedido || !$producto) {
-            return [];
-        }
-
-        // Total reservado actualmente para este producto en todos los carros
-        $reservado = Carro::where('id_producto', $producto->id_producto)->sum('cantidad');
-
-        // Calcula piezas disponibles
-        $piezasDisponibles = max(0, $producto->piezas - $reservado);
-
-        if ($piezasDisponibles <= 0) {
-            return []; // No hay disponibilidad, no creamos este carro
-        }
+        if (!$pedido) return [];
 
         return [
             'id_user' => $pedido->id_user,
             'id_pedido' => $pedido->id_pedido,
-            'id_producto' => $producto->id_producto,
-            'cantidad' => fake()->numberBetween(1, $piezasDisponibles),
         ];
     }
 }

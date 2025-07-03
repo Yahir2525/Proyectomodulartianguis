@@ -14,6 +14,7 @@ use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\Vendedor;
 use App\Models\Carro;
+use App\Models\CarroProducto;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -32,6 +33,7 @@ class DatabaseSeeder extends Seeder
             CreditoSeeder::class,
             PedidoSeeder::class,
             CarroSeeder::class,
+            CarroProductoSeeder::class,
             AbonoSeeder::class,
         ]);
 

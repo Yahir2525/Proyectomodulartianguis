@@ -14,7 +14,6 @@ return new class extends Migration
         // Creación de la tabla Abonos
         Schema::create('abonos', function (Blueprint $table) {
             $table->id('id_abono');
-            //Forma de declarar llaves foraneas
             $table->unsignedBigInteger('id_credito')->nullable();
             $table->unsignedBigInteger('id_user')->nullable();
             $table->decimal('monto_abono', 10,2)->unsigned();

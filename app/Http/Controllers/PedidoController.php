@@ -38,6 +38,7 @@ class PedidoController extends Controller
         $pedido->id_user = $request->input('id_user');
         $pedido->id_credito = $request->input("id_credito");
         $pedido->estado_pedido = $request->input("estado_pedido"); // <-- corregido
+        $pedido->metodo_pago = $request->input("metodo_pago");
 
         if ($pedido->save()) {
             return redirect('/carro/create')->with('pedido_reciente', $pedido->id_pedido);
@@ -69,6 +70,7 @@ class PedidoController extends Controller
         }
         if ($request->has('total')) {
         $pedido->total_pedido = $request->input('total');}
+        $pedido->metodo_pago = $request->input("metodo_pago");
         $pedido->save();
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha actualizado con éxito.');
     }
