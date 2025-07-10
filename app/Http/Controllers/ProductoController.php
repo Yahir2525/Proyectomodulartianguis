@@ -4,13 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductoController extends Controller
 {
     public function index()
     {
-        $productoIndex = Producto::all();
-        return view('producto.productoIndex', compact('productoIndex'));
+        $usuarioId = Auth::id();
+        $pedidosUsuario = \App\Models\Pedido::where('id_user', $usuarioId)->get();
+
+        $productoIndex = \App\Models\Producto::all();
+
+        return view('producto.productoIndex', compact('productoIndex', 'pedidosUsuario'));
     }
 
     public function create()

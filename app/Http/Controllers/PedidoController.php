@@ -70,7 +70,7 @@ class PedidoController extends Controller
         }
         if ($request->has('total')) {
         $pedido->total_pedido = $request->input('total');}
-        $pedido->metodo_pago = $request->input("metodo_pago");
+        
         $pedido->save();
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha actualizado con éxito.');
     }

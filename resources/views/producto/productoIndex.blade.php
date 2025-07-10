@@ -16,6 +16,8 @@
             width: 60px;
         }
     </style>
+
+    @php use App\Models\CarroProducto; @endphp
 </head>
 <body>
     <section>
@@ -54,30 +56,31 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($productos as $producto)
-                                    @php
-                                        $reservadas = \App\Models\Carro::where('id_producto', $producto->id_producto)->sum('cantidad');
-                                        $disponibles = max(0, $producto->piezas - $reservadas);
-                                    @endphp
-                                    <tr class="{{ $disponibles == 0 ? 'sin-stock' : '' }}">
-                                        <td>
+                                    @foreach ($productos as $producto)
+                                        @php
+                                            $reservadas = CarroProducto::where('id_producto', $producto->id_producto)->sum('cantidad');
+                                            $disponibles = max(0, $producto->piezas - $reservadas);
+                                        @endphp
+                                        <tr class="{{ $disponibles == 0 ? 'sin-stock' : '' }}">
+                                            <td>
                                             <input type="checkbox" name="productos_seleccionados[]" value="{{ $producto->id_producto }}" {{ $disponibles == 0 ? 'disabled' : '' }}>
-                                        </td>
-                                        <td>{{ $producto->id_producto }}</td>
-                                        <td>{{ $producto->nombre }}</td>
-                                        <td>{{ $producto->material }}</td>
-                                        <td>{{ $producto->color }}</td>
-                                        <td>{{ $producto->tamanio }}</td>
-                                        <td>${{ number_format($producto->precio_unitario, 2) }}</td>
-                                        <td class="{{ $disponibles == 0 ? 'resaltado' : '' }}">
-                                            {{ $disponibles }}
-                                        </td>
-                                        <td>
-                                            <input type="number" name="cantidades[{{ $producto->id_producto }}]" min="1" max="{{ $disponibles }}" class="cant-input" {{ $disponibles == 0 ? 'disabled' : '' }}>
-                                        </td>
-                                        <td><a href="{{ route('producto.edit', $producto->id_producto) }}">Editar</a></td>
-                                    </tr>
-                                @endforeach
+                                            </td>
+                                            
+                                            <td>{{ $producto->id_producto }}</td>
+                                            <td>{{ $producto->nombre }}</td>
+                                            <td>{{ $producto->material }}</td>
+                                            <td>{{ $producto->color }}</td>
+                                            <td>{{ $producto->tamanio }}</td>
+                                            <td>${{ number_format($producto->precio_unitario, 2) }}</td>
+                                            <td class="{{ $disponibles == 0 ? 'resaltado' : '' }}">
+                                                {{ $disponibles }}
+                                            </td>
+                                            <td>
+                                                <input type="number" name="cantidades[{{ $producto->id_producto }}]" min="1" max="{{ $disponibles }}" class="cant-input" {{ $disponibles == 0 ? 'disabled' : '' }}>
+                                            </td>
+                                            <td><a href="{{ route('producto.edit', $producto->id_producto) }}">Editar</a></td>
+                                        </tr>
+                                    @endforeach
                             </tbody>
                         </table>
                         <br>

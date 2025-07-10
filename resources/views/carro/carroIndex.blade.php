@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Principal de carros</title>
+
+    @php
+    use App\Models\CarroProducto;
+    @endphp
 </head>
 <body>
     <section>
@@ -23,11 +27,14 @@
 
                 @if($carroIndex->isNotEmpty())
                     @php
-                        // Calcular reservas globales (suma total de piezas reservadas por todos los usuarios por producto)
-                        $reservasGlobales = \App\Models\Carro::select('id_producto')
-                        ->selectRaw('SUM(cantidad) as total_reservado')
-                        ->groupBy('id_producto')
-                        ->pluck('total_reservado', 'id_producto');
+                        
+
+                        // Calcular reservas globales desde la tabla pivote carro_productos
+                        $reservasGlobales = CarroProducto::select('id_producto')
+                            ->selectRaw('SUM(cantidad) as total_reservado')
+                            ->groupBy('id_producto')
+                            ->pluck('total_reservado', 'id_producto');
+
                         $carrosPorPedido = $carroIndex->groupBy('id_pedido');
                     @endphp
 

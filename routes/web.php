@@ -90,6 +90,7 @@ Route::post('/credito/crear/{pedido}', [CreditoController::class, 'crearDesdePed
 
 Route::post('/carro/agregar-multiples', [CarroController::class, 'agregarMultiples'])->name('carro.agregarMultiples');
 
+
 });
 
 
