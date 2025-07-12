@@ -36,6 +36,7 @@
             <hr><br>
             <form action="{{ url('/carro/agregar-multiples') }}" method="POST">
                 @csrf
+                
                 @if($productoIndex->isNotEmpty())
                     @php $agrupadosPorTipo = $productoIndex->groupBy('tipo'); @endphp
                     @foreach ($agrupadosPorTipo as $tipo => $productos)

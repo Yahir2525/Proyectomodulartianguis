@@ -83,9 +83,11 @@
                                             <td>
                                                 <div style="display: flex; gap: 5px; justify-content: center;">
                                                     <!-- Botón Editar -->
-                                                    <a href="{{ route('carro.edit', $carrito->id_carro) }}">
+                                                   <a href="{{ route('carro.edit', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}">
                                                         <button type="button">Editar</button>
                                                     </a>
+
+                                                    <!-- Todavia falta hacer que se vayan los datos correctos al edit -->
 
                                                     <!-- Botón Eliminar con confirmación -->
                                                     <form action="{{ url('/carro', $carrito->id_carro) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este carrito?');">

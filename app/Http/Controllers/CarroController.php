@@ -20,7 +20,16 @@ class CarroController extends Controller
     {
         $userId = Auth::id();
         $carroIndex = Carro::with('productos')->where('id_user', $userId)->get();
-        return view('carro/carroIndex', compact('carroIndex'));
+
+        $reservasGlobales = CarroProducto::select('id_producto')
+            ->selectRaw('SUM(cantidad) as total_reservado')
+            ->groupBy('id_producto')
+            ->pluck('total_reservado', 'id_producto');
+
+        $todosProductos = Producto::all();
+
+    return view('carro/carroIndex', compact('carroIndex', 'reservasGlobales', 'todosProductos'));
+
     }
 
     public function create()
@@ -98,6 +107,92 @@ class CarroController extends Controller
     }
 
 
+    
+
+
+    public function edit($id_carro, $id_producto)
+    {
+        $carro = Carro::findOrFail($id_carro);
+
+        // Producto actual que se va a editar
+        $productoActual = $carro->productos()->where('productos.id_producto', $id_producto)->firstOrFail();
+        $cantidad = $productoActual->pivot->cantidad;
+
+        // Cargar todos los productos y calcular su disponibilidad
+        $productos = Producto::all()->map(function ($producto) use ($id_carro) {
+            $reservadas = DB::table('carro_productos')
+                ->where('id_producto', $producto->id_producto)
+                ->where('id_carro', '!=', $id_carro)
+                ->sum('cantidad');
+
+            $producto->piezas_disponibles = max(0, $producto->piezas - $reservadas);
+            return $producto;
+        });
+
+        $pedidosUsuario = Pedido::where('id_user', $carro->id_user)->get();
+
+        return view('carro.editCarro', compact('carro', 'productoActual', 'productos', 'cantidad', 'pedidosUsuario'));
+    }
+
+    public function update(Request $request, Carro $carro, $id_producto)
+    {
+        $nuevoIdProducto = $request->input('id_producto');
+        $cantidadSolicitada = (int) $request->input('cantidad');
+
+        if ($cantidadSolicitada <= 0) {
+            return back()->with('error', 'La cantidad debe ser mayor a 0.');
+        }
+
+        // Verificar disponibilidad
+        $reservadas = DB::table('carro_productos')
+            ->where('id_producto', $nuevoIdProducto)
+            ->where('id_carro', '!=', $carro->id_carro)
+            ->sum('cantidad');
+
+        $producto = Producto::findOrFail($nuevoIdProducto);
+        $disponibles = max(0, $producto->piezas - $reservadas);
+
+        if ($cantidadSolicitada > $disponibles) {
+            return back()->with('error', "Solo hay $disponibles piezas disponibles.");
+        }
+
+        // Si el producto no cambió, solo actualiza la cantidad
+        if ($nuevoIdProducto == $id_producto) {
+            DB::table('carro_productos')
+                ->where('id_carro', $carro->id_carro)
+                ->where('id_producto', $id_producto)
+                ->update(['cantidad' => $cantidadSolicitada]);
+        } else {
+            // Verificar que no exista ya (carro, nuevoIdProducto)
+            $yaExiste = DB::table('carro_productos')
+                ->where('id_carro', $carro->id_carro)
+                ->where('id_producto', $nuevoIdProducto)
+                ->exists();
+
+            if ($yaExiste) {
+                return back()->with('error', 'Ese producto ya está en el carrito. No se puede cambiar.');
+            }
+
+            // Actualizar la fila existente: cambiar id_producto y cantidad
+            DB::table('carro_productos')
+                ->where('id_carro', $carro->id_carro)
+                ->where('id_producto', $id_producto)
+                ->update([
+                    'id_producto' => $nuevoIdProducto,
+                    'cantidad' => $cantidadSolicitada,
+                ]);
+        }
+
+        // Actualizar pedido si fue cambiado
+        if ($request->filled('id_pedido')) {
+            $carro->id_pedido = $request->input('id_pedido');
+            $carro->save();
+        }
+
+        return redirect()->route('carro.index')->with('success', 'Producto del carro actualizado.');
+    }
+
+
     public function agregarMultiples(Request $request)
     {
         $userId = $request->input('id_user');
@@ -150,51 +245,6 @@ class CarroController extends Controller
 
 
 
-    public function edit(Carro $carro)
-    {
-        $carro = Carro::find($carro->id_carro);
-        $productos = Producto::all();
-        $pedidosUsuario = Pedido::where('id_user', $carro->id_user)->get();
-
-        return view('carro.editCarro', compact('carro', 'productos', 'pedidosUsuario'));
-    }
-
-    public function update(Request $request, Carro $carro)
-    {
-        $productoId = $request->input('id_producto');
-        $cantidadSolicitada = (int)$request->input('cantidad');
-
-        if ($cantidadSolicitada <= 0) {
-            return back()->with('error', 'La cantidad debe ser mayor a 0.');
-        }
-
-        $producto = Producto::find($productoId);
-        if (!$producto) {
-            return back()->with('error', 'Producto no encontrado.');
-        }
-
-        $reservadas = DB::table('carro_productos')
-            ->where('id_producto', $productoId)
-            ->where('id_carro', '!=', $carro->id_carro)
-            ->sum('cantidad');
-
-        $disponibles = max(0, $producto->piezas - $reservadas);
-
-        if ($cantidadSolicitada > $disponibles) {
-            return back()->with('error', "Solo quedan $disponibles piezas disponibles.");
-        }
-
-        // Actualizar cantidad en tabla pivote
-        $carro->productos()->updateExistingPivot($productoId, ['cantidad' => $cantidadSolicitada]);
-
-        // Actualizar id_pedido si fue modificado
-        if ($request->filled('id_pedido')) {
-            $carro->id_pedido = $request->input('id_pedido');
-            $carro->save();
-        }
-
-        return redirect()->route('carro.index')->with('success', 'Carro actualizado correctamente.');
-    }
 
     public function show(Request $request)
     {

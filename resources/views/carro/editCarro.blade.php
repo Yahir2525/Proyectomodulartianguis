@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Editar Carro</title>
 </head>
 <body>
@@ -17,17 +17,18 @@
         <p style="color: green;">{{ session('success') }}</p>
     @endif
 
-    <form action="{{ route('carro.update', $carro->id_carro) }}" method="POST">
+    <form action="{{ route('carro.update', ['carro' => $carro->id_carro, 'id_producto' => $productoActual->id_producto]) }}" method="POST">
         @csrf
         @method('PUT')
 
+        <!-- Producto fijo, no editable -->
         <!-- Producto -->
         <label for="id_producto">Producto:</label>
         <select name="id_producto" required>
             <option value="">Selecciona un producto</option>
             @foreach($productos as $producto)
                 <option value="{{ $producto->id_producto }}"
-                    {{ isset($carro) && $producto->id_producto == $carro->id_producto ? 'selected' : '' }}>
+                    {{ $producto->id_producto == $productoActual->id_producto ? 'selected' : '' }}>
                     {{ $producto->nombre }} - {{ $producto->piezas_disponibles }} piezas disponibles
                 </option>
             @endforeach
@@ -36,15 +37,17 @@
 
         <!-- Cantidad -->
         <label for="cantidad">Cantidad:</label>
-        <input type="number" name="cantidad" min="1" value="{{ $carro->cantidad }}" required>
-        <br><br>
+        <input type="number" name="cantidad" min="1" value="{{ $cantidad }}" required>
+
 
         <!-- Pedido -->
         <label for="id_pedido">Selecciona un pedido existente:</label>
-        <select name="id_pedido">
-            <option value="">-- Ninguno --</option>
+        <select name="id_pedido" required>
+            <option value="">-- Selecciona --</option>
             @foreach($pedidosUsuario as $pedido)
-                <option value="{{ $pedido->id_pedido }}">Pedido #{{ $pedido->id_pedido }}</option>
+                <option value="{{ $pedido->id_pedido }}" {{ $carro->id_pedido == $pedido->id_pedido ? 'selected' : '' }}>
+                    Pedido #{{ $pedido->id_pedido }}
+                </option>
             @endforeach
         </select>
         <br><br>
