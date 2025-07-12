@@ -8,14 +8,15 @@
     <h1>Carro #{{ $carro->id_carro }}</h1>
 
     <p><strong>Usuario:</strong> {{ optional($carro->user)->nombre_usuario ?? 'Sin usuario' }}</p>
-    <p><strong>ID Detalle:</strong> {{ $carro->id_detalle }}</p>
 
     @if ($carro->productos->isEmpty())
         <p>Este carro no tiene productos.</p>
     @else
         @php
-            // Obtener reservas totales globales por producto
-            $reservasGlobales = \App\Models\Carro::selectRaw('id_producto, SUM(cantidad) as reservadas')
+            // Calcular reservas globales por producto (excluyendo este carro)
+            $reservasGlobales = \App\Models\CarroProducto::select('id_producto')
+                ->selectRaw('SUM(cantidad) as reservadas')
+                ->where('id_carro', '!=', $carro->id_carro)
                 ->groupBy('id_producto')
                 ->pluck('reservadas', 'id_producto');
         @endphp
@@ -26,7 +27,6 @@
                     <th>ID Carro</th>
                     <th>ID Usuario</th>
                     <th>Nombre de usuario</th>
-                    <th>ID Detalle</th>
                     <th>ID Producto</th>
                     <th>Nombre del Producto</th>
                     <th>Piezas disponibles</th>
@@ -44,18 +44,18 @@
                         $reservado = $reservasGlobales[$id] ?? 0;
                         $piezas_disponibles = max(0, $stockOriginal - $reservado);
 
-                        $subtotal = $producto->pivot->cantidad * $producto->precio_unitario;
+                        $cantidad = $producto->pivot->cantidad;
+                        $subtotal = $cantidad * $producto->precio_unitario;
                         $total += $subtotal;
                     @endphp
                     <tr>
                         <td>{{ $carro->id_carro }}</td>
                         <td>{{ $carro->id_user }}</td>
                         <td>{{ optional($carro->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                        <td>{{ $carro->id_detalle }}</td>
                         <td>{{ $producto->id_producto }}</td>
                         <td>{{ $producto->nombre }}</td>
                         <td>{{ $piezas_disponibles }}</td>
-                        <td>{{ $producto->pivot->cantidad }}</td>
+                        <td>{{ $cantidad }}</td>
                         <td>{{ $producto->precio_unitario }}</td>
                         <td>{{ $subtotal }}</td>
                     </tr>
