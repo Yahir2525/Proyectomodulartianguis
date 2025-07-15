@@ -18,14 +18,35 @@ class ProductoController extends Controller
         return view('producto.productoIndex', compact('productoIndex', 'pedidosUsuario'));
     }
 
-    public function create()
+   public function create()
     {
-        return view('producto.createProducto');
+        $tiposExistentes = Producto::select('tipo')->distinct()->pluck('tipo');
+        $materialesExistentes = Producto::select('material')->distinct()->pluck('material');
+        $coloresExistentes = Producto::select('color')->distinct()->pluck('color');
+        $tamaniosExistentes = Producto::select('tamanio')->distinct()->pluck('tamanio');
+        $marcasExistentes = Producto::select('marca')->distinct()->pluck('marca');
+
+        return view('producto.createProducto', compact(
+            'tiposExistentes',
+            'materialesExistentes',
+            'coloresExistentes',
+            'tamaniosExistentes',
+            'marcasExistentes'
+        ));
     }
+
 
     public function store(Request $request)
     {
         $producto = new Producto();
+
+        if ($request->hasFile('imagen')) {
+            $archivo = $request->file('imagen');
+            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+            $archivo->move(public_path('img'), $nombreArchivo);
+            $producto->imagen = 'img/' . $nombreArchivo;
+        }
+
         $producto->nombre = $request->input('nombre');
         $producto->tipo = $request->input('tipo');
         $producto->material = $request->input('material');
@@ -39,14 +60,14 @@ class ProductoController extends Controller
         return redirect('/producto')->with('success', 'Producto registrado correctamente.');
     }
 
-    public function show($id)
+    public function show(Request $request)
     {
+        $id = $request->input('id_producto');
         $producto = Producto::find($id);
         if (!$producto) {
-            return back()->with('error', 'Producto no encontrado.');
+            return redirect()->back()->with('error', 'El producto no se encontró.');
         }
-
-        return view('producto.showProducto', compact('producto'));
+        return view('/producto/showProducto', ['producto' => $producto]);
     }
 
     public function edit($id)
@@ -56,14 +77,35 @@ class ProductoController extends Controller
             return back()->with('error', 'Producto no encontrado.');
         }
 
-        return view('producto.editProducto', compact('producto'));
+        $tiposExistentes = Producto::select('tipo')->distinct()->pluck('tipo');
+        $materialesExistentes = Producto::select('material')->distinct()->pluck('material');
+        $coloresExistentes = Producto::select('color')->distinct()->pluck('color');
+        $tamaniosExistentes = Producto::select('tamanio')->distinct()->pluck('tamanio');
+        $marcasExistentes = Producto::select('marca')->distinct()->pluck('marca');
+
+        return view('producto.editProducto', compact(
+            'producto',
+            'tiposExistentes',
+            'materialesExistentes',
+            'coloresExistentes',
+            'tamaniosExistentes',
+            'marcasExistentes'
+        ));
     }
+
 
     public function update(Request $request, $id)
     {
         $producto = Producto::find($id);
         if (!$producto) {
             return redirect()->route('producto.index')->with('error', 'Producto no encontrado.');
+        }
+
+        if ($request->hasFile('imagen')) {
+            $archivo = $request->file('imagen');
+            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+            $archivo->move(public_path('img'), $nombreArchivo);
+            $producto->imagen = 'img/' . $nombreArchivo;
         }
 
         $producto->nombre = $request->input('nombre');

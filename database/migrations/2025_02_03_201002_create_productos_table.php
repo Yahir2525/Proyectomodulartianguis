@@ -1,33 +1,135 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Http\Controllers;
 
-return new class extends Migration
+use App\Models\Producto;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class ProductoController extends Controller
 {
-    public function up(): void
+    public function index()
     {
-        // Creación de la tabla Productos
-        Schema::create('productos', function (Blueprint $table) {
-            $table->id('id_producto');
-            $table->string('nombre',40);
-            $table->string('tipo');
-            $table->string('material',20);
-            $table->string('color', 10)->nullable();
-            $table->string('tamanio', 25);
-            $table->string('marca', 25);
-            $table->decimal('precio_unitario', 6, 2)->unsigned();
-            $table->integer('piezas')->nullable();
-            $table->timestamps();
-        });
+        $usuarioId = Auth::id();
+        $pedidosUsuario = \App\Models\Pedido::where('id_user', $usuarioId)->get();
+        $productoIndex = Producto::all();
+
+        return view('producto.productoIndex', compact('productoIndex', 'pedidosUsuario'));
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function create()
     {
-        Schema::dropIfExists('productos');
+        $tiposExistentes = Producto::select('tipo')->distinct()->pluck('tipo');
+        $materialesExistentes = Producto::select('material')->distinct()->pluck('material');
+        $coloresExistentes = Producto::select('color')->distinct()->pluck('color');
+        $tamaniosExistentes = Producto::select('tamanio')->distinct()->pluck('tamanio');
+        $marcasExistentes = Producto::select('marca')->distinct()->pluck('marca');
+
+        return view('producto.createProducto', compact(
+            'tiposExistentes',
+            'materialesExistentes',
+            'coloresExistentes',
+            'tamaniosExistentes',
+            'marcasExistentes'
+        ));
     }
-};
+
+    public function store(Request $request)
+    {
+        $producto = new Producto();
+
+        // Imagen (si se subió)
+        if ($request->hasFile('imagen')) {
+            $archivo = $request->file('imagen');
+            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+            $archivo->move(public_path('img'), $nombreArchivo);
+            $producto->imagen = 'img/' . $nombreArchivo;
+        }
+
+        // Campos normales
+        $producto->nombre = $request->input('nombre');
+        $producto->tipo = $request->input('tipo');
+        $producto->material = $request->input('material');
+        $producto->color = $request->input('color');
+        $producto->tamanio = $request->input('tamanio');
+        $producto->marca = $request->input('marca');
+        $producto->precio_unitario = $request->input('precio_unitario');
+        $producto->piezas = $request->input('piezas');
+        $producto->save();
+
+        return redirect('/producto')->with('success', 'Producto registrado correctamente.');
+    }
+
+    public function show(Request $request)
+    {
+        $id = $request->input('id_producto');
+        $producto = Producto::find($id);
+        if (!$producto) {
+            return redirect()->back()->with('error', 'El producto no se encontró.');
+        }
+        return view('producto.showProducto', ['producto' => $producto]);
+    }
+
+    public function edit($id)
+    {
+        $producto = Producto::find($id);
+        if (!$producto) {
+            return back()->with('error', 'Producto no encontrado.');
+        }
+
+        $tiposExistentes = Producto::select('tipo')->distinct()->pluck('tipo');
+        $materialesExistentes = Producto::select('material')->distinct()->pluck('material');
+        $coloresExistentes = Producto::select('color')->distinct()->pluck('color');
+        $tamaniosExistentes = Producto::select('tamanio')->distinct()->pluck('tamanio');
+        $marcasExistentes = Producto::select('marca')->distinct()->pluck('marca');
+
+        return view('producto.editProducto', compact(
+            'producto',
+            'tiposExistentes',
+            'materialesExistentes',
+            'coloresExistentes',
+            'tamaniosExistentes',
+            'marcasExistentes'
+        ));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $producto = Producto::find($id);
+        if (!$producto) {
+            return redirect()->route('producto.index')->with('error', 'Producto no encontrado.');
+        }
+
+        // Imagen (si se subió una nueva)
+        if ($request->hasFile('imagen')) {
+            $archivo = $request->file('imagen');
+            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+            $archivo->move(public_path('img'), $nombreArchivo);
+            $producto->imagen = 'img/' . $nombreArchivo;
+        }
+
+        // Resto de campos
+        $producto->nombre = $request->input('nombre');
+        $producto->tipo = $request->input('tipo');
+        $producto->material = $request->input('material');
+        $producto->color = $request->input('color');
+        $producto->tamanio = $request->input('tamanio');
+        $producto->marca = $request->input('marca');
+        $producto->precio_unitario = $request->input('precio_unitario');
+        $producto->piezas = $request->input('piezas');
+        $producto->save();
+
+        return redirect()->route('producto.index')->with('success', 'Producto actualizado correctamente.');
+    }
+
+    public function destroy($id)
+    {
+        $producto = Producto::find($id);
+        if (!$producto) {
+            return redirect()->route('producto.index')->with('error', 'Producto no encontrado.');
+        }
+
+        $producto->delete();
+        return redirect()->route('producto.index')->with('success', 'Producto eliminado.');
+    }
+}

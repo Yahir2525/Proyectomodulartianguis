@@ -34,6 +34,15 @@
                 <a href="{{ url('/producto/create') }}">Registrar un nuevo producto</a>
             @endcan
             <hr><br>
+
+            <form action="{{ url('/producto/showProducto') }}" method="GET">
+                    <label for="id">ID de producto a buscar:</label>
+                    <input type="text" id="id" name="id_producto" placeholder="21" autofocus />
+                    <input type="submit" value="Buscar" />
+            </form>
+            <br><br>
+                <br /><br />
+
             <form action="{{ url('/carro/agregar-multiples') }}" method="POST">
                 @csrf
                 
@@ -47,6 +56,7 @@
                                     <th>Seleccionar</th>
                                     <th>ID producto</th>
                                     <th>Nombre</th>
+                                    <th>Imagen</th>
                                     <th>Material</th>
                                     <th>Color</th>
                                     <th>Tamaño</th>
@@ -69,6 +79,11 @@
                                             
                                             <td>{{ $producto->id_producto }}</td>
                                             <td>{{ $producto->nombre }}</td>
+                                            <td>
+                                            @if($producto->imagen)
+                                                    <img src="{{ asset($producto->imagen) }}" alt="Imagen del producto" width="250" style="margin-bottom: 20px;">
+                                                @endif
+                                            </td>
                                             <td>{{ $producto->material }}</td>
                                             <td>{{ $producto->color }}</td>
                                             <td>{{ $producto->tamanio }}</td>
