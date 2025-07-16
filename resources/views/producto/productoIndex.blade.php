@@ -80,8 +80,10 @@
                                             <td>{{ $producto->id_producto }}</td>
                                             <td>{{ $producto->nombre }}</td>
                                             <td>
-                                            @if($producto->imagen)
-                                                    <img src="{{ asset($producto->imagen) }}" alt="Imagen del producto" width="250" style="margin-bottom: 20px;">
+                                                @if ($producto->imagen)
+                                                    <img src="{{ asset($producto->imagen) }}" alt="Imagen del producto" width="250">
+                                                @else
+                                                    Sin imagen
                                                 @endif
                                             </td>
                                             <td>{{ $producto->material }}</td>

@@ -19,7 +19,7 @@
 
     <form action="{{ route('producto.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        @method('PUT')
+        @method('POST')
         <label for="nombre">Nombre del producto:</label><br>
         <input type="text" name="nombre" id="nombre" value="{{ old('nombre') }}" required><br><br>
 

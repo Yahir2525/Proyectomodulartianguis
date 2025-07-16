@@ -29,6 +29,7 @@
                     <th>Nombre de usuario</th>
                     <th>ID Producto</th>
                     <th>Nombre del Producto</th>
+                    <th>Imagen</th>
                     <th>Piezas disponibles</th>
                     <th>Cantidad</th>
                     <th>Precio unitario</th>
@@ -54,6 +55,13 @@
                         <td>{{ optional($carro->user)->nombre_usuario ?? 'Sin cliente' }}</td>
                         <td>{{ $producto->id_producto }}</td>
                         <td>{{ $producto->nombre }}</td>
+                        <td>
+                            @if ($producto->imagen)
+                                <img src="{{ asset($producto->imagen) }}" alt="Imagen del producto" width="250">
+                            @else
+                                Sin imagen
+                            @endif
+                        </td>
                         <td>{{ $piezas_disponibles }}</td>
                         <td>{{ $cantidad }}</td>
                         <td>{{ $producto->precio_unitario }}</td>

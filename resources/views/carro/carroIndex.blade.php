@@ -50,6 +50,7 @@
                                     <th>ID del pedido</th>
                                     <th>ID del producto</th>
                                     <th>Nombre del producto</th>
+                                    <th>Imagen</th>
                                     <th>Piezas disponibles</th>
                                     <th>Cantidad</th>
                                     <th>Precio unitario</th>
@@ -76,6 +77,13 @@
                                             <td>{{ $carrito->id_pedido }}</td>
                                             <td>{{ $producto->id_producto }}</td>
                                             <td>{{ $producto->nombre }}</td>
+                                            <td>
+                                                @if ($producto->imagen)
+                                                    <img src="{{ asset($producto->imagen) }}" alt="Imagen del producto" width="250">
+                                                @else
+                                                    Sin imagen
+                                                @endif
+                                            </td>
                                             <td>{{ $disponible }}</td>
                                             <td>{{ $producto->pivot->cantidad }}</td>
                                             <td>{{ $producto->precio_unitario }}</td>

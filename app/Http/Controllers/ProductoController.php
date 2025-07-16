@@ -12,13 +12,12 @@ class ProductoController extends Controller
     {
         $usuarioId = Auth::id();
         $pedidosUsuario = \App\Models\Pedido::where('id_user', $usuarioId)->get();
-
-        $productoIndex = \App\Models\Producto::all();
+        $productoIndex = Producto::all();
 
         return view('producto.productoIndex', compact('productoIndex', 'pedidosUsuario'));
     }
 
-   public function create()
+    public function create()
     {
         $tiposExistentes = Producto::select('tipo')->distinct()->pluck('tipo');
         $materialesExistentes = Producto::select('material')->distinct()->pluck('material');
@@ -35,11 +34,11 @@ class ProductoController extends Controller
         ));
     }
 
-
     public function store(Request $request)
     {
         $producto = new Producto();
 
+        // Imagen (si se subió)
         if ($request->hasFile('imagen')) {
             $archivo = $request->file('imagen');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
@@ -47,6 +46,7 @@ class ProductoController extends Controller
             $producto->imagen = 'img/' . $nombreArchivo;
         }
 
+        // Campos normales
         $producto->nombre = $request->input('nombre');
         $producto->tipo = $request->input('tipo');
         $producto->material = $request->input('material');
@@ -67,7 +67,7 @@ class ProductoController extends Controller
         if (!$producto) {
             return redirect()->back()->with('error', 'El producto no se encontró.');
         }
-        return view('/producto/showProducto', ['producto' => $producto]);
+        return view('producto.showProducto', ['producto' => $producto]);
     }
 
     public function edit($id)
@@ -93,7 +93,6 @@ class ProductoController extends Controller
         ));
     }
 
-
     public function update(Request $request, $id)
     {
         $producto = Producto::find($id);
@@ -105,6 +104,11 @@ class ProductoController extends Controller
             $archivo = $request->file('imagen');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
             $archivo->move(public_path('img'), $nombreArchivo);
+
+            if ($producto->imagen && file_exists(public_path($producto->imagen))) {
+                unlink(public_path($producto->imagen));
+            }
+
             $producto->imagen = 'img/' . $nombreArchivo;
         }
 
@@ -129,7 +133,6 @@ class ProductoController extends Controller
         }
 
         $producto->delete();
-
         return redirect()->route('producto.index')->with('success', 'Producto eliminado.');
     }
 }

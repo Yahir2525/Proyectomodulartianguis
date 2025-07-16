@@ -30,7 +30,7 @@
             @foreach($productos as $producto)
                 <option value="{{ $producto->id_producto }}"
                     {{ isset($carro) && $producto->id_producto == $carro->id_producto ? 'selected' : '' }}>
-                    {{ $producto->nombre }} - {{ $producto->piezas_disponibles }} piezas disponibles
+                    {{$producto->id_producto}} - {{ $producto->nombre }} - {{ $producto->piezas_disponibles }} piezas disponibles 
                 </option>
             @endforeach
         </select>

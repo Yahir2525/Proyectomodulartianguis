@@ -89,7 +89,7 @@ class CarroController extends Controller
 
         $reservadas = DB::table('carro_productos')
             ->where('id_producto', $productoId)
-            ->where('id_carro', '!=', $carro->id_carro)
+            ->whereIn('id_carro', Carro::where('id_pedido', $pedidoId)->pluck('id_carro'))
             ->sum('cantidad');
 
         $disponibles = max(0, $producto->piezas - $reservadas);
@@ -98,16 +98,27 @@ class CarroController extends Controller
             return back()->with('error', "Solo quedan $disponibles piezas disponibles.");
         }
 
-        // Guardar en la tabla pivote
-        $carro->productos()->syncWithoutDetaching([
-            $productoId => ['cantidad' => $cantidadSolicitada]
-        ]);
+        $carrosDelPedido = Carro::where('id_pedido', $pedidoId)->get();
+        $productoYaExiste = false;
+
+        foreach ($carrosDelPedido as $carrito) {
+            $productoEnCarro = $carrito->productos()->where('productos.id_producto', $productoId)->first();
+            if ($productoEnCarro) {
+                $cantidadActual = $productoEnCarro->pivot->cantidad;
+                $carrito->productos()->updateExistingPivot($productoId, [
+                    'cantidad' => $cantidadActual + $cantidadSolicitada
+                ]);
+                $productoYaExiste = true;
+                break;
+            }
+        }
+
+        if (!$productoYaExiste) {
+            $carro->productos()->attach($productoId, ['cantidad' => $cantidadSolicitada]);
+        }
 
         return redirect('/carro')->with('success', 'Producto agregado al carrito.');
     }
-
-
-    
 
 
     public function edit($id_carro, $id_producto)
@@ -211,34 +222,42 @@ class CarroController extends Controller
         ]);
 
         foreach ($seleccionados as $idProducto) {
-            $producto = Producto::find($idProducto);
-            if (!$producto) continue;
+        $producto = Producto::find($idProducto);
+        if (!$producto) continue;
 
-            $cantidad = isset($cantidades[$idProducto]) ? (int)$cantidades[$idProducto] : 0;
-            if ($cantidad <= 0) continue;
+        $cantidad = isset($cantidades[$idProducto]) ? (int)$cantidades[$idProducto] : 0;
+        if ($cantidad <= 0) continue;
 
-            // Validar disponibilidad
-            $reservadas = DB::table('carro_productos')
-                ->where('id_producto', $idProducto)
-                ->sum('cantidad');
-            $disponibles = max(0, $producto->piezas - $reservadas);
+        $reservadas = DB::table('carro_productos')
+            ->where('id_producto', $idProducto)
+            ->whereIn('id_carro', Carro::where('id_pedido', $idPedido)->pluck('id_carro'))
+            ->sum('cantidad');
 
-            if ($cantidad > $disponibles) {
-                return back()->with('error', 'No hay suficientes piezas de "' . $producto->nombre . '". Solo quedan ' . $disponibles);
-            }
+        $disponibles = max(0, $producto->piezas - $reservadas);
 
-            // Verificar si ya está en el carro
-            $yaExiste = $carro->productos()->wherePivot('id_producto', $idProducto)->exists();
-            if ($yaExiste) {
-                // Puedes actualizar la cantidad si quieres:
-                $cantidadActual = $carro->productos()->where('id_producto', $idProducto)->first()->pivot->cantidad;
-                $carro->productos()->updateExistingPivot($idProducto, [
+        if ($cantidad > $disponibles) {
+            return back()->with('error', 'No hay suficientes piezas de "' . $producto->nombre . '". Solo quedan ' . $disponibles);
+        }
+
+        $carrosDelPedido = Carro::where('id_pedido', $idPedido)->get();
+        $productoYaExiste = false;
+
+        foreach ($carrosDelPedido as $carrito) {
+            $productoEnCarro = $carrito->productos()->where('productos.id_producto', $idProducto)->first();
+            if ($productoEnCarro) {
+                $cantidadActual = $productoEnCarro->pivot->cantidad;
+                $carrito->productos()->updateExistingPivot($idProducto, [
                     'cantidad' => $cantidadActual + $cantidad
                 ]);
-            } else {
-                $carro->productos()->attach($idProducto, ['cantidad' => $cantidad]);
+                $productoYaExiste = true;
+                break;
             }
         }
+
+        if (!$productoYaExiste) {
+            $carro->productos()->attach($idProducto, ['cantidad' => $cantidad]);
+        }
+    }
 
         return redirect('/carro')->with('success', 'Productos agregados al carrito.');
     }

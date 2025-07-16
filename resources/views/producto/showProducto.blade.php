@@ -38,8 +38,10 @@
                     <p>Ruta imagen: {{ $producto->imagen }}</p>
                     <img src="{{ asset($producto->imagen) }}" alt="Imagen del producto" width="250">
                     <td>
-                       @if($producto->imagen)
-                            <img src="{{ asset($producto->imagen) }}" alt="Imagen del producto" style="margin-bottom: 20px;">
+                        @if ($producto->imagen)
+                            <img src="{{ asset($producto->imagen) }}" alt="Imagen del producto" width="100">
+                        @else
+                            Sin imagen
                         @endif
                     </td>
                     <td>{{ $producto->tipo }}</td>

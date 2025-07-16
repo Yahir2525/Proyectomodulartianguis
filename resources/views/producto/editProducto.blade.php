@@ -18,16 +18,16 @@
     @endif
 
 
-    <form action="{{ route('producto.update', $producto->id_producto) }}" method="POST">
+    <form action="{{ route('producto.update', $producto->id_producto) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
         <label for="nombre">Nombre del producto:</label><br>
         <input type="text" name="nombre" id="nombre" value="{{ old('nombre', $producto->nombre) }}" required><br><br>
 
-        <label for="imagen">Cambiar imagen (opcional):</label><br>
+        <label for="imagen">Actualizar imagen:</label><br>
         <input type="file" name="imagen" id="imagen" accept="image/*"><br><br>
-
+        
 
         <label for="tipo">Tipo de producto:</label><br>
         <input list="tipos" name="tipo" id="tipo" value="{{ old('tipo') }}" required>

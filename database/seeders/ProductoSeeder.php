@@ -13,6 +13,31 @@ class ProductoSeeder extends Seeder
      */
     public function run(): void
     {
-        Producto::factory()->count(30)->create();
+        $imagenes = [
+            'img/bobcholo.jpeg',
+            'img/elda.jpeg',
+            'img/elfrecord.png',
+            'img/fondo.jpg',
+            'img/friends.jpg',
+            'img/frieren.jpg',
+            'img/frieren3.png',
+            'img/iruma.png',
+            'img/kanao.jpg',
+            'img/kochos.jpg',
+            'img/miku.jpg',
+            'img/richie.jpg',
+            'img/samisopas.jpg',
+            'img/shrek.jpeg',
+            'img/taylor.jpg',
+            'img/toalla.jpeg',
+        ];
+
+        foreach ($imagenes as $imagen) {
+            Producto::factory()->create([
+                'imagen' => $imagen
+            ]);
+        }
+
+        
     }
 }
