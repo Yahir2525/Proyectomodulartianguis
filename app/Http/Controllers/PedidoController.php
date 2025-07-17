@@ -9,7 +9,7 @@ use App\Models\Credito;
 use App\Models\DetallePedido;
 use App\Models\Pedido;
 use App\Models\Producto;
-use App\Models\Vendedor;
+use App\Models\Carro;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -101,6 +101,64 @@ class PedidoController extends Controller
         $this->recalcularSaldoCredito($pedido->id_credito);
 
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha actualizado con éxito.');
+    }
+
+
+    public function cerrarPedido(Request $request, $id_pedido)
+    {
+        $pedido = Pedido::findOrFail($id_pedido);
+
+        // Actualizar total
+        if ($request->has('total')) {
+            $pedido->total_pedido = $request->input('total');
+            $pedido->save(); 
+        }
+
+        // Si no tiene crédito, crear uno
+        if (!$pedido->id_credito) {
+            $request->validate([
+                'fecha_liquidacion' => 'required|date',
+                'fecha_vencimiento' => 'required|date',
+            ]);
+
+            $credito = new Credito();
+            $credito->id_user = $pedido->id_user;
+            $credito->saldo_total = $pedido->total_pedido;
+            $credito->fecha_liquidacion = $request->input('fecha_liquidacion');
+            $credito->fecha_vencimiento = $request->input('fecha_vencimiento');
+            $credito->save();
+
+            $pedido->id_credito = $credito->id_credito;
+            $pedido->metodo_pago = 'credito';
+        } else {
+            // Si ya tiene crédito, actualizar su saldo
+            $credito = Credito::find($pedido->id_credito);
+            if ($credito) {
+                $totalPedidos = Pedido::where('id_credito', $pedido->id_credito)->sum('total_pedido');
+                $credito->saldo_total = $totalPedidos;
+                $credito->save();
+            }
+        }
+
+        // Cerrar pedido
+        $pedido->estado_pedido = 0;
+        $pedido->save();
+
+        return redirect()->back()->with('success', 'Pedido cerrado y crédito actualizado correctamente.');
+    }
+
+
+    public function reabrirPedido($id_pedido)
+    {
+        if (Auth::user()->rol !== 'admin') {
+            abort(403, 'No autorizado');
+        }
+
+        $pedido = Pedido::findOrFail($id_pedido);
+        $pedido->estado_pedido = 1;
+        $pedido->save();
+
+        return redirect()->back()->with('success', 'Pedido reabierto.');
     }
 
 

@@ -78,12 +78,26 @@
                                     @else
                                         
 
-                                        <form action="{{ route('credito.update', $pedido->id_credito) }}" method="POST">
+                                    <td>
+                                        <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST">
                                             @csrf
-                                            
                                             <input type="hidden" name="total" value="{{ $pedido->total_pedido }}">
-                                            <button type="submit">Actualizar crédito</button>
+
+                                            @if(!$pedido->id_credito)
+                                                <input type="date" name="fecha_liquidacion" required>
+                                                <input type="date" name="fecha_vencimiento" required>
+                                            @endif
+
+                                            <button type="submit">Cerrar pedido</button>
                                         </form>
+
+                                        @if(Auth::user()->rol === 'admin' && $pedido->estado_pedido == 0)
+                                            <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST" style="margin-top: 4px;">
+                                                @csrf
+                                                <button type="submit">Reabrir pedido</button>
+                                            </form>
+                                        @endif
+                                    </td>
                                     @endif
                                 </td>
                             </tr>

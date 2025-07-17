@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id('id_carro');
             $table->unsignedBigInteger('id_user')->nullable();
             $table->unsignedBigInteger('id_pedido')->nullable();
-            
             $table->timestamps();
 
             $table->foreign('id_user')

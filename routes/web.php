@@ -75,6 +75,8 @@ Route::resource('pedido', PedidoController::class);
 
 //FUNCIONES DEL PEDIDO
 Route::post('/credito/crear/{pedido}', [CreditoController::class, 'crearDesdePedido'])->name('credito.crearDesdePedido');
+Route::post('/pedido/cerrar/{id_pedido}', [PedidoController::class, 'cerrarPedido'])->name('pedido.cerrar');
+Route::post('/pedido/{id}/reabrir', [PedidoController::class, 'reabrirPedido'])->name('pedido.reabrir');
 
 Route::resource('credito', CreditoController::class);
 

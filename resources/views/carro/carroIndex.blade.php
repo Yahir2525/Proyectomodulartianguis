@@ -39,6 +39,17 @@
                     @endphp
 
                     @foreach($carrosPorPedido as $idPedido => $carros)
+                    @php
+                        $hayProductos = false;
+                        foreach ($carros as $carrito) {
+                            if ($carrito->productos->isNotEmpty()) {
+                                $hayProductos = true;
+                                break;
+                            }
+                        }
+                    @endphp
+
+                    @if ($hayProductos)
                         <h2>Pedido #{{ $idPedido }}</h2>
 
                         <table border="1" cellspacing="0" cellpadding="5">
@@ -63,10 +74,9 @@
                                 @foreach ($carros as $carrito)
                                     @foreach ($carrito->productos as $producto)
                                         @php
-                                            $stock = $producto->piezas; // inventario total
-                                            $reservado = $reservasGlobales[$producto->id_producto] ?? 0; // suma de todas las cantidades reservadas
+                                            $stock = $producto->piezas;
+                                            $reservado = $reservasGlobales[$producto->id_producto] ?? 0;
                                             $disponible = max(0, $stock - $reservado);
-
                                             $subtotal = $producto->pivot->cantidad * $producto->precio_unitario;
                                             $totalPedido += $subtotal;
                                         @endphp
@@ -90,19 +100,9 @@
                                             <td>{{ $subtotal }}</td>
                                             <td>
                                                 <div style="display: flex; gap: 5px; justify-content: center;">
-                                                    <!-- Botón Editar -->
-                                                   <a href="{{ route('carro.edit', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}">
+                                                    <a href="{{ route('carro.edit', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}">
                                                         <button type="button">Editar</button>
                                                     </a>
-
-                                                    <!-- Todavia falta hacer que se vayan los datos correctos al edit -->
-
-                                                    <!-- Botón Eliminar con confirmación -->
-                                                    <!-- <form action="{{ url('/carro', $carrito->id_carro) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este carrito?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit">Eliminar</button>
-                                                    </form> -->
                                                     <form action="{{ route('carro.eliminarProducto', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este producto del carrito?');">
                                                         @csrf
                                                         @method('DELETE')
@@ -125,7 +125,9 @@
                             <button type="submit">Actualizar total y ver pedido</button>
                         </form>
                         <hr>
-                    @endforeach
+                    @endif
+                @endforeach
+
                 @else
                     <p>No hay productos en el carrito.</p>
                 @endif
