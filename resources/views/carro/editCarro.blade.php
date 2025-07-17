@@ -40,10 +40,9 @@
         <input type="number" name="cantidad" min="1" value="{{ $cantidad }}" required>
 
 
-        <!-- Pedido -->
-        <label for="id_pedido">Selecciona un pedido existente:</label>
-        <select name="id_pedido" required>
-            <option value="">-- Selecciona --</option>
+        <label for="id_pedido">Selecciona un pedido existente (opcional):</label>
+        <select name="id_pedido">
+            <option value="">-- Ninguno --</option>
             @foreach($pedidosUsuario as $pedido)
                 <option value="{{ $pedido->id_pedido }}" {{ $carro->id_pedido == $pedido->id_pedido ? 'selected' : '' }}>
                     Pedido #{{ $pedido->id_pedido }}
@@ -51,6 +50,14 @@
             @endforeach
         </select>
         <br><br>
+
+        <!-- Casilla para crear nuevo pedido -->
+        <label>
+            <input type="checkbox" name="nuevo_pedido" value="1">
+            Crear un nuevo pedido
+        </label>
+
+
 
         <button type="submit">Actualizar Carro</button>
     </form>

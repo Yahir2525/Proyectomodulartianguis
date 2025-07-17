@@ -53,72 +53,58 @@ class CarroController extends Controller
     public function store(Request $request)
     {
         $userId = $request->input('id_user');
-
-        if ($request->has('nuevo_pedido')) {
-            $pedido = new Pedido();
-            $pedido->id_user = $userId;
-            $pedido->id_credito = $request->input('id_credito');
-            $pedido->estado_pedido = 1;
-            $pedido->metodo_pago = 'contado';
-            $pedido->save();
-            $pedidoId = $pedido->id_pedido;
-        } else {
-            $pedidoId = $request->input('id_pedido');
-            if (!$pedidoId) {
-                return back()->with('error', 'Debes seleccionar un pedido o crear uno nuevo.');
-            }
-        }
-
-        // Buscar o crear el carro
-        $carro = Carro::firstOrCreate([
-            'id_user' => $userId,
-            'id_pedido' => $pedidoId,
-        ]);
-
         $productoId = $request->input('id_producto');
-        $cantidadSolicitada = (int)$request->input('cantidad');
+        $cantidad = (int) $request->input('cantidad');
 
-        if ($cantidadSolicitada <= 0) {
+        if ($cantidad <= 0) {
             return back()->with('error', 'La cantidad debe ser mayor a 0.');
         }
 
-        $producto = Producto::find($productoId);
-        if (!$producto) {
-            return back()->with('error', 'Producto no encontrado.');
-        }
+        $producto = Producto::findOrFail($productoId);
 
+        // Verificar disponibilidad de piezas
         $reservadas = DB::table('carro_productos')
             ->where('id_producto', $productoId)
-            ->whereIn('id_carro', Carro::where('id_pedido', $pedidoId)->pluck('id_carro'))
             ->sum('cantidad');
 
         $disponibles = max(0, $producto->piezas - $reservadas);
 
-        if ($cantidadSolicitada > $disponibles) {
-            return back()->with('error', "Solo quedan $disponibles piezas disponibles.");
+        if ($cantidad > $disponibles) {
+            return back()->with('error', "Solo hay $disponibles piezas disponibles.");
         }
 
-        $carrosDelPedido = Carro::where('id_pedido', $pedidoId)->get();
-        $productoYaExiste = false;
-
-        foreach ($carrosDelPedido as $carrito) {
-            $productoEnCarro = $carrito->productos()->where('productos.id_producto', $productoId)->first();
-            if ($productoEnCarro) {
-                $cantidadActual = $productoEnCarro->pivot->cantidad;
-                $carrito->productos()->updateExistingPivot($productoId, [
-                    'cantidad' => $cantidadActual + $cantidadSolicitada
-                ]);
-                $productoYaExiste = true;
-                break;
+        // Verificar si debe crear un nuevo pedido
+        if ($request->has('nuevo_pedido')) {
+            $pedido = new Pedido();
+            $pedido->id_user = $userId;
+            $pedido->estado_pedido = 1;
+            $pedido->metodo_pago = 'contado';
+            $pedido->save();
+        } else {
+            $pedidoId = $request->input('id_pedido');
+            if (!$pedidoId) {
+                return back()->with('error', 'Debes seleccionar un pedido o marcar "crear uno nuevo".');
             }
+
+            $pedido = Pedido::findOrFail($pedidoId);
         }
 
-        if (!$productoYaExiste) {
-            $carro->productos()->attach($productoId, ['cantidad' => $cantidadSolicitada]);
-        }
+        // Crear el nuevo carro
+        $carro = new Carro();
+        $carro->id_user = $userId;
+        $carro->id_pedido = $pedido->id_pedido;
+        $carro->save();
 
-        return redirect('/carro')->with('success', 'Producto agregado al carrito.');
+        // Asociar producto al carro
+        DB::table('carro_productos')->insert([
+            'id_carro' => $carro->id_carro,
+            'id_producto' => $productoId,
+            'cantidad' => $cantidad
+        ]);
+
+        return redirect()->route('carro.index')->with('success', 'Producto agregado correctamente al carrito.');
     }
+
 
 
     public function edit($id_carro, $id_producto)
@@ -167,41 +153,75 @@ class CarroController extends Controller
             return back()->with('error', "Solo hay $disponibles piezas disponibles.");
         }
 
-        // Si el producto no cambió, solo actualiza la cantidad
-        if ($nuevoIdProducto == $id_producto) {
-            DB::table('carro_productos')
-                ->where('id_carro', $carro->id_carro)
-                ->where('id_producto', $id_producto)
-                ->update(['cantidad' => $cantidadSolicitada]);
-        } else {
-            // Verificar que no exista ya (carro, nuevoIdProducto)
-            $yaExiste = DB::table('carro_productos')
-                ->where('id_carro', $carro->id_carro)
-                ->where('id_producto', $nuevoIdProducto)
+        $nuevoIdPedido = $request->input('id_pedido');
+
+        // Si se cambió el pedido, se debe crear un nuevo carro
+        if ($nuevoIdPedido != $carro->id_pedido) {
+            // Verificar que no exista ya el producto en otro carro de ese pedido
+            $existe = DB::table('carros as c')
+                ->join('carro_productos as cp', 'cp.id_carro', '=', 'c.id_carro')
+                ->where('c.id_pedido', $nuevoIdPedido)
+                ->where('cp.id_producto', $nuevoIdProducto)
                 ->exists();
 
-            if ($yaExiste) {
-                return back()->with('error', 'Ese producto ya está en el carrito. No se puede cambiar.');
+            if ($existe) {
+                return back()->with('error', 'Este producto ya está en otro carro del pedido seleccionado.');
             }
 
-            // Actualizar la fila existente: cambiar id_producto y cantidad
+            // Crear nuevo carro
+            $nuevoCarro = new Carro();
+            $nuevoCarro->id_user = $carro->id_user;
+            $nuevoCarro->id_pedido = $nuevoIdPedido;
+            $nuevoCarro->save();
+
+            // Insertar el producto en el nuevo carro
+            DB::table('carro_productos')->insert([
+                'id_carro' => $nuevoCarro->id_carro,
+                'id_producto' => $nuevoIdProducto,
+                'cantidad' => $cantidadSolicitada
+            ]);
+
+            // Eliminar el producto del carro original
             DB::table('carro_productos')
                 ->where('id_carro', $carro->id_carro)
                 ->where('id_producto', $id_producto)
-                ->update([
-                    'id_producto' => $nuevoIdProducto,
-                    'cantidad' => $cantidadSolicitada,
-                ]);
+                ->delete();
+
+        } else {
+            // Si el pedido no cambió, solo actualizamos dentro del mismo carro
+
+            // Si el producto no cambió, actualizamos la cantidad
+            if ($nuevoIdProducto == $id_producto) {
+                DB::table('carro_productos')
+                    ->where('id_carro', $carro->id_carro)
+                    ->where('id_producto', $id_producto)
+                    ->update(['cantidad' => $cantidadSolicitada]);
+            } else {
+                // Verificar que no exista ya (carro, nuevoIdProducto)
+                $yaExiste = DB::table('carro_productos')
+                    ->where('id_carro', $carro->id_carro)
+                    ->where('id_producto', $nuevoIdProducto)
+                    ->exists();
+
+                if ($yaExiste) {
+                    return back()->with('error', 'Ese producto ya está en el carrito. No se puede duplicar.');
+                }
+
+                // Cambiar producto y cantidad
+                DB::table('carro_productos')
+                    ->where('id_carro', $carro->id_carro)
+                    ->where('id_producto', $id_producto)
+                    ->update([
+                        'id_producto' => $nuevoIdProducto,
+                        'cantidad' => $cantidadSolicitada,
+                    ]);
+            }
         }
 
-        // Actualizar pedido si fue cambiado
-        if ($request->filled('id_pedido')) {
-            $carro->id_pedido = $request->input('id_pedido');
-            $carro->save();
-        }
-
-        return redirect()->route('carro.index')->with('success', 'Producto del carro actualizado.');
+        return redirect()->route('carro.index')->with('success', 'Producto actualizado correctamente.');
     }
+
+
 
 
     public function agregarMultiples(Request $request)
@@ -273,6 +293,21 @@ class CarroController extends Controller
             return redirect()->back()->with('error', 'El carro no se encontró.');
         }
         return view('/carro/showCarro', ['carro' => $carro]);
+    }
+
+    public function eliminarProducto($id_carro, $id_producto)
+    {
+        $carro = Carro::findOrFail($id_carro);
+
+        // Eliminar solo la relación con el producto
+        $carro->productos()->detach($id_producto);
+
+        // (Opcional) Si el carro ya no tiene productos, puedes eliminarlo
+        if ($carro->productos()->count() == 0) {
+            $carro->delete();
+        }
+
+        return redirect()->route('carro.index')->with('success', 'Producto eliminado del carrito.');
     }
 
     public function destroy(Carro $carro)

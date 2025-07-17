@@ -98,10 +98,15 @@
                                                     <!-- Todavia falta hacer que se vayan los datos correctos al edit -->
 
                                                     <!-- Botón Eliminar con confirmación -->
-                                                    <form action="{{ url('/carro', $carrito->id_carro) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este carrito?');">
+                                                    <!-- <form action="{{ url('/carro', $carrito->id_carro) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este carrito?');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit">Eliminar</button>
+                                                    </form> -->
+                                                    <form action="{{ route('carro.eliminarProducto', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este producto del carrito?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit">Eliminar producto</button>
                                                     </form>
                                                 </div>
                                             </td>

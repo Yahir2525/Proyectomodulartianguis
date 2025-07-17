@@ -18,7 +18,7 @@
     @endif
 
     <form action="{{ url('/carro') }}" method="POST">
-        @csrf
+    @csrf
 
         <!-- Usuario logueado -->
         <input type="hidden" name="id_user" value="{{ $usuarioId }}">
@@ -30,39 +30,40 @@
             @foreach($productos as $producto)
                 <option value="{{ $producto->id_producto }}"
                     {{ isset($carro) && $producto->id_producto == $carro->id_producto ? 'selected' : '' }}>
-                    {{$producto->id_producto}} - {{ $producto->nombre }} - {{ $producto->piezas_disponibles }} piezas disponibles 
+                    {{ $producto->id_producto }} - {{ $producto->nombre }} - {{ $producto->piezas_disponibles }} piezas disponibles 
                 </option>
             @endforeach
         </select>
         <br><br>
-        
+
         <!-- Cantidad -->
         <label for="cantidad">Cantidad:</label>
         <input type="number" name="cantidad" min="1" required>
         <br><br>
-        @if($pedidosUsuario->isNotEmpty())
-            <!-- Seleccionar pedido existente -->
-            <label for="id_pedido">Selecciona un pedido existente:</label>
-            <select name="id_pedido">
-                <option value="">-- Ninguno --</option>
-                @foreach($pedidosUsuario as $pedido)
-                    <option value="{{ $pedido->id_pedido }}"
-                        {{ session('pedido_reciente') == $pedido->id_pedido ? 'selected' : '' }}>
-                        Pedido #{{ $pedido->id_pedido }}
-                    </option>
-                @endforeach
-            </select>
-            <br><br>
-        @else
-            <!-- Casilla para solicitar uno nuevo -->
-            <label>
-                <input type="checkbox" name="nuevo_pedido" value="1">
-                Crear un nuevo pedido
-            </label>
-            <br><br>
-        @endif
+
+        <!-- Seleccionar pedido existente -->
+        <label for="id_pedido">Selecciona un pedido existente (opcional):</label>
+        <select name="id_pedido">
+            <option value="">-- Ninguno --</option>
+            @foreach($pedidosUsuario as $pedido)
+                <option value="{{ $pedido->id_pedido }}"
+                    {{ session('pedido_reciente') == $pedido->id_pedido ? 'selected' : '' }}>
+                    Pedido #{{ $pedido->id_pedido }}
+                </option>
+            @endforeach
+        </select>
+        <br><br>
+
+        <!-- Casilla para crear uno nuevo -->
+        <label>
+            <input type="checkbox" name="nuevo_pedido" value="1">
+            Crear un nuevo pedido
+        </label>
+        <br><br>
+
         <button type="submit">Agregar al carrito</button>
     </form>
+
 
     <br>
     <a href="/">Inicio</a> |

@@ -73,18 +73,21 @@ Route::resource('abono', AbonoController::class);
 
 Route::resource('pedido', PedidoController::class);
 
+//FUNCIONES DEL PEDIDO
+Route::post('/credito/crear/{pedido}', [CreditoController::class, 'crearDesdePedido'])->name('credito.crearDesdePedido');
+
 Route::resource('credito', CreditoController::class);
 
 Route::resource('producto', ProductoController::class);
 
-
+//FUNCIONES DEL CARRO
 Route::resource('carro', CarroController::class);
-
-Route::post('/credito/crear/{pedido}', [CreditoController::class, 'crearDesdePedido'])->name('credito.crearDesdePedido');
-
 Route::get('/carro/{id_carro}/producto/{id_producto}/edit', [CarroController::class, 'edit'])->name('carro.edit');
 Route::put('/carro/{carro}/producto/{id_producto}', [CarroController::class, 'update'])->name('carro.update');
 Route::post('/carro/agregar-multiples', [CarroController::class, 'agregarMultiples'])->name('carro.agregarMultiples');
+
+Route::delete('/carro/{id_carro}/producto/{id_producto}', [CarroController::class, 'eliminarProducto'])->name('carro.eliminarProducto');
+
 
 });
 

@@ -7,8 +7,7 @@
     <link rel="stylesheet" href="{{ asset('css/compras/editCompras.css') }}">
     <link href="https://fonts.googleapis.com/css?family=Questrial&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/compras/editCompras.css') }}">
-    <title>Edit Pedidos</title>
+    <title>Editar Pedido</title>
 </head>
 <body>
 <section class="hero is-success is-fullheight">
@@ -17,35 +16,41 @@
             <div class="column is-4 is-offset-4">
                 <h1 class="title">Editar Pedido</h1>
                 <hr class="login-hr">
-                <p class="subtitle has-text-white">Ingresa los nuevos datos</p>
-
-                @php
-                    $idPedido = request('id_pedido');
-                    $totalPedido = request('total');
-                @endphp
+                <p class="subtitle has-text-white">Modifica los datos necesarios</p>
 
                 <div class="box">
-                    <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                        <label>Total:</label>
-                        <input type="text" name="total" value="{{ $totalPedido }}">
-                        <div class="field">
-                            <div class="control">
-                                <button class="button is-block is-info is-large is-fullwidth" type="submit">Guardar cambios</button>
-                            </div>
-                        </div>
-                    </form>
-                    <!-- <form action="{{ route('pedido.destroy', $pedido->id_pedido) }}" method="POST">
+                    <form method="POST" action="{{ route('pedido.update', $pedido->id_pedido) }}">
                         @csrf
-                        @method('DELETE')
-                        <div class="field">
-                            <div class="control">
-                                <button class="button is-block is-danger is-large is-fullwidth" type="submit">Eliminar Compra</button>
-                            </div>
-                        </div>
-                    </form> -->
+                        @method('PUT')
+
+                        <label>Método de pago:</label>
+                        <select name="metodo_pago">
+                            <option value="contado" {{ $pedido->metodo_pago === 'contado' ? 'selected' : '' }}>Contado</option>
+                            <option value="credito" {{ $pedido->metodo_pago === 'credito' ? 'selected' : '' }}>Crédito</option>
+                        </select>
+
+                        <br>
+
+                        <label>Crédito (se usará solo si eliges "crédito"):</label>
+                        <select name="id_credito">
+                            <option value="">-- Selecciona un crédito --</option>
+                            @foreach($creditos as $credito)
+                                <option value="{{ $credito->id_credito }}" {{ $pedido->id_credito == $credito->id_credito ? 'selected' : '' }}>
+                                    Crédito #{{ $credito->id_credito }} - ${{ $credito->saldo_total }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <br>
+
+                        <label>Estado del pedido:</label>
+                        <input type="number" name="estado_pedido" value="{{ $pedido->estado_pedido ?? '' }}">
+
+                        <br>
+                        <button type="submit">Guardar cambios</button>
+                    </form>
                     <br>
+                    <a href="{{ url('/pedido') }}" class="button is-light is-fullwidth">Cancelar</a>
                 </div>
             </div>
         </div>

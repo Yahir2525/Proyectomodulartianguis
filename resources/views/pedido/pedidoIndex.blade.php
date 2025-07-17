@@ -25,7 +25,7 @@
             @endphp
 
             @foreach($pedidosPorCredito as $idCredito => $pedidos)
-                <h2>Pedidos del usuario #{{ $idCredito ?? 'Sin crédito' }}</h2>
+                <h2>Pedidos del credito #{{ $idCredito ?? 'Sin crédito' }}</h2>
 
                 <table border="1" cellpadding="5" cellspacing="0">
                     <thead>
@@ -35,6 +35,7 @@
                             <th>ID crédito</th>
                             <th>Total del pedido</th>
                             <th>Estado</th>
+                            <th>Metodo</th>
                             <th>Creado</th>
                             <th>Actualizado</th>
                             <th>Editar</th>
@@ -50,6 +51,7 @@
                                 <td>{{ $idCredito ?? 'N/A' }}</td>
                                 <td>{{ $pedido->total_pedido }}</td>
                                 <td>{{ $pedido->estado_pedido }}</td>
+                                <td>{{ $pedido->metodo_pago}}</td>
                                 <td>{{ $pedido->created_at }}</td>
                                 <td>{{ $pedido->updated_at }}</td>
                                 <td>
@@ -74,9 +76,11 @@
                                             <button type="submit">Crear crédito</button>
                                         </form>
                                     @else
+                                        
+
                                         <form action="{{ route('credito.update', $pedido->id_credito) }}" method="POST">
                                             @csrf
-                                            @method('PUT')
+                                            
                                             <input type="hidden" name="total" value="{{ $pedido->total_pedido }}">
                                             <button type="submit">Actualizar crédito</button>
                                         </form>
