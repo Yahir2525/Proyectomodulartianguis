@@ -1,17 +1,16 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\User;
 use App\Models\Abono;
-use App\Models\Cliente;
 use App\Models\Carro;
+use App\Models\CarroProducto;
 use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\Producto;
-use App\Models\DetallePedido;
-use App\Models\Vendedor;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CreditoController extends Controller
 {
@@ -21,26 +20,21 @@ class CreditoController extends Controller
     public function index()
     {
 
-        $userId = Auth::id();
+        $user = Auth::user();
 
-        $credito = new Credito ();
+        if ($user->hasRole('administrador')) {
+            $creditoIndex = Credito::all();
+        } else {
+            $creditoIndex = Credito::where('id_user', $user->id_user)->get(); // solo los del usuario
+        }
 
-        Credito::all();
-        $creditoIndex = Credito::where('id_user', $userId)->get();
-        return view('credito/creditoIndex', compact ('creditoIndex'));
+        return view('credito/creditoIndex', compact('creditoIndex'));
     }
-    //Me quedé en que iba a pasar el total del pedido segun el id seleccionado en la lista de credito del pedido
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('credito/createCredito');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $credito = new Credito();
@@ -72,8 +66,8 @@ class CreditoController extends Controller
         $credito->id_user = $request->input('id_user');
         if ($request->has('total')) {
         $credito->saldo_total = $request->input('total');}
-        $credito->fecha_liquidacion = $request->input('fecha_liquidacion') ?? now();
-        $credito->fecha_vencimiento = $request->input('fecha_vencimiento') ?? now()->addDays(30);
+        $credito->fecha_liquidacion = null;
+        $credito->fecha_vencimiento = $request->input('fecha_vencimiento') ?? now()->addDays(60);
         $credito->estado = 1;
         $credito->save();
 

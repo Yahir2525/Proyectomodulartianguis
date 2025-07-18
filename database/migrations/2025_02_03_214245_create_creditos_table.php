@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id('id_credito');
             $table->unsignedBigInteger('id_user')->nullable();
             $table->decimal('saldo_total')->nullable();
-            $table->dateTime('fecha_liquidacion');
+            $table->dateTime('fecha_liquidacion')->nullable();
             $table->dateTime('fecha_vencimiento');
             $table->boolean('estado');
             $table->timestamps();

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Principal de pedidos</title>
 </head>
 <body>
@@ -13,15 +13,15 @@
 
         <form action="{{ url('/pedido/showPedido') }}" method="GET">
             <label for="id">ID de compra a buscar:</label>
-            <input type="text" id="id" name="id_pedido" placeholder="21" autofocus>
-            <input type="submit" value="Buscar">
+            <input type="text" id="id" name="id_pedido" placeholder="21" autofocus />
+            <input type="submit" value="Buscar" />
         </form>
 
         @if($pedidoIndex->isNotEmpty())
             @php $pedidosPorCredito = $pedidoIndex->groupBy('id_credito'); @endphp
 
             @foreach($pedidosPorCredito as $idCredito => $pedidos)
-                <h2>{{ $idCredito ? 'Pedidos del crédito #' . $idCredito : 'Pedidos no adquiridos a credito' }}</h2>
+                <h2>{{ $idCredito ? 'Pedidos del crédito #' . $idCredito : 'Pedidos no adquiridos a crédito' }}</h2>
 
                 <table border="1" cellpadding="5" cellspacing="0">
                     <thead>
@@ -70,12 +70,10 @@
 
                                 <td>
                                     @if($pedido->estado_pedido == 1)
-                                        {{-- Formulario para cerrar pedido --}}
                                         <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST" class="form-cierre">
                                             @csrf
-                                            <input type="hidden" name="total" value="{{ $pedido->total_pedido }}">
+                                            <input type="hidden" name="total" value="{{ $pedido->total_pedido }}" />
 
-                                            {{-- Selector de método de pago --}}
                                             <label>Método de pago:</label>
                                             <select name="metodo_pago" class="metodo-pago" required>
                                                 <option value="">-- Selecciona --</option>
@@ -83,10 +81,9 @@
                                                 <option value="credito">Crédito</option>
                                             </select>
 
-                                            {{-- Opciones para crédito --}}
-                                            <div class="credito-opciones" style="display: none; margin-top: 8px;">
+                                            <div class="credito-opciones" style="display:none; margin-top:8px;">
                                                 @php
-                                                    $creditos = \App\Models\Credito::where('id_user', Auth::id())->get();
+                                                    $creditos = \App\Models\Credito::where('id_user', $pedido->id_user)->get();
                                                 @endphp
 
                                                 @if($creditos->isNotEmpty())
@@ -99,22 +96,15 @@
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                    <br><br>
+                                                @else
+                                                    {{-- Si no hay créditos, solo se crea nuevo --}}
+                                                    <input type="hidden" name="id_credito" value="">
                                                 @endif
-
-                                                {{-- Fechas para crear nuevo crédito --}}
-                                                <div class="fechas-credito" style="display: none;">
-                                                    <label>Fecha liquidación:</label>
-                                                    <input type="date" name="fecha_liquidacion">
-                                                    <label>Fecha vencimiento:</label>
-                                                    <input type="date" name="fecha_vencimiento">
-                                                </div>
                                             </div>
 
-                                            <button type="submit">Cerrar pedido</button>
+                                            <button type="submit" style="margin-top:8px;">Cerrar pedido</button>
                                         </form>
                                     @else
-                                        {{-- Mostrar botón Reabrir solo si tiene permiso --}}
                                         @can('edit pedido')
                                             <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST">
                                                 @csrf
@@ -125,8 +115,6 @@
                                         @endcan
                                     @endif
                                 </td>
-
-
                             </tr>
                         @endforeach
                     </tbody>
@@ -135,55 +123,33 @@
         @endif
     @endif
 
-    {{-- JS para manejar opciones de crédito y fechas --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const forms = document.querySelectorAll('.form-cierre');
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.form-cierre').forEach(form => {
+        const metodoPago = form.querySelector('.metodo-pago');
+        const creditoOpciones = form.querySelector('.credito-opciones');
+        const selectCredito = form.querySelector('.select-credito');
 
-            forms.forEach(form => {
-                const metodoSelect = form.querySelector('.metodo-pago');
-                const opcionesCredito = form.querySelector('.credito-opciones');
-                const selectCredito = form.querySelector('.select-credito');
-                const fechasCredito = form.querySelector('.fechas-credito');
-                const fechaLiquidacion = form.querySelector('input[name="fecha_liquidacion"]');
-                const fechaVencimiento = form.querySelector('input[name="fecha_vencimiento"]');
-
-                metodoSelect.addEventListener('change', function () {
-                    if (this.value === 'credito') {
-                        opcionesCredito.style.display = 'block';
-
-                        if (selectCredito && selectCredito.value === '') {
-                            fechasCredito.style.display = 'block';
-                            fechaLiquidacion.required = true;
-                            fechaVencimiento.required = true;
-                        } else {
-                            fechasCredito.style.display = 'none';
-                            fechaLiquidacion.required = false;
-                            fechaVencimiento.required = false;
-                        }
-                    } else {
-                        opcionesCredito.style.display = 'none';
-                        fechasCredito.style.display = 'none';
-                        fechaLiquidacion.required = false;
-                        fechaVencimiento.required = false;
-                    }
-                });
-
-                if (selectCredito) {
-                    selectCredito.addEventListener('change', function () {
-                        if (this.value === '') {
-                            fechasCredito.style.display = 'block';
-                            fechaLiquidacion.required = true;
-                            fechaVencimiento.required = true;
-                        } else {
-                            fechasCredito.style.display = 'none';
-                            fechaLiquidacion.required = false;
-                            fechaVencimiento.required = false;
-                        }
-                    });
+        function toggleCreditoOpciones() {
+            if(metodoPago.value === 'credito'){
+                creditoOpciones.style.display = 'block';
+                if(selectCredito && selectCredito.value === ''){
+                    // Crear nuevo crédito, no mostrar fechas ni exigir nada
                 }
-            });
-        });
-    </script>
+            } else {
+                creditoOpciones.style.display = 'none';
+            }
+        }
+
+        metodoPago.addEventListener('change', toggleCreditoOpciones);
+        if(selectCredito){
+            selectCredito.addEventListener('change', toggleCreditoOpciones);
+        }
+
+        toggleCreditoOpciones();
+    });
+});
+</script>
+
 </body>
 </html>

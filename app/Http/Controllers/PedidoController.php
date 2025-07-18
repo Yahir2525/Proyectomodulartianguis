@@ -1,26 +1,32 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\User;
 use App\Models\Abono;
-use App\Models\Cliente;
-use App\Models\Compra;
+use App\Models\Carro;
+use App\Models\CarroProducto;
 use App\Models\Credito;
-use App\Models\DetallePedido;
 use App\Models\Pedido;
 use App\Models\Producto;
-use App\Models\Carro;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PedidoController extends Controller
 {
     public function index()
     {
-        $userId = Auth::id();
-        $pedidoIndex = Pedido::where('id_user', $userId)->get();
-        return view('pedido/pedidoIndex', compact ('pedidoIndex',));
+        $user = Auth::user();
+
+        if ($user->hasRole('administrador')) {
+            $pedidoIndex = Pedido::all();
+        } else {
+            $pedidoIndex = Pedido::where('id_user', $user->id_user)->get();
+        }
+
+        return view('pedido/pedidoIndex', compact('pedidoIndex'));
     }
+
 
     public function create()
     {
@@ -118,6 +124,7 @@ class PedidoController extends Controller
         if ($metodo === 'contado') {
             $pedido->metodo_pago = 'contado';
             $pedido->estado_pedido = 0;
+            $pedido->id_credito = null; // Quita el crédito asignado
             $pedido->save();
 
             return back()->with('success', 'Pedido cerrado como contado.');
@@ -128,17 +135,15 @@ class PedidoController extends Controller
                 // Crédito existente
                 $pedido->id_credito = $request->input('id_credito');
             } else {
-                // Crear nuevo crédito
-                $request->validate([
-                    'fecha_liquidacion' => 'required|date',
-                    'fecha_vencimiento' => 'required|date',
-                ]);
+                // Crear nuevo crédito sin pedir fechas en formulario, fechas automáticas aquí
+                $fechaCreacion = now();
+                $fechaVencimiento = $fechaCreacion->copy()->addDays(60); // máximo 60 días después
 
                 $nuevoCredito = Credito::create([
                     'id_user' => $pedido->id_user,
                     'saldo_total' => $pedido->total_pedido,
-                    'fecha_liquidacion' => $request->input('fecha_liquidacion'),
-                    'fecha_vencimiento' => $request->input('fecha_vencimiento'),
+                    'fecha_liquidacion' => null, // será asignada cuando se liquide el crédito
+                    'fecha_vencimiento' => $fechaVencimiento,
                     'estado' => 1,
                 ]);
 
@@ -156,6 +161,7 @@ class PedidoController extends Controller
 
         return back()->with('error', 'Método de pago no válido.');
     }
+
 
     public function reabrir(Request $request, $id_pedido)
     {

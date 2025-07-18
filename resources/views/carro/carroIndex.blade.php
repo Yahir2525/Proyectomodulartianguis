@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Principal de carros</title>
+    <center><h1>LOS MEJORES PROYECTOS NO COMO YAMORAS O JUANITOS PROYECT</h1></center>
+    
 
     @php
     use App\Models\CarroProducto;

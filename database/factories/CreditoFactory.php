@@ -27,7 +27,7 @@ class CreditoFactory extends Factory
     {
         return [
             'id_user' => \App\Models\User::inRandomOrder()->value('id_user') ?? null, 
-            'fecha_liquidacion' => $this->faker->dateTime(),
+            'fecha_liquidacion' => null,
             'fecha_vencimiento' => $this->faker->dateTimeBetween('2020-01-01', '2024-12-31'),
             'estado' => 1,
             'created_at' => now(),

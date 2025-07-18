@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Abono;
 use App\Models\Carro;
+use App\Models\CarroProducto;
+use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\User;
-use App\Models\Abono;
-use App\Models\Compra;
-use App\Models\Credito;
-use App\Models\CarroProducto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -18,8 +17,13 @@ class CarroController extends Controller
 {
     public function index()
     {
-        $userId = Auth::id();
-        $carroIndex = Carro::with('productos')->where('id_user', $userId)->get();
+        $user = Auth::user();
+
+        if ($user->hasRole('administrador')) {
+            $carroIndex = Carro::with('productos')->get();
+        } else {
+            $carroIndex = Carro::with('productos')->where('id_user', $user->id_user)->get();
+        }
 
         $reservasGlobales = CarroProducto::select('id_producto')
             ->selectRaw('SUM(cantidad) as total_reservado')
@@ -28,9 +32,9 @@ class CarroController extends Controller
 
         $todosProductos = Producto::all();
 
-    return view('carro/carroIndex', compact('carroIndex', 'reservasGlobales', 'todosProductos'));
-
+        return view('carro.carroIndex', compact('carroIndex', 'reservasGlobales', 'todosProductos'));
     }
+
 
     public function create()
     {
@@ -130,9 +134,6 @@ class CarroController extends Controller
 
         return redirect()->route('carro.index')->with('success', 'Producto agregado correctamente al carrito.');
     }
-
-
-
 
     public function edit($id_carro, $id_producto)
     {

@@ -3,15 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use App\Models\Abono;
-use App\Models\Cliente;
-use App\Models\Compra;
+use App\Models\Carro;
+use App\Models\CarroProducto;
 use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\Producto;
-use App\Models\Vendedor;
-use App\Models\DetallePedido;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
@@ -19,35 +17,18 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-
-    // public function __construct()
-    // {
-    //     $this->middleware('is_admin', ['only' => ['index', 'show']]);
-    //     $this->middleware('permission:create user', ['only' => ['create','store']]);
-    //     $this->middleware('permission:edit user', ['only' => ['update','edit']]);
-    //     $this->middleware('permission:delete user', ['only' => ['destroy']]);
-    // }
-
     public function index()
     {
-        $user = new User ();
-
         $userIndex = User::all();
         return view('user/userIndex', compact ('userIndex'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $roles = Role::pluck('name','name')->all();
         return view('user/createUser', compact('roles'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -77,9 +58,6 @@ class UserController extends Controller
         return redirect('/user')->with('success', 'Usuario registrado correctamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Request $request)
     {
         $id = $request->input('id_user');
@@ -91,9 +69,6 @@ class UserController extends Controller
         return view('/user/showUser', ['user' => $user]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
         $user = User::find($id);
@@ -123,7 +98,6 @@ class UserController extends Controller
         
         $user = User::find($user->id_user);
         
-    
         if (!$user) {
             return redirect()->route('user.index')->with('error', 'El user no se encontró.');
         }
@@ -144,13 +118,13 @@ class UserController extends Controller
     }
 
     
-    public function destroy(User $user, Compra $compra, Credito $credito, Abono $abono)
+    public function destroy(User $user, Pedido $pedido, Credito $credito, Abono $abono)
     {
         $user = User::find($user->id_user);
 
-        if ($user->compras()->exists()) {
+        if ($user->pedidos()->exists()) {
             // Retornar con un mensaje amigable
-            return redirect()->back()->with('error', 'No se puede eliminar el usuario porque tiene compras asociadas.');
+            return redirect()->back()->with('error', 'No se puede eliminar el usuario porque tiene pedidos asociados.');
         }
 
         if ($user->creditos()->exists()) {
@@ -168,7 +142,6 @@ class UserController extends Controller
         }
 
         $user->delete();
-
 
         return redirect()->route('user.index')->with('success', 'El usuario se ha eliminado con éxito.');
     }

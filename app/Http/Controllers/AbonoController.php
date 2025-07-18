@@ -1,39 +1,38 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\User;
 use App\Models\Abono;
-use App\Models\Compra;
+use App\Models\Carro;
+use App\Models\CarroProducto;
 use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\Producto;
+use App\Models\User;
 use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 class AbonoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $abono = new Abono ();
+        $user = Auth::user();
 
-        $abonoIndex = Abono::all();
-        return view('abono/abonoIndex', compact ('abonoIndex'));
+        if ($user->hasRole('administrador')) {
+            $abonoIndex = Abono::all();
+        } else {
+            $abonoIndex = Abono::where('id_user', $user->id)->get();
+        }
+
+        return view('abono/abonoIndex', compact('abonoIndex'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('abono/createAbono');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $abono = new Abono();
@@ -48,9 +47,6 @@ class AbonoController extends Controller
         } 
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Request $request)
     {
         $id = $request->input('id_abono');
@@ -62,9 +58,6 @@ class AbonoController extends Controller
         return view('/abono/showAbono', ['abono' => $abono]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
         // $user = Auth::user();
@@ -83,9 +76,6 @@ class AbonoController extends Controller
         // }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Abono $abono)
     {
         $abono = Abono::find($id);
@@ -100,17 +90,13 @@ class AbonoController extends Controller
         return redirect()->route('abono.abonoIndex')->with('success', 'El abono se ha actualizado con éxito.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Abono $abono)
     {
         $abono = Abono::find($abono->id_user);
 
         if (!$abono) {
             return redirect()->route('abono.index')->with('error', 'El abono no se encontró.');
-        }
-        
+        } 
 
         $abono->delete();
 
