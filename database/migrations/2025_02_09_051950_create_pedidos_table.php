@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_credito')->nullable();
             $table->decimal('total_pedido')->nullable();
             $table->boolean('estado_pedido')->default(1);
-            $table->char('metodo_pago', 7);
+            $table->char('metodo_pago', 7)->nullable();
             $table->timestamps();
 
             $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');

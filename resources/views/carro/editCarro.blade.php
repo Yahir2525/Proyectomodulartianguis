@@ -44,8 +44,10 @@
         <select name="id_pedido">
             <option value="">-- Ninguno --</option>
             @foreach($pedidosUsuario as $pedido)
-                <option value="{{ $pedido->id_pedido }}" {{ $carro->id_pedido == $pedido->id_pedido ? 'selected' : '' }}>
-                    Pedido #{{ $pedido->id_pedido }}
+                <option value="{{ $pedido->id_pedido }}"
+                    {{ $carro->id_pedido == $pedido->id_pedido ? 'selected' : '' }}
+                    {{ $pedido->estado_pedido == 0 ? 'disabled' : '' }}>
+                    Pedido #{{ $pedido->id_pedido }}{{ $pedido->estado_pedido == 0 ? ' (cerrado)' : '' }}
                 </option>
             @endforeach
         </select>

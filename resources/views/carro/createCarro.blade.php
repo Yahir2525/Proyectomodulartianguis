@@ -47,8 +47,9 @@
             <option value="">-- Ninguno --</option>
             @foreach($pedidosUsuario as $pedido)
                 <option value="{{ $pedido->id_pedido }}"
-                    {{ session('pedido_reciente') == $pedido->id_pedido ? 'selected' : '' }}>
-                    Pedido #{{ $pedido->id_pedido }}
+                    {{ session('pedido_reciente') == $pedido->id_pedido ? 'selected' : '' }}
+                    {{ $pedido->estado_pedido == 0 ? 'disabled' : '' }}>
+                    Pedido #{{ $pedido->id_pedido }}{{ $pedido->estado_pedido == 0 ? ' (cerrado)' : '' }}
                 </option>
             @endforeach
         </select>

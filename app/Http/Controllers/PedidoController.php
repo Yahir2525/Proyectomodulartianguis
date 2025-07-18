@@ -104,56 +104,61 @@ class PedidoController extends Controller
     }
 
 
-    public function cerrarPedido(Request $request, $id_pedido)
+    public function cerrar(Request $request, $id_pedido)
     {
         $pedido = Pedido::findOrFail($id_pedido);
 
-        // Actualizar total
+        // Actualiza total
         if ($request->has('total')) {
             $pedido->total_pedido = $request->input('total');
-            $pedido->save(); 
         }
 
-        // Si no tiene crédito, crear uno
-        if (!$pedido->id_credito) {
-            $request->validate([
-                'fecha_liquidacion' => 'required|date',
-                'fecha_vencimiento' => 'required|date',
-            ]);
+        $metodo = $request->input('metodo_pago');
 
-            $credito = new Credito();
-            $credito->id_user = $pedido->id_user;
-            $credito->saldo_total = $pedido->total_pedido;
-            $credito->fecha_liquidacion = $request->input('fecha_liquidacion');
-            $credito->fecha_vencimiento = $request->input('fecha_vencimiento');
-            $credito->save();
+        if ($metodo === 'contado') {
+            $pedido->metodo_pago = 'contado';
+            $pedido->estado_pedido = 0;
+            $pedido->save();
 
-            $pedido->id_credito = $credito->id_credito;
-            $pedido->metodo_pago = 'credito';
-        } else {
-            // Si ya tiene crédito, actualizar su saldo
-            $credito = Credito::find($pedido->id_credito);
-            if ($credito) {
-                $totalPedidos = Pedido::where('id_credito', $pedido->id_credito)->sum('total_pedido');
-                $credito->saldo_total = $totalPedidos;
-                $credito->save();
+            return back()->with('success', 'Pedido cerrado como contado.');
+        }
+
+        if ($metodo === 'credito') {
+            if ($request->filled('id_credito')) {
+                // Crédito existente
+                $pedido->id_credito = $request->input('id_credito');
+            } else {
+                // Crear nuevo crédito
+                $request->validate([
+                    'fecha_liquidacion' => 'required|date',
+                    'fecha_vencimiento' => 'required|date',
+                ]);
+
+                $nuevoCredito = Credito::create([
+                    'id_user' => $pedido->id_user,
+                    'saldo_total' => $pedido->total_pedido,
+                    'fecha_liquidacion' => $request->input('fecha_liquidacion'),
+                    'fecha_vencimiento' => $request->input('fecha_vencimiento'),
+                    'estado' => 1,
+                ]);
+
+                $pedido->id_credito = $nuevoCredito->id_credito;
             }
+
+            $pedido->metodo_pago = 'credito';
+            $pedido->estado_pedido = 0;
+            $pedido->save();
+
+            $this->recalcularSaldoCredito($pedido->id_credito);
+
+            return back()->with('success', 'Pedido cerrado con crédito.');
         }
 
-        // Cerrar pedido
-        $pedido->estado_pedido = 0;
-        $pedido->save();
-
-        return redirect()->back()->with('success', 'Pedido cerrado y crédito actualizado correctamente.');
+        return back()->with('error', 'Método de pago no válido.');
     }
 
-
-    public function reabrirPedido($id_pedido)
+    public function reabrir(Request $request, $id_pedido)
     {
-        if (Auth::user()->rol !== 'admin') {
-            abort(403, 'No autorizado');
-        }
-
         $pedido = Pedido::findOrFail($id_pedido);
         $pedido->estado_pedido = 1;
         $pedido->save();

@@ -29,7 +29,7 @@ class CreditoFactory extends Factory
             'id_user' => \App\Models\User::inRandomOrder()->value('id_user') ?? null, 
             'fecha_liquidacion' => $this->faker->dateTime(),
             'fecha_vencimiento' => $this->faker->dateTimeBetween('2020-01-01', '2024-12-31'),
-            'estado' => $this->faker->randomElement([true, false]),
+            'estado' => 1,
             'created_at' => now(),
             'updated_at' => now(),
         ];

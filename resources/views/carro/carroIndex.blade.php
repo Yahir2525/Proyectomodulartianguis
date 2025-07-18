@@ -99,16 +99,18 @@
                                             <td>{{ $producto->precio_unitario }}</td>
                                             <td>{{ $subtotal }}</td>
                                             <td>
-                                                <div style="display: flex; gap: 5px; justify-content: center;">
+                                                @if($carrito->pedido && $carrito->pedido->estado_pedido == 1)
                                                     <a href="{{ route('carro.edit', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}">
                                                         <button type="button">Editar</button>
                                                     </a>
-                                                    <form action="{{ route('carro.eliminarProducto', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este producto del carrito?');">
+                                                    <form action="{{ route('carro.eliminarProducto', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" method="POST" onsubmit="return confirm('¿Estás seguro?');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit">Eliminar producto</button>
                                                     </form>
-                                                </div>
+                                                @else
+                                                    <span style="color: gray;">Pedido cerrado</span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

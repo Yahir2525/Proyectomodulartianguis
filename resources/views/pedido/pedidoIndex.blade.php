@@ -9,9 +9,7 @@
     <h1>Principal de pedidos</h1>
 
     @if(Auth::check())
-        <p>
-            <a href="{{ url('/pedido/create') }}">Registrar un nuevo pedido</a>
-        </p>
+        <p><a href="{{ url('/pedido/create') }}">Registrar un nuevo pedido</a></p>
 
         <form action="{{ url('/pedido/showPedido') }}" method="GET">
             <label for="id">ID de compra a buscar:</label>
@@ -20,27 +18,25 @@
         </form>
 
         @if($pedidoIndex->isNotEmpty())
-            @php
-                $pedidosPorCredito = $pedidoIndex->groupBy('id_credito');
-            @endphp
+            @php $pedidosPorCredito = $pedidoIndex->groupBy('id_credito'); @endphp
 
             @foreach($pedidosPorCredito as $idCredito => $pedidos)
-                <h2>Pedidos del credito #{{ $idCredito ?? 'Sin crédito' }}</h2>
+                <h2>{{ $idCredito ? 'Pedidos del crédito #' . $idCredito : 'Pedidos no adquiridos a credito' }}</h2>
 
                 <table border="1" cellpadding="5" cellspacing="0">
                     <thead>
                         <tr>
                             <th>ID pedido</th>
-                            <th>Nombre usuario</th>
-                            <th>ID crédito</th>
-                            <th>Total del pedido</th>
+                            <th>Usuario</th>
+                            <th>Crédito</th>
+                            <th>Total</th>
                             <th>Estado</th>
-                            <th>Metodo</th>
+                            <th>Método</th>
                             <th>Creado</th>
                             <th>Actualizado</th>
                             <th>Editar</th>
                             <th>Eliminar</th>
-                            <th>Crédito</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,58 +44,89 @@
                             <tr>
                                 <td>{{ $pedido->id_pedido }}</td>
                                 <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                                <td>{{ $idCredito ?? 'N/A' }}</td>
+                                <td>{{ $pedido->id_credito ?? 'N/A' }}</td>
                                 <td>{{ $pedido->total_pedido }}</td>
-                                <td>{{ $pedido->estado_pedido }}</td>
-                                <td>{{ $pedido->metodo_pago}}</td>
+                                <td>{{ $pedido->estado_pedido == 1 ? 'Abierto' : 'Cerrado' }}</td>
+                                <td>{{ $pedido->metodo_pago ?? 'Sin seleccionar' }}</td>
                                 <td>{{ $pedido->created_at }}</td>
                                 <td>{{ $pedido->updated_at }}</td>
-                                <td>
-                                    <a href="{{ route('pedido.edit', $pedido->id_pedido) }}?total={{ $pedido->total_pedido }}">Editar</a>
-                                </td>
-                                <td>
-                                    <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit">Eliminar</button>
-                                    </form>
-                                </td>
-                                <td>
-                                    @if(!$pedido->id_credito)
-                                        <form action="{{ route('credito.crearDesdePedido', $pedido->id_pedido) }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="nuevo_credito" value="1">
-                                            <input type="hidden" name="total" value="{{ $pedido->total_pedido }}">
-                                            <input type="hidden" name="id_user" value="{{ $pedido->id_user }}">
-                                            <input type="date" name="fecha_liquidacion" required>
-                                            <input type="date" name="fecha_vencimiento" required>
-                                            <button type="submit">Crear crédito</button>
-                                        </form>
-                                    @else
-                                        
 
+                                {{-- Mostrar botones solo si pedido está abierto --}}
+                                @if($pedido->estado_pedido == 1)
                                     <td>
-                                        <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST">
+                                        <a href="{{ route('pedido.edit', $pedido->id_pedido) }}?total={{ $pedido->total_pedido }}">Editar</a>
+                                    </td>
+                                    <td>
+                                        <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit">Eliminar</button>
+                                        </form>
+                                    </td>
+                                @else
+                                    <td></td>
+                                    <td></td>
+                                @endif
+
+                                <td>
+                                    @if($pedido->estado_pedido == 1)
+                                        {{-- Formulario para cerrar pedido --}}
+                                        <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST" class="form-cierre">
                                             @csrf
                                             <input type="hidden" name="total" value="{{ $pedido->total_pedido }}">
 
-                                            @if(!$pedido->id_credito)
-                                                <input type="date" name="fecha_liquidacion" required>
-                                                <input type="date" name="fecha_vencimiento" required>
-                                            @endif
+                                            {{-- Selector de método de pago --}}
+                                            <label>Método de pago:</label>
+                                            <select name="metodo_pago" class="metodo-pago" required>
+                                                <option value="">-- Selecciona --</option>
+                                                <option value="contado">Contado</option>
+                                                <option value="credito">Crédito</option>
+                                            </select>
+
+                                            {{-- Opciones para crédito --}}
+                                            <div class="credito-opciones" style="display: none; margin-top: 8px;">
+                                                @php
+                                                    $creditos = \App\Models\Credito::where('id_user', Auth::id())->get();
+                                                @endphp
+
+                                                @if($creditos->isNotEmpty())
+                                                    <label>Seleccionar crédito:</label>
+                                                    <select name="id_credito" class="select-credito">
+                                                        <option value="">-- Crear nuevo crédito --</option>
+                                                        @foreach($creditos as $credito)
+                                                            <option value="{{ $credito->id_credito }}">
+                                                                Crédito #{{ $credito->id_credito }} - Saldo: {{ $credito->saldo_total }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <br><br>
+                                                @endif
+
+                                                {{-- Fechas para crear nuevo crédito --}}
+                                                <div class="fechas-credito" style="display: none;">
+                                                    <label>Fecha liquidación:</label>
+                                                    <input type="date" name="fecha_liquidacion">
+                                                    <label>Fecha vencimiento:</label>
+                                                    <input type="date" name="fecha_vencimiento">
+                                                </div>
+                                            </div>
 
                                             <button type="submit">Cerrar pedido</button>
                                         </form>
-
-                                        @if(Auth::user()->rol === 'admin' && $pedido->estado_pedido == 0)
-                                            <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST" style="margin-top: 4px;">
+                                    @else
+                                        {{-- Mostrar botón Reabrir solo si tiene permiso --}}
+                                        @can('edit pedido')
+                                            <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST">
                                                 @csrf
                                                 <button type="submit">Reabrir pedido</button>
                                             </form>
-                                        @endif
-                                    </td>
+                                        @else
+                                            Pedido cerrado
+                                        @endcan
                                     @endif
                                 </td>
+
+
                             </tr>
                         @endforeach
                     </tbody>
@@ -107,5 +134,56 @@
             @endforeach
         @endif
     @endif
+
+    {{-- JS para manejar opciones de crédito y fechas --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const forms = document.querySelectorAll('.form-cierre');
+
+            forms.forEach(form => {
+                const metodoSelect = form.querySelector('.metodo-pago');
+                const opcionesCredito = form.querySelector('.credito-opciones');
+                const selectCredito = form.querySelector('.select-credito');
+                const fechasCredito = form.querySelector('.fechas-credito');
+                const fechaLiquidacion = form.querySelector('input[name="fecha_liquidacion"]');
+                const fechaVencimiento = form.querySelector('input[name="fecha_vencimiento"]');
+
+                metodoSelect.addEventListener('change', function () {
+                    if (this.value === 'credito') {
+                        opcionesCredito.style.display = 'block';
+
+                        if (selectCredito && selectCredito.value === '') {
+                            fechasCredito.style.display = 'block';
+                            fechaLiquidacion.required = true;
+                            fechaVencimiento.required = true;
+                        } else {
+                            fechasCredito.style.display = 'none';
+                            fechaLiquidacion.required = false;
+                            fechaVencimiento.required = false;
+                        }
+                    } else {
+                        opcionesCredito.style.display = 'none';
+                        fechasCredito.style.display = 'none';
+                        fechaLiquidacion.required = false;
+                        fechaVencimiento.required = false;
+                    }
+                });
+
+                if (selectCredito) {
+                    selectCredito.addEventListener('change', function () {
+                        if (this.value === '') {
+                            fechasCredito.style.display = 'block';
+                            fechaLiquidacion.required = true;
+                            fechaVencimiento.required = true;
+                        } else {
+                            fechasCredito.style.display = 'none';
+                            fechaLiquidacion.required = false;
+                            fechaVencimiento.required = false;
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

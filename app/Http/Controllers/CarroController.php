@@ -56,6 +56,16 @@ class CarroController extends Controller
         $productoId = $request->input('id_producto');
         $cantidad = (int) $request->input('cantidad');
 
+        $id_pedido = $request->input('id_pedido');
+
+        // Verifica si el pedido está cerrado
+        if ($id_pedido) {
+            $pedido = Pedido::find($id_pedido);
+            if ($pedido && $pedido->estado_pedido == 0) {
+                return redirect()->back()->with('error', 'No se puede agregar productos a un pedido cerrado.');
+            }
+        }
+
         if ($cantidad <= 0) {
             return back()->with('error', 'La cantidad debe ser mayor a 0.');
         }
@@ -128,10 +138,6 @@ class CarroController extends Controller
     {
         $carro = Carro::findOrFail($id_carro);
 
-        if ($carro->estado_carro && Auth::user()->rol != 'admin') {
-            return redirect()->back()->with('error', 'No puedes editar un carro cerrado.');
-        }
-
         // Producto actual que se va a editar
         $productoActual = $carro->productos()->where('productos.id_producto', $id_producto)->firstOrFail();
         $cantidad = $productoActual->pivot->cantidad;
@@ -154,8 +160,14 @@ class CarroController extends Controller
 
     public function update(Request $request, Carro $carro, $id_producto)
     {
-        if ($carro->estado_carro && Auth::user()->rol != 'admin') {
-            return redirect()->back()->with('error', 'No puedes editar un carro cerrado.');
+        $id_pedido = $request->input('id_pedido');
+
+        // Verifica si el pedido está cerrado
+        if ($id_pedido) {
+            $pedido = Pedido::find($id_pedido);
+            if ($pedido && $pedido->estado_pedido == 0) {
+                return redirect()->back()->with('error', 'No se puede agregar productos a un pedido cerrado.');
+            }
         }
 
         $nuevoIdProducto = $request->input('id_producto');
@@ -263,6 +275,14 @@ class CarroController extends Controller
         $idPedido = $request->input('id_pedido');
         $seleccionados = $request->input('productos_seleccionados', []);
         $cantidades = $request->input('cantidades', []);
+
+    // Verifica si el pedido está cerrado
+        if ($idPedido) {
+            $pedido = Pedido::find($idPedido);
+            if ($pedido && $pedido->estado_pedido == 0) {
+                return redirect()->back()->with('error', 'No se puede agregar productos a un pedido cerrado.');
+            }
+        }
 
         if (empty($seleccionados)) {
             return back()->with('error', 'No seleccionaste ningún producto.');
