@@ -114,35 +114,39 @@ class PedidoController extends Controller
     {
         $pedido = Pedido::findOrFail($id_pedido);
 
-        // Actualiza total
+        // Actualiza el total si se manda
         if ($request->has('total')) {
             $pedido->total_pedido = $request->input('total');
         }
 
         $metodo = $request->input('metodo_pago');
+        $creditoAnteriorId = $pedido->id_credito; // guardar el crédito anterior
 
         if ($metodo === 'contado') {
             $pedido->metodo_pago = 'contado';
             $pedido->estado_pedido = 0;
-            $pedido->id_credito = null; // Quita el crédito asignado
+            $pedido->id_credito = null;
             $pedido->save();
+
+            // Recalcular saldo del crédito anterior si existía
+            $this->recalcularSaldoCredito($creditoAnteriorId);
 
             return back()->with('success', 'Pedido cerrado como contado.');
         }
 
         if ($metodo === 'credito') {
             if ($request->filled('id_credito')) {
-                // Crédito existente
+                // Asignar a crédito existente
                 $pedido->id_credito = $request->input('id_credito');
             } else {
-                // Crear nuevo crédito sin pedir fechas en formulario, fechas automáticas aquí
+                // Crear nuevo crédito automáticamente
                 $fechaCreacion = now();
-                $fechaVencimiento = $fechaCreacion->copy()->addDays(60); // máximo 60 días después
+                $fechaVencimiento = $fechaCreacion->copy()->addDays(60);
 
                 $nuevoCredito = Credito::create([
                     'id_user' => $pedido->id_user,
-                    'saldo_total' => $pedido->total_pedido,
-                    'fecha_liquidacion' => null, // será asignada cuando se liquide el crédito
+                    'saldo_total' => 0, // Se actualizará con recalcularSaldoCredito
+                    'fecha_liquidacion' => null,
                     'fecha_vencimiento' => $fechaVencimiento,
                     'estado' => 1,
                 ]);
@@ -154,6 +158,8 @@ class PedidoController extends Controller
             $pedido->estado_pedido = 0;
             $pedido->save();
 
+            // Recalcular saldos del crédito anterior y del nuevo
+            $this->recalcularSaldoCredito($creditoAnteriorId);
             $this->recalcularSaldoCredito($pedido->id_credito);
 
             return back()->with('success', 'Pedido cerrado con crédito.');
@@ -161,6 +167,7 @@ class PedidoController extends Controller
 
         return back()->with('error', 'Método de pago no válido.');
     }
+
 
 
     public function reabrir(Request $request, $id_pedido)
