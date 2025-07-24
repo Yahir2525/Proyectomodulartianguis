@@ -101,6 +101,12 @@ class CarroController extends Controller
             ['id_user' => $userId]
         );
 
+        // Calcular total anterior antes de modificar el carro
+        $totalAnterior = 0;
+        foreach ($carro->productos as $prod) {
+            $totalAnterior += $prod->precio_unitario * $prod->pivot->cantidad;
+        }
+
         // Verificar si el producto ya está en el carro
         $productoExistente = $carro->productos()->where('productos.id_producto', $productoId)->first();
 
@@ -113,25 +119,31 @@ class CarroController extends Controller
             $carro->productos()->attach($productoId, ['cantidad' => $cantidad]);
         }
 
-        // Recalcular total del pedido
-        $total = 0;
+        // Calcular nuevo total
+        $nuevoTotal = 0;
         foreach ($carro->productos as $prod) {
-            $total += $prod->precio_unitario * $prod->pivot->cantidad;
+            $nuevoTotal += $prod->precio_unitario * $prod->pivot->cantidad;
         }
 
-        $pedido->total_pedido = $total;
+        $pedido->total_pedido = $nuevoTotal;
         $pedido->save();
 
-        // Si el pedido está cerrado y tiene crédito, actualiza el crédito
+        // Si el pedido está cerrado y tiene crédito, actualiza el crédito con la diferencia
         if ($pedido->estado_pedido == 0 && $pedido->id_credito) {
-            $credito = Credito::find($pedido->id_credito);
-            $credito->saldo_total = Pedido::where('id_credito', $pedido->id_credito)->sum('total_pedido');
-            $credito->save();
-        }
+            $diferencia = $nuevoTotal - $totalAnterior;
 
+            if ($diferencia != 0) {
+                $credito = Credito::find($pedido->id_credito);
+                if ($credito) {
+                    $credito->saldo_total += $diferencia;
+                    $credito->save();
+                }
+            }
+        }
 
         return redirect()->route('carro.index')->with('success', 'Producto agregado correctamente.');
     }
+
 
     public function agregarMultiples(Request $request)
     {
@@ -162,6 +174,12 @@ class CarroController extends Controller
             ['id_user' => $userId]
         );
 
+        // Calcular total anterior antes de modificaciones
+        $totalAnterior = 0;
+        foreach ($carro->productos as $prod) {
+            $totalAnterior += $prod->precio_unitario * $prod->pivot->cantidad;
+        }
+
         foreach ($seleccionados as $idProducto) {
             $cantidad = (int) ($cantidades[$idProducto] ?? 0);
             if ($cantidad <= 0) continue;
@@ -188,59 +206,84 @@ class CarroController extends Controller
             }
         }
 
-        // Recalcular total del pedido
-        $total = 0;
+        // Calcular nuevo total después de modificaciones
+        $nuevoTotal = 0;
         foreach ($carro->productos as $prod) {
-            $total += $prod->precio_unitario * $prod->pivot->cantidad;
+            $nuevoTotal += $prod->precio_unitario * $prod->pivot->cantidad;
         }
 
-        $pedido->total_pedido = $total;
+        $pedido->total_pedido = $nuevoTotal;
         $pedido->save();
 
-        // Si el pedido está cerrado y tiene crédito, actualiza el crédito
+        // Si el pedido está cerrado y tiene crédito, actualiza el crédito solo con la diferencia
         if ($pedido->estado_pedido == 0 && $pedido->id_credito) {
-            $credito = Credito::find($pedido->id_credito);
-            $credito->saldo_total = Pedido::where('id_credito', $pedido->id_credito)->sum('total_pedido');
-            $credito->save();
-        }
+            $diferencia = $nuevoTotal - $totalAnterior;
 
+            if ($diferencia != 0) {
+                $credito = Credito::find($pedido->id_credito);
+                if ($credito) {
+                    $credito->saldo_total += $diferencia;
+                    $credito->save();
+                }
+            }
+        }
 
         return redirect()->route('carro.index')->with('success', 'Productos agregados correctamente.');
     }
 
+
     public function eliminarProducto($id_carro, $id_producto)
     {
-        $carro = Carro::with('pedido')->findOrFail($id_carro);
+        $carro = Carro::with('pedido', 'productos')->findOrFail($id_carro);
+        $pedido = Pedido::find($carro->id_pedido);
+
+        if (!$pedido) {
+            return back()->with('error', 'Pedido no encontrado.');
+        }
+
+        // Calcular total anterior antes de la eliminación
+        $totalAnterior = 0;
+        foreach ($carro->productos as $prod) {
+            $totalAnterior += $prod->precio_unitario * $prod->pivot->cantidad;
+        }
+
+        // Desvincular producto
         $carro->productos()->detach($id_producto);
 
+        // Recargar relación productos para nuevo cálculo
+        $carro->load('productos');
+
+        // Si el carro quedó vacío, eliminarlo
         if ($carro->productos()->count() == 0) {
             $carro->delete();
         }
 
-        // Recalcular total del pedido
-        $pedido = Pedido::find($carro->id_pedido);
+        // Calcular nuevo total después de eliminación
+        $nuevoTotal = 0;
+        foreach ($carro->productos as $prod) {
+            $nuevoTotal += $prod->precio_unitario * $prod->pivot->cantidad;
+        }
 
-        if ($pedido) {
-            // Recalcular nuevo total
-            $nuevoTotal = 0;
-            foreach ($carro->productos as $prod) {
-                $nuevoTotal += $prod->precio_unitario * $prod->pivot->cantidad;
-            }
+        // Actualizar total del pedido
+        $pedido->total_pedido = $nuevoTotal;
+        $pedido->save();
 
-            $pedido->total_pedido = $nuevoTotal;
-            $pedido->save();
+        // Si pedido cerrado con crédito, actualizar saldo crédito con diferencia
+        if ($pedido->estado_pedido == 0 && $pedido->id_credito) {
+            $diferencia = $nuevoTotal - $totalAnterior;
 
-            // Actualizar crédito si aplica
-            if ($pedido->estado_pedido == 0 && $pedido->id_credito) {
+            if ($diferencia != 0) {
                 $credito = Credito::find($pedido->id_credito);
-                $credito->saldo_total = Pedido::where('id_credito', $pedido->id_credito)->sum('total_pedido');
-                $credito->save();
+                if ($credito) {
+                    $credito->saldo_total += $diferencia;
+                    $credito->save();
+                }
             }
         }
 
-
         return redirect()->route('carro.index')->with('success', 'Producto eliminado.');
     }
+
 
 
     public function show(Request $request)
@@ -319,10 +362,10 @@ class CarroController extends Controller
             return back()->with('error', "Solo hay $disponibles piezas disponibles.");
         }
 
-        // Obtener el pedido y su total antes del cambio
         $pedido = Pedido::find($carro->id_pedido);
         $totalAnterior = $pedido->total_pedido;
 
+        // Actualizar el producto en el carro
         if ($nuevoIdProducto == $id_producto) {
             $carro->productos()->updateExistingPivot($id_producto, ['cantidad' => $cantidadSolicitada]);
         } else {
@@ -334,23 +377,24 @@ class CarroController extends Controller
             $carro->productos()->attach($nuevoIdProducto, ['cantidad' => $cantidadSolicitada]);
         }
 
+        // Recargar productos para obtener los nuevos valores
+        $carro->load('productos');
+
         // Recalcular total del pedido
         $nuevoTotal = 0;
         foreach ($carro->productos as $prod) {
             $nuevoTotal += $prod->precio_unitario * $prod->pivot->cantidad;
         }
 
-        // Actualizar pedido
         $pedido->total_pedido = $nuevoTotal;
         $pedido->save();
 
-        // Si el pedido está cerrado y tiene crédito, actualizar el crédito
+        // Si el pedido está cerrado y tiene crédito, actualiza el crédito con la diferencia
         if ($pedido->estado_pedido == 0 && $pedido->id_credito) {
             $credito = Credito::find($pedido->id_credito);
-
             $diferencia = $nuevoTotal - $totalAnterior;
 
-            if ($diferencia > 0) {
+            if ($credito && $diferencia != 0) {
                 $credito->saldo_total += $diferencia;
                 $credito->save();
             }
@@ -359,11 +403,12 @@ class CarroController extends Controller
         return redirect()->route('carro.index')->with('success', 'Carro actualizado correctamente.');
     }
 
-
     public function destroy(Carro $carro)
     {
         $pedido = Pedido::find($carro->id_pedido);
+        $totalAnterior = $pedido ? $pedido->total_pedido : 0;
 
+        // Eliminar productos y carro
         $carro->productos()->detach();
         $carro->delete();
 
@@ -371,14 +416,19 @@ class CarroController extends Controller
             $pedido->total_pedido = 0;
             $pedido->save();
 
+            // Si el pedido está cerrado y tiene crédito, ajustamos por diferencia
             if ($pedido->estado_pedido == 0 && $pedido->id_credito) {
                 $credito = Credito::find($pedido->id_credito);
-                $credito->saldo_total = Pedido::where('id_credito', $pedido->id_credito)->sum('total_pedido');
-                $credito->save();
+
+                if ($credito && $totalAnterior != 0) {
+                    $credito->saldo_total -= $totalAnterior;
+                    $credito->save();
+                }
             }
         }
 
         return redirect()->route('carro.index')->with('success', 'Carro eliminado.');
     }
+
 
 }

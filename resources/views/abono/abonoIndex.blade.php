@@ -54,6 +54,11 @@
                                     <button type="submit">Eliminar</button>
                                 </form>
                             @endcan
+                                <form action="{{ route('abono.aplicar', $abono->id_abono) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    <button type="submit">Aplicar al crédito</button>
+                                </form>
+
                         </td>
                     </tr>
                 @endforeach

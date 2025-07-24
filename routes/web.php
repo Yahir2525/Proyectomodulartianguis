@@ -70,6 +70,8 @@ Route::get('/registro', function () {
 Route::middleware(['is_user'])->group(function() {
 
 Route::resource('abono', AbonoController::class);
+Route::post('/abono/aplicar/{id}', [AbonoController::class, 'aplicarAlCredito'])->name('abono.aplicar');
+
 
 Route::resource('pedido', PedidoController::class);
 

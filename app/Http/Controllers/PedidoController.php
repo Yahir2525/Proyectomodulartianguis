@@ -113,7 +113,6 @@ class PedidoController extends Controller
         $creditoAnteriorId = $pedido->id_credito;
         $totalAnterior = $pedido->total_pedido;
 
-        // Actualizar campos del pedido
         $nuevoTotal = $request->input('total', $totalAnterior);
         $pedido->total_pedido = $nuevoTotal;
         $pedido->metodo_pago = $request->input('metodo_pago', $pedido->metodo_pago);
@@ -127,19 +126,21 @@ class PedidoController extends Controller
 
         $pedido->save();
 
-        // Si el pedido está cerrado y tiene crédito, sumamos solo la diferencia
         if ($pedido->estado_pedido == 0 && $pedido->metodo_pago === 'credito' && $pedido->id_credito) {
             $diferencia = $nuevoTotal - $totalAnterior;
-            $credito = Credito::find($pedido->id_credito);
-
-            if ($credito && $diferencia != 0) {
-                $credito->saldo_total += $diferencia;
-                $credito->save();
+            if ($diferencia != 0) {
+                $credito = Credito::find($pedido->id_credito);
+                if ($credito) {
+                    $credito->saldo_total += $diferencia;
+                    $credito->save();
+                }
             }
         } else {
-            // Recalcular si no aplica la diferencia
-            $this->recalcularSaldoCredito($creditoAnteriorId);
-            $this->recalcularSaldoCredito($pedido->id_credito);
+            // Solo recalcular si cambió de crédito
+            if ($creditoAnteriorId != $pedido->id_credito) {
+                $this->recalcularSaldoCredito($creditoAnteriorId);
+                $this->recalcularSaldoCredito($pedido->id_credito);
+            }
         }
 
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha actualizado con éxito.');
@@ -147,17 +148,21 @@ class PedidoController extends Controller
 
 
 
+
     public function cerrar(Request $request, $id_pedido)
     {
         $pedido = Pedido::findOrFail($id_pedido);
 
-        // Actualiza el total si se manda
+        $totalAnterior = $pedido->total_pedido;
+
+        // Si viene un nuevo total desde la vista, se aplica
         if ($request->has('total')) {
             $pedido->total_pedido = $request->input('total');
         }
 
         $metodo = $request->input('metodo_pago');
-        $creditoAnteriorId = $pedido->id_credito; // guardar el crédito anterior
+        $creditoAnteriorId = $pedido->id_credito;
+        $nuevoCredito = null;
 
         if ($metodo === 'contado') {
             $pedido->metodo_pago = 'contado';
@@ -165,29 +170,25 @@ class PedidoController extends Controller
             $pedido->id_credito = null;
             $pedido->save();
 
-            // Recalcular saldo del crédito anterior si existía
+            // Recalcula el saldo del crédito anterior si existía
             $this->recalcularSaldoCredito($creditoAnteriorId);
 
             return back()->with('success', 'Pedido cerrado como contado.');
         }
 
         if ($metodo === 'credito') {
+            // Asignar crédito existente o crear uno nuevo
             if ($request->filled('id_credito')) {
-                // Asignar a crédito existente
                 $pedido->id_credito = $request->input('id_credito');
             } else {
-                // Crear nuevo crédito automáticamente
-                $fechaCreacion = now();
-                $fechaVencimiento = $fechaCreacion->copy()->addDays(60);
-
+                $fechaVencimiento = now()->addDays(60);
                 $nuevoCredito = Credito::create([
                     'id_user' => $pedido->id_user,
-                    'saldo_total' => 0, // Se actualizará con recalcularSaldoCredito
+                    'saldo_total' => 0, // Se ajustará abajo
                     'fecha_liquidacion' => null,
                     'fecha_vencimiento' => $fechaVencimiento,
                     'estado' => 1,
                 ]);
-
                 $pedido->id_credito = $nuevoCredito->id_credito;
             }
 
@@ -195,16 +196,32 @@ class PedidoController extends Controller
             $pedido->estado_pedido = 0;
             $pedido->save();
 
-            // Recalcular saldos del crédito anterior y del nuevo
-            $this->recalcularSaldoCredito($creditoAnteriorId);
-            $this->recalcularSaldoCredito($pedido->id_credito);
+            if ($nuevoCredito) {
+                // Es un nuevo crédito: simplemente asigna el total actual del pedido
+                $nuevoCredito->saldo_total = $pedido->total_pedido;
+                $nuevoCredito->save();
+            } else {
+                // Crédito existente: solo actualiza con la diferencia
+                $diferencia = $pedido->total_pedido - $totalAnterior;
+                if ($diferencia != 0) {
+                    $credito = Credito::find($pedido->id_credito);
+                    if ($credito) {
+                        $credito->saldo_total += $diferencia;
+                        $credito->save();
+                    }
+                }
+            }
+
+            // Si se cambió de crédito, recalcular el anterior
+            if ($creditoAnteriorId != $pedido->id_credito) {
+                $this->recalcularSaldoCredito($creditoAnteriorId);
+            }
 
             return back()->with('success', 'Pedido cerrado con crédito.');
         }
 
         return back()->with('error', 'Método de pago no válido.');
     }
-
 
 
     public function reabrir(Request $request, $id_pedido)
