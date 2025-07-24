@@ -2,13 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle del Pedido</title>
+    <title>Detalle(s) del Pedido</title>
 </head>
 <body>
-    <h1>Detalle del Pedido</h1>
+    <h1>Detalle(s) del Pedido</h1>
 
-    @if ($pedido)
+    @if (isset($pedidos) && $pedidos->isNotEmpty())
         <table border="1" cellpadding="5" cellspacing="0">
             <thead>
                 <tr>
@@ -23,20 +22,22 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>{{ $pedido->id_pedido }}</td>
-                    <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin usuario' }}</td>
-                    <td>{{ $pedido->metodo_pago }}</td>
-                    <td>{{ $pedido->estado_pedido }}</td>
-                    <td>{{ $pedido->id_credito ?? 'N/A' }}</td>
-                    <td>{{ $pedido->total_pedido }}</td>
-                    <td>{{ $pedido->created_at }}</td>
-                    <td>{{ $pedido->updated_at }}</td>
-                </tr>
+                @foreach ($pedidos as $pedido)
+                    <tr>
+                        <td>{{ $pedido->id_pedido }}</td>
+                        <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin usuario' }}</td>
+                        <td>{{ $pedido->metodo_pago }}</td>
+                        <td>{{ $pedido->estado_pedido == 1 ? 'Abierto' : 'Cerrado' }}</td>
+                        <td>{{ $pedido->id_credito ?? 'N/A' }}</td>
+                        <td>${{ number_format($pedido->total_pedido, 2) }}</td>
+                        <td>{{ $pedido->created_at }}</td>
+                        <td>{{ $pedido->updated_at }}</td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
     @else
-        <p style="color: red;">El pedido no se encontró.</p>
+        <p style="color: red;">No se encontraron pedidos.</p>
     @endif
 
     <br>

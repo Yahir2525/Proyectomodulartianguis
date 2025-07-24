@@ -85,12 +85,33 @@ class CreditoController extends Controller
     public function show(Request $request)
     {
         $id = $request->input('id_credito');
-        $credito = Credito::find($id);
-            
-        if (!$credito) {
-            return redirect()->back()->with('error', 'El credito no se encontró.');
+        $nombreUsuario = $request->input('nombre_usuario');
+
+        // Buscar por ID de pedido
+        if ($id) {
+            $credito = Credito::with('user')->find($id);
+            if (!$credito) {
+                return back()->with('error', 'El credito no se encontró.');
+            }
+            return view('credito.showCredito', ['creditos' => collect([$credito])]);
         }
-        return view('/credito/showCredito', ['credito' => $credito]);
+
+        // Buscar por nombre de usuario
+        if ($nombreUsuario) {
+            $usuario = User::where('nombre_usuario', 'ILIKE', $nombreUsuario)->first();
+            if (!$usuario) {
+                return back()->with('error', 'Usuario no encontrado.');
+            }
+
+            $creditos = Credito::with('user')->where('id_user', $usuario->id_user)->get();
+            if ($creditos->isEmpty()) {
+                return back()->with('error', 'No se encontraron creditos para el usuario "' . $nombreUsuario . '".');
+            }
+
+            return view('credito.showCredito', ['creditos' => $creditos]);
+        }
+
+        return back()->with('error', 'Debes ingresar un ID de credito o un nombre de usuario.');
     }
 
     /**
@@ -115,16 +136,20 @@ class CreditoController extends Controller
     public function update(Request $request, Credito $credito)
     {
         $credito = Credito::find($credito->id_credito);
-        
+
         if (!$credito) {
-            return redirect()->route('credito.index')->with('error', 'El credito no se encontró.');
+            return redirect()->route('credito.index')->with('error', 'El crédito no se encontró.');
         }
-        if ($request->has('total')) {
-        $credito->saldo_total = $request->input('total');}
-        
+
+        $credito->fecha_liquidacion = $request->input('fecha_liquidacion', $credito->fecha_liquidacion);
+        $credito->fecha_vencimiento = $request->input('fecha_vencimiento', $credito->fecha_vencimiento);
+        $credito->estado = $request->input('estado', $credito->estado);
+
         $credito->save();
-        return redirect()->route('credito.index')->with('success', 'El credito se ha actualizado con éxito.');
+
+        return redirect()->route('credito.index')->with('success', 'El crédito se ha actualizado con éxito.');
     }
+
 
     /**
      * Remove the specified resource from storage.

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Carro;
 use App\Models\Pedido;
 use App\Models\Producto;
+use App\Models\CarroProducto;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CarroProducto>
  */
@@ -19,14 +20,25 @@ class CarroProductoFactory extends Factory
      */
     public function definition(): array
     {
-        $carro = \App\Models\Carro::inRandomOrder()->first();
-        $producto = \App\Models\Producto::inRandomOrder()->first();
+        $carro = Carro::inRandomOrder()->first();
+        $producto = Producto::inRandomOrder()->first();
 
         if (!$carro || !$producto) return [];
 
-        // Calcular lo reservado en todos los carros para ese producto
-        $reservado = \App\Models\CarroProducto::where('id_producto', $producto->id_producto)->sum('cantidad');
+        // Verificar si el producto ya está en otro carro del mismo pedido
+        if ($carro->id_pedido) {
+            $carrosDelPedido = Carro::where('id_pedido', $carro->id_pedido)
+                ->pluck('id_carro');
 
+            $yaExisteEnPedido = CarroProducto::whereIn('id_carro', $carrosDelPedido)
+                ->where('id_producto', $producto->id_producto)
+                ->exists();
+
+            if ($yaExisteEnPedido) return [];
+        }
+
+        // Verificar disponibilidad
+        $reservado = CarroProducto::where('id_producto', $producto->id_producto)->sum('cantidad');
         $disponibles = max(0, $producto->piezas - $reservado);
 
         if ($disponibles <= 0) return [];
@@ -39,4 +51,6 @@ class CarroProductoFactory extends Factory
             'updated_at' => now(),
         ];
     }
+
+
 }

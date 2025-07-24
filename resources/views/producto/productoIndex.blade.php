@@ -104,13 +104,17 @@
                         <br>
                     @endforeach
 
-                    <label for="id_pedido">Selecciona un pedido existente:</label>
+                    <label for="id_pedido">Selecciona o crea un pedido:</label>
                     <select name="id_pedido" required>
                         <option value="">-- Selecciona --</option>
+                        <option value="nuevo">Crear nuevo pedido</option>
                         @foreach($pedidosUsuario as $pedido)
-                            <option value="{{ $pedido->id_pedido }}">Pedido #{{ $pedido->id_pedido }}</option>
+                            <option value="{{ $pedido->id_pedido }}" {{ $pedido->estado_pedido == 0 ? 'disabled' : '' }}>
+                                Pedido #{{ $pedido->id_pedido }} {{ $pedido->estado_pedido == 0 ? '(CERRADO)' : '' }}
+                            </option>
                         @endforeach
                     </select>
+
                     <br><br>
 
                     <input type="hidden" name="id_user" value="{{ Auth::id() }}">

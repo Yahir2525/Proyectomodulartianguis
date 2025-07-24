@@ -13,14 +13,17 @@
             <a href="{{ url('/credito/create') }}" class="button is-info is-fullwidth">
                 Registrar una nuevo credito
             </a><br><br>
-            @if(Auth::check())
-            <form action="{{ url('/credito/showCredito') }}" method="GET"> 
-                <div class="sub">
-                    <label for="id">ID de compra a buscar:</label>
-                    <input type="text" id="id" name="id_credito" placeholder="21" autofocus>
-                </div><br><br>
-                <input type="submit" id="enviar" name="enviar" value="buscar">
+            <form action="{{ url('/credito/showCredito') }}" method="GET">
+                <label for="id_pedido">Buscar por ID de pedido:</label>
+                <input type="text" id="id_credito" name="id_credito" placeholder="Ej. 21" autofocus/>
+                @can('edit credito')
+                <label for="nombre_usuario">o por nombre de usuario:</label>
+                <input type="text" id="nombre_usuario" name="nombre_usuario" placeholder="Ej. Pepito" />
+                @endcan
+                <input type="submit" value="Buscar" />
             </form>
+
+
             @if($creditoIndex->isNotEmpty())
             <br><h2>Tablas de créditos registrados</h2>
             <center>
@@ -57,7 +60,6 @@
                     @endforeach
                 </table>
             </center>
-        @endif
         @endif
         </div>
     </section>

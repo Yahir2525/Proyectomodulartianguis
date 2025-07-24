@@ -4,6 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Carro</title>
+    <style>
+        .sin-stock {
+            background-color: #ffe5e5;
+        }
+        .resaltado {
+            font-weight: bold;
+            color: red;
+        }
+        .cant-input {
+            width: 60px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 6px;
+            border: 1px solid #999;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <h1>Crear carrito de compras</h1>
@@ -18,30 +39,57 @@
     @endif
 
     <form action="{{ url('/carro') }}" method="POST">
-    @csrf
+        @csrf
 
-        <!-- Usuario logueado -->
-        <input type="hidden" name="id_user" value="{{ $usuarioId }}">
+        <input type="hidden" name="id_user" value="{{ $usuario->id_user }}">
 
-        <!-- Producto a agregar -->
-        <label for="id_producto">Producto:</label>
-        <select name="id_producto" required>
-            <option value="">Selecciona un producto</option>
-            @foreach($productos as $producto)
-                <option value="{{ $producto->id_producto }}"
-                    {{ isset($carro) && $producto->id_producto == $carro->id_producto ? 'selected' : '' }}>
-                    {{ $producto->id_producto }} - {{ $producto->nombre }} - {{ $producto->piezas_disponibles }} piezas disponibles 
-                </option>
-            @endforeach
-        </select>
-        <br><br>
+        <h3>Selecciona un producto</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Seleccionar</th>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Material</th>
+                    <th>Color</th>
+                    <th>Tamaño</th>
+                    <th>Precio</th>
+                    <th>Piezas disponibles</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($productos as $producto)
+                    <tr class="{{ $producto->piezas_disponibles == 0 ? 'sin-stock' : '' }}">
+                        <td>
+                            <input type="radio" name="id_producto" value="{{ $producto->id_producto }}"
+                                {{ old('id_producto') == $producto->id_producto ? 'checked' : '' }}
+                                {{ $producto->piezas_disponibles == 0 ? 'disabled' : '' }}>
+                        </td>
+                        <td>
+                            @if($producto->imagen)
+                                <img src="{{ asset($producto->imagen) }}" alt="imagen" width="100">
+                            @else
+                                Sin imagen
+                            @endif
+                        </td>
+                        <td>{{ $producto->nombre }}</td>
+                        <td>{{ $producto->material }}</td>
+                        <td>{{ $producto->color }}</td>
+                        <td>{{ $producto->tamanio }}</td>
+                        <td>${{ number_format($producto->precio_unitario, 2) }}</td>
+                        <td class="{{ $producto->piezas_disponibles == 0 ? 'resaltado' : '' }}">
+                            {{ $producto->piezas_disponibles }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
 
-        <!-- Cantidad -->
+        <br>
         <label for="cantidad">Cantidad:</label>
-        <input type="number" name="cantidad" min="1" required>
+        <input type="number" name="cantidad" min="1" required value="{{ old('cantidad') }}">
         <br><br>
 
-        <!-- Seleccionar pedido existente -->
         <label for="id_pedido">Selecciona un pedido existente (opcional):</label>
         <select name="id_pedido">
             <option value="">-- Ninguno --</option>
@@ -55,7 +103,6 @@
         </select>
         <br><br>
 
-        <!-- Casilla para crear uno nuevo -->
         <label>
             <input type="checkbox" name="nuevo_pedido" value="1">
             Crear un nuevo pedido
@@ -64,7 +111,6 @@
 
         <button type="submit">Agregar al carrito</button>
     </form>
-
 
     <br>
     <a href="/">Inicio</a> |

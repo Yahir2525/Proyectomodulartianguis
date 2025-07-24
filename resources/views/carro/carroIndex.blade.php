@@ -19,10 +19,15 @@
                 </p>
 
                 <form action="{{ url('/carro/showCarro') }}" method="GET">
-                    <label for="id">ID de carro a buscar:</label>
-                    <input type="text" id="id" name="id_carro" placeholder="21" autofocus />
+                    <label for="id_carro">ID de carro:</label>
+                    <input type="text" id="id_carro" name="id_carro" placeholder="21" />
+                    @can('edit carro')
+                    <label for="nombre_usuario">Nombre de usuario:</label>
+                    <input type="text" id="nombre_usuario" name="nombre_usuario" placeholder="carlitos" />
+                    @endcan
                     <input type="submit" value="Buscar" />
                 </form>
+
                 <br /><br />
 
                 @if($carroIndex->isNotEmpty())

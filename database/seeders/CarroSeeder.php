@@ -20,18 +20,20 @@ class CarroSeeder extends Seeder
             return;
         }
 
-        // Generamos 30 carros aleatorios
-        foreach (range(1, 30) as $i) {
-            $pedido = $pedidos->random();
+        foreach ($pedidos as $pedido) {
+            // Evita duplicar si el pedido ya tiene carro
+            if (Carro::where('id_pedido', $pedido->id_pedido)->exists()) {
+                continue;
+            }
 
-            // Crear el carro vacío (sin productos aún)
+            // Crear el carro asociado a ese pedido
             $carro = Carro::create([
                 'id_user' => $pedido->id_user,
                 'id_pedido' => $pedido->id_pedido,
             ]);
 
-            // Agregamos entre 1 y 3 productos al carro
-            $productosAleatorios = $productos->random(rand(1, 3));
+            // Agrega de 1 a 3 productos distintos
+            $productosAleatorios = $productos->random(rand(1, min(3, $productos->count())));
 
             foreach ($productosAleatorios as $producto) {
                 $reservado = CarroProducto::where('id_producto', $producto->id_producto)->sum('cantidad');

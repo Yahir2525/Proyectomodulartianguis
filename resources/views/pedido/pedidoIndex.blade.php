@@ -12,10 +12,15 @@
         <p><a href="{{ url('/pedido/create') }}">Registrar un nuevo pedido</a></p>
 
         <form action="{{ url('/pedido/showPedido') }}" method="GET">
-            <label for="id">ID de compra a buscar:</label>
-            <input type="text" id="id" name="id_pedido" placeholder="21" autofocus />
+            <label for="id_pedido">Buscar por ID de pedido:</label>
+            <input type="text" id="id_pedido" name="id_pedido" placeholder="Ej. 21" />
+            @can('edit pedido')
+            <label for="nombre_usuario">o por nombre de usuario:</label>
+            <input type="text" id="nombre_usuario" name="nombre_usuario" placeholder="Ej. Pepito" />
+            @endcan
             <input type="submit" value="Buscar" />
         </form>
+
 
         @if($pedidoIndex->isNotEmpty())
             @php $pedidosPorCredito = $pedidoIndex->groupBy('id_credito'); @endphp

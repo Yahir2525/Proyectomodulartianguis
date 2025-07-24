@@ -52,12 +52,35 @@ class PedidoController extends Controller
     public function show(Request $request)
     {
         $id = $request->input('id_pedido');
-        $pedido = Pedido::find($id);
-        if (!$pedido) {
-            return redirect()->back()->with('error', 'El pedido no se encontró.');
+        $nombreUsuario = $request->input('nombre_usuario');
+
+        // Buscar por ID de pedido
+        if ($id) {
+            $pedido = Pedido::with('user')->find($id);
+            if (!$pedido) {
+                return back()->with('error', 'El pedido no se encontró.');
+            }
+            return view('pedido.showPedido', ['pedidos' => collect([$pedido])]);
         }
-        return view('/pedido/showPedido', ['pedido' => $pedido]);
+
+        // Buscar por nombre de usuario
+        if ($nombreUsuario) {
+            $usuario = User::where('nombre_usuario', 'ILIKE', $nombreUsuario)->first();
+            if (!$usuario) {
+                return back()->with('error', 'Usuario no encontrado.');
+            }
+
+            $pedidos = Pedido::with('user')->where('id_user', $usuario->id_user)->get();
+            if ($pedidos->isEmpty()) {
+                return back()->with('error', 'No se encontraron pedidos para el usuario "' . $nombreUsuario . '".');
+            }
+
+            return view('pedido.showPedido', ['pedidos' => $pedidos]);
+        }
+
+        return back()->with('error', 'Debes ingresar un ID de pedido o un nombre de usuario.');
     }
+
 
     public function edit($id)
     {
@@ -88,9 +111,11 @@ class PedidoController extends Controller
     {
         $pedido = Pedido::find($pedido->id_pedido);
         $creditoAnteriorId = $pedido->id_credito;
+        $totalAnterior = $pedido->total_pedido;
 
         // Actualizar campos del pedido
-        $pedido->total_pedido = $request->input('total', $pedido->total_pedido);
+        $nuevoTotal = $request->input('total', $totalAnterior);
+        $pedido->total_pedido = $nuevoTotal;
         $pedido->metodo_pago = $request->input('metodo_pago', $pedido->metodo_pago);
         $pedido->estado_pedido = $request->input('estado_pedido', $pedido->estado_pedido);
 
@@ -102,12 +127,24 @@ class PedidoController extends Controller
 
         $pedido->save();
 
-        // Recalcular saldo de créditos involucrados
-        $this->recalcularSaldoCredito($creditoAnteriorId);
-        $this->recalcularSaldoCredito($pedido->id_credito);
+        // Si el pedido está cerrado y tiene crédito, sumamos solo la diferencia
+        if ($pedido->estado_pedido == 0 && $pedido->metodo_pago === 'credito' && $pedido->id_credito) {
+            $diferencia = $nuevoTotal - $totalAnterior;
+            $credito = Credito::find($pedido->id_credito);
+
+            if ($credito && $diferencia != 0) {
+                $credito->saldo_total += $diferencia;
+                $credito->save();
+            }
+        } else {
+            // Recalcular si no aplica la diferencia
+            $this->recalcularSaldoCredito($creditoAnteriorId);
+            $this->recalcularSaldoCredito($pedido->id_credito);
+        }
 
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha actualizado con éxito.');
     }
+
 
 
     public function cerrar(Request $request, $id_pedido)

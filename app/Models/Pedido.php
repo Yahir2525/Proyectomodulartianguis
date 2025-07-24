@@ -17,9 +17,15 @@ class Pedido extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
-        public function carro(): HasMany
+    protected $fillable = [
+    'id_user',
+    'id_credito',
+    // otros campos si los hay
+    ];
+
+        public function carro(): HasOne
     {
-        return $this->hasMany(Carro::class, 'id_pedido', 'id_pedido');
+        return $this->hasOne(Carro::class, 'id_pedido', 'id_pedido');
     }
         public function user(): BelongsTo
     {

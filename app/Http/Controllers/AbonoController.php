@@ -92,7 +92,7 @@ class AbonoController extends Controller
 
     public function destroy(Abono $abono)
     {
-        $abono = Abono::find($abono->id_user);
+        $abono = Abono::find($abono->id_abono);
 
         if (!$abono) {
             return redirect()->route('abono.index')->with('error', 'El abono no se encontró.');

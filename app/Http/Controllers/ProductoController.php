@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Producto;
+use App\Models\Pedido;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,8 +11,14 @@ class ProductoController extends Controller
 {
     public function index()
     {
-        $usuarioId = Auth::id();
-        $pedidosUsuario = \App\Models\Pedido::where('id_user', $usuarioId)->get();
+        $usuario = Auth::user();
+
+        if ($usuario->hasRole('administrador')) {
+            $pedidosUsuario = Pedido::all();
+        } else {
+            $pedidosUsuario = Pedido::where('id_user', $usuario->id_user)->get(); // Solo los suyos
+        }
+
         $productoIndex = Producto::all();
 
         return view('producto.productoIndex', compact('productoIndex', 'pedidosUsuario'));
@@ -100,6 +107,7 @@ class ProductoController extends Controller
             return redirect()->route('producto.index')->with('error', 'Producto no encontrado.');
         }
 
+        // Si subieron una imagen, la actualizamos
         if ($request->hasFile('imagen')) {
             $archivo = $request->file('imagen');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
@@ -112,18 +120,37 @@ class ProductoController extends Controller
             $producto->imagen = 'img/' . $nombreArchivo;
         }
 
-        $producto->nombre = $request->input('nombre');
-        $producto->tipo = $request->input('tipo');
-        $producto->material = $request->input('material');
-        $producto->color = $request->input('color');
-        $producto->tamanio = $request->input('tamanio');
-        $producto->marca = $request->input('marca');
-        $producto->precio_unitario = $request->input('precio_unitario');
-        $producto->piezas = $request->input('piezas');
+        // Solo actualizar campos si están presentes y no vacíos
+        if ($request->filled('nombre')) {
+            $producto->nombre = $request->input('nombre');
+        }
+        if ($request->filled('tipo')) {
+            $producto->tipo = $request->input('tipo');
+        }
+        if ($request->filled('material')) {
+            $producto->material = $request->input('material');
+        }
+        if ($request->filled('color')) {
+            $producto->color = $request->input('color');
+        }
+        if ($request->filled('tamanio')) {
+            $producto->tamanio = $request->input('tamanio');
+        }
+        if ($request->filled('marca')) {
+            $producto->marca = $request->input('marca');
+        }
+        if ($request->filled('precio_unitario')) {
+            $producto->precio_unitario = $request->input('precio_unitario');
+        }
+        if ($request->filled('piezas')) {
+            $producto->piezas = $request->input('piezas');
+        }
+
         $producto->save();
 
         return redirect()->route('producto.index')->with('success', 'Producto actualizado correctamente.');
     }
+
 
     public function destroy($id)
     {
