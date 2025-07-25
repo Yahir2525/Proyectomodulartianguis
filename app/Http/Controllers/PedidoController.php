@@ -30,9 +30,18 @@ class PedidoController extends Controller
 
     public function create()
     {
-        $usuarioId = Auth::id();
-        return view('pedido/createPedido', compact ('usuarioId'));
+        $usuario = Auth::user();
+
+        if ($usuario->hasRole('administrador')) {
+            // Obtener todos los usuarios para mostrar en el select
+            $usuarios = User::all();
+        } else {
+            $usuarios = null; // No se muestra select para usuarios normales
+        }
+
+        return view('pedido.createPedido', compact('usuarios', 'usuario'));
     }
+
 
     public function store(Request $request)
     {
@@ -42,7 +51,7 @@ class PedidoController extends Controller
         $pedido->id_user = $userId;
         $pedido->id_credito = $request->input("id_credito");
         $pedido->estado_pedido = 1;
-        $pedido->metodo_pago = 'contado';
+        $pedido->metodo_pago = '';
 
         if ($pedido->save()) {
             return redirect('/pedido')->with('pedido_reciente', $pedido->id_pedido);
@@ -101,11 +110,15 @@ class PedidoController extends Controller
             $credito = Credito::find($id_credito);
             if ($credito) {
                 $totalPedidos = Pedido::where('id_credito', $id_credito)->sum('total_pedido');
-                $credito->saldo_total = $totalPedidos;
+                $totalAbonos = Abono::where('id_credito', $id_credito)->sum('monto_abono');
+
+                $credito->saldo_total = max($totalPedidos - $totalAbonos, 0);
                 $credito->save();
             }
         }
     }
+
+
 
     public function update(Request $request, Pedido $pedido)
     {
@@ -153,9 +166,10 @@ class PedidoController extends Controller
     {
         $pedido = Pedido::findOrFail($id_pedido);
 
-        $totalAnterior = $pedido->total_pedido;
+        // Recuperar total anterior (si lo hay, si no usar el actual)
+        $totalAnterior = session()->pull("total_anterior_pedido_{$pedido->id_pedido}", $pedido->total_pedido);
 
-        // Si viene un nuevo total desde la vista, se aplica
+        // Aplicar total actualizado si viene desde la vista
         if ($request->has('total')) {
             $pedido->total_pedido = $request->input('total');
         }
@@ -165,26 +179,30 @@ class PedidoController extends Controller
         $nuevoCredito = null;
 
         if ($metodo === 'contado') {
+            // Permitir cerrar contado sin validar créditos
             $pedido->metodo_pago = 'contado';
             $pedido->estado_pedido = 0;
             $pedido->id_credito = null;
             $pedido->save();
 
-            // Recalcula el saldo del crédito anterior si existía
             $this->recalcularSaldoCredito($creditoAnteriorId);
 
             return back()->with('success', 'Pedido cerrado como contado.');
         }
 
         if ($metodo === 'credito') {
-            // Asignar crédito existente o crear uno nuevo
+            // Validar bloqueo de usuario para créditos
+            if ($this->usuarioBloqueadoParaCredito($pedido->id_user)) {
+                return back()->with('error', 'No se puede cerrar el pedido con crédito porque el usuario tiene más de 3 créditos activos o saldo total superior a 10,000.');
+            }
+
             if ($request->filled('id_credito')) {
                 $pedido->id_credito = $request->input('id_credito');
             } else {
                 $fechaVencimiento = now()->addDays(60);
                 $nuevoCredito = Credito::create([
                     'id_user' => $pedido->id_user,
-                    'saldo_total' => 0, // Se ajustará abajo
+                    'saldo_total' => 0,
                     'fecha_liquidacion' => null,
                     'fecha_vencimiento' => $fechaVencimiento,
                     'estado' => 1,
@@ -197,22 +215,25 @@ class PedidoController extends Controller
             $pedido->save();
 
             if ($nuevoCredito) {
-                // Es un nuevo crédito: simplemente asigna el total actual del pedido
                 $nuevoCredito->saldo_total = $pedido->total_pedido;
                 $nuevoCredito->save();
             } else {
-                // Crédito existente: solo actualiza con la diferencia
-                $diferencia = $pedido->total_pedido - $totalAnterior;
-                if ($diferencia != 0) {
-                    $credito = Credito::find($pedido->id_credito);
-                    if ($credito) {
-                        $credito->saldo_total += $diferencia;
-                        $credito->save();
+                $credito = Credito::find($pedido->id_credito);
+                if ($credito) {
+                    if ($totalAnterior == 0) {
+                        // Es un pedido nuevo, sumar total completo
+                        $credito->saldo_total += $pedido->total_pedido;
+                    } else {
+                        // Pedido modificado, sumar solo la diferencia
+                        $diferencia = $pedido->total_pedido - $totalAnterior;
+                        if ($diferencia != 0) {
+                            $credito->saldo_total += $diferencia;
+                        }
                     }
+                    $credito->save();
                 }
             }
 
-            // Si se cambió de crédito, recalcular el anterior
             if ($creditoAnteriorId != $pedido->id_credito) {
                 $this->recalcularSaldoCredito($creditoAnteriorId);
             }
@@ -224,14 +245,21 @@ class PedidoController extends Controller
     }
 
 
+
+
     public function reabrir(Request $request, $id_pedido)
     {
         $pedido = Pedido::findOrFail($id_pedido);
+
+        // Guardamos el total antes de abrir
+        session()->put("total_anterior_pedido_{$pedido->id_pedido}", $pedido->total_pedido);
+
         $pedido->estado_pedido = 1;
         $pedido->save();
 
         return redirect()->back()->with('success', 'Pedido reabierto.');
     }
+
 
 
     public function destroy(Pedido $pedido)
@@ -242,11 +270,43 @@ class PedidoController extends Controller
             return redirect()->route('pedido.index')->with('error', 'El pedido no se encontró.');
         }
 
-        $creditoId = $pedido->id_credito;
+        $idCredito = $pedido->id_credito;
+        $totalPedido = $pedido->total_pedido;
+
         $pedido->delete();
 
-        $this->recalcularSaldoCredito($creditoId);
+        // Recalcular saldo del crédito si aplica
+        if ($idCredito) {
+            $credito = Credito::find($idCredito);
+            if ($credito) {
+                // Sumar todos los totales de pedidos restantes de ese crédito
+                $totalPedidos = Pedido::where('id_credito', $idCredito)->sum('total_pedido');
+                $credito->saldo_total = $totalPedidos;
+                $credito->save();
+            }
+        }
+
+        $this->recalcularSaldoCredito($idCredito);
 
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha eliminado con éxito.');
     }
+
+    private function usuarioBloqueadoParaCredito($idUser)
+    {
+        $creditosActivos = Credito::where('id_user', $idUser)
+                                ->where('estado', 1)
+                                ->get();
+
+        if ($creditosActivos->count() >= 3) {
+            return true;
+        }
+
+        if ($creditosActivos->sum('saldo_total') > 10000) {
+            return true;
+        }
+
+        return false;
+    }
+
+
 }

@@ -21,9 +21,16 @@
             <input type="submit" value="Buscar" />
         </form>
 
-
         @if($pedidoIndex->isNotEmpty())
-            @php $pedidosPorCredito = $pedidoIndex->groupBy('id_credito'); @endphp
+            @php
+                $pedidosPorCredito = $pedidoIndex->groupBy('id_credito');
+
+                // Función helper para validar bloqueo por usuario
+                function usuarioBloqueado($userId) {
+                    $creditos = \App\Models\Credito::where('id_user', $userId)->where('estado', 1)->get();
+                    return ($creditos->count() >= 3 || $creditos->sum('saldo_total') > 10000);
+                }
+            @endphp
 
             @foreach($pedidosPorCredito as $idCredito => $pedidos)
                 <h2>{{ $idCredito ? 'Pedidos del crédito #' . $idCredito : 'Pedidos no adquiridos a crédito' }}</h2>
@@ -46,6 +53,9 @@
                     </thead>
                     <tbody>
                         @foreach ($pedidos as $pedido)
+                            @php
+                                $bloqueado = usuarioBloqueado($pedido->id_user);
+                            @endphp
                             <tr>
                                 <td>{{ $pedido->id_pedido }}</td>
                                 <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin cliente' }}</td>
@@ -80,10 +90,11 @@
                                             <input type="hidden" name="total" value="{{ $pedido->total_pedido }}" />
 
                                             <label>Método de pago:</label>
-                                            <select name="metodo_pago" class="metodo-pago" required>
+                                            <select name="metodo_pago" class="metodo-pago" required
+                                                data-bloqueado="{{ $bloqueado ? 'true' : 'false' }}">
                                                 <option value="">-- Selecciona --</option>
-                                                <option value="contado">Contado</option>
-                                                <option value="credito">Crédito</option>
+                                                <option value="contado" {{ $bloqueado ? 'disabled' : '' }}>Contado</option>
+                                                <option value="credito" {{ $bloqueado ? 'disabled' : '' }}>Crédito</option>
                                             </select>
 
                                             <div class="credito-opciones" style="display:none; margin-top:8px;">
@@ -107,7 +118,15 @@
                                                 @endif
                                             </div>
 
-                                            <button type="submit" style="margin-top:8px;">Cerrar pedido</button>
+                                            @if($bloqueado)
+                                                <p style="color:red; font-weight:bold; margin-top:8px;">
+                                                    Usuario bloqueado para pagar (más de 3 créditos activos o saldo > 10,000).
+                                                </p>
+                                            @endif
+
+                                            <button type="submit" style="margin-top:8px;" {{ $bloqueado ? 'disabled' : '' }}>
+                                                Cerrar pedido
+                                            </button>
                                         </form>
                                     @else
                                         @can('edit pedido')

@@ -26,7 +26,7 @@
                     <tr>
                         <td>{{ $pedido->id_pedido }}</td>
                         <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin usuario' }}</td>
-                        <td>{{ $pedido->metodo_pago }}</td>
+                        <td>{{ $pedido->metodo_pago ?? 'Sin seleccionar' }}</td>
                         <td>{{ $pedido->estado_pedido == 1 ? 'Abierto' : 'Cerrado' }}</td>
                         <td>{{ $pedido->id_credito ?? 'N/A' }}</td>
                         <td>${{ number_format($pedido->total_pedido, 2) }}</td>

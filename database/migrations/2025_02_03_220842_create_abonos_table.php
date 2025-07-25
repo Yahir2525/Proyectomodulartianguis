@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('monto_abono', 10,2)->unsigned();
             $table->timestamps();
 
-            $table->foreign('id_credito')->references('id_credito')->on('creditos')->onDelete('cascade');
+            $table->foreign('id_credito')->references('id_credito')->on('creditos')->onDelete('restrict');
 
             $table->foreign('id_user')
             ->references('id_user')

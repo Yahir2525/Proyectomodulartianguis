@@ -12,13 +12,15 @@
             <a href="{{ url('/abono/create') }}">Registrar nuevo abono</a>
         @endcan
         <br><br>
-        @can('view abono')
         <form action="{{ url('/abono/showAbono') }}" method="GET">
-            <label for="id">ID de compra a buscar:</label>
-            <input type="text" id="id" name="id_abono" placeholder="21" autofocus>
-            <input type="submit" name="enviar" value="Buscar">
-        </form>
-        @endcan
+                    <label for="id_abono">ID de carro:</label>
+                    <input type="text" id="id_abono" name="id_abono" placeholder="21" />
+                    @can('edit abono')
+                    <label for="nombre_usuario">Nombre de usuario:</label>
+                    <input type="text" id="nombre_usuario" name="nombre_usuario" placeholder="sergio" />
+                    @endcan
+                    <input type="submit" value="Buscar" />
+                </form>
 
         @if($abonoIndex->isNotEmpty())
             <h2>Tabla de abonos registrados</h2>
