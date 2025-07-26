@@ -104,6 +104,9 @@ class CarroController extends Controller
 
         $nuevoTotal = $this->recalcularTotalPedido($carro);
         $pedido->total_pedido = $nuevoTotal;
+        if ($pedido->estado_pedido == 0 && !$this->validarCreditoAlModificar($pedido, $nuevoTotal)) {
+        return back()->with('error', 'No se puede modificar el pedido porque el crédito superaría los $10,000 o el usuario tiene más de 3 créditos activos.');
+        }
         $pedido->save();
 
         $this->actualizarCreditoConDiferencia($pedido, $totalAnterior, $nuevoTotal);
@@ -164,6 +167,10 @@ class CarroController extends Controller
 
         $nuevoTotal = $this->recalcularTotalPedido($carro);
         $pedido->total_pedido = $nuevoTotal;
+        if ($pedido->estado_pedido == 0 && !$this->validarCreditoAlModificar($pedido, $nuevoTotal)) {
+            return back()->with('error', 'No se puede modificar el pedido porque el crédito superaría los $10,000 o el usuario tiene más de 3 créditos activos.');
+        }
+
         $pedido->save();
 
         $this->actualizarCreditoConDiferencia($pedido, $totalAnterior, $nuevoTotal);
@@ -186,6 +193,10 @@ class CarroController extends Controller
 
         $nuevoTotal = $this->recalcularTotalPedido($carro);
         $pedido->total_pedido = $nuevoTotal;
+        if ($pedido->estado_pedido == 0 && !$this->validarCreditoAlModificar($pedido, $nuevoTotal)) {
+            return back()->with('error', 'No se puede modificar el pedido porque el crédito superaría los $10,000 o el usuario tiene más de 3 créditos activos.');
+        }
+
         $pedido->save();
 
         $this->actualizarCreditoConDiferencia($pedido, $totalAnterior, $nuevoTotal);
@@ -244,6 +255,10 @@ class CarroController extends Controller
 
         $nuevoTotal = $this->recalcularTotalPedido($carro);
         $pedido->total_pedido = $nuevoTotal;
+        if ($pedido->estado_pedido == 0 && !$this->validarCreditoAlModificar($pedido, $nuevoTotal)) {
+            return back()->with('error', 'No se puede modificar el pedido porque el crédito superaría los $10,000 o el usuario tiene más de 3 créditos activos.');
+        }
+
         $pedido->save();
 
         $this->actualizarCreditoConDiferencia($pedido, $totalAnterior, $nuevoTotal);
@@ -316,10 +331,33 @@ class CarroController extends Controller
         return back()->with('error', 'Debes ingresar un ID de carro o un nombre de usuario.');
     }
 
-    private function usuarioBloqueado($id_user)
+    // private function usuarioBloqueado($id_user)
+    // {
+    //     $creditos = Credito::where('id_user', $id_user)->where('estado', 1)->get();
+    //     return ($creditos->count() >= 3 || $creditos->sum('saldo_total') > 10000);
+    // }
+
+    private function validarCreditoAlModificar(Pedido $pedido, $nuevoTotal)
     {
-        $creditos = Credito::where('id_user', $id_user)->where('estado', 1)->get();
-        return ($creditos->count() >= 3 || $creditos->sum('saldo_total') > 10000);
+        if ($pedido->metodo_pago !== 'credito' || !$pedido->id_credito) {
+            return true; // No aplica la validación si no es a crédito
+        }
+
+        $user = $pedido->user;
+        $creditosActivos = Credito::where('id_user', $user->id_user)->where('estado', 1)->get();
+
+        if ($creditosActivos->count() >= 3) {
+            return false;
+        }
+
+        $credito = Credito::find($pedido->id_credito);
+        if (!$credito) return false;
+
+        $nuevoSaldo = $credito->saldo_total + ($nuevoTotal - $pedido->total_pedido);
+
+        return $nuevoSaldo <= 10000;
     }
+
+
 
 }

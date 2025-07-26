@@ -160,92 +160,49 @@ class PedidoController extends Controller
     }
 
 
-
-
     public function cerrar(Request $request, $id_pedido)
     {
         $pedido = Pedido::findOrFail($id_pedido);
 
-        // Recuperar total anterior (si lo hay, si no usar el actual)
-        $totalAnterior = session()->pull("total_anterior_pedido_{$pedido->id_pedido}", $pedido->total_pedido);
-
-        // Aplicar total actualizado si viene desde la vista
-        if ($request->has('total')) {
-            $pedido->total_pedido = $request->input('total');
+        if ($pedido->estado_pedido == 0) {
+            return back()->with('error', 'El pedido ya está cerrado.');
         }
 
         $metodo = $request->input('metodo_pago');
-        $creditoAnteriorId = $pedido->id_credito;
-        $nuevoCredito = null;
-
-        if ($metodo === 'contado') {
-            // Permitir cerrar contado sin validar créditos
-            $pedido->metodo_pago = 'contado';
-            $pedido->estado_pedido = 0;
-            $pedido->id_credito = null;
-            $pedido->save();
-
-            $this->recalcularSaldoCredito($creditoAnteriorId);
-
-            return back()->with('success', 'Pedido cerrado como contado.');
-        }
+        $total = $request->input('total');
 
         if ($metodo === 'credito') {
-            // Validar bloqueo de usuario para créditos
-            if ($this->usuarioBloqueadoParaCredito($pedido->id_user)) {
-                return back()->with('error', 'No se puede cerrar el pedido con crédito porque el usuario tiene más de 3 créditos activos o saldo total superior a 10,000.');
+            if (!$this->puedeCerrarAPedidoACredito($pedido, $total)) {
+                return back()->with('error', 'No puedes cerrar el pedido a crédito: el usuario tiene demasiados créditos o se superaría el saldo de $10,000.');
             }
 
-            if ($request->filled('id_credito')) {
-                $pedido->id_credito = $request->input('id_credito');
+            $id_credito = $request->input('id_credito');
+
+            if ($id_credito) {
+                $credito = Credito::find($id_credito);
+                $credito->saldo_total += $total;
+                $credito->save();
             } else {
-                $fechaVencimiento = now()->addDays(60);
-                $nuevoCredito = Credito::create([
+                $credito = Credito::create([
                     'id_user' => $pedido->id_user,
-                    'saldo_total' => 0,
-                    'fecha_liquidacion' => null,
-                    'fecha_vencimiento' => $fechaVencimiento,
+                    'saldo_total' => $total,
                     'estado' => 1,
                 ]);
-                $pedido->id_credito = $nuevoCredito->id_credito;
+                $pedido->id_credito = $credito->id_credito;
             }
 
             $pedido->metodo_pago = 'credito';
-            $pedido->estado_pedido = 0;
-            $pedido->save();
-
-            if ($nuevoCredito) {
-                $nuevoCredito->saldo_total = $pedido->total_pedido;
-                $nuevoCredito->save();
-            } else {
-                $credito = Credito::find($pedido->id_credito);
-                if ($credito) {
-                    if ($totalAnterior == 0) {
-                        // Es un pedido nuevo, sumar total completo
-                        $credito->saldo_total += $pedido->total_pedido;
-                    } else {
-                        // Pedido modificado, sumar solo la diferencia
-                        $diferencia = $pedido->total_pedido - $totalAnterior;
-                        if ($diferencia != 0) {
-                            $credito->saldo_total += $diferencia;
-                        }
-                    }
-                    $credito->save();
-                }
-            }
-
-            if ($creditoAnteriorId != $pedido->id_credito) {
-                $this->recalcularSaldoCredito($creditoAnteriorId);
-            }
-
-            return back()->with('success', 'Pedido cerrado con crédito.');
+        } elseif ($metodo === 'contado') {
+            $pedido->metodo_pago = 'contado';
+            $pedido->id_credito = null;
         }
 
-        return back()->with('error', 'Método de pago no válido.');
+        $pedido->estado_pedido = 0;
+        $pedido->total_pedido = $total;
+        $pedido->save();
+
+        return redirect()->route('pedido.index')->with('success', 'Pedido cerrado correctamente.');
     }
-
-
-
 
     public function reabrir(Request $request, $id_pedido)
     {
@@ -307,6 +264,31 @@ class PedidoController extends Controller
 
         return false;
     }
+
+    private function puedeCerrarAPedidoACredito(Pedido $pedido, $montoNuevo = null)
+    {
+        $user = $pedido->user;
+
+        $creditosActivos = Credito::where('id_user', $user->id_user)->where('estado', 1)->get();
+        if ($creditosActivos->count() >= 3) {
+            return false;
+        }
+
+        if ($montoNuevo === null) {
+            $montoNuevo = $pedido->total_pedido;
+        }
+
+        $idCredito = request()->input('id_credito');
+        if ($idCredito) {
+            $credito = Credito::find($idCredito);
+            if (!$credito) return false;
+            $nuevoSaldo = $credito->saldo_total + $montoNuevo;
+            return $nuevoSaldo <= 10000;
+        }
+
+        return $montoNuevo <= 10000;
+    }
+
 
 
 }

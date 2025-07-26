@@ -124,15 +124,47 @@
                             <p><strong>Total del pedido #{{ $idPedido }}: {{ $totalPedido }}</strong></p>
 
                             @if($pedido && $pedido->estado_pedido == 1)
+                                @php
+                                    $usuario = $carros->first()->user;
+                                    $creditosActivos = \App\Models\Credito::where('id_user', $usuario->id_user)->where('estado', 1)->get();
+                                    $bloqueadoPorCreditos = $creditosActivos->count() >= 3;
+
+                                    $saldoSimulado = null;
+                                    foreach ($creditosActivos as $credito) {
+                                        if ($credito->saldo_total + $totalPedido > 10000) {
+                                            $saldoSimulado = $credito->saldo_total + $totalPedido;
+                                            break;
+                                        }
+                                    }
+
+                                    $superaSaldo = $saldoSimulado !== null;
+                                    $bloqueado = $bloqueadoPorCreditos || $superaSaldo;
+                                @endphp
+
                                 <form action="{{ route('pedido.cerrar', $idPedido) }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="total" value="{{ $totalPedido }}" />
 
+                                    @if($bloqueado)
+                                        <p style="color:red;">
+                                            <strong>No puedes cerrar este pedido:</strong><br>
+                                            @if($bloqueadoPorCreditos)
+                                                - El usuario ya tiene 3 o más créditos activos.<br>
+                                            @endif
+                                            @if($superaSaldo)
+                                                - El saldo del crédito superaría los $10,000 con este pedido.<br>
+                                            @endif
+                                            Puedes elegir "Contado" para cerrar sin restricciones.
+                                        </p>
+                                    @endif
+
                                     <label for="metodo_pago_{{ $idPedido }}">Método de pago:</label>
-                                    <select name="metodo_pago" required>
+                                    <select name="metodo_pago" required @if($bloqueado) onchange="activarContadoSiValido(this)" @endif>
                                         <option value="">-- Selecciona --</option>
                                         <option value="contado">Contado</option>
-                                        <option value="credito">Crédito</option>
+                                        @if(!$bloqueado)
+                                            <option value="credito">Crédito</option>
+                                        @endif
                                     </select>
 
                                     @php
@@ -157,6 +189,8 @@
 
                                     <button type="submit" style="margin-top: 8px;">Cerrar pedido</button>
                                 </form>
+
+
                             @else
                                 <p style="color: gray;"><strong>Pedido cerrado</strong></p>
                             @endif
@@ -189,6 +223,16 @@
             }
         });
     });
+
+    // Esta función fuerza que si el usuario intenta elegir 'crédito' cuando está bloqueado, se le obligue a seleccionar 'contado'
+    function activarContadoSiValido(select) {
+        if (select.value === 'credito') {
+            alert('No puedes usar crédito. El usuario tiene 3 créditos activos o el saldo superaría los $10,000. Elige contado.');
+            select.value = '';
+        }
+    }
     </script>
+
+
 </body>
 </html>
