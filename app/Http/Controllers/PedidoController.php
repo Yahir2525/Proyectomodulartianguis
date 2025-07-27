@@ -170,22 +170,36 @@ class PedidoController extends Controller
 
         $metodo = $request->input('metodo_pago');
         $total = $request->input('total');
+        $id_credito_nuevo = $request->input('id_credito');
+        $id_credito_anterior = $pedido->id_credito;
+        $total_anterior = $pedido->total_pedido;
+
+        if ($id_credito_anterior && ($metodo !== 'credito' || $id_credito_anterior != $id_credito_nuevo)) {
+            $creditoAnterior = Credito::find($id_credito_anterior);
+            if ($creditoAnterior) {
+                $creditoAnterior->saldo_total -= $total_anterior;
+                $creditoAnterior->save();
+            }
+        }
 
         if ($metodo === 'credito') {
             if (!$this->puedeCerrarAPedidoACredito($pedido, $total)) {
                 return back()->with('error', 'No puedes cerrar el pedido a crédito: el usuario tiene demasiados créditos o se superaría el saldo de $10,000.');
             }
 
-            $id_credito = $request->input('id_credito');
-
-            if ($id_credito) {
-                $credito = Credito::find($id_credito);
-                $credito->saldo_total += $total;
-                $credito->save();
+            if ($id_credito_nuevo) {
+                $credito = Credito::find($id_credito_nuevo);
+                if ($credito) {
+                    $credito->saldo_total += $total;
+                    $credito->save();
+                    $pedido->id_credito = $credito->id_credito;
+                }
             } else {
                 $credito = Credito::create([
                     'id_user' => $pedido->id_user,
                     'saldo_total' => $total,
+                    'fecha_liquidacion' => null,
+                    'fecha_vencimiento' => now()->addDays(60),
                     'estado' => 1,
                 ]);
                 $pedido->id_credito = $credito->id_credito;
@@ -203,6 +217,7 @@ class PedidoController extends Controller
 
         return redirect()->route('pedido.index')->with('success', 'Pedido cerrado correctamente.');
     }
+
 
     public function reabrir(Request $request, $id_pedido)
     {

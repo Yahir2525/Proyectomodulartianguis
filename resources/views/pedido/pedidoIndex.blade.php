@@ -60,7 +60,7 @@
                                 <td>{{ $pedido->id_pedido }}</td>
                                 <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin cliente' }}</td>
                                 <td>{{ $pedido->id_credito ?? 'N/A' }}</td>
-                                <td>{{ $pedido->total_pedido }}</td>
+                                <td>${{ number_format($pedido->total_pedido, 2) }}</td>
                                 <td>{{ $pedido->estado_pedido == 1 ? 'Abierto' : 'Cerrado' }}</td>
                                 <td>{{ $pedido->metodo_pago ?? 'Sin seleccionar' }}</td>
                                 <td>{{ $pedido->created_at }}</td>
@@ -85,23 +85,55 @@
 
                                 <td>
                                     @if($pedido->estado_pedido == 1)
+                                        @php
+                                            $usuario = $pedido->user;
+                                            $creditosActivos = \App\Models\Credito::where('id_user', $usuario->id_user)->where('estado', 1)->get();
+                                            $bloqueadoPorCreditos = $creditosActivos->count() >= 3;
+
+                                            $saldoSimulado = null;
+                                            foreach ($creditosActivos as $credito) {
+                                                if ($credito->saldo_total + $pedido->total_pedido > 10000) {
+                                                    $saldoSimulado = $credito->saldo_total + $pedido->total_pedido;
+                                                    break;
+                                                }
+                                            }
+
+                                            $superaSaldo = $saldoSimulado !== null;
+                                            $bloqueado = $bloqueadoPorCreditos || $superaSaldo;
+                                        @endphp
+
                                         <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST" class="form-cierre">
                                             @csrf
                                             <input type="hidden" name="total" value="{{ $pedido->total_pedido }}" />
 
-                                            <label>Método de pago:</label>
-                                            <select name="metodo_pago" class="metodo-pago" required
-                                                data-bloqueado="{{ $bloqueado ? 'true' : 'false' }}">
+                                            @if($bloqueado)
+                                                <p style="color:red; font-weight:bold; margin-top:8px;">
+                                                    El usuario tiene restricciones para usar crédito:
+                                                    <br>
+                                                    @if($bloqueadoPorCreditos)
+                                                        - Ya tiene 3 o más créditos activos.<br>
+                                                    @endif
+                                                    @if($superaSaldo)
+                                                        - El saldo superaría los $10,000 con este pedido.<br>
+                                                    @endif
+                                                    Puedes cerrar este pedido como contado.
+                                                </p>
+                                            @endif
+
+                                            <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
+                                            <select name="metodo_pago" required @if($bloqueado) onchange="activarContadoSiValido(this)" @endif>
                                                 <option value="">-- Selecciona --</option>
-                                                <option value="contado" {{ $bloqueado ? 'disabled' : '' }}>Contado</option>
-                                                <option value="credito" {{ $bloqueado ? 'disabled' : '' }}>Crédito</option>
+                                                <option value="contado">Contado</option>
+                                                @if(!$bloqueado)
+                                                    <option value="credito">Crédito</option>
+                                                @endif
                                             </select>
 
-                                            <div class="credito-opciones" style="display:none; margin-top:8px;">
-                                                @php
-                                                    $creditos = \App\Models\Credito::where('id_user', $pedido->id_user)->get();
-                                                @endphp
+                                            @php
+                                                $creditos = \App\Models\Credito::where('id_user', $pedido->id_user)->get();
+                                            @endphp
 
+                                            <div class="credito-opciones" style="display:none; margin-top:8px;">
                                                 @if($creditos->isNotEmpty())
                                                     <label>Seleccionar crédito:</label>
                                                     <select name="id_credito" class="select-credito">
@@ -113,21 +145,13 @@
                                                         @endforeach
                                                     </select>
                                                 @else
-                                                    {{-- Si no hay créditos, solo se crea nuevo --}}
                                                     <input type="hidden" name="id_credito" value="">
                                                 @endif
                                             </div>
 
-                                            @if($bloqueado)
-                                                <p style="color:red; font-weight:bold; margin-top:8px;">
-                                                    Usuario bloqueado para pagar (más de 3 créditos activos o saldo > 10,000).
-                                                </p>
-                                            @endif
-
-                                            <button type="submit" style="margin-top:8px;" {{ $bloqueado ? 'disabled' : '' }}>
-                                                Cerrar pedido
-                                            </button>
+                                            <button type="submit" style="margin-top:8px;">Cerrar pedido</button>
                                         </form>
+
                                     @else
                                         @can('edit pedido')
                                             <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST">
@@ -150,30 +174,32 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.form-cierre').forEach(form => {
-        const metodoPago = form.querySelector('.metodo-pago');
+        const metodo = form.querySelector('[name="metodo_pago"]');
         const creditoOpciones = form.querySelector('.credito-opciones');
-        const selectCredito = form.querySelector('.select-credito');
 
-        function toggleCreditoOpciones() {
-            if(metodoPago.value === 'credito'){
-                creditoOpciones.style.display = 'block';
-                if(selectCredito && selectCredito.value === ''){
-                    // Crear nuevo crédito, no mostrar fechas ni exigir nada
+        if (metodo && creditoOpciones) {
+            metodo.addEventListener('change', () => {
+                if (metodo.value === 'credito') {
+                    creditoOpciones.style.display = 'block';
+                } else {
+                    creditoOpciones.style.display = 'none';
                 }
-            } else {
-                creditoOpciones.style.display = 'none';
-            }
-        }
+            });
 
-        metodoPago.addEventListener('change', toggleCreditoOpciones);
-        if(selectCredito){
-            selectCredito.addEventListener('change', toggleCreditoOpciones);
+            // Ejecutar al inicio por si hay valores persistidos
+            metodo.dispatchEvent(new Event('change'));
         }
-
-        toggleCreditoOpciones();
     });
 });
+
+function activarContadoSiValido(select) {
+    if (select.value === 'credito') {
+        alert('No puedes usar crédito. El usuario tiene 3 créditos activos o el saldo superaría los $10,000. Elige contado.');
+        select.value = '';
+    }
+}
 </script>
+
 
 </body>
 </html>

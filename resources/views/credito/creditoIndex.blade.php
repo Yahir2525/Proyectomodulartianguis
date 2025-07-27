@@ -45,7 +45,8 @@
                             <td>{{ $credito->fecha_liquidacion }}</td>
                             <td>{{ $credito->fecha_vencimiento }}</td>
                             <td>{{ $credito->estado ? 'Activo' : 'Inactivo' }}</td>
-                            <td>{{ $credito->saldo_total ?? 'Sin adeudo'}}</td>
+                            
+                            <td>${{ number_format($credito->saldo_total, 2) }}</td>
                             <td>
                                 <a href="{{ route('credito.edit', $credito->id_credito) }}" class="button is-primary">Editar</a>
                             </td>

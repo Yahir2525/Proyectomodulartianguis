@@ -217,19 +217,23 @@ class CreditoController extends Controller
         $credito = Credito::find($id);
 
         if (!$credito) {
-            return redirect()->route('credito.index')->with('error', 'El credito no se encontró.');
+            return redirect()->route('credito.index')->with('error', 'El crédito no se encontró.');
         }
 
-        // Corregido: obtener los abonos por ID del crédito, no del usuario
-        $abonos = Abono::where('id_credito', $id)->get();
+        // Desvincular pedidos antes de eliminar el crédito
+        Pedido::where('id_credito', $id)->update([
+            'id_credito' => null,
+            'metodo_pago' => 'contado' // si quieres marcar que ya no es a crédito
+        ]);
 
-        foreach ($abonos as $abono) {
-            $abono->delete(); // Elimina solo si estás seguro, o comenta esta línea
-        }
+        // Eliminar abonos relacionados
+        Abono::where('id_credito', $id)->delete();
 
+        // Ahora sí eliminar el crédito
         $credito->delete();
 
-        return redirect()->route('credito.index')->with('success', 'El credito se ha eliminado con éxito.');
+        return redirect()->route('credito.index')->with('success', 'El crédito se ha eliminado con éxito.');
     }
+
 
 }

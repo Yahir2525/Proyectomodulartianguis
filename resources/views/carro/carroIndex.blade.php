@@ -189,23 +189,18 @@
 
                                     <button type="submit" style="margin-top: 8px;">Cerrar pedido</button>
                                 </form>
-
-
                             @else
                                 <p style="color: gray;"><strong>Pedido cerrado</strong></p>
                             @endif
-
                             <hr>
                         @endif
                     @endforeach
-
                 @else
                     <p>No hay productos en el carrito.</p>
                 @endif
             @endif
         </div>
     </section>
-
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('form').forEach(form => {
@@ -232,7 +227,5 @@
         }
     }
     </script>
-
-
 </body>
 </html>
