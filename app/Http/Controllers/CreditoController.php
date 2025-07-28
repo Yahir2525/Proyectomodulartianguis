@@ -14,12 +14,8 @@ use Illuminate\Support\Facades\DB;
 
 class CreditoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-
         $user = Auth::user();
 
         if ($user->hasRole('administrador')) {
@@ -48,8 +44,6 @@ class CreditoController extends Controller
 
         return view('credito.createCredito', compact('usuarios', 'datosRestricciones'));
     }
-
-
 
     public function store(Request $request)
     {
@@ -89,57 +83,53 @@ class CreditoController extends Controller
         }
     }
 
-
-
     public function crearDesdePedido(Request $request, Pedido $pedido)
-{
-    $pedido = Pedido::find($pedido->id_pedido);
-    if (!$pedido) {
-        return back()->with('error', 'Pedido no encontrado.');
+    {
+        $pedido = Pedido::find($pedido->id_pedido);
+        if (!$pedido) {
+            return back()->with('error', 'Pedido no encontrado.');
+        }
+
+        if ($pedido->id_credito) {
+            return back()->with('error', 'Este pedido ya tiene un crédito asignado.');
+        }
+
+        $userId = $request->input('id_user');
+
+        // Validaciones
+        $creditosActivos = Credito::where('id_user', $userId)
+            ->where('estado', 1)
+            ->get();
+
+        if ($request->input('crear_nuevo', true)) {
+            if ($creditosActivos->count() >= 3) {
+                return back()->with('error', 'El usuario ya tiene 3 créditos activos, no puede crear más.');
+            }
+        }
+
+        $saldoTotalActivos = $creditosActivos->sum('saldo_total');
+
+        $nuevoSaldo = $request->input('total', 0);
+        if (($saldoTotalActivos + $nuevoSaldo) > 10000) {
+            return back()->with('error', 'La suma de los saldos activos más el nuevo crédito supera los $10,000.');
+        }
+
+        // Crear crédito
+        $credito = new Credito();
+        $credito->id_user = $userId;
+        $credito->saldo_total = $nuevoSaldo;
+        $credito->fecha_liquidacion = null;
+        $credito->fecha_vencimiento = $request->input('fecha_vencimiento') ?? now()->addDays(60);
+        $credito->estado = 1;
+        $credito->save();
+
+        // Asignar crédito al pedido
+        $pedido->id_credito = $credito->id_credito;
+        $pedido->save();
+
+        return redirect('/credito')->with('success', 'Crédito registrado correctamente.');
     }
 
-    if ($pedido->id_credito) {
-        return back()->with('error', 'Este pedido ya tiene un crédito asignado.');
-    }
-
-    $userId = $request->input('id_user');
-
-    // Validaciones
-    $creditosActivos = Credito::where('id_user', $userId)
-        ->where('estado', 1)
-        ->get();
-
-    if ($creditosActivos->count() >= 3) {
-        return back()->with('error', 'El usuario ya tiene 3 créditos activos, no puede crear más.');
-    }
-
-    $saldoTotalActivos = $creditosActivos->sum('saldo_total');
-
-    $nuevoSaldo = $request->input('total', 0);
-    if (($saldoTotalActivos + $nuevoSaldo) > 10000) {
-        return back()->with('error', 'La suma de los saldos activos más el nuevo crédito supera los $10,000.');
-    }
-
-    // Crear crédito
-    $credito = new Credito();
-    $credito->id_user = $userId;
-    $credito->saldo_total = $nuevoSaldo;
-    $credito->fecha_liquidacion = null;
-    $credito->fecha_vencimiento = $request->input('fecha_vencimiento') ?? now()->addDays(60);
-    $credito->estado = 1;
-    $credito->save();
-
-    // Asignar crédito al pedido
-    $pedido->id_credito = $credito->id_credito;
-    $pedido->save();
-
-    return redirect('/credito')->with('success', 'Crédito registrado correctamente.');
-}
-
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Request $request)
     {
         $id = $request->input('id_credito');
@@ -172,9 +162,6 @@ class CreditoController extends Controller
         return back()->with('error', 'Debes ingresar un ID de credito o un nombre de usuario.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
         $credito = Credito::find($id);
@@ -188,9 +175,6 @@ class CreditoController extends Controller
         return view('/credito/editCredito', ['credito' => $credito]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Credito $credito)
     {
         $credito = Credito::find($credito->id_credito);
@@ -208,10 +192,6 @@ class CreditoController extends Controller
         return redirect()->route('credito.index')->with('success', 'El crédito se ha actualizado con éxito.');
     }
 
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         $credito = Credito::find($id);
@@ -220,10 +200,14 @@ class CreditoController extends Controller
             return redirect()->route('credito.index')->with('error', 'El crédito no se encontró.');
         }
 
+        if ($credito->saldo_total > 0) {
+            return redirect()->route('credito.index')->with('error', 'El crédito no se puede eliminar porque tiene saldo pendiente.');
+        }
+
         // Desvincular pedidos antes de eliminar el crédito
         Pedido::where('id_credito', $id)->update([
             'id_credito' => null,
-            'metodo_pago' => 'contado' // si quieres marcar que ya no es a crédito
+            'metodo_pago' => 'contado'
         ]);
 
         // Eliminar abonos relacionados
@@ -234,6 +218,5 @@ class CreditoController extends Controller
 
         return redirect()->route('credito.index')->with('success', 'El crédito se ha eliminado con éxito.');
     }
-
 
 }

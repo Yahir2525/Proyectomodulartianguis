@@ -23,6 +23,21 @@
             </thead>
             <tbody>
                 @foreach ($pedidos as $pedido)
+                @php
+                    $usuario = $pedido->user;
+                    $creditosActivos = \App\Models\Credito::where('id_user', $usuario->id_user)
+                        ->where('estado', 1)
+                        ->whereDate('fecha_vencimiento', '>=', now())
+                        ->get();
+
+                    $deudaActiva = $creditosActivos->sum('saldo_total');
+                    $pedidoExcede = $pedido->total_pedido > 10000;
+                    $sumaExcede = ($pedido->total_pedido + $deudaActiva) > 10000;
+
+                    $bloqueado = $pedidoExcede || $sumaExcede;
+
+                    $creditosDisponibles = $creditosActivos;
+                @endphp
                     <tr>
                         <td>{{ $pedido->id_pedido }}</td>
                         <td>{{ optional($pedido->user)->nombre_usuario ?? 'Sin usuario' }}</td>
@@ -70,7 +85,7 @@
                                         </p>
                                     @endif
 
-                                    <label>Método de pago:</label>
+                                    <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
                                     <select name="metodo_pago" required @if($bloqueado) onchange="activarContadoSiValido(this)" @endif>
                                         <option value="">-- Selecciona --</option>
                                         <option value="contado">Contado</option>
@@ -80,32 +95,47 @@
                                     </select>
 
                                     <div class="credito-opciones" style="display:none; margin-top:8px;">
-                                        @php
-                                            $creditos = \App\Models\Credito::where('id_user', $usuario->id_user)->get();
-                                        @endphp
-
-                                        @if($creditos->isNotEmpty())
+                                        @if($creditosDisponibles->isNotEmpty())
                                             <label>Seleccionar crédito:</label>
                                             <select name="id_credito" class="select-credito">
                                                 <option value="">-- Crear nuevo crédito --</option>
-                                                @foreach($creditos as $credito)
+                                                @foreach($creditosDisponibles as $credito)
                                                     <option value="{{ $credito->id_credito }}">
-                                                        Crédito #{{ $credito->id_credito }} - Saldo: {{ $credito->saldo_total }}
+                                                        Crédito #{{ $credito->id_credito }} - Saldo: ${{ number_format($credito->saldo_total, 2) }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                         @else
                                             <input type="hidden" name="id_credito" value="">
+                                            <p style="color: red;">No hay créditos disponibles (cerrados o vencidos).</p>
                                         @endif
                                     </div>
 
                                     <button type="submit" style="margin-top:8px;">Cerrar pedido</button>
                                 </form>
                             @else
-                                <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST">
-                                    @csrf
-                                    <button type="submit">Reabrir pedido</button>
-                                </form>
+                                @can('edit pedido')
+                                    @php
+                                        $puedeReabrir = true;
+                                        if ($pedido->id_credito) {
+                                            $credito = \App\Models\Credito::find($pedido->id_credito);
+                                            if (!$credito || $credito->estado == 0 || now()->greaterThan($credito->fecha_vencimiento)) {
+                                                $puedeReabrir = false;
+                                            }
+                                        }
+                                    @endphp
+
+                                    @if ($puedeReabrir)
+                                        <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST">
+                                            @csrf
+                                            <button type="submit">Reabrir pedido</button>
+                                        </form>
+                                    @else
+                                        <p style="color: red;">No se puede reabrir: el crédito está cerrado o vencido.</p>
+                                    @endif
+                                @else
+                                    Pedido cerrado
+                                @endcan
                             @endif
                         </td>
                     </tr>

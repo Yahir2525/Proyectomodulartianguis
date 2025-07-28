@@ -44,7 +44,7 @@
                             <td>{{ optional($credito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
                             <td>{{ $credito->fecha_liquidacion }}</td>
                             <td>{{ $credito->fecha_vencimiento }}</td>
-                            <td>{{ $credito->estado ? 'Activo' : 'Inactivo' }}</td>
+                            <td>{{ $credito->estado ? 'Activo' : 'Cerrado' }}</td>
                             
                             <td>${{ number_format($credito->saldo_total, 2) }}</td>
                             <td>

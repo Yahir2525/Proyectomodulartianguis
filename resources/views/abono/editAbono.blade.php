@@ -32,9 +32,9 @@
 
         <div>
             <label for="id_credito">Seleccionar Crédito:</label>
-            <select name="id_credito" id="id_credito">
+            <select name="id_credito" id="id_credito" required>
                 <option value="">-- Selecciona un crédito --</option>
-                @foreach ($creditos as $credito)
+                @foreach ($creditos->where('estado', 1) as $credito)
                     <option value="{{ $credito->id_credito }}"
                         {{ $abono->id_credito == $credito->id_credito ? 'selected' : '' }}>
                         Crédito #{{ $credito->id_credito }} - Saldo: ${{ number_format($credito->saldo_total, 2) }}

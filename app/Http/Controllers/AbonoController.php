@@ -47,24 +47,43 @@ class AbonoController extends Controller
 
     public function store(Request $request)
     {
+        // Validar entrada
+        $request->validate([
+            'id_user' => 'required|exists:users,id_user',
+            'id_credito' => 'required|exists:creditos,id_credito',
+            'monto_abono' => 'required|numeric|min:0.01',
+        ]);
+
+        $credito = Credito::find($request->input('id_credito'));
+
+        // Verificar que el crédito esté activo
+        if (!$credito || $credito->estado == 0) {
+            return back()->with('error', 'No se puede abonar a un crédito cerrado o inexistente.');
+        }
+
+        // Crear el abono
         $abono = new Abono();
-        $abono->id_credito = $request->input('id_credito');
+        $abono->id_credito = $credito->id_credito;
         $abono->id_user = $request->input('id_user');
         $abono->monto_abono = $request->input('monto_abono');
         $abono->save();
 
-        $credito = Credito::find($abono->id_credito);
-        if ($credito) {
-            $credito->saldo_total -= $abono->monto_abono;
-            if ($credito->saldo_total < 0) {
-                $credito->saldo_total = 0;
-            }
-            $credito->save();
+        // Actualizar saldo del crédito
+        $credito->saldo_total -= $abono->monto_abono;
+        if ($credito->saldo_total < 0) {
+            $credito->saldo_total = 0;
         }
 
-        return redirect('/abono')->with('success', 'Abono registrado y saldo actualizado correctamente.');
-    }
+        // Si se liquida el crédito
+        if ($credito->saldo_total == 0) {
+            $credito->estado = 0;
+            $credito->fecha_liquidacion = now();
+        }
 
+        $credito->save();
+
+        return redirect()->route('abono.index')->with('success', 'Abono registrado y aplicado correctamente.');
+    }
 
 
     public function show(Request $request)
@@ -108,9 +127,10 @@ class AbonoController extends Controller
             return redirect()->back()->with('error', 'El abono no se encontró.');
         }
 
-        // Obtener todos los créditos del mismo usuario al que pertenece el abono
+        // Solo créditos activos
         $creditos = Credito::with('user')
             ->where('id_user', $abono->id_user)
+            ->where('estado', 1) // 👈 solo créditos activos
             ->get();
 
         return view('abono.editAbono', [
@@ -128,18 +148,24 @@ class AbonoController extends Controller
             return redirect()->route('abono.index')->with('error', 'El abono no se encontró.');
         }
 
-        $montoAnterior = $abono->monto_abono;
-        $creditoAnteriorId = $abono->id_credito;
-
         $nuevoMonto = $request->input('monto_abono');
         $nuevoCreditoId = $request->input('id_credito');
 
-        // Actualizar el abono
+        // Validar que el nuevo crédito exista y esté activo
+        $creditoNuevo = Credito::find($nuevoCreditoId);
+        if (!$creditoNuevo || $creditoNuevo->estado == 0) {
+            return redirect()->route('abono.index')->with('error', 'No se puede aplicar el abono a un crédito cerrado.');
+        }
+
+        $montoAnterior = $abono->monto_abono;
+        $creditoAnteriorId = $abono->id_credito;
+
+        // Actualizar el abono con nuevo monto y/o crédito
         $abono->monto_abono = $nuevoMonto;
         $abono->id_credito = $nuevoCreditoId;
         $abono->save();
 
-        // Ajustar el saldo del crédito anterior
+        // Revertir saldo al crédito anterior si cambió
         if ($creditoAnteriorId && $creditoAnteriorId != $nuevoCreditoId) {
             $creditoAnterior = Credito::find($creditoAnteriorId);
             if ($creditoAnterior) {
@@ -148,17 +174,25 @@ class AbonoController extends Controller
             }
         }
 
-        // Ajustar el saldo del crédito nuevo
-        $creditoNuevo = Credito::find($nuevoCreditoId);
-        if ($creditoNuevo) {
-            $ajuste = ($creditoAnteriorId == $nuevoCreditoId)
-                        ? $montoAnterior - $nuevoMonto // solo actualizó el monto
-                        : $nuevoMonto; // cambio de crédito: restar monto completo
+        // Calcular ajuste al crédito nuevo
+        $ajuste = ($creditoAnteriorId == $nuevoCreditoId)
+                    ? $montoAnterior - $nuevoMonto
+                    : $nuevoMonto;
 
-            $creditoNuevo->saldo_total -= $ajuste;
-            if ($creditoNuevo->saldo_total < 0) $creditoNuevo->saldo_total = 0;
-            $creditoNuevo->save();
+        $creditoNuevo->saldo_total -= $ajuste;
+
+        // Evitar saldo negativo
+        if ($creditoNuevo->saldo_total < 0) {
+            $creditoNuevo->saldo_total = 0;
         }
+
+        // Si se liquida el crédito
+        if ($creditoNuevo->saldo_total == 0) {
+            $creditoNuevo->estado = 0;
+            $creditoNuevo->fecha_liquidacion = now(); // fecha actual como fecha de liquidación
+        }
+
+        $creditoNuevo->save();
 
         return redirect()->route('abono.index')->with('success', 'El abono se ha actualizado con éxito.');
     }

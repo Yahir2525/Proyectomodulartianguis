@@ -23,6 +23,8 @@
         document.addEventListener("DOMContentLoaded", () => {
             const userSelect = document.getElementById('id_user');
             if (userSelect) userSelect.addEventListener('change', filtrarCreditos);
+
+            filtrarCreditos(); // por si hay datos ya seleccionados
         });
     </script>
 </head>
@@ -42,6 +44,7 @@
     <form action="{{ route('abono.store') }}" method="POST">
         @csrf
 
+        {{-- Usuario --}}
         @if (Auth::user()->hasRole('administrador'))
             <label for="id_user">Seleccionar Usuario:</label>
             <select name="id_user" id="id_user" required>
@@ -56,11 +59,15 @@
 
         <br><br>
 
+        {{-- Crédito (solo los activos) --}}
         <label for="id_credito">Seleccionar Crédito:</label>
         <select name="id_credito" id="id_credito" required>
             <option value="">-- Selecciona un crédito --</option>
-            @foreach ($creditos as $credito)
-                <option value="{{ $credito->id_credito }}" data-user="{{ $credito->id_user }}">
+            @foreach ($creditos->where('estado', 1) as $credito)
+                <option 
+                    value="{{ $credito->id_credito }}"
+                    data-user="{{ $credito->id_user }}"
+                >
                     Crédito #{{ $credito->id_credito }} - Usuario: {{ $credito->user->nombre_usuario ?? 'N/A' }} - Saldo: ${{ number_format($credito->saldo_total, 2) }}
                 </option>
             @endforeach
@@ -68,11 +75,13 @@
 
         <br><br>
 
+        {{-- Monto --}}
         <label for="monto_abono">Monto del abono:</label>
         <input type="number" name="monto_abono" id="monto_abono" min="1" step="0.01" required>
+
         <br><br>
 
-        <button type="submit">Registrar Abono</button>
+        <button type="submit">Aplicar al crédito</button>
     </form>
 </body>
 </html>
