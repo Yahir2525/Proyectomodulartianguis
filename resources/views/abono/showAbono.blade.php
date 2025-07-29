@@ -38,7 +38,7 @@
                 @foreach($listaAbonos as $abono)
                     <tr>
                         <td>{{ $abono->id_abono }}</td>
-                        <td>{{ $abono->id_user }}</td>
+                        <td>{{ optional($abono->user)->nombre_usuario ?? 'Usuario no disponible' }}</td>
                         <td>{{ $abono->id_credito }}</td>
                         <td>${{ number_format($abono->monto_abono, 2) }}</td>
                         <td>{{ $abono->created_at->format('d/m/Y H:i') }}</td>

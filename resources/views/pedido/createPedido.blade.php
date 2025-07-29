@@ -11,14 +11,35 @@
     <form action="{{ url('/pedido') }}" method="POST">
         @csrf
 
-        @if ($usuarios) 
-            <label for="id_user">Selecciona el usuario para este pedido:</label>
-            <select name="id_user" id="id_user" required>
-                <option value="">-- Selecciona un usuario --</option>
+        @if ($usuarios)
+            {{-- Campo de búsqueda para seleccionar usuario --}}
+            <label for="nombre_usuario">Buscar usuario:</label>
+            <input list="usuarios" id="nombre_usuario" placeholder="Ej. Juan Pérez" required>
+            <input type="hidden" name="id_user" id="id_user">
+
+            <datalist id="usuarios">
                 @foreach ($usuarios as $user)
-                    <option value="{{ $user->id_user }}">{{ $user->nombre_usuario }}</option>
+                    <option value="{{ $user->nombre_usuario }}" data-userid="{{ $user->id_user }}"></option>
                 @endforeach
-            </select>
+            </datalist>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const input = document.getElementById('nombre_usuario');
+                    const hidden = document.getElementById('id_user');
+                    const opciones = document.getElementById('usuarios').options;
+
+                    input.addEventListener('input', () => {
+                        hidden.value = '';
+                        for (let i = 0; i < opciones.length; i++) {
+                            if (opciones[i].value === input.value) {
+                                hidden.value = opciones[i].dataset.userid;
+                                break;
+                            }
+                        }
+                    });
+                });
+            </script>
         @else
             <input type="hidden" name="id_user" value="{{ $usuario->id_user }}">
         @endif

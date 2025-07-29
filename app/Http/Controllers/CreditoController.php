@@ -24,7 +24,9 @@ class CreditoController extends Controller
             $creditoIndex = Credito::where('id_user', $user->id_user)->get(); // solo los del usuario
         }
 
-        return view('credito/creditoIndex', compact('creditoIndex'));
+        $usuarios = $user->hasRole('administrador') ? User::all() : collect();
+
+        return view('credito/creditoIndex', compact('creditoIndex', 'usuarios'));
     }
     public function create()
     {
@@ -132,35 +134,51 @@ class CreditoController extends Controller
 
     public function show(Request $request)
     {
-        $id = $request->input('id_credito');
-        $nombreUsuario = $request->input('nombre_usuario');
+        $busqueda = $request->input('busqueda');
+        $user = Auth::user();
 
-        // Buscar por ID de pedido
-        if ($id) {
-            $credito = Credito::with('user')->find($id);
-            if (!$credito) {
-                return back()->with('error', 'El credito no se encontró.');
+        if (!$busqueda) {
+            return back()->with('error', 'Debes ingresar un ID de crédito o un nombre de usuario.');
+        }
+
+        // Si es un número, se interpreta como ID de crédito
+        if (is_numeric($busqueda)) {
+            if ($user->hasRole('administrador')) {
+                $credito = Credito::with('user')->find($busqueda);
+            } else {
+                $credito = Credito::with('user')
+                    ->where('id_credito', $busqueda)
+                    ->where('id_user', $user->id_user)
+                    ->first();
             }
+
+            if (!$credito) {
+                return back()->with('error', 'El crédito no se encontró o no te pertenece.');
+            }
+
             return view('credito.showCredito', ['creditos' => collect([$credito])]);
         }
 
-        // Buscar por nombre de usuario
-        if ($nombreUsuario) {
-            $usuario = User::where('nombre_usuario', 'ILIKE', $nombreUsuario)->first();
+        // Si es texto, se interpreta como nombre de usuario (solo admins)
+        if ($user->hasRole('administrador')) {
+            $usuario = User::where('nombre_usuario', 'ILIKE', $busqueda)->first();
+
             if (!$usuario) {
                 return back()->with('error', 'Usuario no encontrado.');
             }
 
             $creditos = Credito::with('user')->where('id_user', $usuario->id_user)->get();
+
             if ($creditos->isEmpty()) {
-                return back()->with('error', 'No se encontraron creditos para el usuario "' . $nombreUsuario . '".');
+                return back()->with('error', 'No se encontraron créditos para el usuario "' . $busqueda . '".');
             }
 
             return view('credito.showCredito', ['creditos' => $creditos]);
         }
 
-        return back()->with('error', 'Debes ingresar un ID de credito o un nombre de usuario.');
+        return back()->with('error', 'Solo puedes buscar tus créditos por ID.');
     }
+
 
     public function edit($id)
     {
@@ -202,6 +220,10 @@ class CreditoController extends Controller
 
         if ($credito->saldo_total > 0) {
             return redirect()->route('credito.index')->with('error', 'El crédito no se puede eliminar porque tiene saldo pendiente.');
+        }
+
+        if ($credito->estado == 0){
+            return redirect()->route('credito.index')->with('error', 'El credito no se puede eliminar porque está cerrado y tiene un historial');
         }
 
         // Desvincular pedidos antes de eliminar el crédito

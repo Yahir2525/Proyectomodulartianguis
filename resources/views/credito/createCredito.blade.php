@@ -21,56 +21,80 @@
         @csrf
 
         @if(Auth::user()->hasRole('administrador'))
-            <label for="id_user">Seleccionar usuario:</label>
-            <select name="id_user" id="id_user" onchange="validarRestricciones()" required>
-                <option value="">-- Selecciona un usuario --</option>
+            <label for="nombre_usuario">Buscar usuario:</label>
+            <input list="usuarios" id="nombre_usuario" placeholder="Ej. Juan Pérez" required>
+            <input type="hidden" name="id_user" id="id_user">
+
+            <datalist id="usuarios">
                 @foreach ($usuarios as $usuario)
-                    <option value="{{ $usuario->id_user }}">{{ $usuario->nombre_usuario }}</option>
+                    <option value="{{ $usuario->nombre_usuario }}" data-userid="{{ $usuario->id_user }}"></option>
                 @endforeach
-            </select>
+            </datalist>
+
+            <br><br>
+            <p id="mensaje-restriccion" style="color: red;"></p>
+
+            <script>
+                const restricciones = @json($datosRestricciones);
+
+                function validarRestricciones(userId) {
+                    const boton = document.getElementById('btnCrear');
+                    const mensaje = document.getElementById('mensaje-restriccion');
+
+                    if (!restricciones[userId]) {
+                        boton.disabled = true;
+                        mensaje.innerText = '';
+                        return;
+                    }
+
+                    const { activos, suma } = restricciones[userId];
+
+                    if (activos >= 3) {
+                        boton.disabled = true;
+                        mensaje.innerText = 'Este usuario ya tiene 3 créditos activos.';
+                    } else if (suma >= 10000) {
+                        boton.disabled = true;
+                        mensaje.innerText = 'La suma de los saldos activos supera los $10,000.';
+                    } else {
+                        boton.disabled = false;
+                        mensaje.innerText = '';
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const input = document.getElementById('nombre_usuario');
+                    const hidden = document.getElementById('id_user');
+                    const opciones = document.getElementById('usuarios').options;
+
+                    input.addEventListener('input', () => {
+                        hidden.value = '';
+                        for (let i = 0; i < opciones.length; i++) {
+                            if (opciones[i].value === input.value) {
+                                const userId = opciones[i].dataset.userid;
+                                hidden.value = userId;
+                                validarRestricciones(userId);
+                                break;
+                            }
+                        }
+
+                        // Si no se encuentra coincidencia
+                        if (!hidden.value) {
+                            document.getElementById('btnCrear').disabled = true;
+                            document.getElementById('mensaje-restriccion').innerText = '';
+                        }
+                    });
+                });
+            </script>
         @else
             <input type="hidden" name="id_user" value="{{ Auth::id() }}">
             <p><strong>Usuario:</strong> {{ Auth::user()->nombre_usuario }}</p>
         @endif
 
         <br><br>
-        <p id="mensaje-restriccion" style="color: red;"></p>
-
         <button type="submit" id="btnCrear" {{ Auth::user()->hasRole('administrador') ? 'disabled' : '' }}>Crear crédito</button>
     </form>
 
     <br>
     <a href="{{ url('/credito') }}">Volver al listado</a>
-
-    @if(Auth::user()->hasRole('administrador'))
-    <script>
-        const restricciones = @json($datosRestricciones);
-
-        function validarRestricciones() {
-            const userId = document.getElementById('id_user').value;
-            const boton = document.getElementById('btnCrear');
-            const mensaje = document.getElementById('mensaje-restriccion');
-
-            if (!restricciones[userId]) {
-                boton.disabled = true;
-                mensaje.innerText = '';
-                return;
-            }
-
-            const { activos, suma } = restricciones[userId];
-
-            if (activos >= 3) {
-                boton.disabled = true;
-                mensaje.innerText = 'Este usuario ya tiene 3 créditos activos.';
-            } else if (suma >= 10000) {
-                boton.disabled = true;
-                mensaje.innerText = 'La suma de los saldos activos supera los $10,000.';
-            } else {
-                boton.disabled = false;
-                mensaje.innerText = '';
-            }
-        }
-    </script>
-    @endif
 </body>
 </html>

@@ -4,16 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Abono</title>
+
     <script>
         function filtrarCreditos() {
-            const usuarioId = document.getElementById('id_user').value;
-            const opciones = document.querySelectorAll('#id_credito option');
+            const usuarioInput = document.getElementById('nombre_usuario');
+            const userIdInput = document.getElementById('id_user');
+            const selectedName = usuarioInput.value.trim();
+            const options = usuarioInput.list.options;
+            let userId = '';
 
-            opciones.forEach(op => {
-                if (!op.dataset.user || usuarioId === '') {
+            // Buscar el ID del usuario seleccionado por nombre
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === selectedName) {
+                    userId = options[i].dataset.userid;
+                    break;
+                }
+            }
+
+            userIdInput.value = userId;
+
+            const creditos = document.querySelectorAll('#id_credito option');
+
+            creditos.forEach(op => {
+                if (!op.dataset.user || userId === '') {
                     op.style.display = 'none';
                 } else {
-                    op.style.display = (op.dataset.user === usuarioId) ? 'block' : 'none';
+                    op.style.display = (op.dataset.user === userId) ? 'block' : 'none';
                 }
             });
 
@@ -21,10 +37,11 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            const userSelect = document.getElementById('id_user');
-            if (userSelect) userSelect.addEventListener('change', filtrarCreditos);
-
-            filtrarCreditos(); // por si hay datos ya seleccionados
+            const usuarioInput = document.getElementById('nombre_usuario');
+            if (usuarioInput) {
+                usuarioInput.addEventListener('input', filtrarCreditos);
+                filtrarCreditos(); // inicial
+            }
         });
     </script>
 </head>
@@ -46,24 +63,29 @@
 
         {{-- Usuario --}}
         @if (Auth::user()->hasRole('administrador'))
-            <label for="id_user">Seleccionar Usuario:</label>
-            <select name="id_user" id="id_user" required>
-                <option value="">-- Selecciona un usuario --</option>
+            <label for="nombre_usuario">Buscar usuario:</label>
+            <input list="usuarios" id="nombre_usuario" placeholder="Ej. Juan Pérez" required>
+            <input type="hidden" name="id_user" id="id_user">
+
+            <datalist id="usuarios">
                 @foreach ($usuarios as $usuario)
-                    <option value="{{ $usuario->id_user }}">{{ $usuario->nombre_usuario }}</option>
-                @endforeach
-            </select>
+                    <option 
+                        value="{{ $usuario->nombre_usuario }}"
+                        data-userid="{{ $usuario->id_user }}"
+                    >
+                    @endforeach
+            </datalist>
         @else
             <input type="hidden" name="id_user" value="{{ Auth::id() }}">
         @endif
 
         <br><br>
 
-        {{-- Crédito (solo los activos) --}}
+        {{-- Crédito activo y con saldo > 0 --}}
         <label for="id_credito">Seleccionar Crédito:</label>
         <select name="id_credito" id="id_credito" required>
             <option value="">-- Selecciona un crédito --</option>
-            @foreach ($creditos->where('estado', 1) as $credito)
+            @foreach ($creditos->where('estado', 1)->filter(fn($c) => $c->saldo_total > 0) as $credito)
                 <option 
                     value="{{ $credito->id_credito }}"
                     data-user="{{ $credito->id_user }}"

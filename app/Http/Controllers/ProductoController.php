@@ -13,16 +13,21 @@ class ProductoController extends Controller
     {
         $usuario = Auth::user();
 
+        $usuarios = collect();
+        $pedidosUsuario = collect();
+
         if ($usuario->hasRole('administrador')) {
-            $pedidosUsuario = Pedido::all();
+            $usuarios = \App\Models\User::all();
+            $pedidosUsuario = \App\Models\Pedido::with('user')->get(); // Todos los pedidos
         } else {
-            $pedidosUsuario = Pedido::where('id_user', $usuario->id_user)->get(); // Solo los suyos
+            $pedidosUsuario = \App\Models\Pedido::where('id_user', $usuario->id_user)->get();
         }
 
         $productoIndex = Producto::all();
 
-        return view('producto.productoIndex', compact('productoIndex', 'pedidosUsuario'));
+        return view('producto.productoIndex', compact('productoIndex', 'pedidosUsuario', 'usuarios'));
     }
+
 
     public function create()
     {
@@ -69,13 +74,28 @@ class ProductoController extends Controller
 
     public function show(Request $request)
     {
-        $id = $request->input('id_producto');
-        $producto = Producto::find($id);
-        if (!$producto) {
-            return redirect()->back()->with('error', 'El producto no se encontró.');
+        $busqueda = $request->input('busqueda');
+
+        $productos = collect();
+        if (is_numeric($busqueda)) {
+            $producto = \App\Models\Producto::find($busqueda);
+            if ($producto) {
+                $productos->push($producto);
+            }
+        } elseif ($busqueda) {
+            $productos = \App\Models\Producto::where('nombre', 'ILIKE', "%$busqueda%")->get();
         }
-        return view('producto.showProducto', ['producto' => $producto]);
+
+        $usuarios = \App\Models\User::all();
+        $pedidosUsuario = \App\Models\Pedido::with('user')->get();
+
+        return view('producto.showProducto', compact('productos', 'usuarios', 'pedidosUsuario'));
     }
+
+
+
+
+
 
     public function edit($id)
     {

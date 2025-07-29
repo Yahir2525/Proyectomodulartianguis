@@ -4,68 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Principal de abonos</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 5px;
+            text-align: center;
+        }
+        h2 {
+            margin-top: 30px;
+        }
+    </style>
 </head>
 <body>
     <section>
         <h1>Principal de abonos</h1><br>
+
         @can('create abono')
             <a href="{{ url('/abono/create') }}">Registrar nuevo abono</a>
         @endcan
+
         <br><br>
+
         <form action="{{ url('/abono/showAbono') }}" method="GET">
-                    <label for="id_abono">ID de carro:</label>
-                    <input type="text" id="id_abono" name="id_abono" placeholder="21" />
-                    @can('edit abono')
-                    <label for="nombre_usuario">Nombre de usuario:</label>
-                    <input type="text" id="nombre_usuario" name="nombre_usuario" placeholder="sergio" />
-                    @endcan
-                    <input type="submit" value="Buscar" />
-                </form>
+            <label for="busqueda">Buscar por ID de abono o nombre de usuario:</label>
+            <input type="text" id="busqueda" name="busqueda"
+                placeholder="Ej. 21 o Carlitos"
+                list="{{ Auth::user()->can('edit abono') ? 'usuarios' : '' }}"
+                value="{{ request('busqueda') }}" />
 
-        @if($abonoIndex->isNotEmpty())
-            <h2>Tabla de abonos registrados</h2>
-            <table border="1" cellspacing="0" cellpadding="5">
-                <thead>
-                    <tr>
-                        <th>ID del abono</th>
-                        <th>ID del crédito</th>
-                        <th>Nombre de usuario</th>
-                        <th>Monto</th>
-                        <th>Fecha de creación</th>
-                        <th>Última actualización</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach ($abonoIndex as $abono)
-                    <tr>
-                        <td>{{ $abono->id_abono }}</td>
-                        <td>{{ optional($abono->credito)->id_credito ?? 'Sin crédito' }}</td>
-                        <td>{{ optional($abono->user)->nombre_usuario ?? 'No tiene usuario' }}</td>
-                        <td>{{ $abono->monto_abono }}</td>
-                        <td>{{ $abono->created_at }}</td>
-                        <td>{{ $abono->updated_at }}</td>
-                        <td>
-                            @can('edit abono')
-                                <a href="{{ route('abono.edit', $abono->id_abono) }}">Editar</a>
-                            @endcan
-                            @can('delete abono')
-                                <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit">Eliminar</button>
-                                </form>
-                            @endcan
-                                <form action="{{ route('abono.aplicar', $abono->id_abono) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    <button type="submit">Aplicar al crédito</button>
-                                </form>
+            @can('edit abono')
+                <datalist id="usuarios">
+                    @foreach($usuarios as $usuario)
+                        <option value="{{ $usuario->nombre_usuario }}"></option>
+                    @endforeach
+                </datalist>
+            @endcan
 
-                        </td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
+            <input type="submit" value="Buscar" />
+        </form>
+
+
+        @if ($abonoIndex->isNotEmpty())
+            @php
+                $abonosAgrupados = $abonoIndex->groupBy('user.nombre_usuario');
+            @endphp
+
+            @foreach ($abonosAgrupados as $usuario => $abonos)
+                <h2>Abonos de {{ $usuario ?? 'Usuario desconocido' }}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID del abono</th>
+                            <th>ID del crédito</th>
+                            <th>Monto</th>
+                            <th>Fecha de creación</th>
+                            <th>Última actualización</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($abonos as $abono)
+                            <tr>
+                                <td>{{ $abono->id_abono }}</td>
+                                <td>{{ optional($abono->credito)->id_credito ?? 'Sin crédito' }}</td>
+                                <td>${{ number_format($abono->monto_abono, 2) }}</td>
+                                <td>{{ $abono->created_at }}</td>
+                                <td>{{ $abono->updated_at }}</td>
+                                <td>
+                                    @can('edit abono')
+                                        <a href="{{ route('abono.edit', $abono->id_abono) }}">Editar</a>
+                                    @endcan
+
+                                    @can('delete abono')
+                                        <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit">Eliminar</button>
+                                        </form>
+                                    @endcan
+
+                                    <!-- <form action="{{ route('abono.aplicar', $abono->id_abono) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        <button type="submit">Aplicar al crédito</button>
+                                    </form> -->
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endforeach
+        @else
+            <p>No hay abonos registrados.</p>
         @endif
     </section>
 </body>

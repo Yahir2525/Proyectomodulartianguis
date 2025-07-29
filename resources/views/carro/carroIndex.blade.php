@@ -18,16 +18,23 @@
             <p><a href="{{ url('/carro/create') }}">Registrar un nuevo carro</a></p>
 
             <form action="{{ url('/carro/showCarro') }}" method="GET">
-                <label for="id_carro">ID de carro:</label>
-                <input type="text" id="id_carro" name="id_carro" placeholder="21" />
+                <label for="busqueda">Buscar por ID de carro o nombre de usuario:</label>
+                <input type="text" id="busqueda" name="busqueda" placeholder="Ej. 21 o Carlitos"
+                    list="{{ Auth::user()->can('edit carro') ? 'usuarios' : '' }}"
+                    value="{{ request('busqueda') }}" />
+
                 @can('edit carro')
-                    <label for="nombre_usuario">Nombre de usuario:</label>
-                    <input type="text" id="nombre_usuario" name="nombre_usuario" placeholder="carlitos" />
+                    <datalist id="usuarios">
+                        @foreach($usuarios as $usuario)
+                            <option value="{{ $usuario->nombre_usuario }}"></option>
+                        @endforeach
+                    </datalist>
                 @endcan
+
                 <input type="submit" value="Buscar" />
             </form>
 
-            <br /><br />
+            <br><br>
 
             @if($carroIndex->isNotEmpty())
                 @php
@@ -131,15 +138,15 @@
                                     ->get();
 
                                 $totalCreditos = $creditosActivos->sum('saldo_total');
-                                $pedidoExcede = $totalPedido > 10000;
+                                $totalExcede = $totalPedido > 10000;
                                 $sumaExcede = ($totalCreditos + $totalPedido) > 10000;
+                                $bloqueado = $totalExcede || $sumaExcede;
 
-                                $bloqueado = $pedidoExcede || $sumaExcede;
+                                $puedeCrearCredito = $creditosActivos->count() < 3;
 
-                                $creditosDisponibles = \App\Models\Credito::where('id_user', $usuario->id_user)
-                                    ->where('estado', 1)
-                                    ->whereDate('fecha_vencimiento', '>=', now())
-                                    ->get();
+                                $creditosDisponibles = $creditosActivos->filter(function($c) use ($totalPedido) {
+                                    return ($c->saldo_total + $totalPedido) <= 10000;
+                                });
                             @endphp
 
                             <form action="{{ route('pedido.cerrar', $idPedido) }}" method="POST">
@@ -149,18 +156,18 @@
                                 @if($bloqueado)
                                     <p style="color:red;">
                                         <strong>No puedes cerrar este pedido a crédito:</strong><br>
-                                        @if($pedidoExcede)
-                                            - El total del pedido supera los $10,000.<br>
+                                        @if($totalExcede)
+                                            - El total del pedido excede los $10,000.<br>
                                         @endif
                                         @if($sumaExcede)
-                                            - La suma del saldo de los créditos activos más este pedido supera los $10,000.<br>
+                                            - El total de créditos más este pedido excede los $10,000.<br>
                                         @endif
-                                        Puedes elegir "Contado" para cerrar sin restricciones.
+                                        Puedes cerrarlo como **contado**.
                                     </p>
                                 @endif
 
                                 <label for="metodo_pago_{{ $idPedido }}">Método de pago:</label>
-                                <select name="metodo_pago" required>
+                                <select name="metodo_pago" required onchange="mostrarCreditos(this, {{ $idPedido }})">
                                     <option value="">-- Selecciona --</option>
                                     <option value="contado">Contado</option>
                                     @if(!$bloqueado)
@@ -168,27 +175,34 @@
                                     @endif
                                 </select>
 
-                                <div class="credito-opciones" style="display:none;">
-                                    @if($creditosDisponibles->isNotEmpty())
+                                <div id="credito-opciones-{{ $idPedido }}" style="display:none; margin-top:8px;">
+                                    @if(!$bloqueado)
                                         <label>Seleccionar crédito:</label>
                                         <select name="id_credito" class="select-credito">
-                                            <option value="">-- Crear nuevo crédito --</option>
+                                            @if($puedeCrearCredito)
+                                                <option value="">-- Crear nuevo crédito --</option>
+                                            @endif
                                             @foreach($creditosDisponibles as $credito)
                                                 <option value="{{ $credito->id_credito }}">
-                                                    Crédito #{{ $credito->id_credito }} - Saldo: {{ $credito->saldo_total }}
+                                                    Crédito #{{ $credito->id_credito }} - Saldo: ${{ number_format($credito->saldo_total, 2) }}
                                                 </option>
                                             @endforeach
                                         </select>
-                                    @else
-                                        <input type="hidden" name="id_credito" value="">
+
+                                        @if(!$puedeCrearCredito)
+                                            <p style="color:orange; font-style: italic;">
+                                                Ya tienes 3 créditos activos. No puedes crear uno nuevo, pero puedes usar los existentes.
+                                            </p>
+                                        @endif
                                     @endif
                                 </div>
 
-                                <button type="submit" style="margin-top: 8px;">Cerrar pedido</button>
+                                <button type="submit" style="margin-top:8px;">Cerrar pedido</button>
                             </form>
                         @else
                             <p style="color: gray;"><strong>Pedido cerrado</strong></p>
                         @endif
+
 
                         <hr>
                     @endif
@@ -200,24 +214,27 @@
     </div>
 </section>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('form').forEach(form => {
-        const metodo = form.querySelector('[name="metodo_pago"]');
-        const creditoOpciones = form.querySelector('.credito-opciones');
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('form').forEach(form => {
+            const metodo = form.querySelector('[name="metodo_pago"]');
+            const idPedido = form.getAttribute('action')?.match(/(\d+)/)?.[0];
+            const creditoDiv = document.getElementById('credito-opciones-' + idPedido);
 
-        if (metodo && creditoOpciones) {
-            metodo.addEventListener('change', () => {
-                if (metodo.value === 'credito') {
-                    creditoOpciones.style.display = 'block';
-                } else {
-                    creditoOpciones.style.display = 'none';
-                }
-            });
-        }
+            if (metodo && creditoDiv) {
+                metodo.addEventListener('change', () => {
+                    creditoDiv.style.display = metodo.value === 'credito' ? 'block' : 'none';
+                });
+            }
+        });
     });
-});
-</script>
+
+    function mostrarCreditos(select, idPedido) {
+        const div = document.getElementById('credito-opciones-' + idPedido);
+        div.style.display = select.value === 'credito' ? 'block' : 'none';
+    }
+    </script>
+
 
 </body>
 </html>

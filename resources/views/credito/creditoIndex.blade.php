@@ -3,66 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Principal de creditos</title>
+    <title>Principal de créditos</title>
+    <style>
+        h2 { margin-top: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+        .cerrado { background-color: #f2f2f2; }
+    </style>
 </head>
 <body>
-    <section>
-        <div>
-            <h1>Principal de creditos</h1>
-            <br>
-            <a href="{{ url('/credito/create') }}" class="button is-info is-fullwidth">
-                Registrar una nuevo credito
-            </a><br><br>
-            <form action="{{ url('/credito/showCredito') }}" method="GET">
-                <label for="id_pedido">Buscar por ID de pedido:</label>
-                <input type="text" id="id_credito" name="id_credito" placeholder="Ej. 21" autofocus/>
-                @can('edit credito')
-                <label for="nombre_usuario">o por nombre de usuario:</label>
-                <input type="text" id="nombre_usuario" name="nombre_usuario" placeholder="Ej. Pepito" />
-                @endcan
-                <input type="submit" value="Buscar" />
-            </form>
+<section>
+    <div>
+        <h1>Principal de créditos</h1>
+        <br>
 
+        <a href="{{ url('/credito/create') }}" class="button is-info is-fullwidth">
+            Registrar un nuevo crédito
+        </a>
+        <br><br>
 
-            @if($creditoIndex->isNotEmpty())
-            <br><h2>Tablas de créditos registrados</h2>
-            <center>
-                <table border="1">
-                    <tr>
-                        <th>ID del crédito</th>
-                        <th>Nombre del Cliente</th>
-                        <th>Fecha de Liquidación</th>
-                        <th>Fecha de Vencimiento</th>
-                        <th>Estado</th>
-                        <th>Saldo Total</th>
-                        <th>Acciones</th>
-                        <th>Eliminar</th>
-                    </tr>
-                    @foreach ($creditoIndex as $credito)
-                        <tr>
-                            <td>{{ $credito->id_credito }}</td>
-                            <td>{{ optional($credito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                            <td>{{ $credito->fecha_liquidacion }}</td>
-                            <td>{{ $credito->fecha_vencimiento }}</td>
-                            <td>{{ $credito->estado ? 'Activo' : 'Cerrado' }}</td>
-                            
-                            <td>${{ number_format($credito->saldo_total, 2) }}</td>
-                            <td>
-                                <a href="{{ route('credito.edit', $credito->id_credito) }}" class="button is-primary">Editar</a>
-                            </td>
-                            <td>
-                                    <form action="{{ url('/credito', $credito->id_credito) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit">Eliminar</button>
-                                    </form>
-                            </td>
-                        </tr>
+        <form action="{{ url('/credito/showCredito') }}" method="GET">
+            <label for="busqueda">Buscar por ID de crédito o nombre de usuario:</label>
+            <input type="text" id="busqueda" name="busqueda"
+                placeholder="Ej. 21 o Pepito"
+                list="{{ Auth::user()->can('edit credito') ? 'usuarios' : '' }}"
+                value="{{ request('busqueda') }}" />
+
+            @can('edit credito')
+                <datalist id="usuarios">
+                    @foreach($usuarios as $usuario)
+                        <option value="{{ $usuario->nombre_usuario }}"></option>
                     @endforeach
-                </table>
-            </center>
+                </datalist>
+            @endcan
+
+            <input type="submit" value="Buscar" />
+        </form>
+
+
+
+        @if($creditoIndex->isNotEmpty())
+            @php
+                $agrupados = $creditoIndex->groupBy('user.nombre_usuario');
+            @endphp
+
+            @foreach($agrupados as $usuario => $creditosUsuario)
+                <h2>Créditos de {{ $usuario ?? 'Usuario desconocido' }}</h2>
+
+                {{-- Créditos Activos --}}
+                @php
+                    $activos = $creditosUsuario->where('estado', 1);
+                @endphp
+                @if($activos->isNotEmpty())
+                    <h3>Activos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha de creación</th>
+                                <th>Fecha Liquidación</th>
+                                <th>Fecha Vencimiento</th>
+                                <th>Saldo</th>
+                                <!-- <th>Acciones</th> -->
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($activos as $credito)
+                                <tr>
+                                    <td>{{ $credito->id_credito }}</td>
+                                    <td>{{ $credito->created_at }}</td>
+                                    <td>{{ $credito->fecha_liquidacion ?? 'Aun no liquidado' }}</td>
+                                    <td>{{ $credito->fecha_vencimiento }}</td>
+                                    <td>${{ number_format($credito->saldo_total, 2) }}</td>
+                                    <!-- <td><a href="{{ route('credito.edit', $credito->id_credito) }}">Editar</a></td> -->
+                                    <td>
+                                        <form action="{{ url('/credito', $credito->id_credito) }}" method="POST">
+                                            @csrf @method('DELETE')
+                                            <button type="submit">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+
+                {{-- Créditos Cerrados --}}
+                @php
+                    $cerrados = $creditosUsuario->where('estado', 0);
+                @endphp
+                @if($cerrados->isNotEmpty())
+                    <h3>Cerrados</h3>
+                    <table class="cerrado">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha Liquidación</th>
+                                <th>Fecha Vencimiento</th>
+                                <th>Saldo</th>
+                                <!-- <th>Acciones</th> -->
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($cerrados as $credito)
+                                <tr>
+                                    <td>{{ $credito->id_credito }}</td>
+                                    <td>{{ $credito->fecha_liquidacion ?? '-' }}</td>
+                                    <td>{{ $credito->fecha_vencimiento }}</td>
+                                    <td>${{ number_format($credito->saldo_total, 2) }}</td>
+                                    <!-- <td><a href="{{ route('credito.edit', $credito->id_credito) }}">Editar</a></td> -->
+                                    <td>
+                                        <form action="{{ url('/credito', $credito->id_credito) }}" method="POST">
+                                            @csrf @method('DELETE')
+                                            <button type="submit">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+
+            @endforeach
+        @else
+            <p>No hay créditos registrados.</p>
         @endif
-        </div>
-    </section>
+
+    </div>
+</section>
 </body>
 </html>

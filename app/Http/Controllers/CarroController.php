@@ -15,13 +15,14 @@ use Illuminate\Support\Facades\DB;
 
 class CarroController extends Controller
 {
+
     public function index()
     {
         $user = Auth::user();
 
         $carroIndex = $user->hasRole('administrador')
-            ? Carro::with('productos')->get()
-            : Carro::with('productos')->where('id_user', $user->id_user)->get();
+            ? Carro::with(['productos', 'user', 'pedido'])->get()
+            : Carro::with(['productos', 'user', 'pedido'])->where('id_user', $user->id_user)->get();
 
         $reservasGlobales = CarroProducto::select('id_producto')
             ->selectRaw('SUM(cantidad) as total_reservado')
@@ -30,8 +31,12 @@ class CarroController extends Controller
 
         $todosProductos = Producto::all();
 
-        return view('carro.carroIndex', compact('carroIndex', 'reservasGlobales', 'todosProductos'));
+        // Agrega esta línea solo si es administrador
+        $usuarios = $user->hasRole('administrador') ? User::all() : collect();
+
+        return view('carro.carroIndex', compact('carroIndex', 'reservasGlobales', 'todosProductos', 'usuarios'));
     }
+
 
     public function create()
     {
@@ -171,8 +176,6 @@ class CarroController extends Controller
         }
 
         $carro->load('productos');
-
-      
 
         $nuevoTotal = $this->recalcularTotalPedido($carro);
         $pedido->total_pedido = $nuevoTotal;
@@ -335,27 +338,49 @@ class CarroController extends Controller
 
     public function show(Request $request)
     {
-        $idCarro = $request->input('id_carro');
-        $nombreUsuario = $request->input('nombre_usuario');
+        $busqueda = $request->input('busqueda');
+        $user = Auth::user();
 
-        if ($idCarro) {
-            $carro = Carro::with(['productos', 'user'])->find($idCarro);
-            if (!$carro) return back()->with('error', 'El carro no se encontró.');
+        if (!$busqueda) {
+            return back()->with('error', 'Debes ingresar un ID de carro o un nombre de usuario.');
+        }
+
+        // Si es búsqueda por ID de carro
+        if (is_numeric($busqueda)) {
+            $carro = Carro::with(['productos', 'user'])->find($busqueda);
+
+            if (!$carro) {
+                return back()->with('error', 'El carro no se encontró.');
+            }
+
+            // Validar si el usuario tiene acceso
+            if (!$user->hasRole('administrador') && $carro->id_user !== $user->id_user) {
+                return back()->with('error', 'No tienes permiso para ver este carro.');
+            }
+
             return view('carro.showCarro', compact('carro'));
         }
 
-        if ($nombreUsuario) {
-            $usuario = User::where('nombre_usuario', 'ILIKE', $nombreUsuario)->first();
-            if (!$usuario) return back()->with('error', 'Usuario no encontrado.');
-
-            $carros = Carro::with(['productos', 'user'])->where('id_user', $usuario->id_user)->get();
-            if ($carros->isEmpty()) return back()->with('error', 'No se encontraron carros para ese usuario.');
-
-            return view('carro.showCarro', compact('carros'));
+        // Si es búsqueda por nombre de usuario (solo para admin)
+        if (!$user->hasRole('administrador')) {
+            return back()->with('error', 'No puedes buscar carros por nombre de usuario.');
         }
 
-        return back()->with('error', 'Debes ingresar un ID de carro o un nombre de usuario.');
+        $usuario = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->first();
+
+        if (!$usuario) {
+            return back()->with('error', 'Usuario no encontrado.');
+        }
+
+        $carros = Carro::with(['productos', 'user'])->where('id_user', $usuario->id_user)->get();
+
+        if ($carros->isEmpty()) {
+            return back()->with('error', 'No se encontraron carros para ese usuario.');
+        }
+
+        return view('carro.showCarro', compact('carros'));
     }
+
 
     // private function usuarioBloqueado($id_user)
     // {

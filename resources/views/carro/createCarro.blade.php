@@ -14,23 +14,36 @@
 
     <script>
         function filtrarPedidosPorUsuario() {
-            const usuarioId = document.getElementById('usuario_selector').value;
-            const opciones = document.querySelectorAll('#id_pedido option');
+            const nombre = document.getElementById('nombre_usuario').value;
+            const datalist = document.getElementById('usuarios');
+            const hiddenInput = document.getElementById('id_user');
+            const opciones = datalist.options;
 
-            opciones.forEach(op => {
-                if (!op.dataset.user) return;
+            let idEncontrado = null;
+            for (let i = 0; i < opciones.length; i++) {
+                if (opciones[i].value === nombre) {
+                    idEncontrado = opciones[i].dataset.userid;
+                    break;
+                }
+            }
 
-                op.style.display = (op.dataset.user == usuarioId) ? 'block' : 'none';
-            });
+            if (idEncontrado) {
+                hiddenInput.value = idEncontrado;
 
-            document.getElementById('id_pedido').value = '';
+                const opcionesPedidos = document.querySelectorAll('#id_pedido option[data-user]');
+                opcionesPedidos.forEach(op => {
+                    op.style.display = (op.dataset.user == idEncontrado) ? 'block' : 'none';
+                });
+
+                document.getElementById('id_pedido').value = '';
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const selectorUsuario = document.getElementById('usuario_selector');
-            if (selectorUsuario) {
-                selectorUsuario.addEventListener('change', filtrarPedidosPorUsuario);
-                filtrarPedidosPorUsuario(); // Inicializar
+            const inputNombre = document.getElementById('nombre_usuario');
+            if (inputNombre) {
+                inputNombre.addEventListener('input', filtrarPedidosPorUsuario);
+                filtrarPedidosPorUsuario();
             }
         });
     </script>
@@ -50,20 +63,7 @@
     <form action="{{ route('carro.agregarMultiples') }}" method="POST">
         @csrf
 
-        @if(Auth::user()->hasRole('administrador'))
-            <label for="usuario_selector">Seleccionar Usuario:</label>
-            <select id="usuario_selector" name="id_user" required>
-                <option value="">-- Selecciona un usuario --</option>
-                @foreach($usuarios as $u)
-                    <option value="{{ $u->id_user }}">{{ $u->nombre_usuario }}</option>
-                @endforeach
-            </select>
-        @else
-            <input type="hidden" name="id_user" value="{{ $usuario->id_user }}">
-        @endif
-
-        <br><br>
-
+        {{-- Tabla de productos --}}
         <h3>Selecciona productos</h3>
         <table>
             <thead>
@@ -76,7 +76,7 @@
                     <th>Tamaño</th>
                     <th>Precio</th>
                     <th>Piezas disponibles</th>
-                    <th>Cantidad</th> <!-- Nueva columna -->
+                    <th>Cantidad</th>
                 </tr>
             </thead>
             <tbody>
@@ -102,7 +102,7 @@
                             {{ $producto->piezas_disponibles }}
                         </td>
                         <td>
-                            <input type="number" name="cantidades[{{ $producto->id_producto }}]" max="{{ $producto->piezas_disponibles }}" {{ $producto->piezas_disponibles == 0 ? 'disabled' : '' }} class="cant-input">
+                            <input type="number" name="cantidades[{{ $producto->id_producto }}]" max="{{ $producto->piezas_disponibles }}" class="cant-input" {{ $producto->piezas_disponibles == 0 ? 'disabled' : '' }}>
                         </td>
                     </tr>
                 @endforeach
@@ -110,6 +110,22 @@
         </table>
 
         <br>
+
+        {{-- Buscador de usuario para admin --}}
+        @if(Auth::user()->hasRole('administrador'))
+            <label for="nombre_usuario">Buscar usuario:</label>
+            <input list="usuarios" id="nombre_usuario" placeholder="Ej. Juan Pérez" required>
+            <input type="hidden" name="id_user" id="id_user">
+            <datalist id="usuarios">
+                @foreach ($usuarios as $usuario)
+                    <option value="{{ $usuario->nombre_usuario }}" data-userid="{{ $usuario->id_user }}"></option>
+                @endforeach
+            </datalist>
+        @else
+            <input type="hidden" name="id_user" value="{{ $usuario->id_user }}">
+        @endif
+
+        <br><br>
 
         <label for="id_pedido">Selecciona un pedido existente (opcional):</label>
         <select name="id_pedido" id="id_pedido">
@@ -122,14 +138,13 @@
                     Pedido #{{ $pedido->id_pedido }}{{ $pedido->estado_pedido == 0 ? ' (cerrado)' : '' }}
                 </option>
             @endforeach
-            <option value="nuevo">Crear nuevo pedido</option> <!-- Opción para nuevo pedido -->
+            <option value="nuevo">Crear nuevo pedido</option>
         </select>
 
         <br><br>
 
         <button type="submit">Agregar productos seleccionados</button>
     </form>
-
 
     <br>
     <a href="/">Inicio</a> |
