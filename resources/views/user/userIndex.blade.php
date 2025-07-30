@@ -50,6 +50,30 @@
 
 <h1>Usuarios agrupados por rol</h1>
 
+    <form action="{{ url('/user/showUser') }}" method="GET">
+        <label for="busqueda">Buscar por ID o nombre de usuario:</label>
+        <input 
+            type="text" 
+            id="busqueda" 
+            name="busqueda" 
+            placeholder="Ejemplo: 21 o car" 
+            list="usuarios" 
+            value="{{ request('busqueda') }}" 
+            autocomplete="off"
+            autofocus
+        />
+
+        <datalist id="usuarios">
+            @foreach ($usuarios as $usuario)
+                <option value="{{ $usuario->nombre_usuario }}"></option>
+            @endforeach
+        </datalist>
+
+        <input type="submit" value="Buscar" />
+    </form>
+
+
+
 @php
     $administradores = $userIndex->filter(fn($u) => $u->hasRole('administrador'));
     $usuariosNormales = $userIndex->filter(fn($u) => !$u->hasRole('administrador'));
@@ -75,7 +99,7 @@
                         <td>{{ $user->id_user }}</td>
                         <td>
                             @if($user->imagen)
-                                <img src="{{ asset($user->imagen) }}" alt="Foto de perfil">
+                                <img src="{{ asset($user->imagen) }}" alt="Foto de perfil" width="250">
                             @else
                                 <span>Sin imagen</span>
                             @endif

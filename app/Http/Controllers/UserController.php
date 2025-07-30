@@ -20,7 +20,9 @@ class UserController extends Controller
     public function index()
     {
         $userIndex = User::all();
-        return view('user/userIndex', compact ('userIndex'));
+        $usuarios = User::select('id_user', 'nombre_usuario')->get();
+
+        return view('user.userIndex', compact('userIndex', 'usuarios'));
     }
 
     public function create()
@@ -68,20 +70,34 @@ class UserController extends Controller
 
     public function show(Request $request)
     {
-        $busqueda = $request->input('id_user');
+        $busqueda = $request->input('busqueda');
 
-        if (is_numeric($busqueda)) {
-            $usuarios = User::where('id_user', $busqueda)->get();
-        } else {
-            $usuarios = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->get();
+        if (!$busqueda) {
+            return back()->with('error', 'Debes ingresar un ID o un nombre de usuario.');
         }
+
+        // Si es numérico → búsqueda por ID
+        if (is_numeric($busqueda)) {
+            $usuario = User::find($busqueda);
+
+            if (!$usuario) {
+                return back()->with('error', 'Usuario no encontrado por ID.');
+            }
+
+            return view('user.showUser', ['usuarios' => collect([$usuario])]);
+        }
+
+        // Si es texto → búsqueda por nombre de usuario parcial (ej. "car" → carlos, carmen)
+        $usuarios = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->get();
 
         if ($usuarios->isEmpty()) {
-            return redirect()->back()->with('error', 'No se encontraron usuarios.');
+            return back()->with('error', 'No se encontraron usuarios con ese nombre.');
         }
 
-        return view('user.showUser', compact('usuarios'));
+        return view('user.showUser', ['usuarios' => $usuarios]);
     }
+
+
 
 
 
