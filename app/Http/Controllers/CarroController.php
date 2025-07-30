@@ -63,14 +63,21 @@ class CarroController extends Controller
     public function store(Request $request)
     {
         $userId = $request->input('id_user');
-        
-
         $productoId = $request->input('id_producto');
         $cantidad = (int) $request->input('cantidad');
 
-        if ($cantidad <= 0) return back()->with('error', 'La cantidad debe ser mayor a 0.');
+        if ($cantidad <= 0) {
+            return back()->with('error', 'La cantidad debe ser mayor a 0.');
+        }
 
         $producto = Producto::findOrFail($productoId);
+
+        // Validar que el producto esté activo (no descontinuado)
+        if (!$producto->estado_producto) {
+            return back()->with('error', 'Este producto está descontinuado y no puede ser agregado.');
+        }
+
+        // Calcular piezas disponibles
         $reservadas = CarroProducto::where('id_producto', $productoId)->sum('cantidad');
         $disponibles = max(0, $producto->piezas - $reservadas);
 
@@ -78,6 +85,7 @@ class CarroController extends Controller
             return back()->with('error', "Solo hay $disponibles piezas disponibles.");
         }
 
+        // Crear o usar pedido
         if ($request->has('nuevo_pedido')) {
             $pedido = Pedido::create([
                 'id_user' => $userId,
@@ -93,10 +101,15 @@ class CarroController extends Controller
             return back()->with('error', 'Debes seleccionar un pedido o marcar "crear uno nuevo".');
         }
 
-        $carro = Carro::firstOrCreate(['id_pedido' => $pedido->id_pedido], ['id_user' => $userId]);
+        // Crear o buscar carro
+        $carro = Carro::firstOrCreate(
+            ['id_pedido' => $pedido->id_pedido],
+            ['id_user' => $userId]
+        );
 
         $totalAnterior = $pedido->total_pedido;
 
+        // Revisar si el producto ya está en el carro y sumar cantidades o agregar nuevo
         $productoExistente = $carro->productos()->where('productos.id_producto', $productoId)->first();
         if ($productoExistente) {
             $cantidadActual = $productoExistente->pivot->cantidad;
@@ -108,7 +121,8 @@ class CarroController extends Controller
         $carro->load('productos');
 
         $nuevoTotal = $this->recalcularTotalPedido($carro);
-        $pedido->total_pedido = $nuevoTotal;
+
+        // Validar créditos y estado del pedido
         if (!$this->validarPedidoConCreditoVencido($pedido)) {
             return back()->with('error', 'No puedes aumentar un pedido asociado a un crédito vencido o cerrado.');
         }
@@ -120,17 +134,16 @@ class CarroController extends Controller
         $pedido->total_pedido = $nuevoTotal;
         $pedido->save();
 
-
         $this->actualizarCreditoConDiferencia($pedido, $totalAnterior, $nuevoTotal);
 
         return redirect()->route('carro.index')->with('success', 'Producto agregado correctamente.');
     }
 
+
+
     public function agregarMultiples(Request $request)
     {
         $userId = $request->input('id_user');
-
-        
         $idPedido = $request->input('id_pedido');
         $seleccionados = $request->input('productos_seleccionados', []);
         $cantidades = $request->input('cantidades', []);
@@ -149,7 +162,23 @@ class CarroController extends Controller
             return back()->with('error', 'No seleccionaste ningún producto.');
         }
 
-        $carro = Carro::firstOrCreate(['id_pedido' => $idPedido], ['id_user' => $userId]);
+        $carro = Carro::firstOrCreate(
+            ['id_pedido' => $pedido->id_pedido],
+            ['id_user' => $pedido->id_user]
+        );
+
+
+        // Validar que ninguno de los productos seleccionados esté descontinuado
+        foreach ($seleccionados as $idProducto) {
+            $producto = Producto::find($idProducto);
+            if (!$producto) {
+                return back()->with('error', "El producto con ID $idProducto no existe.");
+            }
+            if (!$producto->estado_producto) {
+                return back()->with('error', "El producto \"{$producto->nombre}\" está descontinuado y no puede ser agregado.");
+            }
+        }
+
         $totalAnterior = $pedido->total_pedido;
 
         foreach ($seleccionados as $idProducto) {
@@ -157,13 +186,11 @@ class CarroController extends Controller
             if ($cantidad <= 0) continue;
 
             $producto = Producto::find($idProducto);
-            if (!$producto) continue;
-
             $reservadas = CarroProducto::where('id_producto', $idProducto)->sum('cantidad');
             $disponibles = max(0, $producto->piezas - $reservadas);
 
             if ($cantidad > $disponibles) {
-                return back()->with('error', "No hay suficientes piezas de $producto->nombre (quedan $disponibles).");
+                return back()->with('error', "No hay suficientes piezas de {$producto->nombre} (quedan $disponibles).");
             }
 
             $productoEnCarro = $carro->productos()->where('productos.id_producto', $idProducto)->first();
@@ -178,20 +205,23 @@ class CarroController extends Controller
         $carro->load('productos');
 
         $nuevoTotal = $this->recalcularTotalPedido($carro);
-        $pedido->total_pedido = $nuevoTotal;
-
         if (!$this->validarPedidoConCreditoVencido($pedido)) {
             return back()->with('error', 'No puedes aumentar un pedido asociado a un crédito vencido o cerrado.');
         }
+
         if ($pedido->estado_pedido == 0 && !$this->validarCreditoAlModificar($pedido, $nuevoTotal)) {
             return back()->with('error', 'No se puede modificar el pedido porque el crédito superaría los $10,000 o el usuario tiene más de 3 créditos activos.');
         }
+
+        $pedido->total_pedido = $nuevoTotal;
         $pedido->save();
 
         $this->actualizarCreditoConDiferencia($pedido, $totalAnterior, $nuevoTotal);
 
         return redirect()->route('carro.index')->with('success', 'Productos agregados correctamente.');
     }
+
+
 
     public function eliminarProducto($id_carro, $id_producto)
     {
@@ -231,7 +261,13 @@ class CarroController extends Controller
         $productoActual = $carro->productos()->where('productos.id_producto', $id_producto)->firstOrFail();
         $cantidad = $productoActual->pivot->cantidad;
 
-        $productos = Producto::all()->map(function ($producto) use ($id_carro) {
+        $usuario = $carro->user;
+
+        // Filtrar productos: mostrar solo activos o el producto actualmente en el carro (aunque esté desactivado)
+        $productos = Producto::when(
+            !$usuario->hasRole('administrador'),
+            fn($q) => $q->where('estado_producto', true)
+        )->get()->map(function ($producto) use ($id_carro) {
             $reservadas = CarroProducto::where('id_producto', $producto->id_producto)
                 ->where('id_carro', '!=', $id_carro)
                 ->sum('cantidad');
@@ -239,61 +275,100 @@ class CarroController extends Controller
             return $producto;
         });
 
+        // Asegurarse de que el producto actual siempre esté en la lista (aunque esté descontinuado)
+        if (!$productos->contains('id_producto', $productoActual->id_producto)) {
+            $productoActual->piezas_disponibles = max(0, $productoActual->piezas -
+                CarroProducto::where('id_producto', $productoActual->id_producto)
+                    ->where('id_carro', '!=', $id_carro)
+                    ->sum('cantidad'));
+            $productos->push($productoActual);
+        }
+
         $pedidosUsuario = Pedido::where('id_user', $carro->id_user)->get();
 
         return view('carro.editCarro', compact('carro', 'productoActual', 'productos', 'cantidad', 'pedidosUsuario'));
     }
 
+
     public function update(Request $request, Carro $carro, $id_producto)
     {
         $nuevoIdProducto = $request->input('id_producto');
         $cantidadSolicitada = (int) $request->input('cantidad');
-        if ($cantidadSolicitada <= 0) return back()->with('error', 'Cantidad no válida.');
 
-        $producto = Producto::findOrFail($nuevoIdProducto);
-        $reservadas = CarroProducto::where('id_producto', $nuevoIdProducto)
-            ->where('id_carro', '!=', $carro->id_carro)->sum('cantidad');
-        $disponibles = max(0, $producto->piezas - $reservadas);
-
-        if ($cantidadSolicitada > $disponibles) {
-            return back()->with('error', "Solo hay $disponibles piezas disponibles.");
+        if ($cantidadSolicitada <= 0) {
+            return back()->with('error', 'Cantidad no válida.');
         }
 
-        $pedido = $carro->pedido;
-        $totalAnterior = $pedido->total_pedido;
+        // Obtener el nuevo producto, sin filtrar por estado
+        $producto = Producto::findOrFail($nuevoIdProducto);
 
+        // Verificar si es el mismo producto (editar cantidad)
         if ($nuevoIdProducto == $id_producto) {
+            $cantidadActual = $carro->productos()->find($id_producto)->pivot->cantidad;
+
+            // Si el producto está desactivado y se quiere aumentar la cantidad, bloquear
+            if (!$producto->estado_producto && $cantidadSolicitada > $cantidadActual) {
+                return back()->with('error', 'No puedes aumentar la cantidad de un producto descontinuado.');
+            }
+
+            // Verificar disponibilidad
+            $reservadas = CarroProducto::where('id_producto', $id_producto)
+                ->where('id_carro', '!=', $carro->id_carro)
+                ->sum('cantidad');
+            $disponibles = max(0, $producto->piezas - $reservadas);
+
+            if ($cantidadSolicitada > $disponibles) {
+                return back()->with('error', "Solo hay $disponibles piezas disponibles.");
+            }
+
             $carro->productos()->updateExistingPivot($id_producto, ['cantidad' => $cantidadSolicitada]);
         } else {
+            // Se intenta cambiar el producto en el carro
+
+            // Verifica que no se repita
             if ($carro->productos()->where('productos.id_producto', $nuevoIdProducto)->exists()) {
                 return back()->with('error', 'Ese producto ya está en el carro.');
             }
+
+            // Verifica disponibilidad
+            $reservadas = CarroProducto::where('id_producto', $nuevoIdProducto)
+                ->where('id_carro', '!=', $carro->id_carro)
+                ->sum('cantidad');
+            $disponibles = max(0, $producto->piezas - $reservadas);
+
+            if ($cantidadSolicitada > $disponibles) {
+                return back()->with('error', "Solo hay $disponibles piezas disponibles.");
+            }
+
+            // Remueve el anterior y agrega el nuevo
             $carro->productos()->detach($id_producto);
             $carro->productos()->attach($nuevoIdProducto, ['cantidad' => $cantidadSolicitada]);
         }
 
         $carro->load('productos');
 
-        
+        // Recalcular total
+        $pedido = $carro->pedido;
+        $totalAnterior = $pedido->total_pedido;
         $nuevoTotal = $this->recalcularTotalPedido($carro);
         $pedido->total_pedido = $nuevoTotal;
 
-
+        // Validaciones extra
         if (!$this->validarPedidoConCreditoVencido($pedido)) {
             return back()->with('error', 'No puedes aumentar un pedido asociado a un crédito vencido o cerrado.');
         }
 
-
         if ($pedido->estado_pedido == 0 && !$this->validarCreditoAlModificar($pedido, $nuevoTotal)) {
             return back()->with('error', 'No se puede modificar el pedido porque el crédito superaría los $10,000 o el usuario tiene más de 3 créditos activos.');
         }
-        
+
         $pedido->save();
 
         $this->actualizarCreditoConDiferencia($pedido, $totalAnterior, $nuevoTotal);
 
         return redirect()->route('carro.index')->with('success', 'Carro actualizado correctamente.');
     }
+
 
     public function destroy(Carro $carro)
     {
@@ -324,7 +399,7 @@ class CarroController extends Controller
 
     private function actualizarCreditoConDiferencia(Pedido $pedido, $totalAnterior, $nuevoTotal)
     {
-        if ($pedido->estado_pedido == 0 && $pedido->id_credito) {
+        if ($pedido->id_credito) {  // Quitar la condición de estado_pedido == 0
             $diferencia = $nuevoTotal - $totalAnterior;
             if ($diferencia != 0) {
                 $credito = Credito::find($pedido->id_credito);

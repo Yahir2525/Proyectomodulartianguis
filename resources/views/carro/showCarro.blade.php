@@ -121,7 +121,15 @@
 
                 <p><strong>Total del carrito:</strong> ${{ number_format($total, 2) }}</p>
             @endif
-
+                <p>
+                    <form action="{{ route('carro.destroy', $carros->first()->id_carro) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar todo este carro?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" style="background-color:#d9534f; color:#fff; border:none; padding:6px 12px; cursor:pointer;">
+                            Eliminar carro completo
+                        </button>
+                    </form>
+                </p>
             {{-- Formulario para cerrar pedido solo si no está cerrado --}}
             @if($pedido && !$pedidoCerrado)
                 @php

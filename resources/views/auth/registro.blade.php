@@ -18,22 +18,39 @@
                     @if(session('success'))
                         <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
-                    <form>
+                    <form action="{{ route('registro.store') }}" method="POST">
                         @csrf
-                        
+
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        @if(session('success'))
+                            <div class="alert alert-success">{{ session('success') }}</div>
+                        @endif
+                        <div>
+                            <label for="imagen">Foto de perfil:</label>
+                            <input type="file" name="imagen" accept="image/*"> 
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">Nombre Completo</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <input type="text" name="name" class="form-control" required value="{{ old('name') }}">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Nombre de Usuario</label>
-                            <input type="text" name="username" class="form-control" required>
+                            <label for="nombre_usuario" class="form-label">Nombre de usuario</label>
+                            <input type="text" name="nombre_usuario" class="form-control" required value="{{ old('nombre_usuario') }}">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Correo Electrónico</label>
-                            <input type="email" name="email" class="form-control" required>
+                            <input type="email" name="email" class="form-control" required value="{{ old('email') }}">
                         </div>
 
                         <div class="mb-3">
@@ -45,20 +62,16 @@
                             <label class="form-label">Confirmar Contraseña</label>
                             <input type="password" name="password_confirmation" class="form-control" required>
                         </div>
-                        <br>
-                        <div>
-                            <input class="button is-block is-primary is-large is-fullwidth" type="reset" value="Limpiar datos">
-                        </div>
-                        <br>
 
                         <button type="submit" class="btn btn-primary w-100">Registrarse</button>
-                    </form> 
+                    </form>
+
                     <br>
-                    <div>
-                    <a class="">
+                    <div class="text-center">
                         <a href="/">Inicio</a><br>
-                        <a href="{{ url('/login') }}">Iniciar sesion</a>
+                        <a href="{{ url('/login') }}">Iniciar sesión</a>
                     </div>
+
                 </div>
             </div>
         </div>

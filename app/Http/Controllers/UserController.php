@@ -40,6 +40,7 @@ class UserController extends Controller
             'telefono' => 'required',
             'direccion' => 'required',
             'nombre_usuario' => 'required',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'roles' => 'required'
         ]);
             $user = new User();
@@ -51,6 +52,13 @@ class UserController extends Controller
             $user->telefono = $request->input('telefono');
             $user->direccion = $request->input('direccion');
             $user->nombre_usuario = $request->input('nombre_usuario');
+            if ($request->hasFile('imagen')) {
+                $file = $request->file('imagen');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('img/perfiles'), $filename);
+                $user->imagen = 'img/perfiles/' . $filename;
+            }
+
             
             $user->save();
 
@@ -60,14 +68,22 @@ class UserController extends Controller
 
     public function show(Request $request)
     {
-        $id = $request->input('id_user');
-        $user = User::find($id);
-            
-        if (!$user) {
-            return redirect()->back()->with('error', 'El user no se encontró.');
+        $busqueda = $request->input('id_user');
+
+        if (is_numeric($busqueda)) {
+            $usuarios = User::where('id_user', $busqueda)->get();
+        } else {
+            $usuarios = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->get();
         }
-        return view('/user/showUser', ['user' => $user]);
+
+        if ($usuarios->isEmpty()) {
+            return redirect()->back()->with('error', 'No se encontraron usuarios.');
+        }
+
+        return view('user.showUser', compact('usuarios'));
     }
+
+
 
     public function edit($id)
     {
@@ -75,7 +91,7 @@ class UserController extends Controller
         $roles = Role::pluck('name','name')->all();
         $userRoles = $user->roles->pluck('name','name')->all();
 
-        return view('/user/editUser', [
+        return view('user.editUser', [
             'user' => $user,
             'roles' => $roles,
             'userRoles' => $userRoles
@@ -84,55 +100,67 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        // $request->validate([
-        //     'name' => 'required|string|max:255',
-        //     'email' => 'required|email|max:255|unique:users,email',
-        //     'password' => 'required|string|min:8|max:20',
-        //     'genero' => 'required',
-        //     'edad' => 'required',
-        //     'telefono' => 'required',
-        //     'direccion' => 'required',
-        //     'nombre_usuario' => 'required',
-        //     'roles' => 'required'
-        // ]);
-        
-        $user = User::find($user->id_user);
-        
-        if (!$user) {
-            return redirect()->route('user.index')->with('error', 'El user no se encontró.');
+        $user = User::findOrFail($user->id_user);
+
+        // Validación de campos (nullable excepto imagen con restricciones)
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255|unique:users,email,' . $user->id_user . ',id_user',
+            'password' => 'nullable|string|min:8|max:20|confirmed',
+            'genero' => 'nullable|in:H,M,O',
+            'edad' => 'nullable|integer|min:0',
+            'telefono' => 'nullable|string|max:20',
+            'direccion' => 'nullable|string|max:80',
+            'nombre_usuario' => 'nullable|string|max:50|unique:users,nombre_usuario,' . $user->id_user . ',id_user',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'roles' => 'nullable|array',
+        ]);
+
+        // Asignación de campos si vienen en la solicitud
+        if ($request->filled('name')) $user->name = $request->name;
+        if ($request->filled('email')) $user->email = $request->email;
+        if ($request->filled('password')) $user->password = Hash::make($request->password);
+        if ($request->filled('genero')) $user->genero = $request->genero;
+        if ($request->filled('edad')) $user->edad = $request->edad;
+        if ($request->filled('telefono')) $user->telefono = $request->telefono;
+        if ($request->filled('direccion')) $user->direccion = $request->direccion;
+        if ($request->filled('nombre_usuario')) $user->nombre_usuario = $request->nombre_usuario;
+
+        // Carga y almacenamiento de imagen
+        if ($request->hasFile('imagen')) {
+            $file = $request->file('imagen');
+            $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $file->move(public_path('perfiles'), $filename);
+            $user->imagen = 'perfiles/' . $filename;
         }
-        $user->name = $request->input('name');
-        $user->email = $request->input('email');
-        $user->password = Hash::make($request->input('password'));
-        $user->genero = $request->input('genero');
-        $user->edad = $request->input('edad');
-        $user->telefono = $request->input('telefono');
-        $user->direccion = $request->input('direccion');
+
         $user->save();
 
-        if($request->has('roles')){
+        // Asignar roles si se enviaron
+        if ($request->has('roles')) {
             $user->syncRoles($request->roles);
         }
 
         return redirect()->route('user.index')->with('success', 'El usuario se ha actualizado con éxito.');
     }
 
+
     
     public function destroy(User $user, Pedido $pedido, Credito $credito, Abono $abono)
     {
         $user = User::find($user->id_user);
 
-        if ($user->pedidos()->exists()) {
+        if ($user->pedido()->exists()) {
             // Retornar con un mensaje amigable
             return redirect()->back()->with('error', 'No se puede eliminar el usuario porque tiene pedidos asociados.');
         }
 
-        if ($user->creditos()->exists()) {
+        if ($user->credito()->exists()) {
             // Retornar con un mensaje amigable
             return redirect()->back()->with('error', 'No se puede eliminar el usuario porque tiene creditos asociados.');
         }
 
-        if ($user->abonos()->exists()) {
+        if ($user->abono()->exists()) {
             // Retornar con un mensaje amigable
             return redirect()->back()->with('error', 'No se puede eliminar el usuario porque tiene abonos asociadas.');
         }

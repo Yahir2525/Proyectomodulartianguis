@@ -54,15 +54,24 @@
                     <th>Tamaño</th>
                     <th>Precio</th>
                     <th>Piezas disponibles</th>
+                    <th>Estado</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($productos as $producto)
-                    <tr class="{{ $producto->piezas_disponibles == 0 ? 'sin-stock' : '' }}">
+                    @php
+                        $esActual = $producto->id_producto == $productoActual->id_producto;
+                        $sinStock = $producto->piezas_disponibles == 0;
+                        $desactivado = !$producto->estado_producto;
+                        $deshabilitado = (!$esActual && ($sinStock || $desactivado));
+                    @endphp
+                    <tr class="{{ $sinStock || $desactivado ? 'sin-stock' : '' }}">
                         <td>
-                            <input type="radio" name="id_producto" value="{{ $producto->id_producto }}"
-                                {{ $producto->id_producto == $productoActual->id_producto ? 'checked' : '' }}
-                                {{ $producto->piezas_disponibles == 0 ? 'disabled' : '' }}>
+                            <input type="radio"
+                                name="id_producto"
+                                value="{{ $producto->id_producto }}"
+                                {{ $esActual ? 'checked' : '' }}
+                                {{ $deshabilitado ? 'disabled' : '' }}>
                         </td>
                         <td>
                             @if($producto->imagen)
@@ -76,17 +85,36 @@
                         <td>{{ $producto->color }}</td>
                         <td>{{ $producto->tamanio }}</td>
                         <td>${{ number_format($producto->precio_unitario, 2) }}</td>
-                        <td class="{{ $producto->piezas_disponibles == 0 ? 'resaltado' : '' }}">
+                        <td class="{{ $sinStock ? 'resaltado' : '' }}">
                             {{ $producto->piezas_disponibles }}
                         </td>
+                        <td>{{ $producto->estado_producto ? 'Activo' : 'Descontinuado' }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
 
         <br>
+        @php
+            $descontinuado = !$productoActual->estado_producto;
+        @endphp
+
         <label for="cantidad">Cantidad:</label>
-        <input type="number" name="cantidad" min="1" value="{{ $cantidad }}" required>
+        <input type="number"
+            name="cantidad"
+            id="cantidad"
+            min="1"
+            max="{{ $descontinuado ? $cantidad : $productoActual->piezas_disponibles }}"
+            value="{{ $cantidad }}"
+            required
+            class="cant-input"
+        >
+        @if($descontinuado)
+            <p style="color: red;">
+                Este producto está descontinuado. Solo puedes reducir la cantidad actual (máximo {{ $cantidad }}).
+            </p>
+        @endif
+
         <br><br>
 
         <label for="id_pedido">Selecciona un pedido existente (opcional):</label>
@@ -100,12 +128,14 @@
                 </option>
             @endforeach
         </select>
+
         <br><br>
 
         <label>
             <input type="checkbox" name="nuevo_pedido" value="1">
             Crear un nuevo pedido
         </label>
+
         <br><br>
 
         <button type="submit">Actualizar Carro</button>

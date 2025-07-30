@@ -48,6 +48,7 @@
                         <th>Precio unitario</th>
                         <th>Piezas disponibles</th>
                         <th>Cantidad</th>
+                        <th>Estado</th>
                         <th>Editar</th>
                     </tr>
                 </thead>
@@ -78,6 +79,10 @@
                             <td>
                                 <input type="number" name="cantidades[{{ $producto->id_producto }}]" min="1" max="{{ $disponibles }}" class="cant-input" {{ $disponibles == 0 ? 'disabled' : '' }}>
                             </td>
+                            <td>
+                                {{ $producto->estado_producto ? 'Activo' : 'Descontinuado' }}
+                            </td>
+
                             <td><a href="{{ route('producto.edit', $producto->id_producto) }}">Editar</a></td>
                         </tr>
                     @endforeach

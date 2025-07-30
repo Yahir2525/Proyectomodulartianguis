@@ -20,6 +20,7 @@ return new class extends Migration
         $table->decimal('precio_unitario', 6, 2)->unsigned();
         $table->integer('piezas')->nullable();
         $table->string('imagen')->nullable();
+        $table->boolean('estado_producto')->default(true);
         $table->timestamps();
     });
 

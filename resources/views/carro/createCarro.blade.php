@@ -81,10 +81,11 @@
             </thead>
             <tbody>
                 @foreach($productos as $producto)
+                    @if (Auth::user()->hasRole('administrador') || $producto->estado_producto)
+
                     <tr class="{{ $producto->piezas_disponibles == 0 ? 'sin-stock' : '' }}">
                         <td>
-                            <input type="checkbox" name="productos_seleccionados[]" value="{{ $producto->id_producto }}"
-                                {{ $producto->piezas_disponibles == 0 ? 'disabled' : '' }}>
+                            <input type="checkbox" name="productos_seleccionados[]" value="{{ $producto->id_producto }}">
                         </td>
                         <td>
                             @if($producto->imagen)
@@ -98,19 +99,16 @@
                         <td>{{ $producto->color }}</td>
                         <td>{{ $producto->tamanio }}</td>
                         <td>${{ number_format($producto->precio_unitario, 2) }}</td>
-                        <td class="{{ $producto->piezas_disponibles == 0 ? 'resaltado' : '' }}">
-                            {{ $producto->piezas_disponibles }}
-                        </td>
+                        <td>{{ $producto->piezas_disponibles }}</td>
                         <td>
-                            <input type="number" name="cantidades[{{ $producto->id_producto }}]" max="{{ $producto->piezas_disponibles }}" class="cant-input" {{ $producto->piezas_disponibles == 0 ? 'disabled' : '' }}>
+                            <input type="number" name="cantidades[{{ $producto->id_producto }}]" max="{{ $producto->piezas_disponibles }}" class="cant-input">
                         </td>
                     </tr>
+                    @endif
                 @endforeach
             </tbody>
         </table>
-
         <br>
-
         {{-- Buscador de usuario para admin --}}
         @if(Auth::user()->hasRole('administrador'))
             <label for="nombre_usuario">Buscar usuario:</label>

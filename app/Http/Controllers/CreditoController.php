@@ -218,27 +218,33 @@ class CreditoController extends Controller
             return redirect()->route('credito.index')->with('error', 'El crédito no se encontró.');
         }
 
+        if ($credito->fecha_vencimiento && $credito->fecha_vencimiento < now()) {
+            return redirect()->route('credito.index')->with('error', 'El crédito no se puede eliminar porque está vencido.');
+        }
+
         if ($credito->saldo_total > 0) {
             return redirect()->route('credito.index')->with('error', 'El crédito no se puede eliminar porque tiene saldo pendiente.');
         }
 
-        if ($credito->estado == 0){
-            return redirect()->route('credito.index')->with('error', 'El credito no se puede eliminar porque está cerrado y tiene un historial');
+        if ($credito->estado == 0) {
+            return redirect()->route('credito.index')->with('error', 'El crédito no se puede eliminar porque está cerrado y tiene un historial.');
         }
 
         // Desvincular pedidos antes de eliminar el crédito
         Pedido::where('id_credito', $id)->update([
             'id_credito' => null,
-            'metodo_pago' => 'contado'
+            'metodo_pago' => 'contado',
         ]);
 
         // Eliminar abonos relacionados
         Abono::where('id_credito', $id)->delete();
 
-        // Ahora sí eliminar el crédito
+        // Eliminar el crédito
         $credito->delete();
 
         return redirect()->route('credito.index')->with('success', 'El crédito se ha eliminado con éxito.');
     }
+
+
 
 }

@@ -17,6 +17,8 @@ class Producto extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
+    protected $fillable = ['nombre', 'tipo', 'material', 'color', 'tamanio', 'marca', 'precio_unitario', 'piezas', 'estado_producto'];
+
     public function pedidos(): BelongsTo
     {
         return $this->belongsToMany(Producto::class, 'pedidos', 'id_producto', 'id_pedido')->withPivot('cantidad');

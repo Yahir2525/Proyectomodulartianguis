@@ -78,6 +78,11 @@
         <label for="piezas">Piezas disponibles:</label><br>
         <input type="number" name="piezas" id="piezas" min="0" value="{{ old('piezas') }}" required><br><br>
 
+        <label>
+            <input type="checkbox" name="estado_producto" value="1" {{ old('estado_producto', $producto->estado_producto ?? true) ? 'checked' : '' }}>
+            Producto activo
+        </label>
+
         <button type="submit">Registrar producto</button>
         <a href="{{ url('/producto') }}">Cancelar</a>
     </form>

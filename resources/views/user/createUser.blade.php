@@ -24,7 +24,7 @@
                         </h4>
                     </div> -->
                     <div class="card-body">
-                    <form action="{{ url('/user') }}" method="POST"> 
+                    <form action="{{ url('/user') }}" method="POST" enctype="multipart/form-data"> 
                             @csrf
 
                             <<div class="field">
@@ -107,6 +107,10 @@
                             @error('nombre_usuario')
                                 <p class="help is-danger">{{ $message }}</p>
                             @enderror
+                        </div>
+                        <div>
+                            <label for="imagen">Foto de perfil:</label>
+                            <input type="file" name="imagen" accept="image/*"> 
                         </div>
                             <div class="mb-3">
                                 <label for="">Roles</label>

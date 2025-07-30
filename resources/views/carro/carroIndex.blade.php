@@ -126,6 +126,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        
 
                         <p><strong>Total del pedido #{{ $idPedido }}: {{ $totalPedido }}</strong></p>
 
@@ -148,6 +149,16 @@
                                     return ($c->saldo_total + $totalPedido) <= 10000;
                                 });
                             @endphp
+
+                            <p>
+                                <form action="{{ route('carro.destroy', $carros->first()->id_carro) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar todo este carro?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" style="background-color:#d9534f; color:#fff; border:none; padding:6px 12px; cursor:pointer;">
+                                        Eliminar carro completo
+                                    </button>
+                                </form>
+                            </p>
 
                             <form action="{{ route('pedido.cerrar', $idPedido) }}" method="POST">
                                 @csrf

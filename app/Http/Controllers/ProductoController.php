@@ -16,17 +16,22 @@ class ProductoController extends Controller
         $usuarios = collect();
         $pedidosUsuario = collect();
 
+        // Productos activos si no es administrador
+        $productoIndex = $usuario->hasRole('administrador')
+            ? Producto::all()
+            : Producto::where('estado_producto', true)->get();
+
+        // Cargar usuarios y pedidos según el rol
         if ($usuario->hasRole('administrador')) {
             $usuarios = \App\Models\User::all();
-            $pedidosUsuario = \App\Models\Pedido::with('user')->get(); // Todos los pedidos
+            $pedidosUsuario = \App\Models\Pedido::with('user')->get();
         } else {
             $pedidosUsuario = \App\Models\Pedido::where('id_user', $usuario->id_user)->get();
         }
 
-        $productoIndex = Producto::all();
-
         return view('producto.productoIndex', compact('productoIndex', 'pedidosUsuario', 'usuarios'));
     }
+
 
 
     public function create()
@@ -67,6 +72,7 @@ class ProductoController extends Controller
         $producto->marca = $request->input('marca');
         $producto->precio_unitario = $request->input('precio_unitario');
         $producto->piezas = $request->input('piezas');
+        $producto->estado_producto = $request->input('estado_producto', true); // por default activo
         $producto->save();
 
         return redirect('/producto')->with('success', 'Producto registrado correctamente.');
@@ -91,12 +97,6 @@ class ProductoController extends Controller
 
         return view('producto.showProducto', compact('productos', 'usuarios', 'pedidosUsuario'));
     }
-
-
-
-
-
-
     public function edit($id)
     {
         $producto = Producto::find($id);
@@ -140,7 +140,9 @@ class ProductoController extends Controller
             $producto->imagen = 'img/' . $nombreArchivo;
         }
 
-        // Solo actualizar campos si están presentes y no vacíos
+        $producto->estado_producto = $request->has('estado_producto');
+
+        // Actualizar campos si están presentes y no vacíos
         if ($request->filled('nombre')) {
             $producto->nombre = $request->input('nombre');
         }
