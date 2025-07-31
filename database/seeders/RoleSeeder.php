@@ -112,8 +112,8 @@ class RoleSeeder extends Seeder
         ]); // Example user with ID 1
         $adminPermisos->assignRole('administrador');
 
-        $userPermisos = User::find(1);
-        $userPermisos->assignRole('user');
+        // $userPermisos = User::find(1);
+        // $userPermisos->assignRole('user');
 
     }
 }

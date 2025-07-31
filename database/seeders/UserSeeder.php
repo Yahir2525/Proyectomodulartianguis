@@ -6,6 +6,8 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\File;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class UserSeeder extends Seeder
 {
@@ -17,6 +19,9 @@ class UserSeeder extends Seeder
             $this->command->error("El archivo usuarios.csv no se encontró en storage/app/public/");
             return;
         }
+
+        // Aseguramos que exista el rol 'user'
+        $rolUser = Role::firstOrCreate(['name' => 'user']);
 
         $rows = array_map('str_getcsv', file($path));
 
@@ -51,6 +56,9 @@ class UserSeeder extends Seeder
                 'nombre_usuario' => $nombreUsuario,
                 'imagen' => $rutaImagen,
             ]);
+
+            // 🔁 A cada usuario le asignamos el rol
+            $user->syncRoles($rolUser);
         }
 
         $this->command->info('Usuarios importados con rol "user" exitosamente.');
