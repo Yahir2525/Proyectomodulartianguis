@@ -144,8 +144,10 @@ class CreditoController extends Controller
         // Si es un número, se interpreta como ID de crédito
         if (is_numeric($busqueda)) {
             if ($user->hasRole('administrador')) {
+                // Administrador puede ver cualquier crédito
                 $credito = Credito::with('user')->find($busqueda);
             } else {
+                // Usuario normal solo puede ver sus propios créditos
                 $credito = Credito::with('user')
                     ->where('id_credito', $busqueda)
                     ->where('id_user', $user->id_user)
@@ -156,18 +158,21 @@ class CreditoController extends Controller
                 return back()->with('error', 'El crédito no se encontró o no te pertenece.');
             }
 
+            // Retornamos vista con solo ese crédito dentro de una colección
             return view('credito.showCredito', ['creditos' => collect([$credito])]);
         }
 
         // Si es texto, se interpreta como nombre de usuario (solo admins)
         if ($user->hasRole('administrador')) {
-            $usuario = User::where('nombre_usuario', 'ILIKE', $busqueda)->first();
+            // Búsqueda por nombre de usuario con coincidencia exacta (ILIKE)
+            $usuario = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->get();
 
             if (!$usuario) {
                 return back()->with('error', 'Usuario no encontrado.');
             }
 
-            $creditos = Credito::with('user')->where('id_user', $usuario->id_user)->get();
+            // Buscamos todos los créditos del usuario encontrado
+            $creditos = Credito::with('user')->whereIn('id_user', $usuario->pluck('id_user'))->get();
 
             if ($creditos->isEmpty()) {
                 return back()->with('error', 'No se encontraron créditos para el usuario "' . $busqueda . '".');
@@ -176,8 +181,10 @@ class CreditoController extends Controller
             return view('credito.showCredito', ['creditos' => $creditos]);
         }
 
+        // Usuario no admin intenta buscar por nombre (no permitido)
         return back()->with('error', 'Solo puedes buscar tus créditos por ID.');
     }
+
 
 
     public function edit($id)
@@ -244,7 +251,5 @@ class CreditoController extends Controller
 
         return redirect()->route('credito.index')->with('success', 'El crédito se ha eliminado con éxito.');
     }
-
-
 
 }

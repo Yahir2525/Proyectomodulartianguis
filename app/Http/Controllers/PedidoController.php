@@ -85,18 +85,19 @@ class PedidoController extends Controller
             return view('pedido.showPedido', ['pedidos' => collect([$pedido])]);
         }
 
-        // Buscar por nombre de usuario (solo para administradores)
+        // Buscar por nombre de usuario (solo admin)
         if (!$user->hasRole('administrador')) {
             return back()->with('error', 'Solo puedes buscar tus propios pedidos por ID.');
         }
 
-        $usuario = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->first();
+        // Buscar múltiples usuarios con nombre similar
+        $usuarios = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->pluck('id_user');
 
-        if (!$usuario) {
-            return back()->with('error', 'Usuario no encontrado.');
+        if ($usuarios->isEmpty()) {
+            return back()->with('error', 'No se encontraron usuarios con ese nombre.');
         }
 
-        $pedidos = Pedido::with('user')->where('id_user', $usuario->id_user)->get();
+        $pedidos = Pedido::with('user')->whereIn('id_user', $usuarios)->get();
 
         if ($pedidos->isEmpty()) {
             return back()->with('error', 'No se encontraron pedidos para "' . $busqueda . '".');
@@ -104,6 +105,7 @@ class PedidoController extends Controller
 
         return view('pedido.showPedido', ['pedidos' => $pedidos]);
     }
+
 
 
 
@@ -223,6 +225,14 @@ class PedidoController extends Controller
         if ($pedido->estado_pedido == 0) {
             return back()->with('error', 'El pedido ya está cerrado.');
         }
+
+        $user = $pedido->user;
+        if ($user->tienePagosAtrasadosSinAbonar()) {
+            return back()->with('error', 'No puedes cerrar el pedido porque tienes pagos vencidos sin abonar.');
+        }
+
+
+
 
         $metodo = $request->input('metodo_pago');
         $total = (float) $request->input('total');

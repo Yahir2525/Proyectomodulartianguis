@@ -137,6 +137,15 @@
                 @enderror
             </div>
 
+            <div>
+                <label for="nivel_usuario">Nivel del usuario:</label>
+                <select name="nivel_usuario" id="nivel_usuario" required>
+                    <option value="excelente" {{ $user->nivel_usuario == 'excelente' ? 'selected' : '' }}>Excelente cliente</option>
+                    <option value="bueno" {{ $user->nivel_usuario == 'bueno' ? 'selected' : '' }}>Buen cliente</option>
+                    <option value="malo" {{ $user->nivel_usuario == 'malo' ? 'selected' : '' }}>Mal cliente</option>
+                </select>
+            </div>
+
             <div class="field mt-4">
                 <div class="control">
                     <button class="button is-info is-fullwidth" type="submit">Guardar cambios</button>

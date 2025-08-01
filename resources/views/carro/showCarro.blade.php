@@ -122,7 +122,7 @@
                 <p><strong>Total del carrito:</strong> ${{ number_format($total, 2) }}</p>
             @endif
                 <p>
-                    <form action="{{ route('carro.destroy', $carros->first()->id_carro) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar todo este carro?');">
+                    <form action="{{ route('carro.destroy', $carroItem->id_carro) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar todo este carro?');">
                         @csrf
                         @method('DELETE')
                         <button type="submit" style="background-color:#d9534f; color:#fff; border:none; padding:6px 12px; cursor:pointer;">
@@ -142,7 +142,9 @@
                     $totalCreditos = $creditosActivos->sum('saldo_total');
                     $totalExcede = $total > 10000;
                     $sumaExcede = ($totalCreditos + $total) > 10000;
-                    $bloqueado = $totalExcede || $sumaExcede;
+                    $bloqueadoPorHistorial = $usuario->tienePagosAtrasadosSinAbonar(); // NUEVO
+                    $bloqueado = $totalExcede || $sumaExcede || $bloqueadoPorHistorial;
+
 
                     $puedeCrearCredito = $creditosActivos->count() < 3;
 
@@ -162,9 +164,13 @@
                             @if($sumaExcede)
                                 - El total de créditos más este pedido excede los $10,000.<br>
                             @endif
+                            @if($bloqueadoPorHistorial)
+                                - Tienes pagos atrasados sin abonar. Tu acceso a crédito está bloqueado.<br>
+                            @endif
                             Puedes cerrarlo como <strong>contado</strong>.
                         </p>
                     @endif
+
 
                     <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
                     <select name="metodo_pago" required onchange="mostrarCreditos(this, {{ $pedido->id_pedido }})">

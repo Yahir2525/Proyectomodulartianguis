@@ -23,40 +23,46 @@
     @if($listaAbonos->isEmpty())
         <p>No se encontraron abonos para mostrar.</p>
     @else
-        <table>
-            <thead>
-                <tr>
-                    <th>ID Abono</th>
-                    <th>ID Usuario</th>
-                    <th>ID Crédito</th>
-                    <th>Monto</th>
-                    <th>Fecha</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($listaAbonos as $abono)
-                    <tr>
-                        <td>{{ $abono->id_abono }}</td>
-                        <td>{{ optional($abono->user)->nombre_usuario ?? 'Usuario no disponible' }}</td>
-                        <td>{{ $abono->id_credito }}</td>
-                        <td>${{ number_format($abono->monto_abono, 2) }}</td>
-                        <td>{{ $abono->created_at->format('d/m/Y H:i') }}</td>
-                        <td>
-                            <a class="btn" href="{{ route('abono.edit', $abono->id_abono) }}">Editar</a>
+        @php
+            $abonosPorUsuario = $listaAbonos->groupBy(fn($a) => optional($a->user)->nombre_usuario ?? 'Usuario desconocido');
+        @endphp
 
-                            <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este abono?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn">Eliminar</button>
-                            </form>
-                        </td>
+        @foreach($abonosPorUsuario as $nombreUsuario => $grupoAbonos)
+            <h2>Abonos de {{ $nombreUsuario }}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Abono</th>
+                        <th>ID Usuario</th>
+                        <th>ID Crédito</th>
+                        <th>Monto</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach($grupoAbonos as $abono)
+                        <tr>
+                            <td>{{ $abono->id_abono }}</td>
+                            <td>{{ optional($abono->user)->nombre_usuario ?? 'Usuario no disponible' }}</td>
+                            <td>{{ $abono->id_credito }}</td>
+                            <td>${{ number_format($abono->monto_abono, 2) }}</td>
+                            <td>{{ $abono->created_at->format('d/m/Y H:i') }}</td>
+                            <td>
+                                <a class="btn" href="{{ route('abono.edit', $abono->id_abono) }}">Editar</a>
+                                <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este abono?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endforeach
     @endif
 
-    <a href="{{ url('/abono') }}">Volver al listado</a>
+    <a href="{{ url('/abono') }}">← Volver al listado</a>
 </body>
 </html>

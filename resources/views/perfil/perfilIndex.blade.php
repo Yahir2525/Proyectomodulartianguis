@@ -71,6 +71,10 @@
                         <th>Rol</th>
                         <td>{{ $user->getRoleNames()->implode(', ') }}</td>
                     </tr>
+                    <tr>
+                        <th>Nivel de usuario</th>
+                        <td>{{ $user->nivel_usuario}}</td>
+                    </tr>
                 </tbody>
             </table>
 

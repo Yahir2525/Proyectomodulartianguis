@@ -20,16 +20,17 @@
             <form action="{{ url('/carro/showCarro') }}" method="GET">
                 <label for="busqueda">Buscar por ID de carro o nombre de usuario:</label>
                 <input type="text" id="busqueda" name="busqueda" placeholder="Ej. 21 o Carlitos"
-                    list="{{ Auth::user()->can('edit carro') ? 'usuarios' : '' }}"
-                    value="{{ request('busqueda') }}" />
+                list="{{ Auth::user()->can('edit carro') ? 'usuarios' : '' }}"
+                value="{{ request('busqueda') }}" />
 
                 @can('edit carro')
-                    <datalist id="usuarios">
-                        @foreach($usuarios as $usuario)
-                            <option value="{{ $usuario->nombre_usuario }}"></option>
-                        @endforeach
-                    </datalist>
+                <datalist id="usuarios">
+                    @foreach($usuarios as $usuario)
+                        <option value="{{ $usuario->nombre_usuario }}"></option>
+                    @endforeach
+                </datalist>
                 @endcan
+
 
                 <input type="submit" value="Buscar" />
             </form>
@@ -141,7 +142,10 @@
                                 $totalCreditos = $creditosActivos->sum('saldo_total');
                                 $totalExcede = $totalPedido > 10000;
                                 $sumaExcede = ($totalCreditos + $totalPedido) > 10000;
-                                $bloqueado = $totalExcede || $sumaExcede;
+
+                                $bloqueadoPorHistorial = $usuario->tienePagosAtrasadosSinAbonar(); // 🔺 NUEVO
+
+                                $bloqueado = $totalExcede || $sumaExcede || $bloqueadoPorHistorial;
 
                                 $puedeCrearCredito = $creditosActivos->count() < 3;
 
@@ -149,6 +153,7 @@
                                     return ($c->saldo_total + $totalPedido) <= 10000;
                                 });
                             @endphp
+
 
                             <p>
                                 <form action="{{ route('carro.destroy', $carros->first()->id_carro) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar todo este carro?');">
@@ -174,6 +179,21 @@
                                             - El total de créditos más este pedido excede los $10,000.<br>
                                         @endif
                                         Puedes cerrarlo como **contado**.
+                                    </p>
+                                @endif
+                                @if($bloqueado)
+                                    <p style="color:red;">
+                                        <strong>No puedes cerrar este pedido a crédito:</strong><br>
+                                        @if($totalExcede)
+                                            - El total del pedido excede los $10,000.<br>
+                                        @endif
+                                        @if($sumaExcede)
+                                            - El total de créditos más este pedido excede los $10,000.<br>
+                                        @endif
+                                        @if($bloqueadoPorHistorial)
+                                            - Tienes pagos atrasados sin abonar. Tu acceso a crédito está bloqueado.<br>
+                                        @endif
+                                        Puedes cerrarlo como <strong>contado</strong>.
                                     </p>
                                 @endif
 

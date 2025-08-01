@@ -124,14 +124,15 @@ class AbonoController extends Controller
         }
 
         // Si no es número, se asume búsqueda por nombre (solo para admin)
+        // Si no es número, se asume búsqueda por nombre (solo para admin)
         if ($user->hasRole('administrador')) {
-            $usuario = User::where('nombre_usuario', 'ILIKE', $busqueda)->first();
+            $usuario = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->get();
 
             if (!$usuario) {
                 return back()->with('error', 'Usuario no encontrado.');
             }
-
-            $abonos = Abono::with(['user', 'credito'])->where('id_user', $usuario->id_user)->get();
+            
+            $abonos = Abono::with('user')->whereIn('id_user', $usuario->pluck('id_user'))->get();
 
             if ($abonos->isEmpty()) {
                 return back()->with('error', 'No se encontraron abonos para el usuario "' . $busqueda . '".');
@@ -139,6 +140,7 @@ class AbonoController extends Controller
 
             return view('abono.showAbono', ['abonos' => $abonos]);
         }
+
 
         return back()->with('error', 'Solo puedes buscar tus abonos por ID.');
     }

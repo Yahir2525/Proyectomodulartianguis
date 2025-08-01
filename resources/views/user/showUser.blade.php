@@ -50,6 +50,7 @@
                 <th>Teléfono</th>
                 <th>Dirección</th>
                 <th>Nombre de usuario</th>
+                <th>Nivel de usuario</th>
                 <th>Creado</th>
                 <th>Actualizado</th>
                 <th>Acciones</th>
@@ -73,6 +74,7 @@
                     <td>{{ $user->telefono ?? 'No registrado' }}</td>
                     <td>{{ $user->direccion ?? 'No registrada' }}</td>
                     <td>{{ $user->nombre_usuario }}</td>
+                    <td>{{ $user->nivel_usuario}}</td>
                     <td>{{ $user->created_at }}</td>
                     <td>{{ $user->updated_at }}</td>
                     <td class="acciones">

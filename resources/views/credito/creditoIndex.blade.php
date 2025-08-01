@@ -24,10 +24,16 @@
 
         <form action="{{ url('/credito/showCredito') }}" method="GET">
             <label for="busqueda">Buscar por ID de crédito o nombre de usuario:</label>
-            <input type="text" id="busqueda" name="busqueda"
+            <input 
+                type="text" 
+                id="busqueda" 
+                name="busqueda"
                 placeholder="Ej. 21 o Pepito"
-                list="{{ Auth::user()->can('edit credito') ? 'usuarios' : '' }}"
-                value="{{ request('busqueda') }}" />
+                {{-- Solo añadir datalist si el usuario tiene permiso --}}
+                @if(Auth::user()->can('edit credito')) list="usuarios" @endif
+                value="{{ old('busqueda', request('busqueda')) }}" 
+                autocomplete="off"
+            />
 
             @can('edit credito')
                 <datalist id="usuarios">
@@ -39,6 +45,7 @@
 
             <input type="submit" value="Buscar" />
         </form>
+
 
 
 

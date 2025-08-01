@@ -36,6 +36,7 @@ class UserSeeder extends Seeder
             $direccion = $row[6] ?? null;
             $nombreUsuario = $row[7] ?? null;
             $nombreImagen = $row[8] ?? null;
+            $nivel = $row[9] ?? 'bueno';
 
             $rutaImagen = null;
             if ($nombreImagen) {
@@ -55,6 +56,8 @@ class UserSeeder extends Seeder
                 'direccion' => $direccion,
                 'nombre_usuario' => $nombreUsuario,
                 'imagen' => $rutaImagen,
+                'limite_credito' => 1000,
+                'nivel_usuario' => $nivel,
             ]);
 
             // 🔁 A cada usuario le asignamos el rol

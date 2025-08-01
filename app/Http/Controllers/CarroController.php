@@ -42,7 +42,7 @@ class CarroController extends Controller
     {
         $usuario = Auth::user();
 
-        $usuarios = $usuario->hasRole('administrador')? User::all(): collect();
+        $usuarios = $usuario->hasRole('administrador') ? User::all() : collect();
 
         $pedidos = Pedido::all();
         $productos = Producto::all();
@@ -77,12 +77,11 @@ class CarroController extends Controller
             return back()->with('error', 'Este producto está descontinuado y no puede ser agregado.');
         }
 
-        // Calcular piezas disponibles
-        $reservadas = CarroProducto::where('id_producto', $productoId)->sum('cantidad');
-        $disponibles = max(0, $producto->piezas - $reservadas);
+        $user = User::findOrFail($userId);
 
-        if ($cantidad > $disponibles) {
-            return back()->with('error', "Solo hay $disponibles piezas disponibles.");
+        // Verificar bloqueo para crédito y método pago
+        if ($user->estaBloqueadoParaCredito() && $request->input('metodo_pago') === 'credito') {
+            return back()->with('error', 'No puedes comprar a crédito porque tienes pagos atrasados sin abonar. Solo contado.');
         }
 
         // Crear o usar pedido
@@ -101,13 +100,36 @@ class CarroController extends Controller
             return back()->with('error', 'Debes seleccionar un pedido o marcar "crear uno nuevo".');
         }
 
+        // Calcular nuevo total con el producto que quiere agregar
+        $totalAnterior = $pedido->total_pedido;
+        $nuevoTotal = $totalAnterior + ($producto->precio_unitario * $cantidad);
+
+        // Aplicar reglas de comportamiento de pago
+        if ($user->pagaSiempreAdelantado() && $nuevoTotal > $totalAnterior && $user->montoPromedio() > 1000) {
+            $user->aumentarLimiteCredito();
+        } elseif ($user->pagaTardePeroPaga() && $nuevoTotal >= $totalAnterior) {
+            if ($nuevoTotal > $totalAnterior) {
+                return back()->with('error', 'No puedes aumentar el total del pedido, solo mantenerlo igual.');
+            }
+        } elseif ($user->tienePagosAtrasadosSinAbonar()) {
+            if ($request->input('metodo_pago') === 'credito') {
+                return back()->with('error', 'No puedes aumentar el total del pedido a crédito porque tienes pagos atrasados sin abonar.');
+            }
+        }
+
         // Crear o buscar carro
         $carro = Carro::firstOrCreate(
             ['id_pedido' => $pedido->id_pedido],
             ['id_user' => $userId]
         );
 
-        $totalAnterior = $pedido->total_pedido;
+        // Validar piezas disponibles
+        $reservadas = CarroProducto::where('id_producto', $productoId)->sum('cantidad');
+        $disponibles = max(0, $producto->piezas - $reservadas);
+
+        if ($cantidad > $disponibles) {
+            return back()->with('error', "Solo hay $disponibles piezas disponibles.");
+        }
 
         // Revisar si el producto ya está en el carro y sumar cantidades o agregar nuevo
         $productoExistente = $carro->productos()->where('productos.id_producto', $productoId)->first();
@@ -148,6 +170,12 @@ class CarroController extends Controller
         $seleccionados = $request->input('productos_seleccionados', []);
         $cantidades = $request->input('cantidades', []);
 
+        $user = User::findOrFail($userId);
+
+        if ($user->estaBloqueadoParaCredito() && $request->input('metodo_pago') === 'credito') {
+            return back()->with('error', 'No puedes comprar a crédito porque tienes pagos atrasados sin abonar. Solo contado.');
+        }
+
         if ($idPedido === 'nuevo') {
             $pedido = Pedido::create(['id_user' => $userId, 'estado_pedido' => 1]);
             $idPedido = $pedido->id_pedido;
@@ -161,6 +189,29 @@ class CarroController extends Controller
         if (empty($seleccionados)) {
             return back()->with('error', 'No seleccionaste ningún producto.');
         }
+
+        // Calcular nuevo total sumando productos seleccionados * cantidades
+        $nuevoTotal = $pedido->total_pedido;
+        foreach ($seleccionados as $idProducto) {
+            $producto = Producto::find($idProducto);
+            $cantidad = (int) ($cantidades[$idProducto] ?? 0);
+            if ($cantidad <= 0) continue;
+            $nuevoTotal += $producto->precio_unitario * $cantidad;
+        }
+
+        // Aplicar reglas de comportamiento de pago
+        if ($user->pagaSiempreAdelantado() && $nuevoTotal > $pedido->total_pedido && $user->montoPromedio() > 1000) {
+            $user->aumentarLimiteCredito();
+        } elseif ($user->pagaTardePeroPaga() && $nuevoTotal >= $pedido->total_pedido) {
+            if ($nuevoTotal > $pedido->total_pedido) {
+                return back()->with('error', 'No puedes aumentar el total del pedido, solo mantenerlo igual.');
+            }
+        } elseif ($user->tienePagosAtrasadosSinAbonar()) {
+            if ($request->input('metodo_pago') === 'credito') {
+                return back()->with('error', 'No puedes aumentar el total del pedido a crédito porque tienes pagos atrasados sin abonar.');
+            }
+        }
+
 
         $carro = Carro::firstOrCreate(
             ['id_pedido' => $pedido->id_pedido],
@@ -441,20 +492,26 @@ class CarroController extends Controller
             return back()->with('error', 'No puedes buscar carros por nombre de usuario.');
         }
 
-        $usuario = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->first();
+        // Obtener todos los usuarios cuyo nombre de usuario coincida parcialmente
+        $usuarios = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->get();
 
-        if (!$usuario) {
-            return back()->with('error', 'Usuario no encontrado.');
+        if ($usuarios->isEmpty()) {
+            return back()->with('error', 'No se encontraron usuarios con ese nombre.');
         }
 
-        $carros = Carro::with(['productos', 'user'])->where('id_user', $usuario->id_user)->get();
+        // Obtener los carros de todos esos usuarios
+        $carros = Carro::with(['productos', 'user'])
+            ->whereIn('id_user', $usuarios->pluck('id_user'))
+            ->get();
 
         if ($carros->isEmpty()) {
-            return back()->with('error', 'No se encontraron carros para ese usuario.');
+            return back()->with('error', 'No se encontraron carros para esos usuarios.');
         }
 
         return view('carro.showCarro', compact('carros'));
     }
+
+
 
 
     // private function usuarioBloqueado($id_user)

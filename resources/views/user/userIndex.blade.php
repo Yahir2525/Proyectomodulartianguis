@@ -89,6 +89,7 @@
                     <th>Imagen</th>
                     <th>Nombre</th>
                     <th>Correo</th>
+                    <th>Nivel de usuario</th>
                     <th>Roles</th>
                     <th>Acciones</th>
                 </tr>
@@ -106,6 +107,7 @@
                         </td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
+                        <td>{{ $user->nivel_usuario}}</td>
                         <td>
                             @foreach ($user->getRoleNames() as $rolename)
                                 <span class="badge">{{ $rolename }}</span>

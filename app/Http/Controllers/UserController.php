@@ -54,12 +54,14 @@ class UserController extends Controller
             $user->telefono = $request->input('telefono');
             $user->direccion = $request->input('direccion');
             $user->nombre_usuario = $request->input('nombre_usuario');
+            $user->nivel_usuario = $request->input('nivel_usuario');
             if ($request->hasFile('imagen')) {
                 $file = $request->file('imagen');
                 $filename = time() . '_' . $file->getClientOriginalName();
                 $file->move(public_path('img/perfiles'), $filename);
                 $user->imagen = 'img/perfiles/' . $filename;
             }
+            $usuario->categoria_pago = $request->categoria_pago;
 
             
             $user->save();
@@ -129,6 +131,7 @@ class UserController extends Controller
             'direccion' => 'nullable|string|max:80',
             'nombre_usuario' => 'nullable|string|max:50|unique:users,nombre_usuario,' . $user->id_user . ',id_user',
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+
             'roles' => 'nullable|array',
         ]);
 
@@ -141,6 +144,7 @@ class UserController extends Controller
         if ($request->filled('telefono')) $user->telefono = $request->telefono;
         if ($request->filled('direccion')) $user->direccion = $request->direccion;
         if ($request->filled('nombre_usuario')) $user->nombre_usuario = $request->nombre_usuario;
+        if ($request->filled('nivel_usuario')) $user->nivel_usuario = $request->nivel_usuario;
 
         // Carga y almacenamiento de imagen
         if ($request->hasFile('imagen')) {
@@ -189,4 +193,5 @@ class UserController extends Controller
 
         return redirect()->route('user.index')->with('success', 'El usuario se ha eliminado con éxito.');
     }
+
 }
