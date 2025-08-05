@@ -93,6 +93,9 @@ class AbonoController extends Controller
             $mensaje .= ' (ajustado del monto ingresado $' . number_format($montoSolicitado, 2) . ' debido a saldo insuficiente del crédito).';
         }
 
+        $user = $credito->user;
+        $user->evaluarNivelUsuario();
+
         return redirect()->route('abono.index')->with('success', $mensaje);
     }
 
@@ -256,7 +259,11 @@ class AbonoController extends Controller
             $mensaje .= ' Se ajustó automáticamente al saldo disponible del crédito.';
         }
 
+        $user = $credito->user;
+        $user->evaluarNivelUsuario();
+        
         return redirect()->route('abono.index')->with('success', $mensaje);
+
     }
 
 
@@ -278,6 +285,9 @@ class AbonoController extends Controller
         }
 
         $abono->delete();
+
+        $user = $credito->user;
+        $user->evaluarNivelUsuario();
 
         return redirect()->route('abono.index')->with('success', 'El abono se ha eliminado con éxito.');
     }
@@ -315,6 +325,37 @@ class AbonoController extends Controller
 
         return redirect()->back()->with('success', 'Monto del abono aplicado al crédito correctamente.');
     }
+
+    // private function actualizarNivelUsuarioPorHistorial($id_user)
+    // {
+    //     $user = User::find($id_user);
+    //     $creditos = Credito::where('id_user', $id_user)
+    //         ->whereNotNull('fecha_liquidacion')
+    //         ->whereNotNull('fecha_vencimiento')
+    //         ->get();
+
+    //     $aTiempo = 0;
+    //     $tarde = 0;
+
+    //     foreach ($creditos as $credito) {
+    //         if ($credito->fecha_liquidacion <= $credito->fecha_vencimiento) {
+    //             $aTiempo++;
+    //         } else {
+    //             $tarde++;
+    //         }
+    //     }
+
+    //     if ($aTiempo >= 3 && $tarde == 0) {
+    //         $user->nivel_usuario = 'excelente';
+    //     } elseif ($aTiempo >= $tarde) {
+    //         $user->nivel_usuario = 'bueno';
+    //     } else {
+    //         $user->nivel_usuario = 'malo';
+    //     }
+
+    //     $user->save();
+    // }
+
 
 
 }

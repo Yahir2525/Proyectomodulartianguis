@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        $path = storage_path('app/public/usuarioss.csv');
+        $path = storage_path('app/public/usuarios.csv');
 
         if (!file_exists($path)) {
             $this->command->error("El archivo usuarios.csv no se encontró en storage/app/public/");
@@ -56,8 +56,9 @@ class UserSeeder extends Seeder
                 'direccion' => $direccion,
                 'nombre_usuario' => $nombreUsuario,
                 'imagen' => $rutaImagen,
-                'limite_credito' => 1000,
                 'nivel_usuario' => $nivel,
+                'dias_aplazo' => 0,
+
             ]);
 
             // 🔁 A cada usuario le asignamos el rol

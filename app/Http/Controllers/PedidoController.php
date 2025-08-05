@@ -107,9 +107,6 @@ class PedidoController extends Controller
     }
 
 
-
-
-
     public function edit($id)
     {
         $pedido = Pedido::find($id);
@@ -212,6 +209,8 @@ class PedidoController extends Controller
             }
         }
 
+        $pedido->user->evaluarNivelUsuario();
+
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha actualizado con éxito.');
     }
 
@@ -227,12 +226,10 @@ class PedidoController extends Controller
         }
 
         $user = $pedido->user;
+
         if ($user->tienePagosAtrasadosSinAbonar()) {
             return back()->with('error', 'No puedes cerrar el pedido porque tienes pagos vencidos sin abonar.');
         }
-
-
-
 
         $metodo = $request->input('metodo_pago');
         $total = (float) $request->input('total');
@@ -245,19 +242,15 @@ class PedidoController extends Controller
             return back()->with('error', 'El total del pedido supera el límite permitido de $10,000.');
         }
 
-        // Obtener créditos activos
-        $creditosActivos = Credito::where('id_user', $pedido->id_user)
-            ->where('estado', 1)
-            ->whereDate('fecha_vencimiento', '>=', now())
-            ->get();
+        $creditosUsuario = Credito::where('id_user', $pedido->id_user)->get();
+        $deudaTotal = $creditosUsuario->sum('saldo_total');
 
-        // Validar suma total de saldos + nuevo total
-        $sumaSaldos = $creditosActivos->sum('saldo_total');
-        if ($sumaSaldos + $total > 10000) {
-            return back()->with('error', 'La suma de los saldos de créditos activos más este pedido excede los $10,000.');
+        // Validar límites de crédito al cerrar
+        if ($metodo === 'credito' && ($deudaTotal + $total - $total_anterior) > 10000) {
+            return back()->with('error', 'No puedes cerrar el pedido. La suma de tus deudas superaría los $10,000.');
         }
 
-        // Si cambia a contado o cambia de crédito, ajustar saldo anterior
+        // Si el crédito anterior existe y se cambia a contado o a otro crédito, ajustar el saldo anterior
         if ($id_credito_anterior && ($metodo !== 'credito' || $id_credito_anterior != $id_credito_nuevo)) {
             $creditoAnterior = Credito::find($id_credito_anterior);
             if ($creditoAnterior) {
@@ -265,6 +258,8 @@ class PedidoController extends Controller
                 $creditoAnterior->save();
             }
         }
+
+        $user->evaluarNivelUsuario(); 
 
         if ($metodo === 'credito') {
             $esNuevoCredito = empty($id_credito_nuevo);
@@ -277,24 +272,35 @@ class PedidoController extends Controller
                     return back()->with('error', 'El crédito seleccionado no es válido.');
                 }
 
-                if (($credito->saldo_total + $total) > 10000) {
-                    return back()->with('error', 'El saldo del crédito superaría los $10,000 con este pedido.');
+                // ✅ Solo sumar diferencia si es el mismo crédito
+                if ($id_credito_nuevo == $id_credito_anterior) {
+                    $credito->saldo_total = $credito->saldo_total - $total_anterior + $total;
+                } else {
+                    $credito->saldo_total += $total;
                 }
 
-                $credito->saldo_total += $total;
                 $credito->save();
                 $pedido->id_credito = $credito->id_credito;
             } else {
-                // Crear nuevo crédito
+                // Crear nuevo crédito solo si tiene menos de 3 activos
+                $creditosActivos = $creditosUsuario->filter(function ($c) {
+                return $c->estado == 1 && $c->fecha_vencimiento >= now();
+                });
+
+                $creditosVencidos = $creditosUsuario->filter(function ($c) {
+                    return $c->estado == 1 && $c->fecha_vencimiento < now();
+                });
+
+
                 if ($creditosActivos->count() >= 3) {
                     return back()->with('error', 'Ya tienes 3 créditos activos. No puedes crear uno nuevo.');
                 }
 
                 $nuevoCredito = Credito::create([
-                    'id_user' => $pedido->id_user,
+                    'id_user' => $user->id_user,
                     'saldo_total' => $total,
                     'fecha_liquidacion' => null,
-                    'fecha_vencimiento' => now()->addDays(60),
+                    'fecha_vencimiento' => now()->addDays($user->dias_aplazo),
                     'estado' => 1,
                 ]);
 
@@ -313,6 +319,8 @@ class PedidoController extends Controller
 
         return redirect()->route('pedido.index')->with('success', 'Pedido cerrado correctamente.');
     }
+
+
 
 
 
@@ -363,6 +371,7 @@ class PedidoController extends Controller
         }
 
         $this->recalcularSaldoCredito($idCredito);
+        $pedido->user->evaluarNivelUsuario();
 
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha eliminado con éxito.');
     }
@@ -383,31 +392,6 @@ class PedidoController extends Controller
 
         return false;
     }
-
-    // private function puedeCerrarAPedidoACredito(Pedido $pedido, $montoNuevo = null)
-    // {
-    //     $user = $pedido->user;
-
-    //     $creditosActivos = Credito::where('id_user', $user->id_user)->where('estado', 1)->get();
-    //     if ($creditosActivos->count() >= 3) {
-    //         return false;
-    //     }
-
-    //     if ($montoNuevo === null) {
-    //         $montoNuevo = $pedido->total_pedido;
-    //     }
-
-    //     $idCredito = request()->input('id_credito');
-    //     if ($idCredito) {
-    //         $credito = Credito::find($idCredito);
-    //         if (!$credito) return false;
-    //         $nuevoSaldo = $credito->saldo_total + $montoNuevo;
-    //         return $nuevoSaldo <= 10000;
-    //     }
-
-    //     return $montoNuevo <= 10000;
-    // }
-
 
     private function puedeCerrarAPedidoACredito(Pedido $pedido, $montoNuevo = null, $esNuevoCredito = false)
     {

@@ -97,7 +97,14 @@
                                 return ($c->saldo_total + $totalPedido) <= 10000;
                             });
 
+                            $creditosVencidos = \App\Models\Credito::where('id_user', $usuario->id_user)
+                                ->where('estado', 1)
+                                ->whereDate('fecha_vencimiento', '<', now())
+                                ->get();
+
                             $puedeCrearNuevoCredito = $creditosActivos->count() < 3;
+
+
 
                             // Si el usuario tiene pagos vencidos sin abonar (usar método en User)
                             $usuarioBloqueadoPorPagosAtrasados = $usuario && method_exists($usuario, 'tienePagosAtrasadosSinAbonar')

@@ -19,11 +19,17 @@ class Credito extends Model
     protected $keyType = 'int';
 
 
+    protected $casts = [
+    'fecha_vencimiento' => 'datetime',
+    'fecha_liquidacion' => 'datetime',
+    ];
+
+
         public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
-        public function abono(): HasMany
+        public function abonos(): HasMany
     {
         return $this->hasMany(Abono::class, 'id_credito', 'id_credito');
     }

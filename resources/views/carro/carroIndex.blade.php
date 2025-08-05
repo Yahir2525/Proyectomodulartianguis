@@ -134,22 +134,30 @@
                         @if($pedido && $pedido->estado_pedido == 1)
                             @php
                                 $usuario = $carros->first()->user;
-                                $creditosActivos = \App\Models\Credito::where('id_user', $usuario->id_user)
+                                $creditosTodos = \App\Models\Credito::where('id_user', $usuario->id_user)
                                     ->where('estado', 1)
-                                    ->whereDate('fecha_vencimiento', '>=', now())
                                     ->get();
 
-                                $totalCreditos = $creditosActivos->sum('saldo_total');
+                                $creditosVigentes = $creditosTodos->filter(function($c) {
+                                    return $c->fecha_vencimiento >= now();
+                                });
+
+                                // Créditos activos pero vencidos
+                                $creditosVencidos = $creditosTodos->filter(function($c) {
+                                    return $c->fecha_vencimiento < now();
+                                });
+
+                                $totalCreditos = $creditosTodos->sum('saldo_total');
                                 $totalExcede = $totalPedido > 10000;
                                 $sumaExcede = ($totalCreditos + $totalPedido) > 10000;
 
-                                $bloqueadoPorHistorial = $usuario->tienePagosAtrasadosSinAbonar(); // 🔺 NUEVO
+                                $bloqueadoPorHistorial = $usuario->tienePagosAtrasadosSinAbonar();
 
                                 $bloqueado = $totalExcede || $sumaExcede || $bloqueadoPorHistorial;
 
-                                $puedeCrearCredito = $creditosActivos->count() < 3;
+                                $puedeCrearCredito = $creditosVigentes->count() < 3;
 
-                                $creditosDisponibles = $creditosActivos->filter(function($c) use ($totalPedido) {
+                                $creditosDisponibles = $creditosVigentes->filter(function($c) use ($totalPedido) {
                                     return ($c->saldo_total + $totalPedido) <= 10000;
                                 });
                             @endphp
@@ -176,19 +184,7 @@
                                             - El total del pedido excede los $10,000.<br>
                                         @endif
                                         @if($sumaExcede)
-                                            - El total de créditos más este pedido excede los $10,000.<br>
-                                        @endif
-                                        Puedes cerrarlo como **contado**.
-                                    </p>
-                                @endif
-                                @if($bloqueado)
-                                    <p style="color:red;">
-                                        <strong>No puedes cerrar este pedido a crédito:</strong><br>
-                                        @if($totalExcede)
-                                            - El total del pedido excede los $10,000.<br>
-                                        @endif
-                                        @if($sumaExcede)
-                                            - El total de créditos más este pedido excede los $10,000.<br>
+                                            - La suma de créditos activos más este pedido excede los $10,000.<br>
                                         @endif
                                         @if($bloqueadoPorHistorial)
                                             - Tienes pagos atrasados sin abonar. Tu acceso a crédito está bloqueado.<br>

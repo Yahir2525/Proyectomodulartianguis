@@ -112,4 +112,10 @@ Route::middleware(['is_admin'])->group(function () {
 
     // Usuarios
     Route::resource('user', UserController::class);
+
+
+    Route::get('/dataset', function () {
+    return response()->download(storage_path('app/public/mineria_dataset.csv'));
+    });
+
 });

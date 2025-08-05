@@ -69,10 +69,17 @@ class CreditoController extends Controller
             ]);
         }
 
+        
+        $user = User::find($userId);
+        $diasAplazo = $user ? $user->dias_aplazo : 0;
+
+        $fechaVencimiento = now()->addDays($diasAplazo)->endOfDay();;
+
+
         $credito = new Credito();
         $credito->id_user = $userId;
         $credito->fecha_liquidacion = null;
-        $credito->fecha_vencimiento = now()->addDays(60);
+        $credito->fecha_vencimiento = $fechaVencimiento;
         $credito->estado = 1;
         $credito->saldo_total = 0;
 
@@ -98,30 +105,38 @@ class CreditoController extends Controller
 
         $userId = $request->input('id_user');
 
-        // Validaciones
-        $creditosActivos = Credito::where('id_user', $userId)
-            ->where('estado', 1)
-            ->get();
+        $creditosUsuario = Credito::where('id_user', $userId)->get();
 
-        if ($request->input('crear_nuevo', true)) {
-            if ($creditosActivos->count() >= 3) {
-                return back()->with('error', 'El usuario ya tiene 3 créditos activos, no puede crear más.');
-            }
+        $creditosActivos = $creditosUsuario->filter(function ($c) {
+            return $c->estado == 1 && $c->fecha_vencimiento >= now();
+        });
+
+        $creditosVencidos = $creditosUsuario->filter(function ($c) {
+            return $c->estado == 1 && $c->fecha_vencimiento < now();
+        });
+
+        if ($creditosActivos->count() >= 3 || $creditosVencidos->count() > 0) {
+            return back()->with('error', 'El usuario no puede crear un nuevo crédito: ya tiene 3 créditos activos o créditos vencidos.');
         }
 
         $saldoTotalActivos = $creditosActivos->sum('saldo_total');
-
         $nuevoSaldo = $request->input('total', 0);
+
         if (($saldoTotalActivos + $nuevoSaldo) > 10000) {
             return back()->with('error', 'La suma de los saldos activos más el nuevo crédito supera los $10,000.');
         }
+
+        $user = User::find($userId);
+        $diasAplazo = $user ? $user->dias_aplazo : 0;
+
+        $fechaVencimiento = now()->addDays($diasAplazo)->endOfDay();;
 
         // Crear crédito
         $credito = new Credito();
         $credito->id_user = $userId;
         $credito->saldo_total = $nuevoSaldo;
         $credito->fecha_liquidacion = null;
-        $credito->fecha_vencimiento = $request->input('fecha_vencimiento') ?? now()->addDays(60);
+        $credito->fecha_vencimiento = $fechaVencimiento;
         $credito->estado = 1;
         $credito->save();
 
@@ -131,6 +146,7 @@ class CreditoController extends Controller
 
         return redirect('/credito')->with('success', 'Crédito registrado correctamente.');
     }
+
 
     public function show(Request $request)
     {

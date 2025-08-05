@@ -55,6 +55,7 @@ class UserController extends Controller
             $user->direccion = $request->input('direccion');
             $user->nombre_usuario = $request->input('nombre_usuario');
             $user->nivel_usuario = $request->input('nivel_usuario');
+            $user->dias_aplazo = $request->input('dias_aplazo');
             if ($request->hasFile('imagen')) {
                 $file = $request->file('imagen');
                 $filename = time() . '_' . $file->getClientOriginalName();
@@ -144,7 +145,28 @@ class UserController extends Controller
         if ($request->filled('telefono')) $user->telefono = $request->telefono;
         if ($request->filled('direccion')) $user->direccion = $request->direccion;
         if ($request->filled('nombre_usuario')) $user->nombre_usuario = $request->nombre_usuario;
-        if ($request->filled('nivel_usuario')) $user->nivel_usuario = $request->nivel_usuario;
+        if ($request->filled('nivel_usuario')) {
+        $user->nivel_usuario = $request->nivel_usuario;
+
+        // Solo actualizar dias_aplazo si NO se ingresó manualmente
+            if (!$request->filled('dias_aplazo')) {
+                switch ($user->nivel_usuario) {
+                    case 'excelente':
+                        $user->dias_aplazo = 1;
+                        break;
+                    case 'bueno':
+                        $user->dias_aplazo = 0;
+                        break;
+                    case 'malo':
+                        $user->dias_aplazo = 0;
+                        break;
+                }
+            }
+        }
+
+        if ($request->filled('dias_aplazo')) {
+            $user->dias_aplazo = $request->dias_aplazo;
+        }
 
         // Carga y almacenamiento de imagen
         if ($request->hasFile('imagen')) {

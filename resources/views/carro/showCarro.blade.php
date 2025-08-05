@@ -134,22 +134,33 @@
             @if($pedido && !$pedidoCerrado)
                 @php
                     $usuario = $carroItem->user;
+
                     $creditosActivos = \App\Models\Credito::where('id_user', $usuario->id_user)
                         ->where('estado', 1)
                         ->whereDate('fecha_vencimiento', '>=', now())
                         ->get();
 
+                    $creditosVencidos = \App\Models\Credito::where('id_user', $usuario->id_user)
+                        ->where('estado', 1)
+                        ->whereDate('fecha_vencimiento', '<', now())
+                        ->get();
+
+                    // Condición para bloquear creación de nuevo crédito:
+                    // No permitir si tiene 3 o más créditos activos o al menos 1 vencido.
+                    $puedeCrearCredito = ($creditosActivos->count() < 3);
+
+                    // Filtra créditos para mostrar opciones válidas (que no excedan saldo)
+                    $creditosDisponibles = $creditosActivos->filter(function ($credito) use ($total) {
+                        return ($credito->saldo_total + $total) <= 10000;
+                    });
+
+                    // Para bloquear cierre a crédito si excede saldo o tiene historial bloqueado
                     $totalCreditos = $creditosActivos->sum('saldo_total');
-                    $totalExcede = $total > 10000;
-                    $sumaExcede = ($totalCreditos + $total) > 10000;
-                    $bloqueadoPorHistorial = $usuario->tienePagosAtrasadosSinAbonar(); // NUEVO
-                    $bloqueado = $totalExcede || $sumaExcede || $bloqueadoPorHistorial;
-
-
-                    $puedeCrearCredito = $creditosActivos->count() < 3;
-
-                    $creditosDisponibles = $creditosActivos->filter(fn($c) => ($c->saldo_total + $total) <= 10000);
+                    $bloqueadoPorSaldo = ($totalCreditos + $total) > 10000;
+                    $bloqueadoPorHistorial = method_exists($usuario, 'tienePagosAtrasadosSinAbonar') && $usuario->tienePagosAtrasadosSinAbonar();
+                    $bloqueado = $bloqueadoPorSaldo || $bloqueadoPorHistorial;
                 @endphp
+
 
                 <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST">
                     @csrf
@@ -158,10 +169,7 @@
                     @if($bloqueado)
                         <p style="color:red;">
                             <strong>No puedes cerrar este pedido a crédito:</strong><br>
-                            @if($totalExcede)
-                                - El total del pedido excede los $10,000.<br>
-                            @endif
-                            @if($sumaExcede)
+                            @if($bloqueadoPorSaldo)
                                 - El total de créditos más este pedido excede los $10,000.<br>
                             @endif
                             @if($bloqueadoPorHistorial)
@@ -170,7 +178,6 @@
                             Puedes cerrarlo como <strong>contado</strong>.
                         </p>
                     @endif
-
 
                     <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
                     <select name="metodo_pago" required onchange="mostrarCreditos(this, {{ $pedido->id_pedido }})">
@@ -197,7 +204,7 @@
 
                             @if(!$puedeCrearCredito)
                                 <p style="color:orange; font-style: italic;">
-                                    Ya tienes 3 créditos activos. No puedes crear uno nuevo, pero puedes usar los existentes.
+                                    Ya tienes 3 créditos activos o créditos vencidos. No puedes crear uno nuevo, pero puedes usar los existentes.
                                 </p>
                             @endif
                         @endif
@@ -205,6 +212,7 @@
 
                     <button type="submit" style="margin-top:8px;">Cerrar pedido</button>
                 </form>
+
             @elseif($pedidoCerrado)
                 <p style="color: gray;"><strong>Pedido cerrado</strong></p>
             @endif
@@ -222,5 +230,6 @@
             div.style.display = select.value === 'credito' ? 'block' : 'none';
         }
     </script>
+
 </body>
 </html>

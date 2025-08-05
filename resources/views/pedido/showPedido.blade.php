@@ -1,41 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Detalle(s) del Pedido</title>
 </head>
 <body>
     <h1>Detalle(s) del Pedido</h1>
 
-    @if (session('success'))
+    @if(session('success'))
         <p style="color: green;"><strong>{{ session('success') }}</strong></p>
     @endif
-    @if (session('error'))
+    @if(session('error'))
         <p style="color: red;"><strong>{{ session('error') }}</strong></p>
     @endif
 
-    @if (isset($pedidos) && $pedidos->isNotEmpty())
+    @if(isset($pedidos) && $pedidos->isNotEmpty())
 
         @php
-            // Agrupar pedidos por usuario (id_user)
-            $pedidosPorUsuario = $pedidos->groupBy(fn($pedido) => $pedido->id_user);
+            $pedidosPorUsuario = $pedidos->groupBy('id_user');
         @endphp
 
-        @foreach ($pedidosPorUsuario as $idUser => $pedidosUsuario)
-            <h2>Usuario: {{ optional($pedidosUsuario->first()->user)->nombre_usuario ?? 'Usuario desconocido' }}</h2>
+        @foreach($pedidosPorUsuario as $idUser => $pedidosUsuario)
+            <h2>Usuario: {{ optional($pedidosUsuario->first()->user)->nombre_usuario ?? 'Desconocido' }}</h2>
 
             @php
-                // Separar pedidos con y sin crédito para este usuario
-                $pedidosConCredito = $pedidosUsuario->filter(fn($p) => !is_null($p->id_credito));
-                $pedidosSinCredito = $pedidosUsuario->filter(fn($p) => is_null($p->id_credito));
+                // Obtener créditos activos y todos los créditos del usuario
+                $usuario = $pedidosUsuario->first()->user;
+
+                $creditosActivos = \App\Models\Credito::where('id_user', $idUser)
+                    ->where('estado', 1)
+                    ->whereDate('fecha_vencimiento', '>=', now())
+                    ->get();
+
+                $creditosTodosActivos = \App\Models\Credito::where('id_user', $idUser)
+                    ->where('estado', 1)
+                    ->get();
+
+                $creditosVencidos = $creditosTodosActivos->filter(fn($c) => $c->fecha_vencimiento < now());
+
+                $puedeCrearCredito = $creditosTodosActivos->count() < 3;
             @endphp
 
-            @if ($pedidosConCredito->isNotEmpty())
+            {{-- Pedidos con crédito --}}
+            @php
+                $pedidosConCredito = $pedidosUsuario->filter(fn($p) => !is_null($p->id_credito));
+            @endphp
+
+            @if($pedidosConCredito->isNotEmpty())
                 <h3>Pedidos con crédito</h3>
-                <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 20px;">
+                <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom:20px;">
                     <thead>
                         <tr>
-                            <th>ID pedido</th>
+                            <th>ID Pedido</th>
                             <th>Crédito</th>
                             <th>Total</th>
                             <th>Estado</th>
@@ -48,27 +65,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($pedidosConCredito as $pedido)
+                        @foreach($pedidosConCredito as $pedido)
                             @php
                                 $totalPedido = $pedido->total_pedido;
-                                $usuario = $pedido->user;
-
-                                $creditosActivos = \App\Models\Credito::where('id_user', $usuario->id_user)
-                                    ->where('estado', 1)
-                                    ->whereDate('fecha_vencimiento', '>=', now())
-                                    ->get();
 
                                 $deudaActual = $creditosActivos->sum('saldo_total');
                                 $superaDiezMil = $deudaActual >= 10000 || ($deudaActual + $totalPedido) > 10000;
 
                                 $creditosValidos = $creditosActivos->filter(fn($c) => ($c->saldo_total + $totalPedido) <= 10000);
 
-                                $puedeCrearNuevoCredito = $creditosActivos->count() < 3;
-
-                                // Valor actual método pago para seleccionar en el form
                                 $metodoPagoActual = $pedido->metodo_pago ?? '';
-
-                                // Crédito seleccionado actual
                                 $creditoSeleccionado = $pedido->id_credito;
                             @endphp
                             <tr>
@@ -83,7 +89,7 @@
                                 @if($pedido->estado_pedido == 1)
                                     <td><a href="{{ route('pedido.edit', $pedido->id_pedido) }}?total={{ $totalPedido }}">Editar</a></td>
                                     <td>
-                                        <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
+                                        <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar este pedido?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit">Eliminar</button>
@@ -109,7 +115,7 @@
                                                     @if(($deudaActual + $totalPedido) > 10000)
                                                         - Con este pedido, la deuda sería ${{ number_format($deudaActual + $totalPedido, 2) }}.<br>
                                                     @endif
-                                                    Usa la opción **Contado**.
+                                                    Usa la opción <strong>Contado</strong>.
                                                 </p>
                                             @endif
 
@@ -125,7 +131,7 @@
                                             <div id="credito-opciones-{{ $pedido->id_pedido }}" style="margin-top:8px; {{ $metodoPagoActual === 'credito' ? 'display:block;' : 'display:none;' }}">
                                                 <label>Seleccionar crédito:</label>
                                                 <select name="id_credito" class="select-credito">
-                                                    @if($puedeCrearNuevoCredito)
+                                                    @if($puedeCrearCredito)
                                                         <option value="" {{ is_null($creditoSeleccionado) ? 'selected' : '' }}>-- Crear nuevo crédito --</option>
                                                     @endif
                                                     @foreach($creditosValidos as $credito)
@@ -135,9 +141,9 @@
                                                     @endforeach
                                                 </select>
 
-                                                @if(!$puedeCrearNuevoCredito)
+                                                @if(!$puedeCrearCredito)
                                                     <p style="color:orange; font-style: italic;">
-                                                        Ya tienes 3 créditos activos. No puedes crear uno nuevo, pero puedes usar los existentes.
+                                                        Ya tienes 3 créditos activos o créditos vencidos. No puedes crear uno nuevo, pero puedes usar los existentes.
                                                     </p>
                                                 @endif
                                             </div>
@@ -162,7 +168,7 @@
                                                     <button type="submit">Reabrir pedido</button>
                                                 </form>
                                             @else
-                                                <p style="color: red;">No se puede reabrir: el crédito está cerrado o vencido.</p>
+                                                <p style="color:red;">No se puede reabrir: el crédito está cerrado o vencido.</p>
                                             @endif
                                         @else
                                             Pedido cerrado
@@ -175,12 +181,17 @@
                 </table>
             @endif
 
-            @if ($pedidosSinCredito->isNotEmpty())
+            {{-- Pedidos sin crédito --}}
+            @php
+                $pedidosSinCredito = $pedidosUsuario->filter(fn($p) => is_null($p->id_credito));
+            @endphp
+
+            @if($pedidosSinCredito->isNotEmpty())
                 <h3>Pedidos sin crédito</h3>
-                <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom: 30px;">
+                <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom:30px;">
                     <thead>
                         <tr>
-                            <th>ID pedido</th>
+                            <th>ID Pedido</th>
                             <th>Total</th>
                             <th>Estado</th>
                             <th>Método</th>
@@ -192,7 +203,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($pedidosSinCredito as $pedido)
+                        @foreach($pedidosSinCredito as $pedido)
                             @php
                                 $totalPedido = $pedido->total_pedido;
                                 $metodoPagoActual = $pedido->metodo_pago ?? '';
@@ -208,7 +219,7 @@
                                 @if($pedido->estado_pedido == 1)
                                     <td><a href="{{ route('pedido.edit', $pedido->id_pedido) }}?total={{ $totalPedido }}">Editar</a></td>
                                     <td>
-                                        <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST">
+                                        <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar este pedido?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit">Eliminar</button>
@@ -255,18 +266,17 @@
         @endforeach
 
     @else
-        <p style="color: red;">No se encontraron pedidos.</p>
+        <p style="color:red;">No se encontraron pedidos.</p>
     @endif
 
-    <br>
     <a href="{{ route('pedido.index') }}">← Volver a la lista de pedidos</a>
 
 <script>
 function toggleCreditoOptions(select, idPedido) {
     const div = document.getElementById('credito-opciones-' + idPedido);
+    if (!div) return;
     div.style.display = select.value === 'credito' ? 'block' : 'none';
 }
 </script>
-
 </body>
 </html>
