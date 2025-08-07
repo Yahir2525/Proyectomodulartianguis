@@ -36,7 +36,7 @@ class ProductoFactory extends Factory
             'tamanio' => $this->faker->randomElement(['S', 'M', 'L', 'XL']),
             'marca' => $this->faker->randomElement(['Pepe', 'Juan', 'Sopas']),
             'precio_unitario' => $this->faker->randomFloat(0, 10, 1000),
-            'piezas' => $this->faker->numberBetween(1, 100),
+            'piezas' => $this->faker->numberBetween(1, 300),
             'estado_producto'=> true,
             
         ];

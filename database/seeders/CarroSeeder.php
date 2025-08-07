@@ -7,32 +7,41 @@ use App\Models\Carro;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\CarroProducto;
+use App\Models\User;
 
 class CarroSeeder extends Seeder
 {
     public function run(): void
     {
-        $pedidos = Pedido::all();
+        $usuarios = User::all();
         $productos = Producto::all();
 
-        if ($pedidos->isEmpty() || $productos->isEmpty()) {
-            $this->command->warn('No hay pedidos o productos para crear carros.');
+        if ($usuarios->isEmpty() || $productos->isEmpty()) {
+            $this->command->warn('No hay usuarios o productos para crear carros.');
             return;
         }
 
-        foreach ($pedidos as $pedido) {
+        foreach ($usuarios as $usuario) {
+            // Crear un pedido si no tiene
+            $pedido = $usuario->pedido()->first();
+            if (!$pedido) {
+                $pedido = Pedido::factory()->create([
+                    'id_user' => $usuario->id_user,
+                ]);
+            }
+
             // Evita duplicar si el pedido ya tiene carro
             if (Carro::where('id_pedido', $pedido->id_pedido)->exists()) {
                 continue;
             }
 
-            // Crear el carro asociado a ese pedido
+            // Crear el carro asociado al pedido
             $carro = Carro::create([
-                'id_user' => $pedido->id_user,
+                'id_user' => $usuario->id_user,
                 'id_pedido' => $pedido->id_pedido,
             ]);
 
-            // Agrega de 1 a 3 productos distintos
+            // Agrega de 1 a 3 productos aleatorios
             $productosAleatorios = $productos->random(rand(1, min(3, $productos->count())));
 
             foreach ($productosAleatorios as $producto) {

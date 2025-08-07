@@ -73,7 +73,7 @@ class CreditoController extends Controller
         $user = User::find($userId);
         $diasAplazo = $user ? $user->dias_aplazo : 0;
 
-        $fechaVencimiento = now()->addDays($diasAplazo)->endOfDay();;
+        $fechaVencimiento = now()->addDays($diasAplazo)->endOfDay();
 
 
         $credito = new Credito();

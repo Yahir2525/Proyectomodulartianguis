@@ -2,17 +2,29 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 use App\Models\Pedido;
 
 class PedidoSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Pedido::factory()->count(20)->create();
+        $usuarios = User::all();
+
+        if ($usuarios->isEmpty()) {
+            $this->command->warn('No hay usuarios para crear pedidos.');
+            return;
+        }
+
+        foreach ($usuarios as $usuario) {
+            Pedido::factory()->create([
+                'id_user' => $usuario->id_user, // 👈 asegúrate de que sea 'id_user'
+                // Si quieres que todos empiecen sin crédito:
+                'id_credito' => null,
+            ]);
+        }
+
+        $this->command->info('Se creó un pedido para cada usuario.');
     }
 }

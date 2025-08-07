@@ -25,8 +25,15 @@ class CreditoFactory extends Factory
 
     public function definition(): array
     {
+        // Obtener un usuario aleatorio, si no hay crear uno
+        $userId = User::inRandomOrder()->value('id_user');
+        if (!$userId) {
+            $user = User::factory()->create();
+            $userId = $user->id_user;
+        }
+
         return [
-            'id_user' => \App\Models\User::inRandomOrder()->value('id_user') ?? null, 
+            'id_user' => $userId,
             'fecha_liquidacion' => null,
             'fecha_vencimiento' => $this->faker->dateTimeBetween('2020-01-01', '2025-12-31'),
             'estado' => 1,
@@ -34,4 +41,5 @@ class CreditoFactory extends Factory
             'updated_at' => now(),
         ];
     }
+
 }
