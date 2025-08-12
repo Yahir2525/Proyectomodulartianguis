@@ -3,6 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>Editar Abono</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 16px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+        h1 { max-width: 720px; margin: 0 auto 16px; }
+
+        /* centrar y dar respiro al formulario */
+        form { max-width: 720px; margin: 0 auto; display: grid; gap: 12px; }
+
+        /* estilos suaves de campos */
+        label { font-weight: 600; }
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            padding: 10px 14px;
+            border: 0;
+            border-radius: 6px;
+            background: #0d6efd;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover { background: #0b5ed7; }
+
+        /* mensajes de error */
+        [style*="color: red;"] {
+            max-width: 720px;
+            margin: 0 auto 12px;
+        }
+
+        /* enlace volver */
+        a[href*="abono.index"] { display: inline-block; margin: 12px auto 0; max-width: 720px; color: #0d6efd; }
+
+        /* en móviles todo fluye a 100% */
+        @media (max-width: 640px) {
+            button, a[href*="abono.index"] { width: 100%; text-align: center; }
+        }
+    </style>
 </head>
 <body>
     <h1>Editar Abono #{{ $abono->id_abono }}</h1>
@@ -37,13 +79,12 @@
                 @foreach ($creditos as $credito)
                     <option value="{{ $credito->id_credito }}"
                         {{ $abono->id_credito == $credito->id_credito ? 'selected' : '' }}>
-                        Crédito #{{ $credito->id_credito }} - 
-                        Saldo: ${{ number_format($credito->saldo_total, 2) }} 
+                        Crédito #{{ $credito->id_credito }} -
+                        Saldo: ${{ number_format($credito->saldo_total, 2) }}
                         @if($credito->estado == 0) (cerrado) @endif
                     </option>
                 @endforeach
             </select>
-
         </div>
 
         <br>

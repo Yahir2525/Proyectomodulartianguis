@@ -239,7 +239,6 @@ class AbonoController extends Controller
         // Aplicar ajuste al nuevo crédito
         $creditoNuevo->saldo_total -= $montoFinal;
 
-        // ⚠️ REACTIVAR si saldo ahora > 0
         if ($creditoNuevo->saldo_total > 0) {
             $creditoNuevo->estado = 1;
             $creditoNuevo->fecha_liquidacion = null;
@@ -259,7 +258,7 @@ class AbonoController extends Controller
             $mensaje .= ' Se ajustó automáticamente al saldo disponible del crédito.';
         }
 
-        $user = $credito->user;
+        $user = $creditoNuevo->user;
         $user->evaluarNivelUsuario();
         
         return redirect()->route('abono.index')->with('success', $mensaje);

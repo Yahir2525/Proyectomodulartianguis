@@ -35,7 +35,7 @@ class CreditoFactory extends Factory
         return [
             'id_user' => $userId,
             'fecha_liquidacion' => null,
-            'fecha_vencimiento' => $this->faker->dateTimeBetween('2020-01-01', '2025-12-31'),
+            'fecha_vencimiento' => $this->faker->dateTimeBetween('2025-01-01', '2025-12-31'),
             'estado' => 1,
             'created_at' => now(),
             'updated_at' => now(),

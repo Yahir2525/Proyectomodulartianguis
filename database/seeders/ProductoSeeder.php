@@ -2,58 +2,61 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Producto;
+use Illuminate\Support\Facades\File;
 
 class ProductoSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $imagenes = [
-            'img/bobcholo.jpeg',
-            'img/elda.jpeg',
-            'img/elfrecord.png',
-            'img/fondo.jpg',
-            'img/friends.jpg',
-            'img/frieren.jpg',
-            'img/frieren3.png',
-            'img/iruma.png',
-            'img/kanao.jpg',
-            'img/kochos.jpg',
-            'img/miku.jpg',
-            'img/richie.jpg',
-            'img/samisopas.jpg',
-            'img/shrek.jpeg',
-            'img/taylor.jpg',
-            'img/toalla.jpeg',
-            'img/bobcholo.jpeg',
-            'img/elda.jpeg',
-            'img/elfrecord.png',
-            'img/fondo.jpg',
-            'img/friends.jpg',
-            'img/frieren.jpg',
-            'img/frieren3.png',
-            'img/iruma.png',
-            'img/kanao.jpg',
-            'img/kochos.jpg',
-            'img/miku.jpg',
-            'img/richie.jpg',
-            'img/samisopas.jpg',
-            'img/shrek.jpeg',
-            'img/taylor.jpg',
-            'img/toalla.jpeg',
-        ];
+        $path = storage_path('app/public/inventario.csv');
 
-        foreach ($imagenes as $imagen) {
-            Producto::factory()->create([
-                'imagen' => $imagen
+        if (!file_exists($path)) {
+            $this->command->error('El archivo inventario.csv no se encontró en storage/app/public/');
+            return;
+        }
+
+        // CSV simple separado por comas
+        $rows = array_map('str_getcsv', file($path));
+
+        foreach ($rows as $index => $row) {
+            if ($index === 0) continue; // Saltar encabezado
+            if (count($row) < 9) continue; // Fila incompleta
+
+            $nombre          = $row[0] ?? null;
+            $tipo            = $row[1] ?? null;
+            $material        = $row[2] ?? null;
+            $color           = $row[3] ?? null;
+            $tamanio         = $row[4] ?? null;
+            $marca           = $row[5] ?? null;
+            $precioUnitario  = (float) ($row[6] ?? 0);
+            $piezas          = (int)   ($row[7] ?? 0);
+            $nombreImagen    = $row[8] ?? null;
+
+            // Resolver ruta de imagen como en tu UserSeeder (carpeta fija)
+            $rutaImagen = null;
+            if ($nombreImagen) {
+                $ruta = public_path('img/' . $nombreImagen);
+                if (File::exists($ruta)) {
+                    $rutaImagen = 'img/' . $nombreImagen; // lo que se guarda en BD
+                }
+            }
+
+            Producto::create([
+                'nombre'          => $nombre,
+                'tipo'            => $tipo,
+                'material'        => $material,
+                'color'           => $color,
+                'tamanio'         => $tamanio,
+                'marca'           => $marca,
+                'precio_unitario' => $precioUnitario,
+                'piezas'          => $piezas,
+                'imagen'          => $rutaImagen,
+                'estado_producto' => true,
             ]);
         }
 
-        
+        $this->command->info('Productos importados exitosamente.');
     }
 }

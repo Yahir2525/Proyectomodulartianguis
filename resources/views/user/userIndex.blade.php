@@ -50,6 +50,10 @@
 
 <h1>Usuarios agrupados por rol</h1>
 
+    @can('create user')
+                <a href="{{ url('/user/create') }}">Registrar un nuevo usuario</a>
+    @endcan
+
     <form action="{{ url('/user/showUser') }}" method="GET">
         <label for="busqueda">Buscar por ID o nombre de usuario:</label>
         <input 
@@ -88,6 +92,8 @@
                     <th>ID</th>
                     <th>Imagen</th>
                     <th>Nombre</th>
+                    <th>Edad</th>
+                    <th>Genero</th>
                     <th>Correo</th>
                     <th>Nivel de usuario</th>
                     <th>Roles</th>
@@ -106,7 +112,8 @@
                             @endif
                         </td>
                         <td>{{ $user->name }}</td>
-                        <td>{{ $user->email }}</td>
+                        <td>{{ $user->edad }}</td>
+                        <td>{{ $user->genero }}</td>
                         <td>{{ $user->nivel_usuario}}</td>
                         <td>
                             @foreach ($user->getRoleNames() as $rolename)

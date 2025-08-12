@@ -91,11 +91,12 @@
                                     <td>{{ $producto->nombre }}</td>
                                     <td>
                                         @if ($producto->imagen)
-                                            <img src="{{ asset($producto->imagen) }}" alt="Imagen del producto" width="250">
+                                            <img src="{{ asset($producto->imagen) }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
                                         @else
                                             Sin imagen
                                         @endif
                                     </td>
+
                                     <td>{{ $producto->material }}</td>
                                     <td>{{ $producto->color }}</td>
                                     <td>{{ $producto->tamanio }}</td>

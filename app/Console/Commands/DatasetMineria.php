@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
+use Carbon\Carbon;
 
 class DatasetMineria extends Command
 {
@@ -14,75 +14,93 @@ class DatasetMineria extends Command
 
     public function handle()
     {
-        $filename = storage_path('app/public/mineria_dataset.csv');
-        File::ensureDirectoryExists(storage_path('app/public'));
-        $file = fopen($filename, 'w');
+        $tmp = fopen('php://temp', 'w+');
 
-        // Cabeceras
-        fputcsv($file, [
-            'id_user', 'nombre_usuario', 'nivel_usuario', 'dias_aplazo',
+        // Cabeceras: SIN nivel_usuario (solo nivel_regla)
+        fputcsv($tmp, [
+            'id_user', 'nombre_usuario',
+            'nivel_regla',
+            'dias_aplazo',
+            'edad', 'genero',
             'total_pedidos', 'pedidos_cerrados',
             'total_creditos', 'creditos_activos', 'creditos_vencidos', 'creditos_liquidados',
             'total_abonado', 'promedio_abonos', 'ultimo_abono_fecha',
-            'monto_promedio_credito', 'cumple_a_tiempo'
         ]);
 
         $usuarios = User::with(['pedido', 'creditos.abonos'])->get();
 
         foreach ($usuarios as $user) {
-            $pedidos = $user->pedido;
-            $creditos = $user->creditos;
+            $pedidos  = $user->pedido ?? collect();
+            $creditos = $user->creditos ?? collect();
 
             $totalPedidos = $pedidos->count();
-            $cerrados = $pedidos->where('estado_pedido', 0)->count();
+            $cerrados     = $pedidos->where('estado_pedido', 0)->count();
 
-            $activos = $creditos->where('estado', 1);
-            $vencidos = $creditos->where('estado', 1)->where('fecha_vencimiento', '<', now());
+            $activos    = $creditos->where('estado', 1);
+            $vencidos   = $creditos->where('estado', 1)->where('fecha_vencimiento', '<', now());
             $liquidados = $creditos->where('saldo_total', 0)->whereNotNull('fecha_liquidacion');
 
-            $totalAbonos = 0;
+            // Abonos
+            $totalAbonos = 0.0;
             $cantidadAbonos = 0;
             $ultimoAbono = null;
 
-            foreach ($creditos as $credito) {
-                foreach ($credito->abonos as $abono) {
-                    $totalAbonos += $abono->monto_abono;
+            foreach ($creditos as $c) {
+                foreach ($c->abonos as $abono) {
+                    $totalAbonos += (float) $abono->monto_abono;
                     $cantidadAbonos++;
                     if (!$ultimoAbono || $abono->created_at > $ultimoAbono) {
                         $ultimoAbono = $abono->created_at;
                     }
                 }
             }
+            $promedioAbonos = $cantidadAbonos ? $totalAbonos / $cantidadAbonos : 0.0;
 
-            $promedioAbonos = $cantidadAbonos ? $totalAbonos / $cantidadAbonos : 0;
-            $promedioCredito = $creditos->count() ? $creditos->avg('monto_original') : 0;
+            // Edad (usa entero si ya lo guardas; si no, intenta desde fecha_nacimiento)
+            $edad = null;
+            if (isset($user->edad) && $user->edad !== null && $user->edad !== '') {
+                $edad = (int) $user->edad;
+            } elseif (!empty($user->fecha_nacimiento)) {
+                try { $edad = Carbon::parse($user->fecha_nacimiento)->age; } catch (\Throwable $e) { $edad = null; }
+            }
 
-            // ¿Cumple a tiempo?
-            $cumpleATiempo = $creditos->filter(function ($c) {
-                return $c->fecha_liquidacion && $c->fecha_liquidacion <= $c->fecha_vencimiento;
-            })->count() >= 3;
+            // Género (fallback a 'sexo' si aplica)
+            $genero = $user->genero ?? $user->sexo ?? null;
 
-            fputcsv($file, [
+            // Nivel por TUS reglas (sin tocar DB)
+            if ($user->tienePagosAtrasadosSinAbonar()) {
+                $nivelRegla = 'malo';
+            } elseif ($user->pagaSiempreAdelantado()) {
+                $nivelRegla = 'excelente';
+            } elseif ($user->pagaTardePeroPaga()) {
+                $nivelRegla = 'bueno';
+            } else {
+                $nivelRegla = 'bueno';
+            }
+
+            fputcsv($tmp, [
                 $user->id_user,
                 $user->nombre_usuario,
-                $user->nivel_usuario,
+                $nivelRegla,
                 $user->dias_aplazo,
+                $edad,
+                $genero,
                 $totalPedidos,
                 $cerrados,
                 $creditos->count(),
                 $activos->count(),
                 $vencidos->count(),
                 $liquidados->count(),
-                number_format($totalAbonos, 2, '.', ''),
-                number_format($promedioAbonos, 2, '.', ''),
-                $ultimoAbono,
-                number_format($promedioCredito, 2, '.', ''),
-                $cumpleATiempo ? 1 : 0,
+                $totalAbonos,
+                $promedioAbonos,
+                $ultimoAbono ? Carbon::parse($ultimoAbono)->format('Y-m-d') : null,
             ]);
         }
 
-        fclose($file);
+        rewind($tmp);
+        Storage::disk('public')->put('mineria_dataset.csv', stream_get_contents($tmp));
+        fclose($tmp);
 
-        $this->info('✅ Archivo generado correctamente en: storage/app/public/mineria_dataset.csv');
+        $this->info('✅ Archivo actualizado en: storage/app/public/mineria_dataset.csv');
     }
 }

@@ -54,15 +54,15 @@ class UserController extends Controller
             $user->telefono = $request->input('telefono');
             $user->direccion = $request->input('direccion');
             $user->nombre_usuario = $request->input('nombre_usuario');
-            $user->nivel_usuario = $request->input('nivel_usuario');
-            $user->dias_aplazo = $request->input('dias_aplazo');
+            $user->nivel_usuario = 'bueno';
+            $user->dias_aplazo = 0;
             if ($request->hasFile('imagen')) {
                 $file = $request->file('imagen');
                 $filename = time() . '_' . $file->getClientOriginalName();
                 $file->move(public_path('img/perfiles'), $filename);
                 $user->imagen = 'img/perfiles/' . $filename;
             }
-            $usuario->categoria_pago = $request->categoria_pago;
+            
 
             
             $user->save();
@@ -197,7 +197,7 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'No se puede eliminar el usuario porque tiene pedidos asociados.');
         }
 
-        if ($user->credito()->exists()) {
+        if ($user->creditos()->exists()) {
             // Retornar con un mensaje amigable
             return redirect()->back()->with('error', 'No se puede eliminar el usuario porque tiene creditos asociados.');
         }

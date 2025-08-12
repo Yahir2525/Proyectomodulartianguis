@@ -94,66 +94,94 @@ class User extends Authenticatable
         return false;
     }
 
-    public function pagaSiempreAdelantado()
+    public function pagaSiempreAdelantado(): bool
     {
+        // Mantengo la lógica original (70% o más), solo evito N+1 y la mutación de fecha.
         $creditos = $this->creditosActivos()->with('abonos')->get();
         $adelantados = 0;
         $total = 0;
 
         foreach ($creditos as $credito) {
             $total++;
-            $ultimoAbono = $credito->abonos()->orderByDesc('created_at')->first();
-            if ($ultimoAbono && $ultimoAbono->created_at < $credito->fecha_vencimiento->subDays(10)) {
-                $adelantados++;
+
+            // Usamos los abonos ya cargados para evitar otra consulta.
+            $ultimoAbono = $credito->abonos->sortByDesc('created_at')->first();
+
+            if ($ultimoAbono && $credito->fecha_vencimiento) {
+                $vence = $credito->fecha_vencimiento instanceof Carbon
+                    ? $credito->fecha_vencimiento->copy()
+                    : Carbon::parse($credito->fecha_vencimiento);
+
+                if ($ultimoAbono->created_at < $vence->copy()->subDays(10)) {
+                    $adelantados++;
+                }
             }
         }
 
-        return $total > 0 && $adelantados / $total >= 0.7;
+        return $total > 0 && ($adelantados / $total) >= 0.7;
     }
 
-    public function pagaTardePeroPaga()
+    public function pagaTardePeroPaga(): bool
     {
+        // Misma lógica original: último abono después del vencimiento y saldo_total == 0.
         $creditos = $this->creditosActivos()->with('abonos')->get();
         $cumple = 0;
         $total = 0;
 
         foreach ($creditos as $credito) {
             $total++;
-            $ultimoAbono = $credito->abonos()->orderByDesc('created_at')->first();
-            if ($ultimoAbono && $ultimoAbono->created_at > $credito->fecha_vencimiento && $credito->saldo_total == 0) {
-                $cumple++;
+
+            $ultimoAbono = $credito->abonos->sortByDesc('created_at')->first();
+
+            if ($ultimoAbono && $credito->fecha_vencimiento) {
+                $vence = $credito->fecha_vencimiento instanceof Carbon
+                    ? $credito->fecha_vencimiento->copy()
+                    : Carbon::parse($credito->fecha_vencimiento);
+
+                if ($ultimoAbono->created_at > $vence && (float)$credito->saldo_total == 0.0) {
+                    $cumple++;
+                }
             }
         }
 
-        return $total > 0 && $cumple / $total >= 0.7;
+        return $total > 0 && ($cumple / $total) >= 0.7;
     }
 
-    public function montoPromedio()
+    public function montoPromedio(): float
     {
-        $creditos = $this->creditosActivos()->get();
-        if ($creditos->isEmpty()) return 0;
+        // Si ya tienes creditosActivos(), úsalo; si no, cambia por $this->creditos()
+        $creditos = $this->creditosActivos()
+            ->withSum('abonos', 'monto_abono')   // evita N+1
+            ->get();
 
-        $suma = $creditos->sum('monto_original');
-        return $suma / $creditos->count();
+        if ($creditos->isEmpty()) return 0.0;
+
+        // promedio de (saldo_total + total_abonado) por crédito
+        return (float) $creditos->avg(function ($c) {
+            $abonado = (float) ($c->abonos_sum_monto_abono ?? 0);
+            return (float) $c->saldo_total + $abonado;
+        });
     }
 
-    public function estaBloqueadoParaCredito()
+    public function estaBloqueadoParaCredito(): bool
     {
         return $this->tienePagosAtrasadosSinAbonar();
     }
 
-    public function evaluarNivelUsuario()
+    public function evaluarNivelUsuario(): void
     {
+        // Misma estructura y decisiones que tenías.
         if ($this->tienePagosAtrasadosSinAbonar()) {
             $this->nivel_usuario = 'malo';
-            $this->dias_aplazo = 0;
+            $this->dias_aplazo   = 0;
         } elseif ($this->pagaSiempreAdelantado()) {
             $this->nivel_usuario = 'excelente';
-            $this->dias_aplazo = 1;
+            $this->dias_aplazo   = 1;
         } else {
             $this->nivel_usuario = 'bueno';
-            $this->dias_aplazo = 0;
+            $this->dias_aplazo   = 0;
         }
+
         $this->save();
     }
 

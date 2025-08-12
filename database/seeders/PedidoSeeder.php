@@ -18,13 +18,16 @@ class PedidoSeeder extends Seeder
         }
 
         foreach ($usuarios as $usuario) {
-            Pedido::factory()->create([
-                'id_user' => $usuario->id_user, // 👈 asegúrate de que sea 'id_user'
-                // Si quieres que todos empiecen sin crédito:
-                'id_credito' => null,
-            ]);
+            $numPedidos = rand(4, 5);
+
+            Pedido::factory()
+                ->count($numPedidos)
+                ->create([
+                    'id_user'    => $usuario->id_user,
+                    'id_credito' => null, // todos sin crédito de inicio
+                ]);
         }
 
-        $this->command->info('Se creó un pedido para cada usuario.');
+        $this->command->info('Se crearon 4–5 pedidos por usuario.');
     }
 }

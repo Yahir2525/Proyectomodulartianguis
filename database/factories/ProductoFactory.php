@@ -23,22 +23,22 @@ class ProductoFactory extends Factory
      * @return array<string, mixed>
      */
 
-    protected $model = Producto::class;
+    // protected $model = Producto::class;
 
-    public function definition(): array
-    {
+    // public function definition(): array
+    // {
 
-        return [
-            'nombre' => $this->faker->randomElement(['Colcha', 'Sabana', 'Cortina', 'Toalla']),
-            'tipo' => $this->faker->randomElement(['Bata', 'Cobija', 'Mantel', 'Almohada']),
-            'material' => $this->faker->randomElement(['Algodon', 'Poliester', 'Fibra']),
-            'color' => $this->faker->randomElement(['Rojo', 'Azul', 'Verde', 'Negro', 'Blanco']),
-            'tamanio' => $this->faker->randomElement(['S', 'M', 'L', 'XL']),
-            'marca' => $this->faker->randomElement(['Pepe', 'Juan', 'Sopas']),
-            'precio_unitario' => $this->faker->randomFloat(0, 10, 1000),
-            'piezas' => $this->faker->numberBetween(1, 300),
-            'estado_producto'=> true,
+    //     return [
+    //         'nombre' => $this->faker->randomElement(['Colcha', 'Sabana', 'Cortina', 'Toalla']),
+    //         'tipo' => $this->faker->randomElement(['Bata', 'Cobija', 'Mantel', 'Almohada']),
+    //         'material' => $this->faker->randomElement(['Algodon', 'Poliester', 'Fibra']),
+    //         'color' => $this->faker->randomElement(['Rojo', 'Azul', 'Verde', 'Negro', 'Blanco']),
+    //         'tamanio' => $this->faker->randomElement(['S', 'M', 'L', 'XL']),
+    //         'marca' => $this->faker->randomElement(['Pepe', 'Juan', 'Sopas']),
+    //         'precio_unitario' => $this->faker->randomFloat(0, 10, 1000),
+    //         'piezas' => $this->faker->numberBetween(1, 300),
+    //         'estado_producto'=> true,
             
-        ];
-    }
+    //     ];
+    // }
 }

@@ -66,5 +66,6 @@ class UserSeeder extends Seeder
         }
 
         $this->command->info('Usuarios importados con rol "user" exitosamente.');
+        $this->command->info('Total users: '.\App\Models\User::withoutGlobalScopes()->count());
     }
 }

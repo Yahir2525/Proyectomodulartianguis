@@ -19,6 +19,14 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\RegistroController;
+use App\Http\Controllers\PrediccionController;
+
+
+
+Route::get('/predicciones', [PrediccionController::class, 'predecirNiveles'])
+    ->name('predicciones.predecir');
+Route::get('/predicciones/aplicar', [PrediccionController::class, 'aplicarPrediccionesDesdeStorage'])
+    ->name('predicciones.aplicar');
 
 // Página principal
 Route::get('/', function () {
@@ -115,7 +123,18 @@ Route::middleware(['is_admin'])->group(function () {
 
 
     Route::get('/dataset', function () {
-    return response()->download(storage_path('app/public/mineria_dataset.csv'));
-    });
+        $path = 'mineria_dataset.csv';
+
+        abort_unless(Storage::disk('public')->exists($path), 404);
+
+        return Storage::disk('public')->download($path, 'mineria_dataset.csv', [
+            'Content-Type'  => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma'        => 'no-cache',
+            'Expires'       => '0',
+            'X-Accel-Buffering' => 'no',
+    ]);
+});
+
 
 });

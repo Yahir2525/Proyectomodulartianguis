@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle(s) de Carro</title>
     <style>
         table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
@@ -87,7 +88,7 @@
                                 <td>{{ $producto->nombre }}</td>
                                 <td>
                                     @if ($producto->imagen)
-                                        <img src="{{ asset($producto->imagen) }}" alt="Imagen">
+                                        <img src="{{ asset($producto->imagen) }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
                                     @else
                                         Sin imagen
                                     @endif

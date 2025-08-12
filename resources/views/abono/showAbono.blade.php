@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Detalle(s) de Abono</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
@@ -11,6 +12,19 @@
         form { display: inline; }
         .btn { padding: 5px 10px; margin: 0 2px; text-decoration: none; border: 1px solid #ccc; background: #eee; border-radius: 4px; }
         .btn:hover { background-color: #ddd; }
+
+        /* --- Responsivo --- */
+        * { box-sizing: border-box; }
+        @media (max-width: 768px) {
+            /* la tabla se vuelve desplazable horizontalmente */
+            table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            /* evita que el contenido “rompa” al hacerse muy estrecho */
+            thead, tbody, th, td, tr { white-space: nowrap; }
+
+            /* acciones más cómodas en móvil: apilar botones */
+            .btn { display: block; width: 100%; margin: 6px 0; }
+            form[method="POST"] { display: block; } /* para que el botón de eliminar no quede en la misma línea */
+        }
     </style>
 </head>
 <body>

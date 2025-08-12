@@ -24,62 +24,67 @@
 
             <div class="text-center mb-4">
                 @if($user->imagen)
-                    <img src="{{ asset($user->imagen) }}" alt="Foto de perfil" class="img-thumbnail" width="150">
+                    <img src="{{ asset($user->imagen) }}" alt="Foto de perfil"
+                         class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
                 @else
-                    <img src="{{ asset('img/default.png') }}" alt="Sin foto" class="img-thumbnail" width="150">
+                    <img src="{{ asset('img/default.png') }}" alt="Sin foto"
+                         class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
                 @endif
             </div>
 
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th>Nombre completo</th>
-                        <td>{{ $user->name }}</td>
-                    </tr>
-                    <tr>
-                        <th>Nombre de usuario</th>
-                        <td>{{ $user->nombre_usuario }}</td>
-                    </tr>
-                    <tr>
-                        <th>Correo electrónico</th>
-                        <td>{{ $user->email }}</td>
-                    </tr>
-                    <tr>
-                        <th>Género</th>
-                        <td>
-                            @switch($user->genero)
-                                @case('H') Hombre @break
-                                @case('M') Mujer @break
-                                @case('O') Otro @break
-                                @default No registrado
-                            @endswitch
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Edad</th>
-                        <td>{{ $user->edad ?? 'No registrada' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Teléfono</th>
-                        <td>{{ $user->telefono ?? 'No registrado' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Dirección</th>
-                        <td>{{ $user->direccion ?? 'No registrada' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Rol</th>
-                        <td>{{ $user->getRoleNames()->implode(', ') }}</td>
-                    </tr>
-                    <tr>
-                        <th>Nivel de usuario</th>
-                        <td>{{ $user->nivel_usuario}}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Tabla responsiva -->
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-4">
+                    <tbody>
+                        <tr>
+                            <th>Nombre completo</th>
+                            <td>{{ $user->name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Nombre de usuario</th>
+                            <td>{{ $user->nombre_usuario }}</td>
+                        </tr>
+                        <tr>
+                            <th>Correo electrónico</th>
+                            <td>{{ $user->email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Género</th>
+                            <td>
+                                @switch($user->genero)
+                                    @case('H') Hombre @break
+                                    @case('M') Mujer @break
+                                    @case('O') Otro @break
+                                    @default No registrado
+                                @endswitch
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Edad</th>
+                            <td>{{ $user->edad ?? 'No registrada' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Teléfono</th>
+                            <td>{{ $user->telefono ?? 'No registrado' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Dirección</th>
+                            <td>{{ $user->direccion ?? 'No registrada' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rol</th>
+                            <td>{{ $user->getRoleNames()->implode(', ') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Nivel de usuario</th>
+                            <td>{{ $user->nivel_usuario}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <div class="text-end">
-                <a href="{{ route('perfil.editPerfil') }}" class="btn btn-warning">Editar perfil</a>
+                <a href="{{ route('perfil.editPerfil') }}" class="btn btn-warning w-100 w-sm-auto">Editar perfil</a>
             </div>
 
         </div>

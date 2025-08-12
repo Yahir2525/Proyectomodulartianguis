@@ -88,8 +88,8 @@
                             <input type="checkbox" name="productos_seleccionados[]" value="{{ $producto->id_producto }}">
                         </td>
                         <td>
-                            @if($producto->imagen)
-                                <img src="{{ asset($producto->imagen) }}" alt="imagen" width="100">
+                            @if ($producto->imagen)
+                                <img src="{{ asset($producto->imagen) }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
                             @else
                                 Sin imagen
                             @endif

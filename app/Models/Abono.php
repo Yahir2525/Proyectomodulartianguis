@@ -21,7 +21,7 @@ class Abono extends Model
     return $this->belongsTo(User::class, 'id_user', 'id_user');
 }
 
-    public function creditos(): BelongsTo
+    public function credito(): BelongsTo
 {
     return $this->belongsTo(Credito::class, 'id_credito', 'id_credito');
 }

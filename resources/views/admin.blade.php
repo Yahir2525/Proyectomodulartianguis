@@ -53,6 +53,9 @@
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                                 Dashboard
                             </a>
+                            <a href="{{ url('/dataset') }}?v={{ \Illuminate\Support\Facades\Storage::disk('public')->lastModified('mineria_dataset.csv') }}">
+                            Descargar dataset
+                            </a>
                             <a href="{{ route('producto.index') }}">Productos</a>
                             <a href="{{ route('carro.index') }}">Carros</a>
                             <a href="{{ route('pedido.index') }}">Pedidos</a>

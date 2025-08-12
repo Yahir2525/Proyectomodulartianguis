@@ -5,34 +5,33 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Abono;
 use App\Models\User;
-use App\Models\Compra;
 use App\Models\Credito;
-use App\Models\Pedido;
-use App\Models\Producto;
-use App\Models\DetallePedido;
-use App\Models\Vendedor;
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Abono>
- */
+
 class AbonoFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-
     protected $model = Abono::class;
 
     public function definition(): array
     {
-        $credito = \App\Models\Credito::inRandomOrder()->first();
+        // 1) Tomar un crédito existente y usar SU usuario
+        $credito = Credito::inRandomOrder()->first();
+
+        // 2) Si no hay créditos aún, crear user + crédito ligados
+        if (!$credito) {
+            $user = User::factory()->create();
+            $credito = Credito::factory()->create([
+                'id_user' => $user->id_user,
+            ]);
+        }
+
         return [
-            'id_credito' => $credito?->id_credito,
-            'id_user' => \App\Models\User::inRandomOrder()->value('id_user') ?? null, 
-            'monto_abono' => $this->faker->randomFloat(2, 1, 1000),
-            'created_at' => now(),
-            'updated_at' => now(),
+            // Por defecto: mismo user del crédito
+            'id_credito'   => $credito->id_credito,
+            'id_user'      => $credito->id_user,
+
+            'monto_abono'  => $this->faker->randomFloat(2, 1, 1000),
+            'created_at'   => now(),
+            'updated_at'   => now(),
         ];
     }
 }
