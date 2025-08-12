@@ -66,7 +66,23 @@
                             <td>{{ $producto->nombre }}</td>
                             <td>
                                 @if ($producto->imagen)
-                                    <img src="{{ asset($producto->imagen) }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
+                                    @php
+                                        $preview = null;
+                                        try {
+                                            if (config('filesystems.default') === 's3') {
+                                                $preview = \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl($producto->imagen, now()->addMinutes(10));
+                                            } else {
+                                                $preview = asset($producto->imagen);
+                                            }
+                                        } catch (\Throwable $e) {
+                                            $preview = null;
+                                        }
+                                    @endphp
+                                    @if ($preview)
+                                        <img src="{{ $preview }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
+                                    @else
+                                        Sin imagen
+                                    @endif
                                 @else
                                     Sin imagen
                                 @endif

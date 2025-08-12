@@ -8,6 +8,7 @@ use App\Models\CarroProducto;
 use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\Producto;
+use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

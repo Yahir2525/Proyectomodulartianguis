@@ -6,6 +6,7 @@ use App\Models\Producto;
 use App\Models\Pedido;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProductoController extends Controller
 {
@@ -55,12 +56,30 @@ class ProductoController extends Controller
     {
         $producto = new Producto();
 
-        // Imagen (si se subió)
+        $request->validate([
+            'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'nombre' => ['required', 'string'],
+            // ...tus demás reglas
+        ]);
+
+
         if ($request->hasFile('imagen')) {
             $archivo = $request->file('imagen');
-            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $archivo->move(public_path('img'), $nombreArchivo);
-            $producto->imagen = 'img/' . $nombreArchivo;
+            $nombreArchivo = time().'_'.$archivo->getClientOriginalName();
+            $rutaRelativa = 'img/'.$nombreArchivo; // lo mismo que ya guardabas en local
+
+            if (config('filesystems.default') === 's3') {
+                // Sube a S3 en la carpeta "img" con el mismo nombre
+                Storage::disk('s3')->putFileAs('img', $archivo, $nombreArchivo, [
+                    'visibility'  => 'public',                 // o 'private' si prefieres presigned
+                    'ContentType' => $archivo->getMimeType(),
+                ]);
+                $producto->imagen = $rutaRelativa;          // guardas "img/xxx.jpg" como antes
+            } else {
+                // Comportamiento local original
+                $archivo->move(public_path('img'), $nombreArchivo);
+                $producto->imagen = $rutaRelativa;          // "img/xxx.jpg"
+            }
         }
 
         // Campos normales
@@ -122,55 +141,79 @@ class ProductoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $producto = Producto::find($id);
+        $producto = \App\Models\Producto::find($id);
         if (!$producto) {
             return redirect()->route('producto.index')->with('error', 'Producto no encontrado.');
         }
 
+        // (opcional) validaciones
+        $request->validate([
+            'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            // agrega aquí tus reglas para los demás campos si quieres
+        ]);
+
+        $urlTemporal = null; // si suben imagen a S3 privado, la generamos
+
         // Si subieron una imagen, la actualizamos
         if ($request->hasFile('imagen')) {
-            $archivo = $request->file('imagen');
+            $archivo       = $request->file('imagen');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $archivo->move(public_path('img'), $nombreArchivo);
+            $rutaRelativa  = 'img/' . $nombreArchivo; // seguimos guardando "img/xxx.ext" en DB
 
-            if ($producto->imagen && file_exists(public_path($producto->imagen))) {
-                unlink(public_path($producto->imagen));
+            // 1) Borra la imagen anterior según el disk activo
+            if ($producto->imagen) {
+                if (config('filesystems.default') === 's3') {
+                    try { Storage::disk('s3')->delete($producto->imagen); } catch (\Throwable $e) {}
+                } else {
+                    $rutaFisica = public_path($producto->imagen);
+                    if (is_file($rutaFisica)) @unlink($rutaFisica);
+                }
             }
 
-            $producto->imagen = 'img/' . $nombreArchivo;
+            // 2) Sube la nueva imagen
+            if (config('filesystems.default') === 's3') {
+                // bucket privado
+                Storage::disk('s3')->putFileAs('img', $archivo, $nombreArchivo, [
+                    'visibility'  => 'private',
+                    'ContentType' => $archivo->getMimeType(),
+                ]);
+
+                // URL temporal (válida 10 min) para mostrar en la vista si quieres
+                $urlTemporal = Storage::disk('s3')->temporaryUrl($rutaRelativa, now()->addMinutes(10));
+            } else {
+                // entorno local: public/img
+                $archivo->move(public_path('img'), $nombreArchivo);
+                $urlTemporal = asset($rutaRelativa); // por si quieres previsualizar tras actualizar
+            }
+
+            $producto->imagen = $rutaRelativa; // guardamos misma convención en DB
         }
 
-        $producto->estado_producto = $request->has('estado_producto');
+        // Checkbox a booleano real
+        $producto->estado_producto = $request->boolean('estado_producto');
 
-        // Actualizar campos si están presentes y no vacíos
-        if ($request->filled('nombre')) {
-            $producto->nombre = $request->input('nombre');
+        // Campos de texto (solo si vienen y no están vacíos)
+        foreach (['nombre','tipo','material','color','tamanio','marca'] as $campo) {
+            if ($request->filled($campo)) {
+                $producto->$campo = $request->input($campo);
+            }
         }
-        if ($request->filled('tipo')) {
-            $producto->tipo = $request->input('tipo');
-        }
-        if ($request->filled('material')) {
-            $producto->material = $request->input('material');
-        }
-        if ($request->filled('color')) {
-            $producto->color = $request->input('color');
-        }
-        if ($request->filled('tamanio')) {
-            $producto->tamanio = $request->input('tamanio');
-        }
-        if ($request->filled('marca')) {
-            $producto->marca = $request->input('marca');
-        }
-        if ($request->filled('precio_unitario')) {
+
+        // Numéricos con 'has' para permitir 0
+        if ($request->has('precio_unitario')) {
             $producto->precio_unitario = $request->input('precio_unitario');
         }
-        if ($request->filled('piezas')) {
+        if ($request->has('piezas')) {
             $producto->piezas = $request->input('piezas');
         }
 
         $producto->save();
 
-        return redirect()->route('producto.index')->with('success', 'Producto actualizado correctamente.');
+        // Si generamos URL temporal (S3 privado o local), la mandamos por sesión para mostrar previsualización
+        return redirect()
+            ->route('producto.index')
+            ->with('success', 'Producto actualizado correctamente.')
+            ->with('imagen_url', $urlTemporal);
     }
 
 

@@ -11,6 +11,7 @@ use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 // use App\Http\Middleware\AdminRole;

@@ -24,7 +24,12 @@
         <input type="text" name="nombre" id="nombre" value="{{ old('nombre') }}" required><br><br>
 
         <label for="imagen">Imagen del producto:</label><br>
-        <input type="file" name="imagen" id="imagen" accept="image/*"><br><br>
+        <input type="file" name="imagen" id="imagen" accept="image/*"><br>
+        @if (session('imagen_url'))
+            <br>
+            <img src="{{ session('imagen_url') }}" alt="Imagen seleccionada" style="max-width:260px;">
+        @endif
+        <br><br>
 
         <label for="tipo">Tipo de producto:</label><br>
         <input list="tipos" name="tipo" id="tipo" value="{{ old('tipo') }}" required>
@@ -70,7 +75,6 @@
             @endforeach
         </datalist>
         <br><br>
-
 
         <label for="precio_unitario">Precio unitario ($):</label><br>
         <input type="number" name="precio_unitario" id="precio_unitario" step="0.01" min="0" value="{{ old('precio_unitario') }}" required><br><br>

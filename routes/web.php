@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;   // <- agregado (dataset)
+use Illuminate\Support\Facades\Artisan;   // <- agregado (dataset)
 
 // Controladores
 use App\Http\Controllers\AbonoController;
@@ -20,8 +22,6 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\PrediccionController;
-
-
 
 Route::get('/predicciones', [PrediccionController::class, 'predecirNiveles'])
     ->name('predicciones.predecir');
@@ -73,12 +73,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
 });
 
-
 Route::resource('registro', RegistroController::class);
-
-// Route::get('/registro', [RegistroController::class, 'create'])->name('registro.create');
-// Route::post('/registro', [RegistroController::class, 'store'])->name('registro.store');
-
 
 // -------------------------------------------------
 // Rutas protegidas por el middleware is_user
@@ -121,20 +116,43 @@ Route::middleware(['is_admin'])->group(function () {
     // Usuarios
     Route::resource('user', UserController::class);
 
+    // -----------------------
+    // DATASET (solo cambios)
+    // -----------------------
+    // Descargar el CSV ya generado
+    // Route::get('/dataset', function () {
+    //     $path = 'mineria_dataset.csv';
 
-    Route::get('/dataset', function () {
-        $path = 'mineria_dataset.csv';
+    //     abort_unless(Storage::disk('public')->exists($path), 404);
 
-        abort_unless(Storage::disk('public')->exists($path), 404);
+    //     return Storage::disk('public')->download($path, 'mineria_dataset.csv', [
+    //         'Content-Type'       => 'text/csv; charset=UTF-8',
+    //         'Cache-Control'      => 'no-store, no-cache, must-revalidate, max-age=0',
+    //         'Pragma'             => 'no-cache',
+    //         'Expires'            => '0',
+    //         'X-Accel-Buffering'  => 'no',
+    //     ]);
+    // })->name('dataset.download');
 
-        return Storage::disk('public')->download($path, 'mineria_dataset.csv', [
-            'Content-Type'  => 'text/csv; charset=UTF-8',
-            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-            'Pragma'        => 'no-cache',
-            'Expires'       => '0',
-            'X-Accel-Buffering' => 'no',
-    ]);
-});
+    // Ejecuta el comando y descarga el CSV actualizado
+    // Route::post('/dataset/export-download', function () {
+    //     Artisan::call('export:dataset-mineria');
 
+    //     $path = 'mineria_dataset.csv';
+    //     abort_unless(Storage::disk('public')->exists($path), 404, 'El CSV no se generó.');
 
+    //     return Storage::disk('public')->download($path, 'mineria_dataset.csv', [
+    //         'Content-Type'       => 'text/csv; charset=UTF-8',
+    //         'Cache-Control'      => 'no-store, no-cache, must-revalidate, max-age=0',
+    //         'Pragma'             => 'no-cache',
+    //         'Expires'            => '0',
+    //         'X-Accel-Buffering'  => 'no',
+    //     ]);
+    // })->name('dataset.export-download');
+
+    Route::post('/dataset/actualizar', function () {
+        Artisan::call('export:dataset-mineria');
+
+        return back()->with('success', '✅ Dataset actualizado correctamente.');
+    })->name('dataset.actualizar')->middleware('is_admin');
 });

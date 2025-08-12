@@ -26,8 +26,26 @@
         <input type="text" name="nombre" id="nombre" value="{{ old('nombre', $producto->nombre) }}"><br><br>
 
         <label for="imagen">Actualizar imagen:</label><br>
-        <input type="file" name="imagen" id="imagen" accept="image/*"><br><br>
-        
+        <input type="file" name="imagen" id="imagen" accept="image/*"><br>
+        @if (!empty($producto->imagen))
+            @php
+                $preview = null;
+                try {
+                    if (config('filesystems.default') === 's3') {
+                        $preview = \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl($producto->imagen, now()->addMinutes(10));
+                    } else {
+                        $preview = asset($producto->imagen);
+                    }
+                } catch (\Throwable $e) {
+                    $preview = null;
+                }
+            @endphp
+            @if ($preview)
+                <br>
+                <img src="{{ $preview }}" alt="Imagen actual" style="max-width:260px;">
+            @endif
+        @endif
+        <br><br>
 
         <label for="tipo">Tipo de producto:</label><br>
         <input list="tipos" name="tipo" id="tipo" value="{{ old('tipo') }}">
