@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ asset('css/carro/showCarro.css') }}">
     <title>Detalle(s) de Carro</title>
     <style>
         table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
@@ -18,6 +19,60 @@
         form.inline {
             display: inline;
         }
+
+        /* --------- Solo responsividad (sin cambiar tu HTML/Blade) --------- */
+        * { box-sizing: border-box; }
+        html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+        body { margin: 0; padding: 16px; color: #222; background: #fff; }
+        h1 { margin: 0 0 12px; font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem); }
+        h2 { font-size: clamp(1.1rem, 0.95rem + 0.7vw, 1.5rem); }
+
+        /* Evitar desbordes en imágenes dentro de celdas */
+        td img { display: block; margin: 0 auto; max-width: min(120px, 100%); height: auto; }
+
+        @media (max-width: 992px) {
+          body { padding: 12px; }
+        }
+
+        /* En móviles/tablets: tabla con scroll horizontal y acciones apiladas */
+        @media (max-width: 768px) {
+          table {
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #e6e6e6;
+          }
+          thead, tbody, tr, th, td { white-space: nowrap; }
+
+          /* Formularios y controles a ancho completo para facilidad de uso */
+          form { max-width: 100%; }
+          form select,
+          form button {
+            width: 100%;
+            max-width: 100%;
+            margin: 6px 0;
+          }
+
+          /* Botones de acciones dentro de la tabla en columna vertical */
+          td:last-child a,
+          td:last-child form {
+            display: block;
+            width: 100%;
+            margin: 6px 0;
+          }
+          td:last-child button,
+          td:last-child a button {
+            width: 100%;
+          }
+        }
+
+        /* Móviles muy pequeños: permitir saltos de línea y toque cómodo */
+        @media (max-width: 480px) {
+          thead, tbody, tr, th, td { white-space: normal; }
+          th, td { padding: 6px; }
+          button, select { min-height: 44px; } /* área táctil mínima */
+        }
+        /* ------------------------------------------------------------------ */
     </style>
 </head>
 <body>
@@ -87,8 +142,8 @@
                                 <td>{{ $producto->id_producto }}</td>
                                 <td>{{ $producto->nombre }}</td>
                                 <td>
-                                    @if ($producto->imagen)
-                                        <img src="{{ asset($producto->imagen) }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
+                                    @if (!empty($producto->imagen_url))
+                                        <img src="{{ $producto->imagen_url }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
                                     @else
                                         Sin imagen
                                     @endif

@@ -1,0 +1,39 @@
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; }
+
+/* Corrige altura en móviles con barras dinámicas */
+.hero.is-fullheight { min-height: 100dvh; }
+
+/* Padding lateral fluido para evitar que pegue a los bordes en móviles */
+.hero-body { padding-left: clamp(12px, 3vw, 24px); padding-right: clamp(12px, 3vw, 24px); }
+
+/* Limita el ancho del card en pantallas grandes para mejor legibilidad */
+.columns.is-centered > .column.is-12-mobile.is-8-tablet.is-5-desktop.is-4-widescreen {
+  max-width: 520px;
+}
+
+/* Títulos fluidos para que no “brinquen” entre breakpoints */
+.title { font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem); }
+.subtitle { font-size: clamp(1rem, 0.9rem + 0.4vw, 1.15rem); }
+
+/* Ajustes en móvil/tablet: compacidad y ritmo vertical */
+@media (max-width: 768px) {
+  .box { padding: 1rem; }
+  .field + .field { margin-top: 0.75rem; }
+}
+
+/* Alto táctil mínimo en botones grandes */
+.button.is-large { min-height: 44px; }
+
+/* Utilitarios por si no hay CSS de Bootstrap cargado */
+.mt-4 { margin-top: 1.5rem !important; }
+.mr-2 { margin-right: .5rem !important; }
+
+/* Enlaces inferiores: mejor distribución y área de toque */
+.has-text-centered.mt-4 a {
+  display: inline-block;
+  padding: 6px 8px;
+  line-height: 1.2;
+}
+

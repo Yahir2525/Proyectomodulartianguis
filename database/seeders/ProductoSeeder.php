@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Producto;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;   
 
 class ProductoSeeder extends Seeder
 {
@@ -17,12 +18,11 @@ class ProductoSeeder extends Seeder
             return;
         }
 
-        // CSV simple separado por comas
         $rows = array_map('str_getcsv', file($path));
 
         foreach ($rows as $index => $row) {
-            if ($index === 0) continue; // Saltar encabezado
-            if (count($row) < 9) continue; // Fila incompleta
+            if ($index === 0) continue;
+            if (count($row) < 9) continue;
 
             $nombre          = $row[0] ?? null;
             $tipo            = $row[1] ?? null;
@@ -34,12 +34,28 @@ class ProductoSeeder extends Seeder
             $piezas          = (int)   ($row[7] ?? 0);
             $nombreImagen    = $row[8] ?? null;
 
-            // Resolver ruta de imagen como en tu UserSeeder (carpeta fija)
             $rutaImagen = null;
+
             if ($nombreImagen) {
-                $ruta = public_path('img/' . $nombreImagen);
-                if (File::exists($ruta)) {
-                    $rutaImagen = 'img/' . $nombreImagen; // lo que se guarda en BD
+                $rutaLocal = public_path('img/' . $nombreImagen);
+
+                if (File::exists($rutaLocal)) {
+                    // Guardamos la MISMA ruta relativa en BD
+                    $rutaImagen = 'img/' . $nombreImagen;
+
+                    // Solo si el disk activo es s3, subimos el archivo al bucket
+                    if (config('filesystems.default') === 's3') {
+                        $destino = $rutaImagen; // "img/archivo.jpg"
+
+                        // Evita re-subir si ya existe
+                        if (!Storage::disk('s3')->exists($destino)) {
+                            Storage::disk('s3')->put(
+                                $destino,
+                                File::get($rutaLocal),
+                                ['visibility' => 'private'] // bucket privado
+                            );
+                        }
+                    }
                 }
             }
 
@@ -52,7 +68,7 @@ class ProductoSeeder extends Seeder
                 'marca'           => $marca,
                 'precio_unitario' => $precioUnitario,
                 'piezas'          => $piezas,
-                'imagen'          => $rutaImagen,
+                'imagen'          => $rutaImagen,   // sigue siendo "img/archivo.jpg"
                 'estado_producto' => true,
             ]);
         }

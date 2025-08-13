@@ -1,0 +1,46 @@
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; background: #f8f9fa; }
+
+/* Asegura altura útil en móviles con barras dinámicas */
+.min-vh-100 { min-height: 100dvh !important; }
+
+/* Limita el ancho del card para legibilidad en pantallas grandes */
+.row.justify-content-center .col-12.col-sm-10.col-md-8.col-lg-6 {
+max-width: 560px;
+}
+
+/* Títulos/headers fluidos */
+.card-header {
+font-size: clamp(1.1rem, 0.9rem + 0.6vw, 1.35rem);
+font-weight: 600;
+background: #fff;
+}
+
+/* Área táctil mínima en inputs y botones */
+.form-control { min-height: 44px; }
+.btn { min-height: 44px; }
+
+/* Ritmo vertical más compacto en móviles/tablet */
+@media (max-width: 768px) {
+.container.py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+.card-body { padding: 1rem; }
+.mb-3 { margin-bottom: 0.85rem !important; }
+}
+
+/* En pantallas muy pequeñas, evita desbordes y mejora toque en enlaces */
+@media (max-width: 420px) {
+.card { margin: 0 8px; }
+.text-center.mt-3 a {
+    display: inline-block;
+    padding: 6px 8px;
+    line-height: 1.2;
+}
+}
+
+/* Sombra y bordes suaves del card */
+.card {
+border-radius: 12px;
+overflow: hidden;
+box-shadow: 0 6px 24px rgba(0,0,0,.06);
+}

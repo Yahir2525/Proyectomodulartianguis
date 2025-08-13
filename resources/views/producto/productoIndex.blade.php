@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
+    <link rel="stylesheet" href="{{ asset('css/producto/productoIndex.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Principal de productos</title>
     <style>
@@ -90,29 +91,12 @@
                                     <td>{{ $producto->id_producto }}</td>
                                     <td>{{ $producto->nombre }}</td>
                                     <td>
-                                        @if ($producto->imagen)
-                                            @php
-                                                $preview = null;
-                                                try {
-                                                    if (config('filesystems.default') === 's3') {
-                                                        $preview = \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl($producto->imagen, now()->addMinutes(10));
-                                                    } else {
-                                                        $preview = asset($producto->imagen);
-                                                    }
-                                                } catch (\Throwable $e) {
-                                                    $preview = null;
-                                                }
-                                            @endphp
-                                            @if ($preview)
-                                                <img src="{{ $preview }}" alt="{{ $producto->nombre }}" style="max-width: 300px;">
-                                            @else
-                                                Sin imagen
-                                            @endif
+                                        @if (!empty($producto->imagen_url))
+                                            <img src="{{ $producto->imagen_url }}" alt="{{ $producto->nombre }}" style="max-width: 300px;">
                                         @else
                                             Sin imagen
                                         @endif
                                     </td>
-
                                     <td>{{ $producto->material }}</td>
                                     <td>{{ $producto->color }}</td>
                                     <td>{{ $producto->tamanio }}</td>
@@ -180,7 +164,6 @@
                                     }
                                 }
                             }
-
                             function mostrarTodosPedidos() {
                                 const opciones = document.querySelectorAll('#id_pedido option');
                                 opciones.forEach(opcion => {
@@ -192,9 +175,7 @@
                     @else
                         <input type="hidden" name="id_user" value="{{ Auth::id() }}">
                     @endif
-
                     <br><br>
-
                     <label for="id_pedido">Selecciona o crea un pedido:</label>
                     <select name="id_pedido" id="id_pedido" required>
                         <option value="">-- Selecciona --</option>

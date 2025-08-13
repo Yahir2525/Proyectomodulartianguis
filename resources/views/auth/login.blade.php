@@ -7,7 +7,9 @@
     <meta name="description" content="Inicio de sesión" />
     <meta name="author" content="Juan y Yahir" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ asset('css/sesion/login.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
+    
 </head>
 <body>
 
@@ -43,7 +45,7 @@
 
               <div class="field">
                 <label class="label">Contraseña</label>
-                <div >
+                <div>
                   <input class="input is-large" type="password" name="password" placeholder="Contraseña" required>
                 </div>
                 @error('password')

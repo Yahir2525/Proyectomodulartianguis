@@ -26,63 +26,70 @@ class RoleController extends Controller
 
     public function create()
     {
-        $permission = Permission::get();
-        return view('role/createRole', compact('permission'));
+        $permissions = Permission::orderBy('name')->get();
+        return view('role/createRole', compact('permissions'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'unique:roles,name'
-            ]
+        $validated = $request->validate([
+            'name' => ['required','string','unique:roles,name'],
+            'permissions' => ['nullable','array'],
+            'permissions.*' => ['integer','exists:permissions,id'],
         ]);
 
-        Role::create([
-            'name' => $request->name
+        $role = Role::create([
+            'name' => $validated['name'],
+            'guard_name' => 'web', // asegura el guard
         ]);
 
-        return redirect('/role')->with('success', 'Role registrado correctamente.');
+        // Opción A: convertir a enteros y pasar IDs (Spatie >= v5 suele aceptarlos)
+        $ids = collect($validated['permissions'] ?? [])->map(fn($v)=>(int)$v)->all();
+        // $role->syncPermissions($ids);
+
+        // Opción B (más robusta): cargar modelos por ID y sincronizar
+        $perms = Permission::whereIn('id', $ids)
+                ->where('guard_name', $role->guard_name) // asegura mismo guard
+                ->get();
+        $role->syncPermissions($perms);
+
+        return redirect()->route('role.index')->with('success','Rol creado correctamente.');
     }
 
-    public function edit($id)
+    public function edit(Role $role)
     {
-        $role = Role::find($id);
-        $permission = Permission::get();
-        $rolePermissions = DB::table('role_has_permissions')
-        ->where('role_has_permissions.role_id', $role->id)
-        ->pluck('role_has_permissions.permission_id','role_has_permissions.permission_id')
-        ->all();
+        $permissions = Permission::orderBy('name')->get();
+        $rolePermissionIds = $role->permissions()->pluck('id')->toArray();
 
-        return view('/role/editRole',[
+        return view('role.editRole', [
             'role' => $role,
-            'permission' => $permission,
-            'rolePermission' => $rolePermissions
+            'permissions' => $permissions,
+            'rolePermissionIds' => $rolePermissionIds,
         ]);
     }
-
 
     public function update(Request $request, Role $role)
     {
-        $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'unique:roles,name,'.$role->id
-            ]
+        $validated = $request->validate([
+            'name' => ['required','string','unique:roles,name,'.$role->id],
+            'permissions' => ['nullable','array'],
+            'permissions.*' => ['integer','exists:permissions,id'],
         ]);
 
-        $role = Role::find($id);
-        $role->name = $request->input('name');
+        $role->update([
+            'name' => $validated['name'],
+            'guard_name' => $role->guard_name ?: 'web',
+        ]);
 
-        $role->save();
+        $ids = collect($validated['permissions'] ?? [])->map(fn($v)=>(int)$v)->all();
+        $perms = Permission::whereIn('id', $ids)
+                ->where('guard_name', $role->guard_name)
+                ->get();
+        $role->syncPermissions($perms);
 
-        $role->syncPermissions($request->input('permission'));
-        
-        return redirect('role.index')->with('success', 'Role registrado correctamente.');
+        return redirect()->route('role.index')->with('success','Rol actualizado correctamente.');
     }
+
 
     public function destroyPermissionFromRole(Role $role, Permission $permission)
     {

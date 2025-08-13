@@ -1,0 +1,141 @@
+/* ===== abonoIndex.css — tema simple, compacto y responsivo ===== */
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; color: #222; background: #f7f7f8; }
+
+/* Layout */
+.container { max-width: 1100px; margin: 0 auto; padding: 14px; }
+h1 { margin: 0 0 8px; font-size: clamp(1.2rem, 1rem + 1vw, 1.8rem); text-align: center; }
+h2 { margin-top: 24px; font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem); }
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* --- Botones reutilizables --- */
+.btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  margin: 2px 4px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: .9rem;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:hover{ filter: brightness(.95); }
+
+.btn-primary { background:#15c221; border-color:#15c221; color:#fff; } /* Registrar */
+.btn-edit    { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; } /* Editar */
+.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; } /* Eliminar */
+.btn-gray    { background:#6b7280; border-color:#6b7280; color:#fff; } /* Utilitario */
+
+/* --- Formulario de búsqueda: label + input + botón en la misma fila --- */
+form{
+  display:grid;
+  grid-template-columns: max-content minmax(200px, 320px) auto; /* etiqueta | campo | botón */
+  gap:6px;
+  align-items:center;
+  margin:6px 0 10px;
+}
+form label{
+  margin:0;
+  font-weight:600;
+  white-space:nowrap;
+  font-size: 0.95rem;
+}
+#busqueda{
+  width:100%;
+  padding:6px 10px;
+  border:1px solid #999;
+  border-radius:6px;
+  background:#fff;
+  outline:none;
+  font-size: 0.95rem;
+}
+#busqueda::placeholder{ color:#9aa3ad; }
+#busqueda:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 2px rgba(37,99,235,.15);
+}
+
+/* Botón Buscar con estilo consistente */
+input[type="submit"]{
+  width:auto;
+  padding:6px 10px;
+  min-height:32px;
+  font-size:.88rem;
+  border-radius:6px;
+  border:1px solid #2563eb;
+  background:#2563eb;
+  color:#fff;
+  cursor:pointer;
+  line-height:1;
+}
+input[type="submit"]:hover{ filter:brightness(.95); }
+
+/* Tabla */
+.table-wrap { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; margin-top:8px; min-width:680px; background:#fff; }
+th, td { border:1px solid #999; padding:6px; text-align:center; font-size: 0.95rem; }
+thead th { background:#f3f4f6; }
+tbody tr:nth-child(odd) { background:#fafafa; }
+tbody tr:hover { background:#f2f7ff; }
+
+/* Alineación de botones en la celda de Acciones */
+td .btn{ display:inline-flex; }
+form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
+
+/* Responsivo */
+@media (max-width: 992px){
+  html { font-size: 15px; }
+  .container { padding: 12px; }
+}
+@media (max-width: 768px){
+  html { font-size: 14px; }
+  th, td { padding:5px; }
+  table { min-width: 640px; }
+}
+@media (max-width: 640px){
+  html { font-size: 13.5px; }
+  form{ grid-template-columns:1fr; }       /* apilar en móvil */
+  #busqueda, input[type="submit"]{ width:100%; }
+  /* Botones de acciones apilados y a ancho completo */
+  td .btn{ display:block; width:100%; margin:6px 0; }
+  td form{ display:block !important; }
+  .table-wrap{
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    background:#fff;
+  }
+}
+
+/* Botón "Buscar" del ABONO: evitar que se alargue en desktop */
+@media (min-width: 769px) {
+  /* Selecciona el form que contiene el #busqueda */
+  form:has(#busqueda) {
+    grid-template-columns: max-content minmax(200px, 320px) max-content; /* etiqueta | campo | botón */
+  }
+  form:has(#busqueda) input[type="submit"] {
+    justify-self: start; /* no se estira */
+    width: auto;         /* solo lo necesario */
+    padding: 2px 8px;    /* compacto opcional */
+    font-size: 0.8rem;
+    min-height: 26px;
+    border-radius: 4px;
+    line-height: 1;
+  }
+}
+
+/* En móvil: que sí llene el ancho (accesible) */
+@media (max-width: 768px) {
+  form:has(#busqueda) input[type="submit"] {
+    justify-self: stretch;
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 10px;
+    font-size: .9rem;
+  }
+}

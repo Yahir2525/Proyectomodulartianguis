@@ -38,7 +38,6 @@ class CarroController extends Controller
         return view('carro.carroIndex', compact('carroIndex', 'reservasGlobales', 'todosProductos', 'usuarios'));
     }
 
-
     public function create()
     {
         $usuario = Auth::user();
@@ -59,7 +58,6 @@ class CarroController extends Controller
 
         return view('carro/createCarro', compact('usuario', 'usuarios', 'pedidos', 'productos'));
     }
-
 
     public function store(Request $request)
     {
@@ -163,8 +161,6 @@ class CarroController extends Controller
 
         return redirect()->route('carro.index')->with('success', 'Producto agregado correctamente.');
     }
-
-
 
     public function agregarMultiples(Request $request)
     {
@@ -278,8 +274,6 @@ class CarroController extends Controller
 
         return redirect()->route('carro.index')->with('success', 'Productos agregados correctamente.');
     }
-
-
 
     public function eliminarProducto($id_carro, $id_producto)
     {
@@ -438,7 +432,6 @@ class CarroController extends Controller
         return redirect()->route('carro.index')->with('success', 'Carro actualizado correctamente.');
     }
 
-
     public function destroy(Carro $carro)
     {
         $pedido = $carro->pedido;
@@ -484,10 +477,6 @@ class CarroController extends Controller
             }
         }
     }
-
-
-
-
 
     public function show(Request $request)
     {
@@ -539,8 +528,6 @@ class CarroController extends Controller
     }
 
 
-
-
     // private function usuarioBloqueado($id_user)
     // {
     //     $creditos = Credito::where('id_user', $id_user)->where('estado', 1)->get();
@@ -578,6 +565,4 @@ class CarroController extends Controller
         }
         return true;
     }
-
-
 }

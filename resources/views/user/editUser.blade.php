@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ asset('css/user/editUser.css') }}">
     <title>Editar Usuario</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
 </head>
@@ -48,9 +49,19 @@
             <div class="field">
                 <label class="label" for="password">Nueva Contraseña:</label>
                 <div class="control">
-                    <input class="input" type="password" name="password" id="password" placeholder="Escribe una nueva contraseña">
+                    <input class="input" type="password" name="password" id="password" placeholder="Escribe una nueva contraseña" autocomplete="new-password">
                 </div>
                 @error('password')
+                    <p class="help is-danger">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="field">
+                <label class="label" for="password_confirmation">Confirmar Contraseña:</label>
+                <div class="control">
+                    <input class="input" type="password" name="password_confirmation" id="password_confirmation" placeholder="Repite la nueva contraseña" autocomplete="new-password">
+                </div>
+                @error('password_confirmation')
                     <p class="help is-danger">{{ $message }}</p>
                 @enderror
             </div>
@@ -108,16 +119,17 @@
                 <div class="control">
                     <input class="input" type="file" name="imagen" id="imagen" accept="image/*">
                 </div>
-                @if ($user->imagen)
+                @if (!empty($user->imagen_url))
                     <figure class="mt-3">
                         <p class="label">Actual:</p>
-                        <img src="{{ asset($user->imagen) }}" alt="Imagen actual" style="max-width: 150px;">
+                        <img src="{{ $user->imagen_url }}" alt="Imagen actual" style="max-width: 150px;">
                     </figure>
                 @endif
                 @error('imagen')
                     <p class="help is-danger">{{ $message }}</p>
                 @enderror
             </div>
+
 
             <div class="field">
                 <label class="label" for="roles">Roles:</label>

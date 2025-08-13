@@ -4,12 +4,66 @@
     <meta charset="UTF-8">
     <title>Crear Carro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ asset('css/carro/createCarro.css') }}">
     <style>
         .sin-stock { background-color: #ffe5e5; }
         .resaltado { font-weight: bold; color: red; }
         .cant-input { width: 60px; }
         table { border-collapse: collapse; width: 100%; }
         th, td { padding: 6px; border: 1px solid #999; text-align: center; }
+
+        /* --------- Mejores estilos responsivos (sin cambiar tu HTML) --------- */
+        * { box-sizing: border-box; }
+        html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+        body { margin: 0; padding: 16px; color: #222; background: #fff; }
+        h1 { margin: 0 0 12px; font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem); }
+        h3 { margin: 16px 0 8px; font-size: clamp(1.1rem, 0.95rem + 0.6vw, 1.4rem); }
+
+        /* Imágenes dentro de la tabla: que no desborden */
+        td img {
+            width: auto;
+            max-width: min(200px, 100%);
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Área táctil mínima y legibilidad */
+        input, select, button { line-height: 1.2; }
+        button { padding: 8px 12px; cursor: pointer; }
+
+        /* Breakpoint tablet/móvil: tabla desplazable, formularios apilados */
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                border: 1px solid #e9e9e9;
+            }
+            thead, tbody, tr, th, td { white-space: nowrap; }
+
+            /* Inputs select y botones a ancho completo para comodidad */
+            input[type="text"],
+            input[type="number"],
+            select,
+            button {
+                width: 100%;
+                max-width: 100%;
+                margin: 6px 0;
+            }
+            .cant-input { width: 100%; }
+
+            /* Un poco más de aire */
+            body { padding: 12px; }
+        }
+
+        /* Móviles muy pequeños: permitir salto de línea en celdas */
+        @media (max-width: 480px) {
+            thead, tbody, tr, th, td { white-space: normal; }
+            th, td { padding: 6px; }
+            button { min-height: 44px; } /* toque cómodo */
+        }
+        /* --------------------------------------------------------------------- */
     </style>
 
     <script>
@@ -88,8 +142,8 @@
                             <input type="checkbox" name="productos_seleccionados[]" value="{{ $producto->id_producto }}">
                         </td>
                         <td>
-                            @if ($producto->imagen)
-                                <img src="{{ asset($producto->imagen) }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
+                            @if (!empty($producto->imagen_url))
+                                <img src="{{ $producto->imagen_url }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
                             @else
                                 Sin imagen
                             @endif

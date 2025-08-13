@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Mi Perfil</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ asset('css/perfil/perfilIndex.css') }}">
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -23,12 +24,12 @@
             @php $user = auth()->user(); @endphp
 
             <div class="text-center mb-4">
-                @if($user->imagen)
-                    <img src="{{ asset($user->imagen) }}" alt="Foto de perfil"
-                         class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
+                @if (!empty($user->imagen_url))
+                    <img src="{{ $user->imagen_url }}" alt="Foto de perfil"
+                        class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
                 @else
                     <img src="{{ asset('img/default.png') }}" alt="Sin foto"
-                         class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
+                        class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
                 @endif
             </div>
 

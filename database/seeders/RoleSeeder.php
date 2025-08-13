@@ -10,20 +10,12 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 class RoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $adminRole = Role::create(['name' => 'administrador']);
         $userRole = Role::create(['name' => 'user']);
 
-        // Create permissions
-        // $editPermission = Permission::create(['name' => 'edit articles']);
-        // $viewPermission = Permission::create(['name' => 'view articles']);
-        
-        
-        //Abonos
+        //Abono
         $viewAbonoPermission = Permission::create(['name' => 'view abono']);
         $createAbonoPermission = Permission::create(['name' => 'create abono']);
         $editAbonoPermission = Permission::create(['name' => 'edit abono']);
@@ -34,12 +26,6 @@ class RoleSeeder extends Seeder
         $createCarroPermission = Permission::create(['name' => 'create carro']);
         $editCarroPermission = Permission::create(['name' => 'edit carro']);
         $deleteCarroPermission = Permission::create(['name' => 'delete carro']);
-
-        //Compra
-        $viewCompraPermission = Permission::create(['name' => 'view compra']);
-        $createCompraPermission = Permission::create(['name' => 'create compra']);
-        $editCompraPermission = Permission::create(['name' => 'edit compra']);
-        $deleteCompraPermission = Permission::create(['name' => 'delete compra']);
 
         //Credito
         $viewCreditoPermission = Permission::create(['name' => 'view credito']);
@@ -65,11 +51,13 @@ class RoleSeeder extends Seeder
         $editUserPermission = Permission::create(['name' => 'edit user']);
         $deleteUserPermission = Permission::create(['name' => 'delete user']);
 
+        //Role
         $viewRolePermission = Permission::create(['name' => 'view role']);
         $createRolePermission = Permission::create(['name' => 'create role']);
         $editRolePermission = Permission::create(['name' => 'edit role']);
         $deleteRolePermission = Permission::create(['name' => 'delete role']);
 
+        //Permission
         $viewPermission = Permission::create(['name' => 'view permission']);
         $createPermission = Permission::create(['name' => 'create permission']);
         $editPermission = Permission::create(['name' => 'edit permission']);
@@ -78,20 +66,17 @@ class RoleSeeder extends Seeder
         // Assign permissions to roles
         $adminRole->givePermissionTo($viewAbonoPermission, $createAbonoPermission, $editAbonoPermission, $deleteAbonoPermission, 
         $viewCarroPermission, $createCarroPermission, $editCarroPermission, $deleteCarroPermission,
-        $viewCompraPermission, $createCompraPermission, $editCompraPermission, $deleteCompraPermission,
         $viewCreditoPermission, $createCreditoPermission, $editCreditoPermission, $deleteCreditoPermission,
         $viewPedidoPermission, $createPedidoPermission, $editPedidoPermission, $deletePedidoPermission,
         $viewProductoPermission, $createProductoPermission, $editProductoPermission, $deleteProductoPermission,
         $viewUserPermission, $createUserPermission, $editUserPermission, $deleteUserPermission,
-        $viewRolePermission, $createRolePermission, $editRolePermission, $deleteRolePermission, $viewPermission, $createPermission,
-        $editPermission, $deletePermission);
+        $viewRolePermission, $createRolePermission, $editRolePermission, $deleteRolePermission, $viewPermission, $createPermission, $editPermission, $deletePermission);
         
-        $userRole->givePermissionTo($viewAbonoPermission, $deleteAbonoPermission,
+        $userRole->givePermissionTo($viewAbonoPermission,
         $viewCarroPermission, $createCarroPermission, $editCarroPermission, $deleteCarroPermission,
-        $viewCompraPermission, $createCompraPermission, $editCompraPermission, $deleteCompraPermission,
-        $viewCreditoPermission, $deleteCreditoPermission,
-        $viewPedidoPermission, $createPedidoPermission, $editPedidoPermission, $deletePedidoPermission,
-        $viewProductoPermission, $deleteProductoPermission,
+        $viewCreditoPermission,
+        $viewPedidoPermission, $createPedidoPermission, $editPedidoPermission,
+        $viewProductoPermission,
         $viewUserPermission, $editUserPermission,
     
     );
@@ -100,14 +85,14 @@ class RoleSeeder extends Seeder
         $adminPermisos = User::firstOrCreate([
             'email' => 'admin@gmail.com'
         ], [
-            'name' => 'Admin',
+            'name' => 'YahirAdmin',
             'email' => 'admin@gmail.com',
             'password' => Hash::make ('12345678'),
-            'genero' => 'M',
+            'genero' => 'H',
             'edad' => '20',
             'telefono' => '3333331111',
             'direccion' => 'juanitoaddress',
-            'nombre_usuario' => 'juanitoadmin',
+            'nombre_usuario' => 'yahiradmin',
 
         ]); // Example user with ID 1
         $adminPermisos->assignRole('administrador');

@@ -35,42 +35,54 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|max:20',
-            'genero' => 'required',
-            'edad' => 'required',
-            'telefono' => 'required',
-            'direccion' => 'required',
-            'nombre_usuario' => 'required',
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'roles' => 'required'
+            'name'            => 'required|string|max:255',
+            'email'           => 'required|email|max:255|unique:users,email',
+            'password'        => 'required|string|min:8|max:20',
+            'genero'          => 'required',
+            'edad'            => 'required',
+            'telefono'        => 'required',
+            'direccion'       => 'required',
+            'nombre_usuario'  => 'required',
+            'imagen'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'roles'           => 'required',
         ]);
-            $user = new User();
-            $user->name = $request->input('name');
-            $user->email = $request->input('email');
-            $user->password = Hash::make($request->input('password'));
-            $user->genero = $request->input('genero');
-            $user->edad = $request->input('edad');
-            $user->telefono = $request->input('telefono');
-            $user->direccion = $request->input('direccion');
-            $user->nombre_usuario = $request->input('nombre_usuario');
-            $user->nivel_usuario = 'bueno';
-            $user->dias_aplazo = 0;
-            if ($request->hasFile('imagen')) {
-                $file = $request->file('imagen');
-                $filename = time() . '_' . $file->getClientOriginalName();
+
+        $user = new User();
+        $user->name           = $request->input('name');
+        $user->email          = $request->input('email');
+        $user->password       = Hash::make($request->input('password'));
+        $user->genero         = $request->input('genero');
+        $user->edad           = $request->input('edad');
+        $user->telefono       = $request->input('telefono');
+        $user->direccion      = $request->input('direccion');
+        $user->nombre_usuario = $request->input('nombre_usuario');
+        $user->nivel_usuario  = 'bueno';
+        $user->dias_aplazo    = 0;
+
+        // Imagen de perfil (S3 privado o local)
+        if ($request->hasFile('imagen')) {
+            $file = $request->file('imagen');
+            $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $relativePath = 'img/perfiles/' . $filename;
+
+            if (config('filesystems.default') === 's3') {
+                Storage::disk('s3')->putFileAs('img/perfiles', $file, $filename, [
+                    'visibility'  => 'private',              // bucket privado
+                    'ContentType' => $file->getMimeType(),
+                ]);
+            } else {
                 $file->move(public_path('img/perfiles'), $filename);
-                $user->imagen = 'img/perfiles/' . $filename;
             }
-            
 
-            
-            $user->save();
+            $user->imagen = $relativePath; // guardas la ruta relativa en BD
+        }
 
-            $user->syncRoles($request->roles);
+        $user->save();
+        $user->syncRoles($request->roles);
+
         return redirect('/user')->with('success', 'Usuario registrado correctamente.');
     }
+
 
     public function show(Request $request)
     {
@@ -101,10 +113,6 @@ class UserController extends Controller
         return view('user.showUser', ['usuarios' => $usuarios]);
     }
 
-
-
-
-
     public function edit($id)
     {
         $user = User::find($id);
@@ -122,69 +130,83 @@ class UserController extends Controller
     {
         $user = User::findOrFail($user->id_user);
 
-        // Validación de campos (nullable excepto imagen con restricciones)
         $request->validate([
-            'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255|unique:users,email,' . $user->id_user . ',id_user',
-            'password' => 'nullable|string|min:8|max:20|confirmed',
-            'genero' => 'nullable|in:H,M,O',
-            'edad' => 'nullable|integer|min:0',
-            'telefono' => 'nullable|string|max:20',
-            'direccion' => 'nullable|string|max:80',
-            'nombre_usuario' => 'nullable|string|max:50|unique:users,nombre_usuario,' . $user->id_user . ',id_user',
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-
-            'roles' => 'nullable|array',
+            'name'            => 'nullable|string|max:255',
+            'email'           => 'nullable|email|max:255|unique:users,email,' . $user->id_user . ',id_user',
+            'password'        => 'nullable|string|min:8|max:20|confirmed',
+            'genero'          => 'nullable|in:H,M,O',
+            'edad'            => 'nullable|integer|min:0',
+            'telefono'        => 'nullable|string|max:20',
+            'direccion'       => 'nullable|string|max:80',
+            'nombre_usuario'  => 'nullable|string|max:50|unique:users,nombre_usuario,' . $user->id_user . ',id_user',
+            'imagen'          => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'roles'           => 'nullable|array',
         ]);
 
-        // Asignación de campos si vienen en la solicitud
-        if ($request->filled('name')) $user->name = $request->name;
-        if ($request->filled('email')) $user->email = $request->email;
-        if ($request->filled('password')) $user->password = Hash::make($request->password);
-        if ($request->filled('genero')) $user->genero = $request->genero;
-        if ($request->filled('edad')) $user->edad = $request->edad;
-        if ($request->filled('telefono')) $user->telefono = $request->telefono;
-        if ($request->filled('direccion')) $user->direccion = $request->direccion;
-        if ($request->filled('nombre_usuario')) $user->nombre_usuario = $request->nombre_usuario;
-        if ($request->filled('nivel_usuario')) {
-        $user->nivel_usuario = $request->nivel_usuario;
+        // Asignaciones (nota: para numéricos usa has() para permitir 0)
+        if ($request->filled('name'))            $user->name = $request->name;
+        if ($request->filled('email'))           $user->email = $request->email;
+        if ($request->filled('password'))        $user->password = Hash::make($request->password);
+        if ($request->filled('genero'))          $user->genero = $request->genero;
+        if ($request->has('edad'))               $user->edad = $request->edad;
+        if ($request->filled('telefono'))        $user->telefono = $request->telefono;
+        if ($request->filled('direccion'))       $user->direccion = $request->direccion;
+        if ($request->filled('nombre_usuario'))  $user->nombre_usuario = $request->nombre_usuario;
 
-        // Solo actualizar dias_aplazo si NO se ingresó manualmente
+        if ($request->filled('nivel_usuario')) {
+            $user->nivel_usuario = $request->nivel_usuario;
+
+            // Solo actualizar dias_aplazo si NO se ingresó manualmente
             if (!$request->filled('dias_aplazo')) {
                 switch ($user->nivel_usuario) {
-                    case 'excelente':
-                        $user->dias_aplazo = 1;
-                        break;
-                    case 'bueno':
-                        $user->dias_aplazo = 0;
-                        break;
-                    case 'malo':
-                        $user->dias_aplazo = 0;
-                        break;
+                    case 'excelente': $user->dias_aplazo = 1; break;
+                    case 'bueno':     $user->dias_aplazo = 0; break;
+                    case 'malo':      $user->dias_aplazo = 0; break;
                 }
             }
         }
-
         if ($request->filled('dias_aplazo')) {
             $user->dias_aplazo = $request->dias_aplazo;
         }
 
-        // Carga y almacenamiento de imagen
+        // Imagen (S3 privado o local) - guardamos SIEMPRE la ruta relativa en BD
         if ($request->hasFile('imagen')) {
-            $file = $request->file('imagen');
-            $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-            $file->move(public_path('perfiles'), $filename);
-            $user->imagen = 'perfiles/' . $filename;
+            $file        = $request->file('imagen');
+            $filename    = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $relative    = 'img/perfiles/' . $filename;  // misma convención en toda la app
+
+            // Borrar anterior
+            if (!empty($user->imagen)) {
+                if (config('filesystems.default') === 's3') {
+                    try { Storage::disk('s3')->delete($user->imagen); } catch (\Throwable $e) {}
+                } else {
+                    $old = public_path($user->imagen);
+                    if (is_file($old)) @unlink($old);
+                }
+            }
+
+            // Subir nueva
+            if (config('filesystems.default') === 's3') {
+                Storage::disk('s3')->putFileAs('img/perfiles', $file, $filename, [
+                    'visibility'  => 'private',                 // bucket privado
+                    'ContentType' => $file->getMimeType(),
+                ]);
+            } else {
+                $file->move(public_path('img/perfiles'), $filename);
+            }
+
+            $user->imagen = $relative; // la vista usará $user->imagen_url (accessor)
         }
 
         $user->save();
 
-        // Asignar roles si se enviaron
+        // Roles (si se enviaron)
         if ($request->has('roles')) {
             $user->syncRoles($request->roles);
         }
 
-        return redirect()->route('user.index')->with('success', 'El usuario se ha actualizado con éxito.');
+        return redirect()->route('user.index')
+            ->with('success', 'El usuario se ha actualizado con éxito.');
     }
 
 

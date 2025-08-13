@@ -5,9 +5,9 @@
     <title>Registro de Usuario</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/sesion/registro.css') }}">
 </head>
 <body class="bg-light">
-
 <div class="container min-vh-100 d-flex align-items-center py-4">
   <div class="row justify-content-center w-100">
     <div class="col-12 col-sm-10 col-md-8 col-lg-6">
@@ -35,12 +35,6 @@
             @if(session('success'))
               <div class="alert alert-success">{{ session('success') }}</div>
             @endif
-
-            <div class="mb-3">
-              <label for="imagen" class="form-label">Foto de perfil</label>
-              <input id="imagen" type="file" name="imagen" accept="image/*" class="form-control">
-            </div>
-
             <div class="mb-3">
               <label class="form-label">Nombre Completo</label>
               <input type="text" name="name" class="form-control" required value="{{ old('name') }}">
@@ -73,13 +67,11 @@
             <a href="/">Inicio</a><br>
             <a href="{{ url('/login') }}">Iniciar sesión</a>
           </div>
-
         </div>
       </div>
     </div>
   </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

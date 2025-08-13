@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Editar Perfil</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ asset('css/perfil/editPerfil.css') }}">
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -26,59 +27,57 @@
                 </div>
             @endif
 
-           <form action="{{ route('perfil.update') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('perfil.update') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
                 <div>
                     <label for="imagen">Foto de perfil:</label>
-                    <input type="file" name="imagen" accept="image/*"> 
+                    <input type="file" name="imagen" id="imagen" accept="image/*">
+                    @if (!empty($user->imagen_url))
+                        <div class="mt-2">
+                            <img src="{{ $user->imagen_url }}" alt="Foto actual"
+                                class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
+                        </div>
+                    @endif
                 </div>
                 <div class="mb-3">
                     <label for="name" class="form-label">Nombre completo</label>
-                    <input type="text" name="name" id="name" class="form-control" 
-                           value="{{ old('name', auth()->user()->name) }}" required>
+                    <input type="text" name="name" id="name" class="form-control" value="{{ old('name', auth()->user()->name) }}" required>
                 </div>
 
                 <div class="mb-3">
                     <label for="nombre_usuario" class="form-label">Nombre de usuario</label>
-                    <input type="text" name="nombre_usuario" id="nombre_usuario" class="form-control" 
-                           value="{{ old('nombre_usuario', auth()->user()->nombre_usuario) }}" required>
+                    <input type="text" name="nombre_usuario" id="nombre_usuario" class="form-control" value="{{ old('nombre_usuario', auth()->user()->nombre_usuario) }}" required>
                 </div>
 
                 <div class="mb-3">
                     <label for="telefono" class="form-label">Teléfono</label>
-                    <input type="text" name="telefono" id="telefono" class="form-control" 
-                           value="{{ old('telefono', auth()->user()->telefono) }}">
+                    <input type="text" name="telefono" id="telefono" class="form-control" value="{{ old('telefono', auth()->user()->telefono) }}">
                 </div>
 
                 <div class="mb-3">
                     <label for="direccion" class="form-label">Dirección</label>
-                    <input type="text" name="direccion" id="direccion" class="form-control" 
-                           value="{{ old('direccion', auth()->user()->direccion) }}">
+                    <input type="text" name="direccion" id="direccion" class="form-control" value="{{ old('direccion', auth()->user()->direccion) }}">
                 </div>
 
                 <div class="mb-3">
                     <label for="edad" class="form-label">Edad</label>
-                    <input type="number" name="edad" id="edad" class="form-control" min="0" 
-                           value="{{ old('edad', auth()->user()->edad) }}">
+                    <input type="number" name="edad" id="edad" class="form-control" min="0" value="{{ old('edad', auth()->user()->edad) }}">
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Género</label><br>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="genero" value="H" id="generoH" 
-                               {{ old('genero', auth()->user()->genero) == 'H' ? 'checked' : '' }}>
+                        <input class="form-check-input" type="radio" name="genero" value="H" id="generoH" {{ old('genero', auth()->user()->genero) == 'H' ? 'checked' : '' }}>
                         <label class="form-check-label" for="generoH">Hombre</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="genero" value="M" id="generoM" 
-                               {{ old('genero', auth()->user()->genero) == 'M' ? 'checked' : '' }}>
+                        <input class="form-check-input" type="radio" name="genero" value="M" id="generoM" {{ old('genero', auth()->user()->genero) == 'M' ? 'checked' : '' }}>
                         <label class="form-check-label" for="generoM">Mujer</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="genero" value="O" id="generoO" 
-                               {{ old('genero', auth()->user()->genero) == 'O' ? 'checked' : '' }}>
+                        <input class="form-check-input" type="radio" name="genero" value="O" id="generoO" {{ old('genero', auth()->user()->genero) == 'O' ? 'checked' : '' }}>
                         <label class="form-check-label" for="generoO">Otro</label>
                     </div>
                 </div>

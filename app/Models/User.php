@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -183,6 +184,17 @@ class User extends Authenticatable
         }
 
         $this->save();
+    }
+
+    
+
+    public function getImagenUrlAttribute()
+    {
+        if (!$this->imagen) return null;
+        if (config('filesystems.default') === 's3') {
+            return Storage::disk('s3')->temporaryUrl($this->imagen, now()->addMinutes(10));
+        }
+        return asset($this->imagen);
     }
 
 }

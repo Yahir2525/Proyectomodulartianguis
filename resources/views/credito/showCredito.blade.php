@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ asset('css/credito/showCredito.css') }}">
     <title>Detalle(s) de Crédito</title>
     <style>
         table {

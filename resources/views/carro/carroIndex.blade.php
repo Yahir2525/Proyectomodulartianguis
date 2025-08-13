@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{{ asset('css/carro/carroIndex.css') }}">
     <title>Principal de carros</title>
 
     @php
         use App\Models\CarroProducto;
     @endphp
+
 </head>
 <body>
 <section>
     <div>
-        <center><h1>CAJA REGISTRADORA</h1></center>
+        <br><hr><center><h1>Caja registradora</h1></center><hr>
+       
 
         @if(Auth::check())
             <p><a href="{{ url('/carro/create') }}">Registrar un nuevo carro</a></p>
@@ -65,18 +68,17 @@
                         <table border="1" cellspacing="0" cellpadding="5">
                             <thead>
                                 <tr>
-                                    <th>ID del carrito</th>
-                                    <th>ID del usuario</th>
-                                    <th>Nombre del usuario</th>
-                                    <th>ID del pedido</th>
-                                    <th>ID del producto</th>
-                                    <th>Nombre del producto</th>
+                                    <th>ID carro</th>
+                                    <th>Usuario</th>
+                                    <th>ID producto</th>
+                                    <th>Producto</th>
                                     <th>Imagen</th>
-                                    <th>Piezas disponibles</th>
+                                    <th>Pzs disponibles</th>
                                     <th>Cantidad</th>
                                     <th>Precio unitario</th>
                                     <th>Subtotal</th>
-                                    <th>Acciones</th>
+                                    <th>Editar</th>
+                                    <th>Eliminar Producto</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -92,14 +94,12 @@
                                         @endphp
                                         <tr>
                                             <td>{{ $carrito->id_carro }}</td>
-                                            <td>{{ $carrito->id_user }}</td>
                                             <td>{{ optional($carrito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                                            <td>{{ $carrito->id_pedido }}</td>
                                             <td>{{ $producto->id_producto }}</td>
                                             <td>{{ $producto->nombre }}</td>
                                             <td>
-                                                @if ($producto->imagen)
-                                                    <img src="{{ asset($producto->imagen) }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
+                                                @if (!empty($producto->imagen_url))
+                                                    <img src="{{ $producto->imagen_url }}" alt="{{ $producto->nombre }}" width="200" loading="lazy">
                                                 @else
                                                     Sin imagen
                                                 @endif
@@ -113,10 +113,12 @@
                                                     <a href="{{ route('carro.edit', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}">
                                                         <button type="button">Editar</button>
                                                     </a>
+                                            </td>
+                                            <td>
                                                     <form action="{{ route('carro.eliminarProducto', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" method="POST" onsubmit="return confirm('¿Estás seguro?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit">Eliminar producto</button>
+                                                        <button type="submit">Eliminar</button>
                                                     </form>
                                                 @else
                                                     <span style="color: gray;">Pedido cerrado</span>
@@ -261,7 +263,5 @@
         div.style.display = select.value === 'credito' ? 'block' : 'none';
     }
     </script>
-
-
 </body>
 </html>

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ asset('css/user/createUser.css') }}">
     <title>Crear usuarios</title>
 </head>
 <body>
@@ -110,21 +111,27 @@
                         </div>
                         <div>
                             <label for="imagen">Foto de perfil:</label>
-                            <input type="file" name="imagen" accept="image/*"> 
+                            <input type="file" name="imagen" id="imagen" accept="image/*">
+                            @if (isset($user) && !empty($user->imagen_url))
+                                <div class="mt-2">
+                                    <img src="{{ $user->imagen_url }}" alt="Foto seleccionada"
+                                        class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
+                                </div>
+                            @endif
+                        </div> <br><br>
+                        <div class="mb-3">
+                            <label for="">Roles</label>
+                            <select name="roles[]" class="form-control" multiple>
+                                <option value="">Select Role</option>
+                                @foreach ($roles as $role)
+                                <option value="{{ $role }}">{{ $role }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                            <div class="mb-3">
-                                <label for="">Roles</label>
-                                <select name="roles[]" class="form-control" multiple>
-                                    <option value="">Select Role</option>
-                                    @foreach ($roles as $role)
-                                    <option value="{{ $role }}">{{ $role }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="control">
-                            <button class="button is-block is-info is-large is-fullwidth" type="submit">
-                                Enviar</button>
-                            </div>
+                        <div class="control">
+                        <button class="button is-block is-info is-large is-fullwidth" type="submit">
+                            Enviar</button>
+                        </div>
                         </form>
                     </div>
                 </div>

@@ -4,29 +4,8 @@
     <meta charset="UTF-8">
     <title>Crear Abono</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-        /* contenedor cómodo y centrado */
-        .container { max-width: 720px; margin: 0 auto; padding: 16px; }
-
-        /* formulario fluido en móvil */
-        form { display: grid; gap: 12px; }
-        label { font-weight: 600; }
-        input[type="text"], input[type="number"], select {
-            width: 100%; padding: 10px; box-sizing: border-box;
-        }
-        button { width: 100%; padding: 10px 14px; }
-
-        /* agrupar campos en 2 columnas solo en pantallas medianas+ */
-        .grid-2 { display: grid; gap: 12px; }
-        @media (min-width: 768px) {
-            .grid-2 { grid-template-columns: 1fr 1fr; }
-        }
-
-        /* mensajes de error */
-        .errors { color: #b00020; }
-    </style>
-
+    <link rel="stylesheet" href="{{ asset('css/abono/createAbono.css') }}">
+    
     <script>
         function filtrarCreditos() {
             const usuarioInput = document.getElementById('nombre_usuario');
@@ -70,7 +49,7 @@
 </head>
 <body>
 <div class="container">
-    <h1>Registrar nuevo abono</h1>
+    <br><hr><center><h1>Registrar nuevo abono</h1></center><hr><br>
 
     @if ($errors->any())
         <div class="errors" role="alert">
@@ -105,7 +84,7 @@
                     {{-- usa tu PK real (id_user) para no romper la relación --}}
                     <input type="hidden" name="id_user" value="{{ Auth::user()->id_user }}">
                 @endif
-            </div>
+            </div> <br>
 
             {{-- Crédito activo con saldo > 0 --}}
             <div>
@@ -115,23 +94,25 @@
                     @foreach ($creditos->where('estado', 1)->filter(fn($c) => $c->saldo_total > 0) as $credito)
                         <option
                             value="{{ $credito->id_credito }}"
-                            data-user="{{ $credito->id_user }}"
-                        >
+                            data-user="{{ $credito->id_user }}">
                             Crédito #{{ $credito->id_credito }} · {{ $credito->user->nombre_usuario ?? 'N/A' }} · ${{ number_format($credito->saldo_total, 2) }}
                         </option>
                     @endforeach
                 </select>
             </div>
-        </div>
+        </div><br>
 
         {{-- Monto --}}
         <div>
             <label for="monto_abono">Monto del abono</label>
             <input type="number" name="monto_abono" id="monto_abono" min="1" step="0.01" required>
         </div>
-
-        <button type="submit">Aplicar al crédito</button>
-    </form>
+        <br><button type="submit">Aplicar al crédito</button>
+    </form><br><br>
+    <center>
+    <div class="back-wrap">
+    <a href="{{ route('abono.index') }}" class="btn btn-primary">Cancelar</a>
+    </div></center>
 </div>
 </body>
 </html>

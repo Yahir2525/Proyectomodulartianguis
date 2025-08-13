@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
+    <link rel="stylesheet" href="{{ asset('css/user/userIndex.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Listado de Usuarios</title>
     <style>
@@ -105,8 +106,8 @@
                     <tr>
                         <td>{{ $user->id_user }}</td>
                         <td>
-                            @if($user->imagen)
-                                <img src="{{ asset($user->imagen) }}" alt="Foto de perfil" width="250">
+                            @if (!empty($user->imagen_url))
+                                <img src="{{ $user->imagen_url }}" alt="Foto de perfil" width="250">
                             @else
                                 <span>Sin imagen</span>
                             @endif

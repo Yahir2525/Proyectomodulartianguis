@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ asset('css/producto/showProducto.css') }}">
     <title>Detalle del Producto</title>
     <style>
         .sin-stock {
@@ -65,24 +66,8 @@
                             <td>{{ $producto->id_producto }}</td>
                             <td>{{ $producto->nombre }}</td>
                             <td>
-                                @if ($producto->imagen)
-                                    @php
-                                        $preview = null;
-                                        try {
-                                            if (config('filesystems.default') === 's3') {
-                                                $preview = \Illuminate\Support\Facades\Storage::disk('s3')->temporaryUrl($producto->imagen, now()->addMinutes(10));
-                                            } else {
-                                                $preview = asset($producto->imagen);
-                                            }
-                                        } catch (\Throwable $e) {
-                                            $preview = null;
-                                        }
-                                    @endphp
-                                    @if ($preview)
-                                        <img src="{{ $preview }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
-                                    @else
-                                        Sin imagen
-                                    @endif
+                                @if (!empty($producto->imagen_url))
+                                    <img src="{{ $producto->imagen_url }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
                                 @else
                                     Sin imagen
                                 @endif

@@ -1,0 +1,93 @@
+/* ===== editAbono.css — diseño simple y consistente (como create) ===== */
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; color: #222; background: #f7f7f8; }
+
+/* Contenedor centrado horizontal (igual que create) */
+.container { max-width: 400px; margin: 0 auto; padding: 16px; }
+
+/* Titulares / info */
+h1 { margin: 0 0 12px; font-size: clamp(1.2rem, 0.95rem + 1vw, 1.6rem); }
+p  { margin: 6px 0; }
+
+/* Formulario fluido y compacto */
+form { display: grid; gap: 12px; margin-top: 6px; }
+label { font-weight: 600; font-size: 0.95rem; }
+
+input[type="number"],
+select{
+width: 100%;
+padding: 8px 10px;
+border: 1px solid #999;
+border-radius: 6px;
+background: #fff;
+outline: none;
+font-size: 0.95rem;
+}
+input[type="number"]:focus,
+select:focus{
+border-color: #2563eb;
+box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+
+/* Botón primario y enlaces con aspecto de botón */
+button,
+.btn.btn-primary{
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 100%;
+padding: 8px 12px;
+min-height: 36px;
+border-radius: 6px;
+border: 1px solid #2563eb;
+background: #2563eb;
+color: #fff;
+font-size: .94rem;
+line-height: 1;
+cursor: pointer;
+text-decoration: none;
+}
+button:hover,
+.btn.btn-primary:hover{ filter: brightness(.95); }
+
+/* Contenedor para el botón "Volver" */
+.back-wrap{ margin-top: 10px; }
+/* Si prefieres que el botón volver no sea full width en desktop: */
+@media (min-width: 641px){
+.back-wrap .btn.btn-primary{ width: auto; }
+}
+
+/* Mensajes de error */
+.errors{
+color: #7f1d1d;
+background: #fef2f2;
+border: 1px solid #fca5a5;
+border-radius: 8px;
+padding: 10px 12px;
+font-size: 0.95rem;
+margin-bottom: 8px;
+}
+.errors ul{ margin: 0 0 0 18px; padding: 0; }
+.errors li{ margin: 4px 0; }
+
+/* Compatibilidad si aún viene inline style="color:red" desde Blade */
+[style*="color: red;"]{
+color: #7f1d1d !important;
+background: #fef2f2;
+border: 1px solid #fca5a5;
+border-radius: 8px;
+padding: 10px 12px;
+margin: 10px 0 8px;
+}
+
+/* Responsivo (igual que create) */
+@media (max-width: 768px){
+html { font-size: 15px; }
+.container { padding: 14px; }
+}
+@media (max-width: 640px){
+html { font-size: 14px; }
+.container { padding: 12px; }
+.btn.btn-primary, button{ width: 100%; }
+}

@@ -1,0 +1,267 @@
+/* ===== carroIndex.css — estilo alineado con abonoIndex ===== */
+
+/* Reset & tipografía */
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; color: #222; background: #f7f7f8; }
+
+/* Contenedor principal (tu <section><div> actual) */
+section > div {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 14px;
+}
+
+/* Títulos */
+h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.2rem, 1rem + 1vw, 1.8rem);
+  text-align: center;
+}
+h2 {
+  margin-top: 24px;
+  font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem);
+}
+
+/* Enlaces */
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- Botones (coherentes con abonoIndex) ---------- */
+button,
+input[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  margin: 2px 4px;
+  border-radius: 6px;
+  border: 1px solid #2563eb;
+  background: #2563eb;           /* Primario (azul) por defecto */
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+  font-size: .9rem;
+  white-space: nowrap;
+}
+button:hover,
+input[type="submit"]:hover { filter: brightness(.95); }
+
+/* "Registrar un nuevo carro" como primario verde, sin cambiar HTML */
+p > a[href$="/carro/create"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  margin: 2px 4px;
+  border-radius: 6px;
+  border: 1px solid #15c221;
+  background: #15c221;            /* .btn-primary (verde) */
+  color: #fff;
+  text-decoration: none;
+}
+p > a[href$="/carro/create"]:hover { filter: brightness(.95); }
+
+/* Botón "Editar" (morado) — tu HTML usa <a><button>Editar</button></a> */
+td a button[type="button"] {
+  background: hsl(275, 100%, 59%); /* .btn-edit */
+  border-color: hsl(275, 100%, 59%);
+}
+
+/* Botones de eliminar:
+   - eliminar producto (tiene onsubmit="return confirm('¿Estás seguro?');")
+   - eliminar carro completo (onsubmit contiene "eliminar todo este carro")
+*/
+form[onsubmit*="¿Estás seguro?"] button,
+form[onsubmit*="eliminar todo este carro"] button {
+  background: #ef4444;            /* .btn-danger (rojo) */
+  border-color: #ef4444;
+}
+
+/* ---------- Formulario de búsqueda (grid como en abonoIndex) ---------- */
+form[action$="/carro/showCarro"] {
+  display: grid;
+  grid-template-columns: max-content minmax(220px, 360px) auto; /* etiqueta | campo | botón */
+  gap: 6px;
+  align-items: center;
+  margin: 6px 0 10px;
+}
+form[action$="/carro/showCarro"] label {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+#busqueda,
+form[action$="/carro/showCarro"] select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  outline: none;
+  font-size: 0.95rem;
+}
+#busqueda::placeholder { color: #9aa3ad; }
+#busqueda:focus,
+form[action$="/carro/showCarro"] select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+
+/* Botón Buscar consistente con el primario (azul) */
+form[action$="/carro/showCarro"] input[type="submit"] {
+  min-height: 32px;
+}
+
+/* ---------- Tablas ---------- */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 8px;
+  min-width: 680px;         /* Mantén estructura en desktop */
+  background: #fff;
+}
+th, td {
+  border: 1px solid #999;
+  padding: 6px;
+  text-align: center;
+  font-size: 0.95rem;
+  vertical-align: middle;
+  word-break: break-word;
+}
+thead th { background: #f3f4f6; }
+tbody tr:nth-child(odd) { background: #fafafa; }
+tbody tr:hover { background: #f2f7ff; }
+
+/* Imágenes de producto */
+td img {
+  max-width: min(200px, 100%);
+  height: auto;
+}
+
+/* Celda de acciones: alinear botones en fila en desktop */
+td .btn { display: inline-flex; }
+td a, td form { display: inline; }
+
+/* ---------- Bloques de crédito/selecciones ---------- */
+[id^="credito-opciones-"] {
+  margin-top: 8px;
+}
+[id^="credito-opciones-"] select {
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 992px) {
+  html { font-size: 15px; }
+  section > div { padding: 12px; }
+}
+
+@media (max-width: 768px) {
+  html { font-size: 14px; }
+
+  /* Tabla desplazable en móvil (sin cambiar HTML) */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    min-width: 640px;
+  }
+  thead, tbody, tr, th, td { white-space: nowrap; }
+
+  /* Form de búsqueda apilado y a ancho completo */
+  form[action$="/carro/showCarro"] {
+    grid-template-columns: 1fr;
+  }
+  form[action$="/carro/showCarro"] label,
+  form[action$="/carro/showCarro"] #busqueda,
+  form[action$="/carro/showCarro"] input[type="submit"],
+  form[action$="/carro/showCarro"] select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  html { font-size: 13.5px; }
+  th, td { padding: 5px; }
+  thead, tbody, tr, th, td { white-space: normal; }
+
+  /* Botones de acciones apilados a ancho completo */
+  td a,
+  td form {
+    display: block;
+    width: 100%;
+    margin: 6px 0;
+  }
+  td a button,
+  td form button,
+  input[type="submit"] {
+    width: 100%;
+    min-height: 44px;      /* tap-friendly */
+  }
+}
+
+/* Botón "Buscar" sin estirarse en desktop */
+@media (min-width: 769px) {
+  /* La 3ª columna se ajusta al contenido del botón */
+  form[action$="/carro/showCarro"] {
+    grid-template-columns: max-content minmax(220px, 360px) max-content;
+  }
+
+  /* Y el propio botón deja de estirarse */
+  form[action$="/carro/showCarro"] input[type="submit"] {
+    justify-self: start; /* no fill */
+    width: auto;         /* solo lo necesario */
+  }
+}
+
+/* En móvil sí lo queremos a todo el ancho (tocable) */
+@media (max-width: 768px) {
+  form[action$="/carro/showCarro"] input[type="submit"] {
+    justify-self: stretch;
+    width: 100%;
+  }
+}
+
+section > div { max-width: clamp(960px, 92vw, 1100px); }
+
+/* 2) En pantallas muy grandes, no dejes que se estire demasiado */
+@media (min-width: 1400px) {
+  section > div { max-width: 1100px; }
+}
+
+/* 3) Laptops / tablets apaisado (900–1399px): baja un poco la escala */
+@media (min-width: 900px) and (max-width: 1399px) {
+  html { font-size: 15px; } /* ~-6% */
+  h1 { font-size: clamp(1.05rem, 0.8rem + 0.9vw, 1.6rem); }
+  h2 { font-size: clamp(1rem, 0.8rem + 0.4vw, 1.2rem); }
+
+  th, td { padding: 5px; font-size: 0.92rem; }
+  td img { max-width: 170px; }
+  table { min-width: 720px; } /* reduce el ancho mínimo de la tabla */
+}
+
+/* 4) Entre 768 y 899px: aún más compacto sin romper el scroll horizontal */
+@media (min-width: 768px) and (max-width: 899px) {
+  html { font-size: 14px; }
+  th, td { padding: 4px; font-size: 0.9rem; }
+  td img { max-width: 150px; }
+  table { min-width: 680px; }
+}
+
+/* 5) (Reafirmación) Botón Buscar que no se estire en desktop */
+@media (min-width: 769px) {
+  form[action$="/carro/showCarro"] {
+    grid-template-columns: max-content minmax(220px, 360px) max-content;
+  }
+  form[action$="/carro/showCarro"] input[type="submit"] {
+    justify-self: start;
+    width: auto;
+  }
+}

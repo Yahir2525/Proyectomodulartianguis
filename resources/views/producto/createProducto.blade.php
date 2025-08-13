@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ asset('css/producto/createProducto.css') }}">
     <title>Registrar Producto</title>
 </head>
 <body>
@@ -25,9 +26,9 @@
 
         <label for="imagen">Imagen del producto:</label><br>
         <input type="file" name="imagen" id="imagen" accept="image/*"><br>
-        @if (session('imagen_url'))
+        @if (isset($producto) && !empty($producto->imagen_url))
             <br>
-            <img src="{{ session('imagen_url') }}" alt="Imagen seleccionada" style="max-width:260px;">
+            <img src="{{ $producto->imagen_url }}" alt="Imagen seleccionada" style="max-width:260px;">
         @endif
         <br><br>
 

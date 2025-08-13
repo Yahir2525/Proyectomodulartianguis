@@ -30,6 +30,11 @@ class UserSeeder extends Seeder
 
             $nombre = $row[0] ?? null;
             $email = $row[1] ?? null;
+            $passwordPlano = isset($row[2]) ? trim((string)$row[2]) : '';
+            $hashedPassword = (strncmp($passwordPlano, '$2y$', 4) === 0)
+                ? $passwordPlano
+                : Hash::make($passwordPlano);
+
             $genero = $row[3] ?? 'O';
             $edad = is_numeric($row[4] ?? null) ? intval($row[4]) : 0;
             $telefono = $row[5] ?? null;
@@ -49,7 +54,7 @@ class UserSeeder extends Seeder
             $user = User::create([
                 'name' => $nombre,
                 'email' => $email,
-                'password' => Hash::make('password123'),
+                'password' => $hashedPassword, // <- del archivo, hasheada
                 'genero' => $genero,
                 'edad' => $edad,
                 'telefono' => $telefono,

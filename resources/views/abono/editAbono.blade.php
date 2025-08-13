@@ -4,54 +4,15 @@
     <meta charset="UTF-8">
     <title>Editar Abono</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; padding: 16px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-        h1 { max-width: 720px; margin: 0 auto 16px; }
-
-        /* centrar y dar respiro al formulario */
-        form { max-width: 720px; margin: 0 auto; display: grid; gap: 12px; }
-
-        /* estilos suaves de campos */
-        label { font-weight: 600; }
-        input[type="number"], select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-        button {
-            padding: 10px 14px;
-            border: 0;
-            border-radius: 6px;
-            background: #0d6efd;
-            color: #fff;
-            cursor: pointer;
-        }
-        button:hover { background: #0b5ed7; }
-
-        /* mensajes de error */
-        [style*="color: red;"] {
-            max-width: 720px;
-            margin: 0 auto 12px;
-        }
-
-        /* enlace volver */
-        a[href*="abono.index"] { display: inline-block; margin: 12px auto 0; max-width: 720px; color: #0d6efd; }
-
-        /* en móviles todo fluye a 100% */
-        @media (max-width: 640px) {
-            button, a[href*="abono.index"] { width: 100%; text-align: center; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/abono/editAbono.css') }}">
 </head>
 <body>
-    <h1>Editar Abono #{{ $abono->id_abono }}</h1>
+    <section class="container">
+    <br><hr><center><h1>Editar Abono #{{ $abono->id_abono }}</h1></center><hr><br>
 
     {{-- Información adicional del abono --}}
-    <p><strong>Usuario:</strong> {{ $abono->user->nombre_usuario ?? 'Usuario no disponible' }}</p>
-    <p><strong>Fecha de abono:</strong> {{ $abono->created_at->format('d/m/Y H:i') }}</p>
+    <p><strong>Usuario:</strong> {{ $abono->user->nombre_usuario ?? 'Usuario no disponible' }}</p><br>
+    <p><strong>Fecha de abono:</strong> {{ $abono->created_at->format('d/m/Y H:i') }}</p><br>
 
     @if ($errors->any())
         <div style="color: red;">
@@ -70,7 +31,7 @@
         <div>
             <label for="monto_abono">Monto del Abono:</label>
             <input type="number" name="monto_abono" id="monto_abono" step="0.01" min="0" value="{{ old('monto_abono', $abono->monto_abono) }}" required>
-        </div>
+        </div><br>
 
         <div>
             <label for="id_credito">Seleccionar Crédito:</label>
@@ -88,10 +49,13 @@
         </div>
 
         <br>
-        <button type="submit">Actualizar Abono</button>
+        <button type="submit" class="btn btn-primary">Actualizar Abono</button>
     </form>
 
-    <br>
-    <a href="{{ route('abono.index') }}">← Volver al listado de abonos</a>
+    <br><center>
+    <div class="back-wrap">
+    <a href="{{ route('abono.index') }}" class="btn btn-primary">Cancelar</a>
+    </div></center>
+    </section>
 </body>
 </html>
