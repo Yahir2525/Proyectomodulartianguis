@@ -49,7 +49,7 @@
 </head>
 <body>
 <div class="container">
-    <br><hr><center><h1>Registrar nuevo abono</h1></center><hr><br>
+    <br><hr class="hr-grueso"><center><h1>Registrar nuevo abono</h1></center><hr class="hr-grueso"><br>
 
     @if ($errors->any())
         <div class="errors" role="alert">

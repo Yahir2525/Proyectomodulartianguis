@@ -9,7 +9,7 @@
 <body>
     <section class="container">
         
-        <br><hr><center><h1>Historial de Abonos</h1></center><hr><br>
+        <br><hr class="hr-grueso"><center><h1>Historial de Abonos</h1></center><hr class="hr-grueso"><br>
 
         @can('create abono')
         <form action="{{ url('/abono/create') }}" method="GET" style="display:inline;">

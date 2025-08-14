@@ -1,0 +1,12 @@
+
+        body { background: linear-gradient(to right, #6a11cb, #2575fc); color: #fff; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+        nav { background: rgba(0,0,0,0.7) !important; }
+        .inicio-container { text-align: center; padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
+        .inicio-container h1 { font-size: 3rem; font-weight: 800; margin-bottom: 10px; letter-spacing: .5px; }
+        .inicio-container p.frase { font-size: 1.35rem; font-style: italic; opacity: .95; margin-bottom: 40px; }
+        .accesos { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; }
+        .accesos a, .accesos form button { background: #fff; color: #2575fc; font-weight: 700; padding: 12px 18px; border-radius: 12px; text-decoration: none; border: none; font-size: 1rem; transition: transform .2s, box-shadow .2s, background .2s; box-shadow: 0 8px 18px rgba(0,0,0,.15); }
+        .accesos a:hover, .accesos form button:hover { background: #f5f7ff; transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.18); }
+        .user-icon { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,.6); }
+        footer { background: rgba(255,255,255,0.08); padding: 18px 0; text-align: center; color: #fff; margin-top: 50px; }
+        .navbar-brand { font-weight: 700; }

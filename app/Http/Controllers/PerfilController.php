@@ -54,7 +54,7 @@ class PerfilController extends Controller
         if ($request->hasFile('imagen')) {
             $file = $request->file('imagen');
             $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-            $relativePath = 'img/perfiles/' . $filename;
+            $relativePath = 'perfiles/' . $filename;
 
             // borrar anterior
             if ($user->imagen) {
@@ -68,12 +68,12 @@ class PerfilController extends Controller
 
             // subir nueva
             if (config('filesystems.default') === 's3') {
-                Storage::disk('s3')->putFileAs('img/perfiles', $file, $filename, [
+                Storage::disk('s3')->putFileAs('perfiles', $file, $filename, [
                     'visibility'  => 'private',              // bucket privado
                     'ContentType' => $file->getMimeType(),
                 ]);
             } else {
-                $file->move(public_path('img/perfiles'), $filename);
+                $file->move(public_path('perfiles'), $filename);
             }
 
             $user->imagen = $relativePath; // siempre guardamos ruta relativa
@@ -84,7 +84,5 @@ class PerfilController extends Controller
         return redirect()->route('perfil.perfilIndex')
             ->with('success', 'Perfil actualizado correctamente.');
     }
-
-
 
 }

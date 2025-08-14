@@ -8,7 +8,7 @@
 </head>
 <body>
     <section class="container">
-    <br><hr><center><h1>Editar Abono #{{ $abono->id_abono }}</h1></center><hr><br>
+    <br><hr class="hr-grueso"><center><h1>Editar Abono #{{ $abono->id_abono }}</h1></center><hr class="hr-grueso"><br>
 
     {{-- Información adicional del abono --}}
     <p><strong>Usuario:</strong> {{ $abono->user->nombre_usuario ?? 'Usuario no disponible' }}</p><br>

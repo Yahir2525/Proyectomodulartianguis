@@ -76,7 +76,7 @@
     </style>
 </head>
 <body>
-    <h1>Detalle(s) de Carro</h1>
+    <br><hr class="hr-grueso"><center><h1>Detalle del carro</h1></center><hr class="hr-grueso">
 
     @php
         // Normaliza variable para trabajar con uno o varios carros

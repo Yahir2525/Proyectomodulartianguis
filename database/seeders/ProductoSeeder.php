@@ -35,27 +35,10 @@ class ProductoSeeder extends Seeder
             $nombreImagen    = $row[8] ?? null;
 
             $rutaImagen = null;
-
             if ($nombreImagen) {
-                $rutaLocal = public_path('img/' . $nombreImagen);
-
-                if (File::exists($rutaLocal)) {
-                    // Guardamos la MISMA ruta relativa en BD
-                    $rutaImagen = 'img/' . $nombreImagen;
-
-                    // Solo si el disk activo es s3, subimos el archivo al bucket
-                    if (config('filesystems.default') === 's3') {
-                        $destino = $rutaImagen; // "img/archivo.jpg"
-
-                        // Evita re-subir si ya existe
-                        if (!Storage::disk('s3')->exists($destino)) {
-                            Storage::disk('s3')->put(
-                                $destino,
-                                File::get($rutaLocal),
-                                ['visibility' => 'private'] // bucket privado
-                            );
-                        }
-                    }
+                $ruta = public_path('img/' . $nombreImagen);
+                if (File::exists($ruta)) {
+                    $rutaImagen = 'img/' . $nombreImagen; // lo que se guarda en BD
                 }
             }
 

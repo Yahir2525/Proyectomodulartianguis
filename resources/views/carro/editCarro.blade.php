@@ -80,7 +80,7 @@
     </style>
 </head>
 <body>
-    <h1>Editar Carrito de Compras</h1>
+    <br><hr class="hr-grueso"><center><h1>Editar carro</h1></center><hr class="hr-grueso">
     <hr>
 
     @php

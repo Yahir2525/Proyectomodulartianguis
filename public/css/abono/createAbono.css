@@ -88,3 +88,5 @@ button:hover,
   /* Botones a ancho completo en móvil */
   .btn.btn-primary { width: 100%; }
 }
+
+hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }

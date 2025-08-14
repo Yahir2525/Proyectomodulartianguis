@@ -265,3 +265,5 @@ section > div { max-width: clamp(960px, 92vw, 1100px); }
     width: auto;
   }
 }
+
+hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }

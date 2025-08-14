@@ -104,12 +104,8 @@ class CarroController extends Controller
         $nuevoTotal = $totalAnterior + ($producto->precio_unitario * $cantidad);
 
         // Aplicar reglas de comportamiento de pago
-        if ($user->pagaSiempreAdelantado() && $nuevoTotal > $totalAnterior && $user->montoPromedio() > 1000) {
+        if ($user->pagaSiempreAdelantado() && $nuevoTotal > $totalAnterior && $user->montoPromedio() > 10000) {
             $user->aumentarLimiteCredito();
-        } elseif ($user->pagaTardePeroPaga() && $nuevoTotal >= $totalAnterior) {
-            if ($nuevoTotal > $totalAnterior) {
-                return back()->with('error', 'No puedes aumentar el total del pedido, solo mantenerlo igual.');
-            }
         } elseif ($user->tienePagosAtrasadosSinAbonar()) {
             if ($request->input('metodo_pago') === 'credito') {
                 return back()->with('error', 'No puedes aumentar el total del pedido a crédito porque tienes pagos atrasados sin abonar.');
@@ -201,10 +197,6 @@ class CarroController extends Controller
         // Aplicar reglas de comportamiento de pago
         if ($user->pagaSiempreAdelantado() && $nuevoTotal > $pedido->total_pedido && $user->montoPromedio() > 1000) {
             $user->aumentarLimiteCredito();
-        } elseif ($user->pagaTardePeroPaga() && $nuevoTotal >= $pedido->total_pedido) {
-            if ($nuevoTotal > $pedido->total_pedido) {
-                return back()->with('error', 'No puedes aumentar el total del pedido, solo mantenerlo igual.');
-            }
         } elseif ($user->tienePagosAtrasadosSinAbonar()) {
             if ($request->input('metodo_pago') === 'credito') {
                 return back()->with('error', 'No puedes aumentar el total del pedido a crédito porque tienes pagos atrasados sin abonar.');

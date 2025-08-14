@@ -5,106 +5,81 @@
     <title>Crear Carro</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ asset('css/carro/createCarro.css') }}">
-    <style>
-        .sin-stock { background-color: #ffe5e5; }
-        .resaltado { font-weight: bold; color: red; }
-        .cant-input { width: 60px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { padding: 6px; border: 1px solid #999; text-align: center; }
 
-        /* --------- Mejores estilos responsivos (sin cambiar tu HTML) --------- */
-        * { box-sizing: border-box; }
-        html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-        body { margin: 0; padding: 16px; color: #222; background: #fff; }
-        h1 { margin: 0 0 12px; font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem); }
-        h3 { margin: 16px 0 8px; font-size: clamp(1.1rem, 0.95rem + 0.6vw, 1.4rem); }
-
-        /* Imágenes dentro de la tabla: que no desborden */
-        td img {
-            width: auto;
-            max-width: min(200px, 100%);
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-
-        /* Área táctil mínima y legibilidad */
-        input, select, button { line-height: 1.2; }
-        button { padding: 8px 12px; cursor: pointer; }
-
-        /* Breakpoint tablet/móvil: tabla desplazable, formularios apilados */
-        @media (max-width: 768px) {
-            table {
-                display: block;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                border: 1px solid #e9e9e9;
-            }
-            thead, tbody, tr, th, td { white-space: nowrap; }
-
-            /* Inputs select y botones a ancho completo para comodidad */
-            input[type="text"],
-            input[type="number"],
-            select,
-            button {
-                width: 100%;
-                max-width: 100%;
-                margin: 6px 0;
-            }
-            .cant-input { width: 100%; }
-
-            /* Un poco más de aire */
-            body { padding: 12px; }
-        }
-
-        /* Móviles muy pequeños: permitir salto de línea en celdas */
-        @media (max-width: 480px) {
-            thead, tbody, tr, th, td { white-space: normal; }
-            th, td { padding: 6px; }
-            button { min-height: 44px; } /* toque cómodo */
-        }
-        /* --------------------------------------------------------------------- */
-    </style>
 
     <script>
-        function filtrarPedidosPorUsuario() {
-            const nombre = document.getElementById('nombre_usuario').value;
-            const datalist = document.getElementById('usuarios');
-            const hiddenInput = document.getElementById('id_user');
-            const opciones = datalist.options;
+    function filtrarPedidosPorUsuario() {
+        const nombre = document.getElementById('nombre_usuario').value;
+        const datalist = document.getElementById('usuarios');
+        const hiddenInput = document.getElementById('id_user');
+        const opciones = datalist.options;
 
-            let idEncontrado = null;
-            for (let i = 0; i < opciones.length; i++) {
-                if (opciones[i].value === nombre) {
-                    idEncontrado = opciones[i].dataset.userid;
-                    break;
-                }
-            }
-
-            if (idEncontrado) {
-                hiddenInput.value = idEncontrado;
-
-                const opcionesPedidos = document.querySelectorAll('#id_pedido option[data-user]');
-                opcionesPedidos.forEach(op => {
-                    op.style.display = (op.dataset.user == idEncontrado) ? 'block' : 'none';
-                });
-
-                document.getElementById('id_pedido').value = '';
+        let idEncontrado = null;
+        for (let i = 0; i < opciones.length; i++) {
+            if (opciones[i].value === nombre) {
+                idEncontrado = opciones[i].dataset.userid;
+                break;
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const inputNombre = document.getElementById('nombre_usuario');
-            if (inputNombre) {
-                inputNombre.addEventListener('input', filtrarPedidosPorUsuario);
-                filtrarPedidosPorUsuario();
+        if (idEncontrado) {
+            hiddenInput.value = idEncontrado;
+
+            const opcionesPedidos = document.querySelectorAll('#id_pedido option[data-user]');
+            opcionesPedidos.forEach(op => {
+                op.style.display = (op.dataset.user == idEncontrado) ? 'block' : 'none';
+            });
+
+            document.getElementById('id_pedido').value = '';
+        }
+    }
+
+    /* NUEVO: desactiva checkbox e input cantidad si no hay piezas disponibles */
+    function desactivarProductosSinStock() {
+        const filas = document.querySelectorAll('table tbody tr');
+
+        filas.forEach(fila => {
+            // 8ª columna = "Piezas disponibles"
+            const celdaDisp = fila.querySelector('td:nth-child(8)');
+            if (!celdaDisp) return;
+
+            const num = parseInt((celdaDisp.textContent || '0').replace(/[^\d-]/g, ''), 10);
+            const disp = isNaN(num) ? 0 : num;
+
+            const chk = fila.querySelector('td:first-child input[type="checkbox"]');
+            const qty = fila.querySelector('td:last-child input[type="number"]');
+
+            if (disp <= 0) {
+                if (chk) { chk.checked = false; chk.disabled = true; }
+                if (qty) { qty.value = ''; qty.disabled = true; }
+                fila.classList.add('sin-stock');
+            } else {
+                if (chk) chk.disabled = false;
+                if (qty) {
+                    qty.disabled = false;
+                    qty.min = '1';
+                    qty.step = '1';
+                    qty.max = String(disp);
+                }
+                fila.classList.remove('sin-stock');
             }
         });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputNombre = document.getElementById('nombre_usuario');
+        if (inputNombre) {
+            inputNombre.addEventListener('input', filtrarPedidosPorUsuario);
+            filtrarPedidosPorUsuario();
+        }
+        desactivarProductosSinStock(); // <-- llamada añadida
+    });
     </script>
+
 </head>
 <body>
-    <h1>Crear carrito de compras</h1>
-    <hr>
+  <a id="top"></a>
+    <br><hr class="hr-grueso"><center><h1>Crear nuevo carro</h1></center><hr class="hr-grueso">
 
     @if(session('error'))
         <p style="color: red;">{{ session('error') }}</p>
@@ -153,15 +128,30 @@
                         <td>{{ $producto->color }}</td>
                         <td>{{ $producto->tamanio }}</td>
                         <td>${{ number_format($producto->precio_unitario, 2) }}</td>
-                        <td>{{ $producto->piezas_disponibles }}</td>
+                        @php
+                            // Si viene null o negativo, lo normalizamos a 0
+                            $disp = max(0, (int)($producto->piezas_disponibles ?? 0));
+                        @endphp
+                        <td>{{ $disp }}</td>
                         <td>
-                            <input type="number" name="cantidades[{{ $producto->id_producto }}]" max="{{ $producto->piezas_disponibles }}" class="cant-input">
+                            <input
+                            type="number"
+                            name="cantidades[{{ $producto->id_producto }}]"
+                            class="cant-input"
+                            min="1"
+                            step="1"
+                            max="{{ $disp }}"
+                            {{ $disp === 0 ? 'disabled' : '' }}
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            />
                         </td>
                     </tr>
                     @endif
                 @endforeach
             </tbody>
         </table>
+        <center>
         <br>
         {{-- Buscador de usuario para admin --}}
         @if(Auth::user()->hasRole('administrador'))
@@ -198,8 +188,8 @@
         <button type="submit">Agregar productos seleccionados</button>
     </form>
 
-    <br>
-    <a href="/">Inicio</a> |
-    <a href="/carro">Ver carrito</a>
+    <br><br>
+    <a href="/carro">Cancelar</a>
+    <a href="#top" aria-label="Ir arriba">Ir arriba</a></center>
 </body>
 </html>

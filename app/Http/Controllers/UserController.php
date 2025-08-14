@@ -63,15 +63,15 @@ class UserController extends Controller
         if ($request->hasFile('imagen')) {
             $file = $request->file('imagen');
             $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-            $relativePath = 'img/perfiles/' . $filename;
+            $relativePath = 'perfiles/' . $filename;
 
             if (config('filesystems.default') === 's3') {
-                Storage::disk('s3')->putFileAs('img/perfiles', $file, $filename, [
+                Storage::disk('s3')->putFileAs('perfiles', $file, $filename, [
                     'visibility'  => 'private',              // bucket privado
                     'ContentType' => $file->getMimeType(),
                 ]);
             } else {
-                $file->move(public_path('img/perfiles'), $filename);
+                $file->move(public_path('perfiles'), $filename);
             }
 
             $user->imagen = $relativePath; // guardas la ruta relativa en BD
@@ -173,7 +173,7 @@ class UserController extends Controller
         if ($request->hasFile('imagen')) {
             $file        = $request->file('imagen');
             $filename    = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-            $relative    = 'img/perfiles/' . $filename;  // misma convención en toda la app
+            $relative    = 'perfiles/' . $filename;  // misma convención en toda la app
 
             // Borrar anterior
             if (!empty($user->imagen)) {
@@ -187,12 +187,12 @@ class UserController extends Controller
 
             // Subir nueva
             if (config('filesystems.default') === 's3') {
-                Storage::disk('s3')->putFileAs('img/perfiles', $file, $filename, [
+                Storage::disk('s3')->putFileAs('perfiles', $file, $filename, [
                     'visibility'  => 'private',                 // bucket privado
                     'ContentType' => $file->getMimeType(),
                 ]);
             } else {
-                $file->move(public_path('img/perfiles'), $filename);
+                $file->move(public_path('perfiles'), $filename);
             }
 
             $user->imagen = $relative; // la vista usará $user->imagen_url (accessor)

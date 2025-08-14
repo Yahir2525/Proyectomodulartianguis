@@ -14,7 +14,7 @@
 <body>
 <section>
     <div>
-        <br><hr><center><h1>Caja registradora</h1></center><hr>
+        <br><hr class="hr-grueso"><center><h1>Caja registradora</h1></center><hr class="hr-grueso">
        
 
         @if(Auth::check())

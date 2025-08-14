@@ -91,3 +91,5 @@ html { font-size: 14px; }
 .container { padding: 12px; }
 .btn.btn-primary, button{ width: 100%; }
 }
+
+hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }

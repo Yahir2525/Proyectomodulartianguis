@@ -139,3 +139,5 @@ form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
     font-size: .9rem;
   }
 }
+
+hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }

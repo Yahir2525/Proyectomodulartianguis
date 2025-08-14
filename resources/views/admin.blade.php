@@ -1,262 +1,97 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="Blancos Doña Colchas" />
-        <meta name="author" content="Juan y Yahir" />
-        <title>Dashboard - SB Admin</title>
-        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-        <link href="{{asset('css/template.css')}}" rel="stylesheet" />
-        <link rel="stylesheet" href="{{ asset('css/dashboard/admin.css') }}">
-        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-    </head>
-    <body class="sb-nav-fixed">
-        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-            <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
-            <!-- Sidebar Toggle-->
-            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-            <!-- Navbar Search-->
-            <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
-                    <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-                </div>
-            </form>
-            <!-- Navbar-->
-            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#!">Settings</a></li>
-                        <li><a class="dropdown-item" href="#!">Activity Log</a></li>
-                        <li><a href="{{ url('/login') }}">Iniciar sesion</a></li>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Blancos Doña Colchas" />
+    <title>Página de inicio</title>
+    <link href="{{ asset('css/template.css') }}" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('css/dashboard/admin.css') }}">
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <style>
+        body { background: linear-gradient(to right, #6a11cb, #2575fc); color: #fff; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+        nav { background: rgba(0,0,0,0.7) !important; }
+        .inicio-container { text-align: center; padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
+        .inicio-container h1 { font-size: 3rem; font-weight: 800; margin-bottom: 10px; letter-spacing: .5px; }
+        .inicio-container p.frase { font-size: 1.35rem; font-style: italic; opacity: .95; margin-bottom: 40px; }
+        .accesos { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; }
+        .accesos a, .accesos form button { background: #fff; color: #2575fc; font-weight: 700; padding: 12px 18px; border-radius: 12px; text-decoration: none; border: none; font-size: 1rem; transition: transform .2s, box-shadow .2s, background .2s; box-shadow: 0 8px 18px rgba(0,0,0,.15); }
+        .accesos a:hover, .accesos form button:hover { background: #f5f7ff; transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.18); }
+        .user-icon { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,.6); }
+        footer { background: rgba(255,255,255,0.08); padding: 18px 0; text-align: center; color: #fff; margin-top: 50px; }
+        .navbar-brand { font-weight: 700; }
+    </style>
+</head>
+<body>
+    {{-- Navbar superior --}}
+    <nav class="navbar navbar-expand navbar-dark px-3">
+        <a class="navbar-brand" href="{{ url('/') }}">Blancos Doña Colchas</a>
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    @if (Auth::check())
+                        @if (!empty(Auth::user()->imagen_url))
+                            <img src="{{ Auth::user()->imagen_url }}" alt="Foto de perfil" class="user-icon">
+                        @else
+                            <i class="fas fa-user fa-fw"></i>
+                        @endif
+                    @else
+                        <i class="fas fa-user fa-fw"></i>
+                    @endif
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    @if (Auth::check())
+                        <li><span class="dropdown-item-text">Hola, {{ Auth::user()->name }}</span></li>
                         <li><hr class="dropdown-divider" /></li>
                         <li>
-                        <form method="POST" action="{{ url('logout') }}">
-                        @csrf
-                        <button type="submit" class="dropdown-item">Logout</button>
-                        </form>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-        <div id="layoutSidenav">
-            <div id="layoutSidenav_nav">
-                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                    <div class="sb-sidenav-menu">
-                        <div class="nav">
-                            <div class="sb-sidenav-menu-heading">Core</div>
-                            <a class="nav-link" href="index.html">
-                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Dashboard
-                            </a>
-                            <form method="POST" action="{{ route('dataset.actualizar') }}">
+                            <form method="POST" action="{{ url('logout') }}">
                                 @csrf
-                                <button type="submit" class="btn btn-primary">
-                                    Actualizar dataset
-                                </button>
+                                <button type="submit" class="dropdown-item">Cerrar sesión</button>
                             </form>
-                            <form method="GET" action="{{ route('predicciones.aplicar') }}">
-                                <button type="submit" class="btn btn-primary">
-                                    Aplicar predicciones
-                                </button>
-                            </form>
-                            <a href="{{ route('producto.index') }}">Productos</a>
-                            <a href="{{ route('carro.index') }}">Carros</a>
-                            <a href="{{ route('pedido.index') }}">Pedidos</a>
-                            <a href="{{ route('credito.index') }}">Creditos</a>
-                            <a href="{{ route('abono.index') }}">Abonos</a>
-                            <a href="{{ route('user.index') }}">Usuarios</a>
-                            <a href="{{ route('role.index') }}">Roles</a>
-                            <a href="{{ route('permission.index') }}">Permisos</a>
-                            
-                            <div class="sb-sidenav-menu-heading">Interface</div>
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
-                                <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                                Layouts
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                                <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="layout-static.html">Static Navigation</a>
-                                    <a class="nav-link" href="layout-sidenav-light.html">Light Sidenav</a>
-                                </nav>
-                            </div>
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
-                                <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                                Pages
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
-                                <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
-                                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
-                                        Authentication
-                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                    </a>
-                                    <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
-                                        <nav class="sb-sidenav-menu-nested nav">
-                                            <a class="nav-link" href="login.html">Login</a>
-                                            <a class="nav-link" href="register.html">Register</a>
-                                            <a class="nav-link" href="password.html">Forgot Password</a>
-                                        </nav>
-                                    </div>
-                                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
-                                        Error
-                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                    </a>
-                                    <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
-                                        <nav class="sb-sidenav-menu-nested nav">
-                                            <a class="nav-link" href="401.html">401 Page</a>
-                                            <a class="nav-link" href="404.html">404 Page</a>
-                                            <a class="nav-link" href="500.html">500 Page</a>
-                                        </nav>
-                                    </div>
-                                </nav>
-                            </div>
-                            <div class="sb-sidenav-menu-heading">Addons</div>
-                            <a class="nav-link" href="charts.html">
-                                <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                                Charts
-                            </a>
-                            <a class="nav-link" href="tables.html">
-                                <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                                Tables
-                            </a>
-                        </div>
-                    </div>
-                    <div class="sb-sidenav-footer">
-                        <div class="small">Logged in as:</div>
-                        Start Bootstrap
-                    </div>
-                </nav>
-            </div>
-            <div id="layoutSidenav_content">
-                <main>
-                    <div class="container-fluid px-4">
-                        <h1 class="mt-4">Dashboard</h1>
-                        @if (Auth::check())
-                        <p>Sesión iniciada por: {{ Auth::user()->name }}</p>
-                        @else
-                        <p>No hay sesión activa.</p>
-                        @endif
-                        <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item active">Dashboard</li>
-                        </ol>
-                        <div class="row">
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-primary text-white mb-4">
-                                    <div class="card-body">Primary Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-warning text-white mb-4">
-                                    <div class="card-body">Warning Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-success text-white mb-4">
-                                    <div class="card-body">Success Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-danger text-white mb-4">
-                                    <div class="card-body">Danger Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <i class="fas fa-chart-area me-1"></i>
-                                        Area Chart Example
-                                    </div>
-                                    <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
-                                </div>
-                            </div>
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <i class="fas fa-chart-bar me-1"></i>
-                                        Bar Chart Example
-                                    </div>
-                                    <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <i class="fas fa-table me-1"></i>
-                                DataTable Example
-                            </div>
-                            <div class="card-body">
-                                <table id="datatablesSimple">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Position</th>
-                                            <th>Office</th>
-                                            <th>Age</th>
-                                            <th>Start date</th>
-                                            <th>Salary</th>
-                                        </tr>
-                                    </thead>
-                                    <tfoot>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Position</th>
-                                            <th>Office</th>
-                                            <th>Age</th>
-                                            <th>Start date</th>
-                                            <th>Salary</th>
-                                        </tr>
-                                    </tfoot>
-                                    
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-                <footer class="py-4 bg-light mt-auto">
-                    <div class="container-fluid px-4">
-                        <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                            <div>
-                                <a href="#">Privacy Policy</a>
-                                &middot;
-                                <a href="#">Terms &amp; Conditions</a>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
+                        </li>
+                    @else
+                        <li><a href="{{ url('/login') }}" class="dropdown-item">Iniciar sesión</a></li>
+                    @endif
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    {{-- Contenido principal --}}
+    <main>
+        <div class="inicio-container">
+            <h1>BLANCOS DOÑA COLCHAS</h1>
+            <p class="frase">¡La mejor calidad y crédito a tu alcance!</p>
+
+            <div class="accesos">
+                <form method="POST" action="{{ route('dataset.actualizar') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-primary">
+                        Actualizar dataset
+                    </button>
+                </form>
+                <form method="GET" action="{{ route('predicciones.aplicar') }}">
+                    <button type="submit" class="btn btn-primary">
+                        Predicciones
+                    </button>
+                </form>
+                <a href="{{ route('producto.index') }}">Productos</a>
+                <a href="{{ route('carro.index') }}">Carros</a>
+                <a href="{{ route('pedido.index') }}">Pedidos</a>
+                <a href="{{ route('credito.index') }}">Créditos</a>
+                <a href="{{ route('abono.index') }}">Abonos</a>
+                <a href="{{ route('user.index') }}">Usuarios</a>
+                <a href="{{ route('role.index') }}">Roles</a>
+                <a href="{{ route('permission.index') }}">Permisos</a>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="{{asset('js/scripts.js')}}"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-        <script src="{{asset('assets/demo/chart-area-demo.js')}}"></script>
-        <script src="{{asset('assets/demo/chart-bar-demo.js')}}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-        <script src="{{asset('js/datatables-simple-demo.js')}}"></script>
-    </body>
+    </main>
+
+    {{-- Footer --}}
+    <footer>
+        © {{ date('Y') }} Blancos Doña Colchas - Todos los derechos reservados
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</body>
 </html>

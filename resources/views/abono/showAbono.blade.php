@@ -8,7 +8,7 @@
 </head>
 <body>
 <section class="container">
-     <br><hr><center><h1>Detalles del Abono</h1></center><hr>
+     <br><hr class="hr-grueso"><center><h1>Detalles del Abono</h1></center><hr class="hr-grueso">
 
     @php
         $listaAbonos = isset($abonos) ? $abonos : (isset($abono) ? collect([$abono]) : collect([]));
