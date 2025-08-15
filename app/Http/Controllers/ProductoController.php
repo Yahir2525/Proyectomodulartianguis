@@ -62,24 +62,32 @@ class ProductoController extends Controller
             // ...tus demás reglas
         ]);
 
-
         if ($request->hasFile('imagen')) {
-            $archivo = $request->file('imagen');
-            $nombreArchivo = time().'_'.$archivo->getClientOriginalName();
-            $rutaRelativa = 'img/'.$nombreArchivo; // lo mismo que ya guardabas en local
+            $file        = $request->file('imagen');
+            $filename    = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $relative    = 'img/' . $filename;  // misma convención en toda la app
 
-            if (config('filesystems.default') === 's3') {
-                // Sube a S3 en la carpeta "img" con el mismo nombre
-                Storage::disk('s3')->putFileAs('img', $archivo, $nombreArchivo, [
-                    'visibility'  => 'public',                 // o 'private' si prefieres presigned
-                    'ContentType' => $archivo->getMimeType(),
-                ]);
-                $producto->imagen = $rutaRelativa;          // guardas "img/xxx.jpg" como antes
-            } else {
-                // Comportamiento local original
-                $archivo->move(public_path('img'), $nombreArchivo);
-                $producto->imagen = $rutaRelativa;          // "img/xxx.jpg"
+            // Borrar anterior
+            if (!empty($user->imagen)) {
+                if (config('filesystems.default') === 's3') {
+                    try { Storage::disk('s3')->delete($producto->imagen); } catch (\Throwable $e) {}
+                } else {
+                    $old = public_path($producto->imagen);
+                    if (is_file($old)) @unlink($old);
+                }
             }
+
+            // Subir nueva
+            if (config('filesystems.default') === 's3') {
+                Storage::disk('s3')->putFileAs('img', $file, $filename, [
+                    'visibility'  => 'private',                 // bucket privado
+                    'ContentType' => $file->getMimeType(),
+                ]);
+            } else {
+                $file->move(public_path('img'), $filename);
+            }
+
+            $producto->imagen = $relative; // la vista usará $user->imagen_url (accessor)
         }
 
         // Campos normales

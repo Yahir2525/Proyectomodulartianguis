@@ -138,10 +138,10 @@
                                     {{ $deshabilitado ? 'disabled' : '' }}>
                             </td>
                             <td>
-                                @if (!empty($producto->imagen_url))
-                                    <img src="{{ $producto->imagen_url }}" alt="{{ $producto->nombre }}" width="250" loading="lazy">
+                                @if (!empty($producto->imagen)) 
+                                    <img src="{{ Storage::disk('s3')->url($producto->imagen) }}" alt="Foto de producto" width="250">
                                 @else
-                                    Sin imagen
+                                    <span>Sin imagen</span>
                                 @endif
                             </td>
                             <td>{{ $producto->nombre }}</td>

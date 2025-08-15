@@ -31,15 +31,21 @@
                 @csrf
                 @method('PUT')
 
-                <div>
-                    <label for="imagen">Foto de perfil:</label>
-                    <input type="file" name="imagen" id="imagen" accept="image/*">
+
+                <div class="field">
+                <label class="label" for="imagen">Imagen de perfil:</label>
+                <div class="control">
+                    <input class="input" type="file" name="imagen" id="imagen" accept="image/*">
+                </div>
                     @if (!empty($user->imagen_url))
-                        <div class="mt-2">
-                            <img src="{{ $user->imagen_url }}" alt="Foto actual"
-                                class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
-                        </div>
+                        <figure class="mt-3">
+                            <p class="label">Actual:</p>
+                            <img src="{{ $user->imagen_url }}" alt="Imagen actual" style="max-width: 150px;">
+                        </figure>
                     @endif
+                    @error('imagen')
+                        <p class="help is-danger">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div class="mb-3">
                     <label for="name" class="form-label">Nombre completo</label>

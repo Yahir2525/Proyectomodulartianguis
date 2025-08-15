@@ -5,7 +5,9 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Producto;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;   
+use Illuminate\Support\Facades\Storage;  
+use Illuminate\Support\Str;
+
 
 class ProductoSeeder extends Seeder
 {
@@ -32,15 +34,13 @@ class ProductoSeeder extends Seeder
             $marca           = $row[5] ?? null;
             $precioUnitario  = (float) ($row[6] ?? 0);
             $piezas          = (int)   ($row[7] ?? 0);
-            $nombreImagen    = $row[8] ?? null;
+            $nombreImagen    = trim((string)($row[8] ?? ''));
 
-            $rutaImagen = null;
-            if ($nombreImagen) {
-                $ruta = public_path('img/' . $nombreImagen);
-                if (File::exists($ruta)) {
-                    $rutaImagen = 'img/' . $nombreImagen; // lo que se guarda en BD
-                }
-            }
+
+            // Guarda tal cual en BD (absoluta o relativa)
+            $rutaImagen = $nombreImagen !== '' ? $nombreImagen : null;
+
+            // (Opcional) Si es relativa, puedes verificar que exista en S3 para avisar:
 
             Producto::create([
                 'nombre'          => $nombre,

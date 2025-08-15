@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -188,13 +189,25 @@ class User extends Authenticatable
 
     
 
-    public function getImagenUrlAttribute()
+    public function getImagenUrlAttribute(): ?string
     {
-        if (!$this->imagen) return null;
-        if (config('filesystems.default') === 's3') {
-            return Storage::disk('s3')->temporaryUrl($this->imagen, now()->addMinutes(10));
+        if (!$this->imagen) {
+            return null;
         }
-        return asset($this->imagen);
+
+        // 1) Si ya es URL absoluta (S3/CloudFront), úsala tal cual
+        if (Str::startsWith($this->imagen, ['http://', 'https://'])) {
+            return $this->imagen;
+        }
+
+        // 2) Si es ruta relativa, genera URL pública desde el disco S3 (sin prefirmar)
+        //    Esto usará el 'url' configurado del disco s3 (ideal: tu dominio de CloudFront)
+        if (config('filesystems.disks.s3')) {
+            return Storage::disk('s3')->url(ltrim($this->imagen, '/'));
+        }
+
+        // 3) Fallback local (por si todavía tienes imágenes en public/)
+        return asset(ltrim($this->imagen, '/'));
     }
 
 }

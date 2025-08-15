@@ -61,20 +61,22 @@ class UserController extends Controller
 
         // Imagen de perfil (S3 privado o local)
         if ($request->hasFile('imagen')) {
-            $file = $request->file('imagen');
-            $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-            $relativePath = 'perfiles/' . $filename;
+            $archivo = $request->file('imagen');
+            $nombreArchivo = time().'_'.$archivo->getClientOriginalName();
+            $rutaRelativa = 'perfiles/'.$nombreArchivo; // lo mismo que ya guardabas en local
 
             if (config('filesystems.default') === 's3') {
-                Storage::disk('s3')->putFileAs('perfiles', $file, $filename, [
-                    'visibility'  => 'private',              // bucket privado
-                    'ContentType' => $file->getMimeType(),
+                // Sube a S3 en la carpeta "img" con el mismo nombre
+                Storage::disk('s3')->putFileAs('perfiles', $archivo, $nombreArchivo, [
+                    'visibility'  => 'public',                 // o 'private' si prefieres presigned
+                    'ContentType' => $archivo->getMimeType(),
                 ]);
+                $user->imagen = $rutaRelativa;          // guardas "img/xxx.jpg" como antes
             } else {
-                $file->move(public_path('perfiles'), $filename);
+                // Comportamiento local original
+                $archivo->move(public_path('perfiles'), $nombreArchivo);
+                $user->imagen = $rutaRelativa;          // "img/xxx.jpg"
             }
-
-            $user->imagen = $relativePath; // guardas la ruta relativa en BD
         }
 
         $user->save();

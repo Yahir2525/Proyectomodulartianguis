@@ -106,8 +106,8 @@
                     <tr>
                         <td>{{ $user->id_user }}</td>
                         <td>
-                            @if (!empty($user->imagen_url))
-                                <img src="{{ $user->imagen_url }}" alt="Foto de perfil" width="250">
+                            @if (!empty($user->imagen))
+                                <img src="{{ Storage::disk('s3')->url($user->imagen) }}" alt="Foto de perfil" width="250">
                             @else
                                 <span>Sin imagen</span>
                             @endif

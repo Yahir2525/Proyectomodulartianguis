@@ -25,22 +25,20 @@
         <input type="text" name="nombre" id="nombre" value="{{ old('nombre') }}" required><br><br>
 
         <label for="imagen">Imagen del producto:</label><br>
-        <input type="file" name="imagen" id="imagen" accept="image/*"><br>
+        <input type="file" name="imagen" id="imagen" accept="image/*">
         @if (isset($producto) && !empty($producto->imagen_url))
-            <br>
-            <img src="{{ $producto->imagen_url }}" alt="Imagen seleccionada" style="max-width:260px;">
-        @endif
-        <br><br>
-
+            <div class="mt-2">
+                <img src="{{ $producto->imagen_url }}" alt="Imagen seleccionada"
+                    class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
+            </div>
+        @endif<br><br>             
         <label for="tipo">Tipo de producto:</label><br>
         <input list="tipos" name="tipo" id="tipo" value="{{ old('tipo') }}" required>
         <datalist id="tipos">
             @foreach($tiposExistentes as $tipo)
                 <option value="{{ $tipo }}">
             @endforeach
-        </datalist>
-        <br><br>
-
+        </datalist><br><br>
         <label for="material">Material:</label><br>
         <input list="materiales" name="material" id="material" value="{{ old('material') }}" required>
         <datalist id="materiales">

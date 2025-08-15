@@ -50,14 +50,13 @@ class PerfilController extends Controller
         if ($request->has('edad'))              $user->edad = $request->edad;   // permite 0
         if ($request->filled('genero'))         $user->genero = $request->genero;
 
-        // Imagen de perfil
         if ($request->hasFile('imagen')) {
-            $file = $request->file('imagen');
-            $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-            $relativePath = 'perfiles/' . $filename;
+            $file        = $request->file('imagen');
+            $filename    = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $relative    = 'perfiles/' . $filename;  // misma convención en toda la app
 
-            // borrar anterior
-            if ($user->imagen) {
+            // Borrar anterior
+            if (!empty($user->imagen)) {
                 if (config('filesystems.default') === 's3') {
                     try { Storage::disk('s3')->delete($user->imagen); } catch (\Throwable $e) {}
                 } else {
@@ -66,17 +65,17 @@ class PerfilController extends Controller
                 }
             }
 
-            // subir nueva
+            // Subir nueva
             if (config('filesystems.default') === 's3') {
                 Storage::disk('s3')->putFileAs('perfiles', $file, $filename, [
-                    'visibility'  => 'private',              // bucket privado
+                    'visibility'  => 'private',                 // bucket privado
                     'ContentType' => $file->getMimeType(),
                 ]);
             } else {
                 $file->move(public_path('perfiles'), $filename);
             }
 
-            $user->imagen = $relativePath; // siempre guardamos ruta relativa
+            $user->imagen = $relative; // la vista usará $user->imagen_url (accessor)
         }
 
         $user->save();

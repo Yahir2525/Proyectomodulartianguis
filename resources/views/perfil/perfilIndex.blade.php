@@ -24,12 +24,10 @@
             @php $user = auth()->user(); @endphp
 
             <div class="text-center mb-4">
-                @if (!empty($user->imagen_url))
-                    <img src="{{ $user->imagen_url }}" alt="Foto de perfil"
-                        class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
+                @if (!empty($user->imagen))
+                    <img src="{{ Storage::disk('s3')->url($user->imagen) }}" alt="Foto de perfil" class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
                 @else
-                    <img src="{{ asset('img/default.png') }}" alt="Sin foto"
-                        class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
+                    <span>Sin imagen</span>
                 @endif
             </div>
 

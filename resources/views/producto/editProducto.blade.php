@@ -26,13 +26,20 @@
         <label for="nombre">Nombre del producto:</label><br>
         <input type="text" name="nombre" id="nombre" value="{{ old('nombre', $producto->nombre) }}"><br><br>
 
-        <label for="imagen">Actualizar imagen:</label><br>
-        <input type="file" name="imagen" id="imagen" accept="image/*"><br>
+        <label class="label" for="imagen">Actualizar imagen:</label>
+        <div class="control">
+            <input class="input" type="file" name="imagen" id="imagen" accept="image/*">
+        </div>
         @if (!empty($producto->imagen_url))
-            <br>
-            <img src="{{ $producto->imagen_url }}" alt="Imagen actual" style="max-width:260px;">
+            <figure class="mt-3">
+                <p class="label">Actual:</p>
+                <img src="{{ $producto->imagen_url }}" alt="Imagen actual" style="max-width: 150px;">
+            </figure>
         @endif
-        <br><br>
+        @error('imagen')
+            <p class="help is-danger">{{ $message }}</p>
+        @enderror
+
 
         <label for="tipo">Tipo de producto:</label><br>
         <input list="tipos" name="tipo" id="tipo" value="{{ old('tipo') }}">

@@ -63,10 +63,10 @@
                     <td>{{ $user->id_user }}</td>
                     <td>{{ $user->name }}</td>
                     <td>
-                        @if (!empty($user->imagen_url))
-                            <img src="{{ $user->imagen_url }}" alt="Imagen de perfil">
+                        @if (!empty($user->imagen)) {{-- ruta relativa en BD, p.ej. "perfiles/archivo.jpg" --}}
+                            <img src="{{ Storage::disk('s3')->url($user->imagen) }}" alt="Foto de perfil" width="250">
                         @else
-                            Sin imagen
+                            <span>Sin imagen</span>
                         @endif
                     </td>
                     <td>{{ $user->email }}</td>

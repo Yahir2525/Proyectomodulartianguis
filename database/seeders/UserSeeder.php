@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\File;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Storage;  
+use Illuminate\Support\Str;
+
 
 class UserSeeder extends Seeder
 {
@@ -40,16 +43,14 @@ class UserSeeder extends Seeder
             $telefono = $row[5] ?? null;
             $direccion = $row[6] ?? null;
             $nombreUsuario = $row[7] ?? null;
-            $nombreImagen = $row[8] ?? null;
+            $nombreImagen    = trim((string)($row[8] ?? ''));
             $nivel = $row[9] ?? 'bueno';
 
-            $rutaImagen = null;
-            if ($nombreImagen) {
-                $ruta = public_path('perfiles/' . $nombreImagen);
-                if (File::exists($ruta)) {
-                    $rutaImagen = 'perfiles/' . $nombreImagen;
-                }
-            }
+           
+
+
+            // Guarda tal cual en BD (absoluta o relativa)
+            $rutaImagen = $nombreImagen !== '' ? $nombreImagen : null;
 
             $user = User::create([
                 'name' => $nombre,
