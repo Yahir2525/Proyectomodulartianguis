@@ -121,7 +121,6 @@
                             <th>Material</th>
                             <th>Color</th>
                             <th>Tamaño</th>
-                            <th>Piezas disponibles</th>
                             <th>Cantidad</th>
                             <th>Precio unitario</th>
                             <th>Subtotal</th>
@@ -151,7 +150,6 @@
                                 <td>{{ $producto->material }}</td>
                                 <td>{{ $producto->color }}</td>
                                 <td>{{ $producto->tamanio }}</td>
-                                <td>{{ $disponibles }}</td>
                                 <td>{{ $cantidad }}</td>
                                 <td>${{ number_format($producto->precio_unitario, 2) }}</td>
                                 <td>${{ number_format($subtotal, 2) }}</td>

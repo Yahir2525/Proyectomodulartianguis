@@ -93,10 +93,11 @@
                     <th>ID</th>
                     <th>Imagen</th>
                     <th>Nombre</th>
-                    <th>Edad</th>
-                    <th>Genero</th>
                     <th>Correo</th>
-                    <th>Nivel de usuario</th>
+                    <th>Usuario</th>
+                    <th>Telefono</th>
+                    <th>Direccion</th>
+                    <th>Nivel</th>
                     <th>Roles</th>
                     <th>Acciones</th>
                 </tr>
@@ -113,8 +114,10 @@
                             @endif
                         </td>
                         <td>{{ $user->name }}</td>
-                        <td>{{ $user->edad }}</td>
-                        <td>{{ $user->genero }}</td>
+                        <td>{{ $user->email }}</td>
+                        <td>{{ $user->nombre_usuario }}</td>
+                        <td>{{ $user->telefono }}</td>
+                        <td>{{ $user->direccion }}</td>
                         <td>{{ $user->nivel_usuario}}</td>
                         <td>
                             @foreach ($user->getRoleNames() as $rolename)

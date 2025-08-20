@@ -13,16 +13,30 @@
             ? Storage::disk('s3')->url(Auth::user()->imagen)
             : null;
     @endphp
-    
+
     <div class="collapse navbar-collapse" id="mainNavbar">
-        
         @auth
             <ul class="navbar-nav mx-auto align-items-lg-center">
-                <li class="nav-item"><a class="nav-link btn-chip" href="/producto">Productos</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/carro">Carros</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/pedido">Pedidos</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/credito">Créditos</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/abono">Abonos</a></li>
+                @if ($isAdmin)
+                    <li class="nav-item"><a class="nav-link btn-chip" href="/user">Usuarios</a></li>
+                    <li class="nav-item"><a class="nav-link btn-chip" href="/role">Roles</a></li>
+                    <li class="nav-item"><a class="nav-link btn-chip" href="/permission">Permisos</a></li>
+                    <li class="nav-item">
+                    <form method="POST" action="{{ route('dataset.actualizar') }}">
+                        @csrf
+                        <button type="submit" class="nav-link btn-chip">
+                            Actualizar dataset
+                        </button>
+                    </form>
+                    </li>
+                    <li class="nav-item">
+                    <form method="GET" action="{{ route('predicciones.aplicar') }}">
+                        <button type="submit" class="nav-link btn-chip">
+                            Predicciones
+                        </button>
+                    </form>
+                    </li>
+                @endif
             </ul>
         @endauth
 
@@ -147,22 +161,4 @@
     @media (max-width: 991.98px) {
         .btn-chip { width: 100%; justify-content: center; }
     }
-
-    /* Centrado real del menú entre el logo (izq) y el avatar (der) */
-    @media (min-width: 992px) {
-    nav.navbar { position: relative; } /* referencia para el centrado absoluto */
-
-    /* El <ul> del centro es el que ya tiene .mx-auto */
-    #mainNavbar .navbar-nav.mx-auto {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        /* opcional: evita que los chips se “peguen” demasiado entre sí */
-        gap: .35rem;
-    }
-
-    /* El avatar se queda pegado a la derecha como está */
-    #mainNavbar .navbar-nav.ms-auto { margin-left: auto !important; }
-    }
-
 </style>

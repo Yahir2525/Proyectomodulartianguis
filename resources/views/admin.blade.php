@@ -19,19 +19,29 @@
             <p class="frase">¡La mejor calidad y crédito a tu alcance!</p></center>
             <div class="collage">
                 <figure class="tile wide">
-                    <img src="{{ asset('img/almohada.jpeg') }}" alt="Kanao">
+                    <a href="{{ url('/producto') }}" aria-label="Ver productos: Almohada">
+                        <img src="{{ asset('img/almohada.jpeg') }}" alt="Almohada">
+                    </a>
                 </figure>
                 <figure class="tile square">
-                    <img src="{{ asset('img/bata.jpeg') }}" alt="Kanao">
+                    <a href="{{ url('/producto') }}" aria-label="Ver productos: Bata">
+                        <img src="{{ asset('img/bata.jpeg') }}" alt="Bata">
+                    </a>
                 </figure>
                 <figure class="tile tall">
-                    <img src="{{ asset('img/cobertor.jpeg') }}" alt="Kanao">
+                    <a href="{{ url('/producto') }}" aria-label="Ver productos: Cobertor">
+                        <img src="{{ asset('img/cobertor.jpeg') }}" alt="Cobertor">
+                    </a>
                 </figure>
                 <figure class="tile square">
-                    <img src="{{ asset('img/colcha.jpeg') }}" alt="Kanao">
+                    <a href="{{ url('/producto') }}" aria-label="Ver productos: Colcha">
+                        <img src="{{ asset('img/colcha.jpeg') }}" alt="Colcha">
+                    </a>
                 </figure>
                 <figure class="tile wide">
-                    <img src="{{ asset('img/cobija.jpeg') }}" alt="Kanao">
+                    <a href="{{ url('/producto') }}" aria-label="Ver productos: Cobija">
+                        <img src="{{ asset('img/cobija.jpeg') }}" alt="Cobija">
+                    </a>
                 </figure>
             </div>
         </div>

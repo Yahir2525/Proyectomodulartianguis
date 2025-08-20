@@ -14,24 +14,29 @@ class ProductoController extends Controller
     {
         $usuario = Auth::user();
 
+        // Productos visibles
+        if ($usuario && $usuario->hasRole('administrador')) {
+            $productoIndex = Producto::all();
+        } else {
+            $productoIndex = Producto::where('estado_producto', true)->get();
+        }
+
+        // Usuarios y pedidos solo si hay usuario logueado
         $usuarios = collect();
         $pedidosUsuario = collect();
 
-        // Productos activos si no es administrador
-        $productoIndex = $usuario->hasRole('administrador')
-            ? Producto::all()
-            : Producto::where('estado_producto', true)->get();
-
-        // Cargar usuarios y pedidos según el rol
-        if ($usuario->hasRole('administrador')) {
-            $usuarios = \App\Models\User::all();
-            $pedidosUsuario = \App\Models\Pedido::with('user')->get();
-        } else {
-            $pedidosUsuario = \App\Models\Pedido::where('id_user', $usuario->id_user)->get();
+        if ($usuario) {
+            if ($usuario->hasRole('administrador')) {
+                $usuarios = \App\Models\User::all();
+                $pedidosUsuario = \App\Models\Pedido::with('user')->get();
+            } else {
+                $pedidosUsuario = \App\Models\Pedido::where('id_user', $usuario->id_user)->get();
+            }
         }
 
         return view('producto.productoIndex', compact('productoIndex', 'pedidosUsuario', 'usuarios'));
-    }
+}
+
 
 
 

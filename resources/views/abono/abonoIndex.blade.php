@@ -45,11 +45,22 @@
 
         @if ($abonoIndex->isNotEmpty())
             @php
-                $abonosAgrupados = $abonoIndex->groupBy('user.nombre_usuario');
+                // Agrupar por crédito (si no tiene, va al grupo "Sin crédito")
+                $abonosAgrupados = $abonoIndex->groupBy(function($abono) {
+                    return optional($abono->credito)->id_credito ?? 'Sin crédito';
+                });
             @endphp
 
-            @foreach ($abonosAgrupados as $usuario => $abonos)
-                <h2>Abonos de {{ $usuario ?? 'Usuario desconocido' }}</h2>
+            @foreach ($abonosAgrupados as $idCredito => $abonos)
+                @php
+                    $usuarioNombre = optional($abonos->first()->user)->nombre_usuario;
+                @endphp
+
+                @if($idCredito === 'Sin crédito')
+                    <h2>Abonos sin crédito @if($usuarioNombre) de {{ $usuarioNombre }} @endif</h2>
+                @else
+                    <h2>Abonos del crédito #{{ $idCredito }} @if($usuarioNombre) de {{ $usuarioNombre }} @endif</h2>
+                @endif
 
                 <div class="table-wrap">
                     <table>
@@ -73,20 +84,20 @@
                                     <td>{{ $abono->created_at }}</td>
                                     <td>{{ $abono->updated_at }}</td>
                                     <td>
-                                    @can('edit abono')
-                                    <form action="{{ route('abono.edit', $abono->id_abono) }}" method="GET" style="display:inline;">
-                                        <button type="submit" class="btn btn-edit">Editar</button>
-                                    </form>
-                                    @endcan
+                                        @can('edit abono')
+                                        <form action="{{ route('abono.edit', $abono->id_abono) }}" method="GET" style="display:inline;">
+                                            <button type="submit" class="btn btn-edit">Editar</button>
+                                        </form>
+                                        @endcan
                                     </td>
                                     <td>
-                                    @can('delete abono')
+                                        @can('delete abono')
                                         <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger" type="submit">Eliminar</button>
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-danger" type="submit">Eliminar</button>
                                         </form>
-                                    @endcan
+                                        @endcan
                                     </td>
                                 </tr>
                             @endforeach
@@ -98,6 +109,7 @@
         @else
             <p>No hay abonos registrados.</p>
         @endif
+
     </section>
 </body>
 </html>

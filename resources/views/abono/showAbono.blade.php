@@ -18,11 +18,22 @@
         <p>No se encontraron abonos para mostrar.</p>
     @else
         @php
-            $abonosPorUsuario = $listaAbonos->groupBy(fn($a) => optional($a->user)->nombre_usuario ?? 'Usuario desconocido');
+            // Agrupar por crédito; si no tiene, va al grupo "Sin crédito"
+            $abonosPorCredito = $listaAbonos->groupBy(function($a) {
+                return optional($a->credito)->id_credito ?? 'Sin crédito';
+            });
         @endphp
 
-        @foreach($abonosPorUsuario as $nombreUsuario => $grupoAbonos)
-            <h2>Abonos de {{ $nombreUsuario }}</h2>
+        @foreach($abonosPorCredito as $idCredito => $grupoAbonos)
+            @php
+                $nombreUsuario = optional($grupoAbonos->first()->user)->nombre_usuario ?? 'Usuario desconocido';
+            @endphp
+
+            @if($idCredito === 'Sin crédito')
+                <h2>Abonos sin crédito @if($nombreUsuario) de {{ $nombreUsuario }} @endif</h2>
+            @else
+                <h2>Abonos del crédito #{{ $idCredito }} @if($nombreUsuario) de {{ $nombreUsuario }} @endif</h2>
+            @endif
 
             <div class="table-wrap">
                 <table>
@@ -42,7 +53,7 @@
                             <tr>
                                 <td>{{ $abono->id_abono }}</td>
                                 <td>{{ optional($abono->user)->nombre_usuario ?? 'Usuario no disponible' }}</td>
-                                <td>{{ $abono->id_credito }}</td>
+                                <td>{{ optional($abono->credito)->id_credito ?? 'Sin crédito' }}</td>
                                 <td>${{ number_format($abono->monto_abono, 2) }}</td>
                                 <td>{{ $abono->created_at->format('d/m/Y H:i') }}</td>
                                 <td>

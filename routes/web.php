@@ -75,6 +75,8 @@ Route::middleware(['auth'])->group(function () {
 
 Route::resource('registro', RegistroController::class);
 
+
+Route::resource('producto', ProductoController::class);
 // -------------------------------------------------
 // Rutas protegidas por el middleware is_user
 // -------------------------------------------------
@@ -94,7 +96,7 @@ Route::middleware(['is_user'])->group(function () {
     Route::post('/credito/crear/{pedido}', [CreditoController::class, 'crearDesdePedido'])->name('credito.crearDesdePedido');
 
     // Productos
-    Route::resource('producto', ProductoController::class);
+    
 
     // Carro y productos en carro
     Route::resource('carro', CarroController::class);
@@ -153,6 +155,6 @@ Route::middleware(['is_admin'])->group(function () {
     Route::post('/dataset/actualizar', function () {
         Artisan::call('export:dataset-mineria');
 
-        return back()->with('success', '✅ Dataset actualizado correctamente.');
+        return back()->with('success', 'Dataset actualizado correctamente.');
     })->name('dataset.actualizar')->middleware('is_admin');
 });

@@ -63,17 +63,14 @@
                     @endphp
 
                     @if ($hayProductos)
-                        <h2>Pedido #{{ $idPedido }}</h2>
+                        <h2>Pedido #{{ $idPedido }} de {{ optional($carros->first()->user)->nombre_usuario ?? 'Sin cliente' }}</h2>
 
                         <table border="1" cellspacing="0" cellpadding="5">
                             <thead>
                                 <tr>
                                     <th>ID carro</th>
-                                    <th>Usuario</th>
-                                    <th>ID producto</th>
                                     <th>Producto</th>
                                     <th>Imagen</th>
-                                    <th>Pzs disponibles</th>
                                     <th>Cantidad</th>
                                     <th>Precio unitario</th>
                                     <th>Subtotal</th>
@@ -94,8 +91,6 @@
                                         @endphp
                                         <tr>
                                             <td>{{ $carrito->id_carro }}</td>
-                                            <td>{{ optional($carrito->user)->nombre_usuario ?? 'Sin cliente' }}</td>
-                                            <td>{{ $producto->id_producto }}</td>
                                             <td>{{ $producto->nombre }}</td>
                                             <td>
                                                 @if (!empty($producto->imagen)) 
@@ -104,7 +99,6 @@
                                                     <span>Sin imagen</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $disponible }}</td>
                                             <td>{{ $producto->pivot->cantidad }}</td>
                                             <td>{{ $producto->precio_unitario }}</td>
                                             <td>{{ $subtotal }}</td>

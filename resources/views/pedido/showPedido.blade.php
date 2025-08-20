@@ -23,7 +23,7 @@
         @endphp
 
         @foreach($pedidosPorUsuario as $idUser => $pedidosUsuario)
-            <h2>Usuario: {{ optional($pedidosUsuario->first()->user)->nombre_usuario ?? 'Desconocido' }}</h2>
+            <h2>Pedidos de: {{ optional($pedidosUsuario->first()->user)->nombre_usuario ?? 'Desconocido' }}</h2>
 
             @php
                 // Obtener créditos activos y todos los créditos del usuario

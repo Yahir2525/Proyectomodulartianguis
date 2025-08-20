@@ -46,11 +46,9 @@
                 <th>Nombre</th>
                 <th>Imagen</th>
                 <th>Correo</th>
-                <th>Género</th>
-                <th>Edad</th>
+                <th>Nombre de usuario</th>
                 <th>Teléfono</th>
                 <th>Dirección</th>
-                <th>Nombre de usuario</th>
                 <th>Nivel de usuario</th>
                 <th>Creado</th>
                 <th>Actualizado</th>
@@ -70,11 +68,9 @@
                         @endif
                     </td>
                     <td>{{ $user->email }}</td>
-                    <td>{{ $user->genero }}</td>
-                    <td>{{ $user->edad ?? 'No registrada' }}</td>
+                    <td>{{ $user->nombre_usuario }}</td>
                     <td>{{ $user->telefono ?? 'No registrado' }}</td>
                     <td>{{ $user->direccion ?? 'No registrada' }}</td>
-                    <td>{{ $user->nombre_usuario }}</td>
                     <td>{{ $user->nivel_usuario}}</td>
                     <td>{{ $user->created_at }}</td>
                     <td>{{ $user->updated_at }}</td>

@@ -43,7 +43,7 @@
         @endphp
 
         @foreach($pedidosPorUsuario as $idUser => $pedidosUsuario)
-            <h2>Usuario: {{ optional($pedidosUsuario->first()->user)->nombre_usuario ?? 'Usuario desconocido' }}</h2>
+            <h2>Pedidos de: {{ optional($pedidosUsuario->first()->user)->nombre_usuario ?? 'Usuario desconocido' }}</h2>
 
             @php
                 $pedidosPorCredito = $pedidosUsuario->groupBy('id_credito');
@@ -68,7 +68,6 @@
                     <thead>
                     <tr>
                         <th>ID pedido</th>
-                        <th>Usuario</th>
                         <th>Crédito</th>
                         <th>Total</th>
                         <th>Estado</th>
@@ -115,7 +114,6 @@
 
                         <tr>
                             <td>{{ $pedido->id_pedido }}</td>
-                            <td>{{ optional($usuario)->nombre_usuario ?? 'Sin cliente' }}</td>
                             <td>{{ $pedido->id_credito ?? 'N/A' }}</td>
                             <td>${{ number_format($totalPedido, 2) }}</td>
                             <td>{{ $pedido->estado_pedido == 1 ? 'Abierto' : 'Cerrado' }}</td>

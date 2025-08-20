@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <title>Mi Perfil</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{{ asset('css/perfil/perfilIndex.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/perfil/perfilindex.css') }}">
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
-
+<body>
+<x-barraadmin></x-barraadmin>
 <div class="container mt-5">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
@@ -40,12 +40,12 @@
                             <td>{{ $user->name }}</td>
                         </tr>
                         <tr>
-                            <th>Nombre de usuario</th>
-                            <td>{{ $user->nombre_usuario }}</td>
-                        </tr>
-                        <tr>
                             <th>Correo electrónico</th>
                             <td>{{ $user->email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Nombre de usuario</th>
+                            <td>{{ $user->nombre_usuario }}</td>
                         </tr>
                         <tr>
                             <th>Género</th>

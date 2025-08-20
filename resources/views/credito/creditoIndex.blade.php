@@ -30,7 +30,6 @@
                 id="busqueda" 
                 name="busqueda"
                 placeholder="Ej. 21 o Pepito"
-                {{-- Solo añadir datalist si el usuario tiene permiso --}}
                 @if(Auth::user()->can('edit credito')) list="usuarios" @endif
                 value="{{ old('busqueda', request('busqueda')) }}" 
                 autocomplete="off"
@@ -47,9 +46,6 @@
             <input type="submit" value="Buscar" />
         </form>
 
-
-
-
         @if($creditoIndex->isNotEmpty())
             @php
                 $agrupados = $creditoIndex->groupBy('user.nombre_usuario');
@@ -58,10 +54,18 @@
             @foreach($agrupados as $usuario => $creditosUsuario)
                 <h2>Créditos de {{ $usuario ?? 'Usuario desconocido' }}</h2>
 
-                {{-- Créditos Activos --}}
                 @php
-                    $activos = $creditosUsuario->where('estado', 1);
+                    $ahora = now();
+                    $activos = $creditosUsuario->filter(function($c) use ($ahora) {
+                        return (int)$c->estado === 1 && \Carbon\Carbon::parse($c->fecha_vencimiento) >= $ahora;
+                    });
+                    $vencidos = $creditosUsuario->filter(function($c) use ($ahora) {
+                        return (int)$c->estado === 1 && \Carbon\Carbon::parse($c->fecha_vencimiento) < $ahora;
+                    });
+                    $cerrados = $creditosUsuario->where('estado', 0);
                 @endphp
+
+                {{-- Créditos Activos --}}
                 @if($activos->isNotEmpty())
                     <h3>Activos</h3>
                     <table>
@@ -72,7 +76,6 @@
                                 <th>Fecha Liquidación</th>
                                 <th>Fecha Vencimiento</th>
                                 <th>Saldo</th>
-                                <!-- <th>Acciones</th> -->
                                 <th>Eliminar</th>
                             </tr>
                         </thead>
@@ -84,7 +87,40 @@
                                     <td>{{ $credito->fecha_liquidacion ?? 'Aun no liquidado' }}</td>
                                     <td>{{ $credito->fecha_vencimiento }}</td>
                                     <td>${{ number_format($credito->saldo_total, 2) }}</td>
-                                    <!-- <td><a href="{{ route('credito.edit', $credito->id_credito) }}">Editar</a></td> -->
+                                    <td>
+                                        <form action="{{ url('/credito', $credito->id_credito) }}" method="POST">
+                                            @csrf @method('DELETE')
+                                            <button type="submit">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+
+                {{-- Créditos Vencidos (estado 1 pero fecha_vencimiento pasada) --}}
+                @if($vencidos->isNotEmpty())
+                    <h3>Vencidos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha de creación</th>
+                                <th>Fecha Liquidación</th>
+                                <th>Fecha Vencimiento</th>
+                                <th>Saldo</th>
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($vencidos as $credito)
+                                <tr>
+                                    <td>{{ $credito->id_credito }}</td>
+                                    <td>{{ $credito->created_at }}</td>
+                                    <td>{{ $credito->fecha_liquidacion ?? 'Aun no liquidado' }}</td>
+                                    <td>{{ $credito->fecha_vencimiento }}</td>
+                                    <td>${{ number_format($credito->saldo_total, 2) }}</td>
                                     <td>
                                         <form action="{{ url('/credito', $credito->id_credito) }}" method="POST">
                                             @csrf @method('DELETE')
@@ -98,9 +134,6 @@
                 @endif
 
                 {{-- Créditos Cerrados --}}
-                @php
-                    $cerrados = $creditosUsuario->where('estado', 0);
-                @endphp
                 @if($cerrados->isNotEmpty())
                     <h3>Cerrados</h3>
                     <table class="cerrado">
@@ -110,7 +143,6 @@
                                 <th>Fecha Liquidación</th>
                                 <th>Fecha Vencimiento</th>
                                 <th>Saldo</th>
-                                <!-- <th>Acciones</th> -->
                                 <th>Eliminar</th>
                             </tr>
                         </thead>
@@ -121,7 +153,6 @@
                                     <td>{{ $credito->fecha_liquidacion ?? '-' }}</td>
                                     <td>{{ $credito->fecha_vencimiento }}</td>
                                     <td>${{ number_format($credito->saldo_total, 2) }}</td>
-                                    <!-- <td><a href="{{ route('credito.edit', $credito->id_credito) }}">Editar</a></td> -->
                                     <td>
                                         <form action="{{ url('/credito', $credito->id_credito) }}" method="POST">
                                             @csrf @method('DELETE')

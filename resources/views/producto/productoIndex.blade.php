@@ -6,57 +6,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Principal de productos</title>
     <style>
-        .sin-stock {
-            background-color: #ffe5e5;
-        }
-        .resaltado {
-            font-weight: bold;
-            color: red;
-        }
-        .cant-input {
-            width: 60px;
-        }
+        .sin-stock { background-color: #ffe5e5; }
+        .resaltado { font-weight: bold; color: red; }
+        .cant-input { width: 60px; }
+        /* Estilos opcionales para modo solo lectura */
+        .solo-lectura table { opacity: 1; }
+        .solo-lectura .nota { color: #666; margin: 8px 0 16px; }
     </style>
 
     @php use App\Models\CarroProducto; @endphp
 </head>
 <body>
-    <section>
-        <div>
-            <h1>Principal de productos</h1>
-            <br>
-            @if (Auth::check())
-                <p>Sesión iniciada por: {{ Auth::user()->name }}</p>
-            @else
-                <p>No hay sesión activa.</p>
-            @endif
+<section>
+    <div>
+        <h1>Principal de productos</h1>
+        <br>
 
-            @can('create producto')
-                <a href="{{ url('/producto/create') }}">Registrar un nuevo producto</a>
-            @endcan
-            <hr><br>
+        @if (Auth::check())
+            <p>Sesión iniciada por: {{ Auth::user()->name }}</p>
+        @else
+            <p>No hay sesión activa.</p>
+        @endif
 
-            <form action="{{ url('/producto/showProducto') }}" method="GET">
-                <label for="busqueda">Buscar por ID o por nombre:</label>
-                <input list="productos" id="busqueda" name="busqueda" placeholder="Ej. 21 o Cortina de baño" value="{{ request('busqueda') }}">
+        @can('create producto')
+            <a href="{{ url('/producto/create') }}">Registrar un nuevo producto</a>
+        @endcan
 
-                <datalist id="productos">
-                    @foreach ($productoIndex as $producto)
-                        <option value="{{ $producto->id_producto }}">{{ $producto->nombre }}</option>
-                        <option value="{{ $producto->nombre }}">{{ $producto->nombre }}</option>
-                    @endforeach
-                </datalist>
+        <hr><br>
 
-                <input type="submit" value="Buscar">
-            </form>
+        {{-- Búsqueda (solo lectura; se mantiene para todos) --}}
+        <form action="{{ url('/producto/showProducto') }}" method="GET">
+            <label for="busqueda">Buscar por ID o por nombre:</label>
+            <input list="productos" id="busqueda" name="busqueda" placeholder="Ej. 21 o Cortina de baño" value="{{ request('busqueda') }}">
+            <datalist id="productos">
+                @foreach ($productoIndex as $producto)
+                    <option value="{{ $producto->id_producto }}">{{ $producto->nombre }}</option>
+                    <option value="{{ $producto->nombre }}">{{ $producto->nombre }}</option>
+                @endforeach
+            </datalist>
+            <input type="submit" value="Buscar">
+        </form>
 
-            <br><br>
+        <br><br>
 
-            <form action="{{ url('/carro/agregar-multiples') }}" method="POST">
-                @csrf
+        @if($productoIndex->isNotEmpty())
+            @php $agrupadosPorTipo = $productoIndex->groupBy('tipo'); @endphp
 
-                @if($productoIndex->isNotEmpty())
-                    @php $agrupadosPorTipo = $productoIndex->groupBy('tipo'); @endphp
+            {{-- ===== Vista para USUARIOS LOGUEADOS (interactiva) ===== --}}
+            @auth
+                <form action="{{ url('/carro/agregar-multiples') }}" method="POST">
+                    @csrf
+
                     @foreach ($agrupadosPorTipo as $tipo => $productos)
                         <h3>Tipo: {{ ucfirst($tipo) }}</h3>
                         <table border="1" cellpadding="5" cellspacing="0">
@@ -77,46 +77,46 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            @foreach ($productos as $producto)
-                                @if (Auth::user()->hasRole('administrador') || $producto->estado_producto)
+                                @foreach ($productos as $producto)
+                                    @php
+                                        $reservadas = CarroProducto::where('id_producto', $producto->id_producto)->sum('cantidad');
+                                        $disponibles = max(0, $producto->piezas - $reservadas);
+                                        $esAdmin = Auth::check() && Auth::user()->hasRole('administrador');
+                                    @endphp
 
-                                @php
-                                    $reservadas = CarroProducto::where('id_producto', $producto->id_producto)->sum('cantidad');
-                                    $disponibles = max(0, $producto->piezas - $reservadas);
-                                @endphp
-                                <tr class="{{ $disponibles == 0 ? 'sin-stock' : '' }}">
-                                    <td>
-                                        <input type="checkbox" name="productos_seleccionados[]" value="{{ $producto->id_producto }}" {{ $disponibles == 0 ? 'disabled' : '' }}>
-                                    </td>
-                                    <td>{{ $producto->id_producto }}</td>
-                                    <td>{{ $producto->nombre }}</td>
-                                    <td>
-                                        @if (!empty($producto->imagen)) 
-                                            <img src="{{ Storage::disk('s3')->url($producto->imagen) }}" alt="Foto de producto" width="250">
-                                        @else
-                                            <span>Sin imagen</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $producto->material }}</td>
-                                    <td>{{ $producto->color }}</td>
-                                    <td>{{ $producto->tamanio }}</td>
-                                    <td>${{ number_format($producto->precio_unitario, 2) }}</td>
-                                    <td class="{{ $disponibles == 0 ? 'resaltado' : '' }}">
-                                        {{ $disponibles }}
-                                    </td>
-                                    <td>
-                                        <input type="number" name="cantidades[{{ $producto->id_producto }}]" min="1" max="{{ $disponibles }}" class="cant-input" {{ $disponibles == 0 ? 'disabled' : '' }}>
-                                    </td>
-                                    <td>{{ $producto->estado_producto ? 'Activo' : 'Descontinuado' }}</td>
-                                    <td><a href="{{ route('producto.edit', $producto->id_producto) }}">Editar</a></td>
-                                </tr>
-                                @endif
-                            @endforeach
+                                    @if ($esAdmin || $producto->estado_producto)
+                                        <tr class="{{ $disponibles == 0 ? 'sin-stock' : '' }}">
+                                            <td>
+                                                <input type="checkbox" name="productos_seleccionados[]" value="{{ $producto->id_producto }}" {{ $disponibles == 0 ? 'disabled' : '' }}>
+                                            </td>
+                                            <td>{{ $producto->id_producto }}</td>
+                                            <td>{{ $producto->nombre }}</td>
+                                            <td>
+                                                @if (!empty($producto->imagen)) 
+                                                    <img src="{{ Storage::disk('s3')->url($producto->imagen) }}" alt="Foto de producto" width="250">
+                                                @else
+                                                    <span>Sin imagen</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $producto->material }}</td>
+                                            <td>{{ $producto->color }}</td>
+                                            <td>{{ $producto->tamanio }}</td>
+                                            <td>${{ number_format($producto->precio_unitario, 2) }}</td>
+                                            <td class="{{ $disponibles == 0 ? 'resaltado' : '' }}">{{ $disponibles }}</td>
+                                            <td>
+                                                <input type="number" name="cantidades[{{ $producto->id_producto }}]" min="1" max="{{ $disponibles }}" class="cant-input" {{ $disponibles == 0 ? 'disabled' : '' }}>
+                                            </td>
+                                            <td>{{ $producto->estado_producto ? 'Activo' : 'Descontinuado' }}</td>
+                                            <td><a href="{{ route('producto.edit', $producto->id_producto) }}">Editar</a></td>
+                                        </tr>
+                                    @endif
+                                @endforeach
                             </tbody>
                         </table>
                         <br>
                     @endforeach
 
+                    {{-- Selección de usuario y pedido solo para admin/usuarios logueados --}}
                     @if (Auth::user()->hasRole('administrador'))
                         <label for="nombre_usuario">Buscar usuario:</label>
                         <input list="usuarios" id="nombre_usuario" placeholder="Ej. Juan Pérez" autocomplete="off">
@@ -135,9 +135,7 @@
                             const selectPedido = document.getElementById('id_pedido');
 
                             inputUsuario.addEventListener('input', () => {
-                                const option = Array.from(datalistUsuarios.options).find(
-                                    o => o.value === inputUsuario.value
-                                );
+                                const option = Array.from(datalistUsuarios.options).find(o => o.value === inputUsuario.value);
                                 if (option) {
                                     idUsuario.value = option.dataset.userid;
                                     filtrarPedidos(option.dataset.userid);
@@ -151,12 +149,11 @@
                                 const opciones = document.querySelectorAll('#id_pedido option');
                                 opciones.forEach(opcion => {
                                     if (opcion.value === 'nuevo') {
-                                        opcion.hidden = false; // siempre visible
+                                        opcion.hidden = false;
                                     } else {
                                         opcion.hidden = opcion.dataset.user !== userId;
                                     }
                                 });
-
                                 if (selectPedido.value) {
                                     const opcionSeleccionada = selectPedido.querySelector(`option[value="${selectPedido.value}"]`);
                                     if (opcionSeleccionada && opcionSeleccionada.value !== 'nuevo' && opcionSeleccionada.dataset.user !== userId) {
@@ -166,16 +163,16 @@
                             }
                             function mostrarTodosPedidos() {
                                 const opciones = document.querySelectorAll('#id_pedido option');
-                                opciones.forEach(opcion => {
-                                    opcion.hidden = false;
-                                });
+                                opciones.forEach(opcion => { opcion.hidden = false; });
                                 selectPedido.value = '';
                             }
                         </script>
                     @else
                         <input type="hidden" name="id_user" value="{{ Auth::id() }}">
                     @endif
+
                     <br><br>
+
                     <label for="id_pedido">Selecciona o crea un pedido:</label>
                     <select name="id_pedido" id="id_pedido" required>
                         <option value="">-- Selecciona --</option>
@@ -190,13 +187,71 @@
                     </select>
 
                     <br><br>
-
                     <button type="submit">Agregar seleccionados al carrito</button>
-                @else
-                    <p>No hay productos registrados.</p>
-                @endif
-            </form>
-        </div>
-    </section>
+                </form>
+            @endauth
+
+            {{-- ===== Vista para VISITANTES (solo lectura) ===== --}}
+            @guest
+                <div class="solo-lectura">
+                    <p class="nota">Estás en modo solo lectura. Inicia sesión para agregar productos al carrito.</p>
+
+                    @foreach ($agrupadosPorTipo as $tipo => $productos)
+                        <h3>Tipo: {{ ucfirst($tipo) }}</h3>
+                        <table border="1" cellpadding="5" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    {{-- Sin checkbox ni cantidad ni editar --}}
+                                    <th>ID producto</th>
+                                    <th>Nombre</th>
+                                    <th>Imagen</th>
+                                    <th>Material</th>
+                                    <th>Color</th>
+                                    <th>Tamaño</th>
+                                    <th>Precio unitario</th>
+                                    <th>Piezas disponibles</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($productos as $producto)
+                                    @php
+                                        $reservadas = CarroProducto::where('id_producto', $producto->id_producto)->sum('cantidad');
+                                        $disponibles = max(0, $producto->piezas - $reservadas);
+                                        $esAdmin = false;
+                                    @endphp
+
+                                    {{-- Mostrar solo productos activos para visitantes --}}
+                                    @if ($producto->estado_producto)
+                                        <tr class="{{ $disponibles == 0 ? 'sin-stock' : '' }}">
+                                            <td>{{ $producto->id_producto }}</td>
+                                            <td>{{ $producto->nombre }}</td>
+                                            <td>
+                                                @if (!empty($producto->imagen)) 
+                                                    <img src="{{ Storage::disk('s3')->url($producto->imagen) }}" alt="Foto de producto" width="250">
+                                                @else
+                                                    <span>Sin imagen</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $producto->material }}</td>
+                                            <td>{{ $producto->color }}</td>
+                                            <td>{{ $producto->tamanio }}</td>
+                                            <td>${{ number_format($producto->precio_unitario, 2) }}</td>
+                                            <td class="{{ $disponibles == 0 ? 'resaltado' : '' }}">{{ $disponibles }}</td>
+                                            <td>{{ $producto->estado_producto ? 'Activo' : 'Descontinuado' }}</td>
+                                        </tr>
+                                    @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <br>
+                    @endforeach
+                </div>
+            @endguest
+        @else
+            <p>No hay productos registrados.</p>
+        @endif
+    </div>
+</section>
 </body>
 </html>

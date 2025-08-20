@@ -25,54 +25,45 @@ def to_native(v):
         return bool(v)
     return v  # str/int/float/bool nativos OK
 
-def select_feature_range(df: pd.DataFrame, start_col: str, end_col: str) -> pd.DataFrame:
-    """Selecciona columnas por rango (inclusive) siguiendo el orden del CSV."""
-    cols = list(df.columns)
-    if start_col not in cols or end_col not in cols:
-        raise KeyError(f"Faltan columnas: '{start_col}' o '{end_col}'")
-    i0, i1 = cols.index(start_col), cols.index(end_col)
-    return df.iloc[:, min(i0, i1):max(i0, i1) + 1].copy()
-
-def encode_genero(series: pd.Series) -> pd.Series:
-    """Mapeo simple para género en tus datos (H/M, con tolerancia a variantes)."""
-    s = series.astype(str).str.strip().str.upper()
-    mapa = {
-        'H': 1, 'HOMBRE': 1, 'MASCULINO': 1,
-        'M': 0, 'MUJER': 0, 'F': 0, 'FEMENINO': 0
-    }
-    return s.map(mapa)
-
 def transform_like_training(df: pd.DataFrame, feat_cols_expected: List[str]) -> pd.DataFrame:
     """
-    Replica tu entrenamiento:
-      - subset: dias_aplazo..ultimo_abono_fecha
-      - fecha -> 'ultimo_abono_ts' (segundos) y drop de 'ultimo_abono_fecha'
-      - encode genero
-      - to_numeric + fillna(0)
-      - alinear columnas al orden guardado en el modelo
+    Preprocesa exactamente como el entrenamiento (train_arbol_nivel_regla_v3):
+      - Construye 'ultimo_abono_ts' a partir de 'ultimo_abono_fecha' (formato DD/MM/YYYY).
+      - Elimina el texto de fecha (no se usa en el modelo).
+      - Convierte el resto a numérico y rellena NaN con 0.
+      - Alinea columnas y orden a feat_cols_expected.
     """
-    # 1) subset por rango
-    X = select_feature_range(df, 'dias_aplazo', 'ultimo_abono_fecha')
+    X = pd.DataFrame(index=df.index)
 
-    # 2) fecha -> timestamp (segundos desde epoch)
-    if 'ultimo_abono_fecha' in X.columns:
-        parsed = pd.to_datetime(X['ultimo_abono_fecha'], errors='coerce')
-        ts = parsed.astype('int64')  # ns desde epoch; NaT -> sentinel
-        ts = ts.where(parsed.notna(), np.nan) / 1e9  # a segundos y NaT -> NaN
+    # 1) generar 'ultimo_abono_ts' desde 'ultimo_abono_fecha' (DD/MM/YYYY)
+    if 'ultimo_abono_fecha' in df.columns:
+        parsed = pd.to_datetime(df['ultimo_abono_fecha'], format="%d/%m/%Y", errors='coerce')
+        ts = (parsed.view('int64') / 1e9).where(parsed.notna(), np.nan)  # segundos desde epoch
         X['ultimo_abono_ts'] = ts
-        X = X.drop(columns=['ultimo_abono_fecha'])
+    else:
+        # Si no viene la fecha, dejamos el ts en 0 (o NaN -> luego fillna(0))
+        X['ultimo_abono_ts'] = 0.0
 
-    # 3) codificar genero
-    if 'genero' in X.columns:
-        X['genero'] = encode_genero(X['genero'])
+    # 2) copiar columnas numéricas usadas en el modelo (excepto 'ultimo_abono_ts' que ya hicimos)
+    #    Estas son las que definimos en el entrenamiento v3:
+    #    'dias_aplazo','total_pedidos','pedidos_cerrados','total_creditos',
+    #    'creditos_activos','creditos_vencidos','creditos_liquidados',
+    #    'total_abonado','promedio_abonos'
+    for col in df.columns:
+        if col == 'ultimo_abono_fecha':
+            continue  # no la usamos directamente
+        if col == 'ultimo_abono_ts':
+            continue  # ya la construimos
+        if col in feat_cols_expected:
+            X[col] = df[col]
 
-    # 4) a numérico + NaN -> 0
+    # 3) A numérico + NaN -> 0
     for c in X.columns:
         if not pd.api.types.is_numeric_dtype(X[c]):
             X[c] = pd.to_numeric(X[c], errors='coerce')
     X = X.fillna(0)
 
-    # 5) asegurar columnas y orden exactamente como en el entrenamiento
+    # 4) Asegurar todas las columnas esperadas y en el orden exacto
     for col in feat_cols_expected:
         if col not in X.columns:
             X[col] = 0
