@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/carro/carroIndex.css') }}">
     <title>Principal de carros</title>
 
@@ -12,13 +14,14 @@
 
 </head>
 <body>
+<x-barrageneral/>
 <section>
     <div>
         <br><hr class="hr-grueso"><center><h1>Caja registradora</h1></center><hr class="hr-grueso">
        
 
         @if(Auth::check())
-            <p><a href="{{ url('/carro/create') }}">Registrar un nuevo carro</a></p>
+            <br><p><a href="{{ url('/carro/create') }}">Registrar un nuevo carro</a></p>
 
             <form action="{{ url('/carro/showCarro') }}" method="GET">
                 <label for="busqueda">Buscar por ID de carro o nombre de usuario:</label>
@@ -38,7 +41,7 @@
                 <input type="submit" value="Buscar" />
             </form>
 
-            <br><br>
+            <br>
 
             @if($carroIndex->isNotEmpty())
                 @php
@@ -125,7 +128,7 @@
                         </table>
                         
 
-                        <p><strong>Total del pedido #{{ $idPedido }}: {{ $totalPedido }}</strong></p>
+                        <br><p><strong>Total del pedido #{{ $idPedido }}: {{ $totalPedido }}</strong></p>
 
                         @if($pedido && $pedido->estado_pedido == 1)
                             @php
@@ -163,8 +166,7 @@
                                 <form action="{{ route('carro.destroy', $carros->first()->id_carro) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar todo este carro?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" style="background-color:#d9534f; color:#fff; border:none; padding:6px 12px; cursor:pointer;">
-                                        Eliminar carro completo
+                                    <button type="submit" style="background-color:#d9534f; color:#fff; border:none; padding:6px 12px; cursor:pointer;">Eliminar carro completo
                                     </button>
                                 </form>
                             </p>

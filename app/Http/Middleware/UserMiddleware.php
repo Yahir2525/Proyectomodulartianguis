@@ -16,7 +16,7 @@ class UserMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        echo "Permitido para users";
+        
         if(Auth::check()){
         return $next($request);
         }

@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página de roles</title>
+    
     <link rel="stylesheet" href="{{ asset('css/role/roleIndex.css') }}">
+    <title>Principal de roles</title>
 </head>
 <body>
 <div class="container">

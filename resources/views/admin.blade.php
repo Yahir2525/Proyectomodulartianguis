@@ -4,10 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Blancos Doña Colchas" />
-    <title>Página de inicio</title>
+    
     <link href="{{ asset('css/template.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('css/dashboard/admin.css') }}">
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <title>Página de inicio</title>
 </head>
 <body><br>
     <x-barra></x-barra>

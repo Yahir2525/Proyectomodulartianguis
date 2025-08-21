@@ -1,7 +1,7 @@
 /* ===== editAbono.css — diseño simple y consistente (como create) ===== */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #f7f7f8; }
+body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh;}
 
 /* Contenedor centrado horizontal (igual que create) */
 .container { max-width: 400px; margin: 0 auto; padding: 16px; }

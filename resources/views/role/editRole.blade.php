@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link rel="stylesheet" href="{{ asset('css/role/editRole.css') }}">
   <title>Editar Rol</title>
-
-  {{-- Como no usas Vite, cargamos desde public/ --}}
-  <link rel="stylesheet" href="{{ asset('css/pages/roles/edit.css') }}">
 </head>
 <body>
   <div class="container">

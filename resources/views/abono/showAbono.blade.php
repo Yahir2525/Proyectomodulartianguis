@@ -2,11 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detalle(s) de Abono</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/abono/showAbono.css') }}">
+    <title>Detalle(s) de Abono</title>
 </head>
 <body>
+<x-barrageneral/>
 <section class="container">
      <br><hr class="hr-grueso"><center><h1>Detalles del Abono</h1></center><hr class="hr-grueso">
 
@@ -39,11 +42,10 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID Abono</th>
-                            <th>ID Usuario</th>
-                            <th>ID Crédito</th>
+                            <th>ID del abono</th>
+                            <th>Fecha de creación</th>
+                            <th>Última actualización</th>
                             <th>Monto</th>
-                            <th>Fecha</th>
                             <th>Editar</th>
                             <th>Eliminar</th>
                         </tr>
@@ -52,10 +54,10 @@
                         @foreach($grupoAbonos as $abono)
                             <tr>
                                 <td>{{ $abono->id_abono }}</td>
-                                <td>{{ optional($abono->user)->nombre_usuario ?? 'Usuario no disponible' }}</td>
-                                <td>{{ optional($abono->credito)->id_credito ?? 'Sin crédito' }}</td>
+                                
+                                <td>{{ $abono->created_at }}</td>
+                                <td>{{ $abono->updated_at }}</td>
                                 <td>${{ number_format($abono->monto_abono, 2) }}</td>
-                                <td>{{ $abono->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     @can('edit abono')
                                         <a href="{{ route('abono.edit', $abono->id_abono) }}" class="btn btn-edit">Editar</a>

@@ -1,6 +1,6 @@
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; background: #f8f9fa; }
+body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh;}
 
 /* Asegura altura útil en móviles con barras dinámicas */
 .min-vh-100 { min-height: 100dvh !important; }

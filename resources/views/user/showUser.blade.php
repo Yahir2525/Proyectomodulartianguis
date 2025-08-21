@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{{ asset('css/user/showUser.css') }}">
-    <title>Usuarios encontrados</title>
+    
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Usuarios encontrados</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         h2 { margin-bottom: 20px; }

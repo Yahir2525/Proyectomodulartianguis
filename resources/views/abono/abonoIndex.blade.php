@@ -2,11 +2,16 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Principal de abonos</title>
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/abono/abonoIndex.css') }}">
+    <title>Principal de abonos</title>
 </head>
+
 <body>
+    <x-barrageneral/>
     <section class="container">
         
         <br><hr class="hr-grueso"><center><h1>Historial de Abonos</h1></center><hr class="hr-grueso"><br>
@@ -16,10 +21,7 @@
             <button type="submit" class="btn btn-primary">Registrar nuevo abono</button>
         </form>
         @endcan
-
-
         <br>
-
         <form action="{{ url('/abono/showAbono') }}" method="GET">
             <label for="busqueda">Buscar por ID de abono o nombre de usuario:</label>
             <input
@@ -67,10 +69,9 @@
                         <thead>
                             <tr>
                                 <th>ID del abono</th>
-                                <th>ID del crédito</th>
-                                <th>Monto</th>
                                 <th>Fecha de creación</th>
                                 <th>Última actualización</th>
+                                <th>Monto</th>
                                 <th>Editar</th>
                                 <th>Eliminar</th>
                             </tr>
@@ -79,10 +80,9 @@
                             @foreach ($abonos as $abono)
                                 <tr>
                                     <td>{{ $abono->id_abono }}</td>
-                                    <td>{{ optional($abono->credito)->id_credito ?? 'Sin crédito' }}</td>
-                                    <td>${{ number_format($abono->monto_abono, 2) }}</td>
                                     <td>{{ $abono->created_at }}</td>
                                     <td>{{ $abono->updated_at }}</td>
+                                    <td>${{ number_format($abono->monto_abono, 2) }}</td>
                                     <td>
                                         @can('edit abono')
                                         <form action="{{ route('abono.edit', $abono->id_abono) }}" method="GET" style="display:inline;">

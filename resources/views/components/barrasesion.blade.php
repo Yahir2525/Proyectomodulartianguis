@@ -1,73 +1,15 @@
 <nav class="navbar navbar-expand-lg navbar-dark px-3">
-    <a class="navbar-brand fw-semibold" href="/">Blancos Doña Colchas</a>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
-        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-
-    @php
-        $isAuth  = Auth::check();
-        $isAdmin = $isAuth && Auth::user()->hasRole('administrador');
-        $avatarPath = $isAuth && !empty(Auth::user()->imagen)
-            ? Storage::disk('s3')->url(Auth::user()->imagen)
-            : null;
-    @endphp
-    
+    <a class="navbar-brand fw-semibold" href="/">Blancos Doña Colchas</a>    
     <div class="collapse navbar-collapse" id="mainNavbar">
-        
-        @auth
             <ul class="navbar-nav mx-auto align-items-lg-center">
-                <li class="nav-item"><a class="nav-link btn-chip" href="/producto">Productos</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/carro">Carros</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/pedido">Pedidos</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/credito">Créditos</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/abono">Abonos</a></li>
+                <li class="nav-item"><a class="nav-link btn-chip" href="/">Inicio</a></li>
             </ul>
-        @endauth
-
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" id="navbarDropdown" href="#"
-                role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="avatar-chip">
-                    @auth
-                    @if ($avatarPath)
-                        <img src="{{ $avatarPath }}" alt="Foto de perfil" class="user-icon">
-                    @else
-                        <i class="fas fa-user fa-fw text-white"></i>
-                    @endif
-                    @else
-                    <i class="fas fa-user fa-fw text-white"></i>
-                    @endauth
-                </span>
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    @auth
-                        <li><span class="dropdown-item-text">Hola, {{ Auth::user()->name }}</span></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li>
-                            <a class="dropdown-item" href="/perfil">Ver perfil</a>
-                        </li>
-                        <li>
-                            <form method="POST" action="{{ url('logout') }}">
-                                @csrf
-                                <button type="submit" class="dropdown-item">Cerrar sesión</button>
-                            </form>
-                        </li>
-                    @else
-                        <li><a href="{{ url('/login') }}" class="dropdown-item">Iniciar sesión</a></li>
-                    @endauth
-                </ul>
-            </li>
-        </ul>
     </div>
-    
-</nav> 
+</nav>
 
 <style>
-    nav { background: transparent !important; }
+    /* Fondo morado */
+   nav { background: transparent !important; }
 
     .navbar-brand { 
     font-weight: 700; 
@@ -167,4 +109,3 @@
     }
 
 </style>
-

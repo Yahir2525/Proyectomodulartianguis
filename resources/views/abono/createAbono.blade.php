@@ -2,9 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Crear Abono</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/abono/createAbono.css') }}">
+    <title>Crear Abono</title>
     
     <script>
         function filtrarCreditos() {
@@ -48,6 +50,7 @@
     </script>
 </head>
 <body>
+<x-barracreate/>
 <div class="container">
     <br><hr class="hr-grueso"><center><h1>Registrar nuevo abono</h1></center><hr class="hr-grueso"><br>
 

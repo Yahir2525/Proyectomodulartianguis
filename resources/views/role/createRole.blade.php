@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <link rel="stylesheet" href="{{ asset('css/role/createRole.css') }}">
 <title>Crear Rol</title>
-
-{{-- CSS separado en public/ --}}
-<link rel="stylesheet" href="{{ asset('css/pages/roles/create.css') }}">
 </head>
 <body>
 <div class="container">

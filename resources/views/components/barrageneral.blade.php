@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark px-3">
+<nav class="navbar navbar-expand-lg navbar-dark px-3" >
     <a class="navbar-brand fw-semibold" href="/">Blancos Doña Colchas</a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
@@ -18,6 +18,7 @@
         
         @auth
             <ul class="navbar-nav mx-auto align-items-lg-center">
+                <li class="nav-item"><a class="nav-link btn-chip" href="/">Inicio</a></li>
                 <li class="nav-item"><a class="nav-link btn-chip" href="/producto">Productos</a></li>
                 <li class="nav-item"><a class="nav-link btn-chip" href="/carro">Carros</a></li>
                 <li class="nav-item"><a class="nav-link btn-chip" href="/pedido">Pedidos</a></li>
@@ -63,10 +64,10 @@
             </li>
         </ul>
     </div>
-    
-</nav> 
+</nav>
 
 <style>
+    /* Fondo morado transparente */
     nav { background: transparent !important; }
 
     .navbar-brand { 
@@ -167,4 +168,5 @@
     }
 
 </style>
+
 

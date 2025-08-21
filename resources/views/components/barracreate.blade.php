@@ -18,11 +18,7 @@
         
         @auth
             <ul class="navbar-nav mx-auto align-items-lg-center">
-                <li class="nav-item"><a class="nav-link btn-chip" href="/producto">Productos</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/carro">Carros</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/pedido">Pedidos</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/credito">Créditos</a></li>
-                <li class="nav-item"><a class="nav-link btn-chip" href="/abono">Abonos</a></li>
+                <li class="nav-item"><a class="nav-link btn-chip" href="/">Inicio</a></li>
             </ul>
         @endauth
 
@@ -63,10 +59,10 @@
             </li>
         </ul>
     </div>
-    
-</nav> 
+</nav>
 
 <style>
+    /* Fondo morado */
     nav { background: transparent !important; }
 
     .navbar-brand { 
@@ -167,4 +163,3 @@
     }
 
 </style>
-

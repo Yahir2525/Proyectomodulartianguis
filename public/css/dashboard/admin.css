@@ -1,5 +1,6 @@
 
-body { color: #fff; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:#c186ff}
+body { color: #222; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:#c186ff; min-height: 100vh; margin: 0;}
+
 
 .inicio-container h1 { font-size: 3rem; font-weight: 800; margin-bottom: 10px; letter-spacing: .5px; }
 .inicio-container p.frase { font-size: 1.35rem; font-style: italic; opacity: .95; margin-bottom: 40px; }

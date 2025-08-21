@@ -2,12 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registro de Usuario</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/sesion/registro.css') }}">
+    <title>Registro de Usuario</title>
 </head>
 <body class="bg-light">
+<x-barrasesion/>
 <div class="container min-vh-100 d-flex align-items-center py-4">
   <div class="row justify-content-center w-100">
     <div class="col-12 col-sm-10 col-md-8 col-lg-6">

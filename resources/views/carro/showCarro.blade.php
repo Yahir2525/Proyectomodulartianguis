@@ -173,7 +173,7 @@
                     </tbody>
                 </table>
 
-                <p><strong>Total del carrito:</strong> ${{ number_format($total, 2) }}</p>
+                <br><p><strong>Total del carrito:</strong> ${{ number_format($total, 2) }}</p>
             @endif
                 <p>
                     <form action="{{ route('carro.destroy', $carroItem->id_carro) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar todo este carro?');">

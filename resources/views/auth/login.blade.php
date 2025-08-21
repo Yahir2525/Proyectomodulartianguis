@@ -2,17 +2,15 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <title>Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Inicio de sesión" />
-    <meta name="author" content="Juan y Yahir" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{{ asset('css/sesion/login.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/sesion/login.css') }}">
+    <title>Login</title>
     
 </head>
 <body>
-
+<x-barrasesion/>
 <section class="hero is-fullheight">
   <div class="hero-body">
     <div class="container">
