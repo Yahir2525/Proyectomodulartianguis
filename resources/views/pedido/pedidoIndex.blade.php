@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/pedido/pedidoIndex.css') }}">
     <title>Principal de pedidos</title>
 </head>
@@ -53,11 +55,24 @@
                 $usuarioBloqueadoPorPagosAtrasados = $usuario && method_exists($usuario, 'tienePagosAtrasadosSinAbonar')
                     ? $usuario->tienePagosAtrasadosSinAbonar()
                     : false;
+
+                /* NUEVO: detectar nivel del usuario (normalizado, con fallbacks) */
+                $nivelUsuarioGlobal = $usuario
+                    ? strtolower((string)($usuario->nivel ?? $usuario->nivel_usuario ?? $usuario->nivel_riesgo ?? ''))
+                    : '';
+                $bloqueadoPorNivelGlobal = ($nivelUsuarioGlobal === 'malo');
             @endphp
 
             @if($usuarioBloqueadoPorPagosAtrasados)
                 <p style="color: red; font-weight: bold;">
                     El usuario tiene pagos vencidos sin abonar. No podrá cerrar pedidos a crédito hasta liquidarlos.
+                </p>
+            @endif
+
+            <!-- NUEVO: aviso global por nivel malo -->
+            @if($bloqueadoPorNivelGlobal)
+                <p style="color: red; font-weight: bold;">
+                    El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar pedidos <strong>a contado</strong>.
                 </p>
             @endif
 
@@ -104,12 +119,15 @@
 
                             $puedeCrearNuevoCredito = $creditosActivos->count() < 3;
 
-
-
                             // Si el usuario tiene pagos vencidos sin abonar (usar método en User)
                             $usuarioBloqueadoPorPagosAtrasados = $usuario && method_exists($usuario, 'tienePagosAtrasadosSinAbonar')
                                 ? $usuario->tienePagosAtrasadosSinAbonar()
                                 : false;
+
+                            $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? ''));
+                            $bloqueadoPorNivel = ($nivelUsuario === 'malo');
+
+                            $bloqueoCreditoUI = $superaDiezMil || $usuarioBloqueadoPorPagosAtrasados || $bloqueadoPorNivel;
                         @endphp
 
                         <tr>
@@ -161,16 +179,23 @@
                                             </p>
                                         @endif
 
+                                        @if($bloqueadoPorNivel)
+                                            <p style="color:red;">
+                                                <strong>Atención:</strong> El nivel del usuario es <strong>"malo"</strong>.<br>
+                                                Solo puede cerrar pedidos <strong>a contado</strong>.
+                                            </p>
+                                        @endif
+
                                         <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
                                         <select name="metodo_pago" required onchange="toggleCreditoOptions(this, {{ $pedido->id_pedido }})">
                                             <option value="">-- Selecciona --</option>
                                             <option value="contado" {{ $pedido->metodo_pago == 'contado' ? 'selected' : '' }}>Contado</option>
-                                            @if(!$superaDiezMil && !$usuarioBloqueadoPorPagosAtrasados)
+                                            @if(!$bloqueoCreditoUI)
                                                 <option value="credito" {{ $pedido->metodo_pago == 'credito' ? 'selected' : '' }}>Crédito</option>
                                             @endif
                                         </select>
 
-                                        <div id="credito-opciones-{{ $pedido->id_pedido }}" style="display:{{ $pedido->metodo_pago == 'credito' ? 'block' : 'none' }}; margin-top:8px;">
+                                        <div id="credito-opciones-{{ $pedido->id_pedido }}" style="display:{{ ($pedido->metodo_pago == 'credito' && !$bloqueoCreditoUI) ? 'block' : 'none' }}; margin-top:8px;">
                                             <label>Seleccionar crédito:</label>
                                             <select name="id_credito" class="select-credito">
                                                 @if($puedeCrearNuevoCredito)

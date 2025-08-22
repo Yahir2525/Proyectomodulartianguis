@@ -98,30 +98,41 @@ class User extends Authenticatable
 
     public function pagaSiempreAdelantado(): bool
     {
-        // Mantengo la lógica original (70% o más), solo evito N+1 y la mutación de fecha.
-        $creditos = $this->creditosActivos()->with('abonos')->get();
+        // Trae todos los créditos con sus abonos (activos o históricos)
+        $creditos = $this->creditos()->with('abonos')->get();
+
+        // Sólo consideramos créditos que realmente tengan abonos y fecha de vencimiento
+        $creditosConAbonos = $creditos->filter(function ($c) {
+            return $c->abonos->isNotEmpty() && !empty($c->fecha_vencimiento);
+        });
+
+        $total = $creditosConAbonos->count();
+        if ($total < 3) {
+            return false;
+        }
+
         $adelantados = 0;
-        $total = 0;
 
-        foreach ($creditos as $credito) {
-            $total++;
-
-            // Usamos los abonos ya cargados para evitar otra consulta.
+        foreach ($creditosConAbonos as $credito) {
             $ultimoAbono = $credito->abonos->sortByDesc('created_at')->first();
+            if (!$ultimoAbono) {
+                continue;
+            }
 
-            if ($ultimoAbono && $credito->fecha_vencimiento) {
-                $vence = $credito->fecha_vencimiento instanceof Carbon
-                    ? $credito->fecha_vencimiento->copy()
-                    : Carbon::parse($credito->fecha_vencimiento);
+            $vence = $credito->fecha_vencimiento instanceof \Illuminate\Support\Carbon
+                ? $credito->fecha_vencimiento->copy()
+                : \Illuminate\Support\Carbon::parse($credito->fecha_vencimiento);
 
-                if ($ultimoAbono->created_at < $vence->copy()->subDays(10)) {
-                    $adelantados++;
-                }
+            // Cuenta como "adelantado" si el último abono fue >= 10 días ANTES del vencimiento
+            if ($ultimoAbono->created_at < $vence->copy()->subDays(10)) {
+                $adelantados++;
             }
         }
 
+        // Mantén el umbral del 70%
         return $total > 0 && ($adelantados / $total) >= 0.7;
     }
+
 
     public function pagaTardePeroPaga(): bool
     {

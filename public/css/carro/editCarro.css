@@ -1,1 +1,249 @@
-body { margin: 0; color: #222; background: #47fb9e; min-height: 100vh;}
+/* ==== editCarro.css — estilo coherente con createCarro (AUTOAJUSTE COLUMNAS) ==== */
+
+/* Reset & tipografía */
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; color: #222; background: #47fb9e; min-height: 100vh; }
+
+/* -------- Container centrado -------- */
+.container {
+  max-width: clamp(1400px, 100vw, 1800px);
+  margin: 0 auto;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+}
+
+/* -------- Fallback sin wrapper (tu edit no usa .container) -------- */
+body > h1,
+body > hr,
+body > form,
+body > p,
+body > a,
+body > div:not(.container) {
+  max-width: clamp(1400px, 98vw, 1800px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* Títulos */
+h1 { margin: 12px 0; font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem); text-align: center; }
+h3 { margin: 16px 0 8px; font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.4rem); }
+
+/* Enlaces & botones */
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button,
+input[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  margin: 2px 4px;
+  border-radius: 8px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+  font-size: .95rem;
+  white-space: nowrap;
+}
+button:hover,
+input[type="submit"]:hover { filter: brightness(.95); }
+button:disabled { opacity: .6; cursor: not-allowed; }
+
+/* “Volver al Carrito” como botón azul (sin cambiar HTML) */
+a[href="/carro"],
+a[href$="/carro"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  margin: 2px 4px;
+  border-radius: 8px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff !important;
+  text-decoration: none;
+}
+
+a[href$="/carro"]:hover { filter: brightness(.95); }
+a[href="#top"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  margin: 2px 4px;
+  border-radius: 8px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff !important;
+  text-decoration: none;
+}
+a[href="#top"]:hover { filter: brightness(.95); }
+
+a[href="/carro"] + a[href="#top"],
+a[href$="/carro"] + a[href="#top"] {
+  margin-left: 8px;
+}
+/* Tabla (AUTOAJUSTE DE COLUMNAS) */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;                 /* bordes redondeados limpios */
+  table-layout: auto !important;    /* autoajuste real de columnas */
+}
+th, td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: .95rem;
+  white-space: normal;              /* envuelve por defecto */
+  overflow-wrap: anywhere;          /* evita desbordes de texto */
+}
+thead th { background: #f3f4f6; }
+tbody tr:nth-child(odd) { background: #fafafa; }
+tbody tr:hover { background: #f2f7ff; }
+
+/* Columnas: guía de anchuras (edit) */
+table th:nth-child(1), table td:nth-child(1) { /* Seleccionar */
+  width: 1%;
+  white-space: nowrap;
+}
+table th:nth-child(2), table td:nth-child(2) { /* Imagen */
+  width: 150px;                                 /* acorde al tope de imagen */
+}
+table th:nth-child(3), table td:nth-child(3) { /* Nombre */
+  width: auto;                                   /* absorbe el resto */
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+table th:nth-child(4), table td:nth-child(4),  /* Material */
+table th:nth-child(5), table td:nth-child(5),  /* Color */
+table th:nth-child(6), table td:nth-child(6),  /* Tamaño */
+table th:nth-child(7), table td:nth-child(7),  /* Precio */
+table th:nth-child(8), table td:nth-child(8),  /* Piezas disp. */
+table th:nth-child(9), table td:nth-child(9)   /* Estado */
+{
+  width: 1%;                   /* contraer al mínimo */
+  white-space: nowrap;         /* sin saltos para datos cortos */
+}
+
+/* Imágenes: que no empujen columnas */
+td img {
+  width: auto;
+  max-width: 140px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Estados */
+.sin-stock { background: #fee2e2 !important; }
+.resaltado { font-weight: 700; color: #dc2626; }
+
+/* Inputs */
+input[type="text"],
+input[type="number"],
+select {
+  padding: 8px 10px;
+  border: 1px solid #9aa3ad;
+  border-radius: 8px;
+  background: #fff;
+  font-size: .95rem;
+  outline: none;
+}
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+.cant-input { width: 72px; max-width: 100%; }
+
+/* HR estilizado */
+hr {
+  border: none;
+  height: 1px;
+  background: #e5e7eb;
+  margin: 12px auto 16px;
+  max-width: 100%;
+}
+
+/* Seguridad anti-scroll lateral */
+html, body { overflow-x: hidden; }
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 992px) {
+  html { font-size: 15px; }
+}
+
+@media (max-width: 768px) {
+  html { font-size: 14px; }
+
+  /* “Tarjetas” para evitar scroll horizontal en móvil */
+  table, thead, tbody, th, td, tr { display: block; }
+  thead { display: none; }
+
+  tbody tr {
+    background: #fff;
+    margin: 8px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    overflow: hidden;
+  }
+
+  td {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    white-space: normal;         /* en móvil, permite saltos */
+  }
+  td:first-child { border-top: none; }
+
+  /* Etiquetas por columna (edit) */
+  td:nth-child(1)::before { content: "Seleccionar"; font-weight: 400; }
+  td:nth-child(2)::before { content: "Imagen"; font-weight: 400; }
+  td:nth-child(3)::before { content: "Nombre"; font-weight: 700; }
+  td:nth-child(4)::before { content: "Material"; font-weight: 600; }
+  td:nth-child(5)::before { content: "Color"; font-weight: 600; }
+  td:nth-child(6)::before { content: "Tamaño"; font-weight: 600; }
+  td:nth-child(7)::before { content: "Precio"; font-weight: 600; }
+  td:nth-child(8)::before { content: "Piezas disponibles"; font-weight: 500; }
+  td:nth-child(9)::before { content: "Estado"; font-weight: 600; }
+
+  /* Controles del formulario a ancho completo en móvil */
+  input[type="text"],
+  input[type="number"],
+  select,
+  button,
+  a[href="/carro"],
+  a[href$="/carro"] {
+    width: 100%;
+    margin: 6px 0;
+  }
+  .cant-input { width: 100%; }
+}
+
+/* Móviles muy pequeños: toque cómodo */
+@media (max-width: 480px) {
+  button, input[type="number"], select { min-height: 44px; }
+}
+
+/* Línea gruesa reutilizada */
+hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }

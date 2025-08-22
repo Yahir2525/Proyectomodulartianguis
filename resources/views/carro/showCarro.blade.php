@@ -3,81 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/carro/showCarro.css') }}">
     <title>Detalle(s) de Carro</title>
-    <style>
-        table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
-        th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
-        th { background-color: #eee; }
-        img { max-width: 120px; height: auto; }
-        h2 { margin-top: 40px; }
-        button {
-            cursor: pointer;
-            padding: 4px 10px;
-            margin: 2px;
-        }
-        form.inline {
-            display: inline;
-        }
-
-        /* --------- Solo responsividad (sin cambiar tu HTML/Blade) --------- */
-        * { box-sizing: border-box; }
-        html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-        body { margin: 0; padding: 16px; color: #222; background: #fff; }
-        h1 { margin: 0 0 12px; font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem); }
-        h2 { font-size: clamp(1.1rem, 0.95rem + 0.7vw, 1.5rem); }
-
-        /* Evitar desbordes en imágenes dentro de celdas */
-        td img { display: block; margin: 0 auto; max-width: min(120px, 100%); height: auto; }
-
-        @media (max-width: 992px) {
-          body { padding: 12px; }
-        }
-
-        /* En móviles/tablets: tabla con scroll horizontal y acciones apiladas */
-        @media (max-width: 768px) {
-          table {
-            display: block;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border: 1px solid #e6e6e6;
-          }
-          thead, tbody, tr, th, td { white-space: nowrap; }
-
-          /* Formularios y controles a ancho completo para facilidad de uso */
-          form { max-width: 100%; }
-          form select,
-          form button {
-            width: 100%;
-            max-width: 100%;
-            margin: 6px 0;
-          }
-
-          /* Botones de acciones dentro de la tabla en columna vertical */
-          td:last-child a,
-          td:last-child form {
-            display: block;
-            width: 100%;
-            margin: 6px 0;
-          }
-          td:last-child button,
-          td:last-child a button {
-            width: 100%;
-          }
-        }
-
-        /* Móviles muy pequeños: permitir saltos de línea y toque cómodo */
-        @media (max-width: 480px) {
-          thead, tbody, tr, th, td { white-space: normal; }
-          th, td { padding: 6px; }
-          button, select { min-height: 44px; } /* área táctil mínima */
-        }
-        /* ------------------------------------------------------------------ */
-    </style>
 </head>
 <body>
+<x-barrageneral/>
     <br><hr class="hr-grueso"><center><h1>Detalle del carro</h1></center><hr class="hr-grueso">
-
     @php
         // Normaliza variable para trabajar con uno o varios carros
         $listaCarros = isset($carros) ? $carros : (isset($carro) ? collect([$carro]) : collect([]));
@@ -91,7 +24,6 @@
             ->groupBy('id_producto')
             ->pluck('reservadas', 'id_producto');
     @endphp
-
     @if($listaCarros->isEmpty())
         <p>No se encontraron carros para mostrar.</p>
     @else
@@ -124,7 +56,8 @@
                             <th>Cantidad</th>
                             <th>Precio unitario</th>
                             <th>Subtotal</th>
-                            <th>Acciones</th>
+                            <th>Editar</th>
+                            <th>Eliminar</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -158,7 +91,8 @@
                                         <a href="{{ route('carro.edit', ['id_carro' => $carroItem->id_carro, 'id_producto' => $producto->id_producto]) }}">
                                             <button type="button">Editar</button>
                                         </a>
-
+                                </td>
+                                <td>
                                         <form action="{{ route('carro.eliminarProducto', ['id_carro' => $carroItem->id_carro, 'id_producto' => $producto->id_producto]) }}" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
                                             @csrf
                                             @method('DELETE')
@@ -175,6 +109,7 @@
 
                 <br><p><strong>Total del carrito:</strong> ${{ number_format($total, 2) }}</p>
             @endif
+            @if($pedido && $pedido->estado_pedido == 1)
                 <p>
                     <form action="{{ route('carro.destroy', $carroItem->id_carro) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar todo este carro?');">
                         @csrf
@@ -184,7 +119,7 @@
                         </button>
                     </form>
                 </p>
-            {{-- Formulario para cerrar pedido solo si no está cerrado --}}
+            @endif
             @if($pedido && !$pedidoCerrado)
                 @php
                     $usuario = $carroItem->user;
@@ -200,7 +135,7 @@
                         ->get();
 
                     // Condición para bloquear creación de nuevo crédito:
-                    // No permitir si tiene 3 o más créditos activos o al menos 1 vencido.
+                    // No permitir si tiene 3 o más créditos activos.
                     $puedeCrearCredito = ($creditosActivos->count() < 3);
 
                     // Filtra créditos para mostrar opciones válidas (que no excedan saldo)
@@ -208,11 +143,15 @@
                         return ($credito->saldo_total + $total) <= 10000;
                     });
 
-                    // Para bloquear cierre a crédito si excede saldo o tiene historial bloqueado
+                    // Reglas de bloqueo para cerrar a crédito
                     $totalCreditos = $creditosActivos->sum('saldo_total');
                     $bloqueadoPorSaldo = ($totalCreditos + $total) > 10000;
                     $bloqueadoPorHistorial = method_exists($usuario, 'tienePagosAtrasadosSinAbonar') && $usuario->tienePagosAtrasadosSinAbonar();
-                    $bloqueado = $bloqueadoPorSaldo || $bloqueadoPorHistorial;
+
+                    $nivelUsuario = strtolower((string)( $usuario->nivel_usuario ?? ''));
+                    $bloqueadoPorNivel = ($nivelUsuario === 'malo');
+
+                    $bloqueado = $bloqueadoPorSaldo || $bloqueadoPorHistorial || $bloqueadoPorNivel;
                 @endphp
 
 
@@ -228,6 +167,9 @@
                             @endif
                             @if($bloqueadoPorHistorial)
                                 - Tienes pagos atrasados sin abonar. Tu acceso a crédito está bloqueado.<br>
+                            @endif
+                            @if($bloqueadoPorNivel)
+                                - Tu nivel actual es <strong>"malo"</strong>. Solo puedes cerrar pedidos <strong>a contado</strong>.<br>
                             @endif
                             Puedes cerrarlo como <strong>contado</strong>.
                         </p>

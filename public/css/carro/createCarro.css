@@ -243,3 +243,6 @@ html, body { overflow-x: hidden; }
 /* (Se eliminó el override que encogía .container a 1100px en pantallas grandes) */
 
 hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }
+
+a.arriba { color: #2563eb; text-decoration: none; }
+a.arriba:hover { text-decoration: underline; }

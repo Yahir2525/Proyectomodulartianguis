@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/producto/productoIndex.css') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Principal de productos</title>
     <style>
         .sin-stock { background-color: #ffe5e5; }
@@ -17,6 +19,12 @@
     @php use App\Models\CarroProducto; @endphp
 </head>
 <body>
+    @if (Auth::check())
+        <x-barrageneral/>
+    @else
+        <x-barrasesion/>
+    @endif
+
 <section>
     <div>
         <h1>Principal de productos</h1>

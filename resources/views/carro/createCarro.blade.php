@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/carro/createCarro.css') }}">
     <title>Crear Carro</title>
-
 
     <script>
     function filtrarPedidosPorUsuario() {
@@ -79,6 +79,7 @@
 
 </head>
 <body>
+<x-barracreate/>
   <a id="top"></a>
     <br><hr class="hr-grueso"><center><h1>Crear nuevo carro</h1></center><hr class="hr-grueso">
 
@@ -92,9 +93,7 @@
 
     <form action="{{ route('carro.agregarMultiples') }}" method="POST">
         @csrf
-
-        {{-- Tabla de productos --}}
-        <h3>Selecciona productos</h3>
+        <h3>Selecciona productos</h3><br>
         <table>
             <thead>
                 <tr>

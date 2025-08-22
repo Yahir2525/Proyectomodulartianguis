@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
@@ -127,7 +127,6 @@
                             </tbody>
                         </table>
                         
-
                         <br><p><strong>Total del pedido #{{ $idPedido }}: {{ $totalPedido }}</strong></p>
 
                         @if($pedido && $pedido->estado_pedido == 1)
@@ -152,7 +151,11 @@
 
                                 $bloqueadoPorHistorial = $usuario->tienePagosAtrasadosSinAbonar();
 
-                                $bloqueado = $totalExcede || $sumaExcede || $bloqueadoPorHistorial;
+                                $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? ''));
+                                $bloqueadoPorNivel = ($nivelUsuario === 'malo');
+
+                                
+                                $bloqueado = $totalExcede || $sumaExcede || $bloqueadoPorHistorial || $bloqueadoPorNivel;
 
                                 $puedeCrearCredito = $creditosVigentes->count() < 3;
 
@@ -186,6 +189,10 @@
                                         @endif
                                         @if($bloqueadoPorHistorial)
                                             - Tienes pagos atrasados sin abonar. Tu acceso a crédito está bloqueado.<br>
+                                        @endif
+                                        <!-- NUEVO: mensaje por nivel malo -->
+                                        @if($bloqueadoPorNivel)
+                                            - Tu nivel actual es <strong>"malo"</strong>. Solo puedes cerrar pedidos <strong>a contado</strong>.<br>
                                         @endif
                                         Puedes cerrarlo como <strong>contado</strong>.
                                     </p>

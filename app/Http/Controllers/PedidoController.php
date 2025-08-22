@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Abono;
 use App\Models\Carro;
 use App\Models\CarroProducto;
@@ -29,7 +30,6 @@ class PedidoController extends Controller
         return view('pedido/pedidoIndex', compact('pedidoIndex', 'usuarios'));
     }
 
-
     public function create()
     {
         $usuario = Auth::user();
@@ -43,7 +43,6 @@ class PedidoController extends Controller
 
         return view('pedido.createPedido', compact('usuarios', 'usuario'));
     }
-
 
     public function store(Request $request)
     {
@@ -106,7 +105,6 @@ class PedidoController extends Controller
         return view('pedido.showPedido', ['pedidos' => $pedidos]);
     }
 
-
     public function edit($id)
     {
         $pedido = Pedido::find($id);
@@ -134,7 +132,13 @@ class PedidoController extends Controller
         }
     }
 
-
+    // ✅ NUEVO: Helper central para checar si el usuario está en nivel "malo"
+    private function esNivelMalo(User $user): bool
+    {
+        // Ajusta el nombre del campo según tu modelo User
+        $nivel = strtolower((string)($user->nivel ?? $user->nivel_usuario ?? $user->nivel_riesgo ?? ''));
+        return $nivel === 'malo';
+    }
 
     public function update(Request $request, Pedido $pedido)
     {
@@ -142,6 +146,12 @@ class PedidoController extends Controller
         $creditoAnteriorId = $pedido->id_credito;
         $totalAnterior = $pedido->total_pedido;
         $nuevoTotal = (float) $request->input('total', $totalAnterior);
+
+        // ✅ NUEVO: impedir cambiar método a crédito si el usuario es "malo"
+        $metodoNuevo = $request->input('metodo_pago', $pedido->metodo_pago);
+        if ($metodoNuevo === 'credito' && $this->esNivelMalo($pedido->user)) {
+            return back()->with('error', 'Tu nivel actual es "malo". No puedes cambiar el método de pago a crédito.');
+        }
 
         // Si el pedido está cerrado y tiene crédito
         if ($pedido->estado_pedido == 0 && $pedido->id_credito) {
@@ -171,7 +181,7 @@ class PedidoController extends Controller
         }
 
         $pedido->total_pedido = $nuevoTotal;
-        $pedido->metodo_pago = $request->input('metodo_pago', $pedido->metodo_pago);
+        $pedido->metodo_pago = $metodoNuevo;
         $pedido->estado_pedido = $request->input('estado_pedido', $pedido->estado_pedido);
 
         // Cambiar crédito si es necesario
@@ -214,9 +224,6 @@ class PedidoController extends Controller
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha actualizado con éxito.');
     }
 
-
-
-
     public function cerrar(Request $request, $id_pedido)
     {
         $pedido = Pedido::findOrFail($id_pedido);
@@ -236,6 +243,12 @@ class PedidoController extends Controller
         $id_credito_nuevo = $request->input('id_credito');
         $id_credito_anterior = $pedido->id_credito;
         $total_anterior = $pedido->total_pedido;
+
+        // ✅ NUEVO: bloquear cierre a crédito para usuarios con nivel "malo"
+        $user->refresh(); // Garantiza nivel actualizado si lo modificó un job externo
+        if ($metodo === 'credito' && $this->esNivelMalo($user)) {
+            return back()->with('error', 'Tu nivel actual es "malo". Solo puedes cerrar pedidos a contado.');
+        }
 
         // Validar monto del pedido
         if ($total > 10000) {
@@ -259,7 +272,7 @@ class PedidoController extends Controller
             }
         }
 
-        $user->evaluarNivelUsuario(); 
+        $user->evaluarNivelUsuario();
 
         if ($metodo === 'credito') {
             $esNuevoCredito = empty($id_credito_nuevo);
@@ -284,13 +297,12 @@ class PedidoController extends Controller
             } else {
                 // Crear nuevo crédito solo si tiene menos de 3 activos
                 $creditosActivos = $creditosUsuario->filter(function ($c) {
-                return $c->estado == 1 && $c->fecha_vencimiento >= now();
+                    return $c->estado == 1 && $c->fecha_vencimiento >= now();
                 });
 
                 $creditosVencidos = $creditosUsuario->filter(function ($c) {
                     return $c->estado == 1 && $c->fecha_vencimiento < now();
                 });
-
 
                 if ($creditosActivos->count() >= 3) {
                     return back()->with('error', 'Ya tienes 3 créditos activos. No puedes crear uno nuevo.');
@@ -319,10 +331,6 @@ class PedidoController extends Controller
 
         return redirect()->route('pedido.index')->with('success', 'Pedido cerrado correctamente.');
     }
-
-
-
-
 
     public function reabrir(Request $request, $id_pedido)
     {
@@ -395,6 +403,11 @@ class PedidoController extends Controller
 
     private function puedeCerrarAPedidoACredito(Pedido $pedido, $montoNuevo = null, $esNuevoCredito = false)
     {
+        // ✅ NUEVO: rechaza inmediatamente si el usuario es "malo"
+        if ($this->esNivelMalo($pedido->user)) {
+            return false;
+        }
+
         $user = $pedido->user;
 
         $creditosActivos = Credito::where('id_user', $user->id_user)
@@ -428,9 +441,13 @@ class PedidoController extends Controller
         }
     }
 
-
     private function validarCreditoAlModificar(Pedido $pedido, $nuevoTotal, $esNuevoCredito = false)
     {
+        // ✅ NUEVO: si es "malo" no puede operar a crédito
+        if ($this->esNivelMalo($pedido->user)) {
+            return false;
+        }
+
         if ($pedido->metodo_pago !== 'credito' || !$pedido->id_credito) {
             return true;
         }
@@ -455,7 +472,4 @@ class PedidoController extends Controller
         // Validar que no supere $10,000
         return $nuevoSaldo <= 10000;
     }
-
-
-
 }

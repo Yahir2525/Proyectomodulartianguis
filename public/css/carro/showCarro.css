@@ -1,1 +1,184 @@
-body { margin: 0; color: #222; background: #47fb9e; min-height: 100vh;}
+/* ===== showCarro.css — estilo alineado con carroIndex ===== */
+
+/* Reset & tipografía */
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; color: #222; background: #47fb9e; min-height: 100vh; }
+
+/* Contenedor (misma anchura que index) */
+.container,
+section > div,
+body > h1, body > h2, body > p, body > form, body > table, body > a, body > div:not(.container) {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px;
+}
+
+/* Títulos */
+h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.2rem, 1rem + 1vw, 1.8rem);
+  text-align: center;
+}
+h2 {
+  margin-top: 24px;
+  font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem);
+}
+
+/* Enlaces (como index) */
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- Botones (alineados a carroIndex) ---------- */
+.btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  margin: 2px 4px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: .9rem;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:hover{ filter: brightness(.95); }
+
+.btn-primary { background:#15c221; border-color:#15c221; color:#fff; }
+.btn-edit    { background:hsl(275,100%,59%); border-color:hsl(275,100%,59%); color:#fff; }
+.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; }
+.btn-gray    { background:#6b7280; border-color:#6b7280; color:#fff; }
+
+/* Igualamos botones nativos al look azul por defecto */
+button,
+input[type="submit"]{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:6px 10px; margin:2px 4px; border-radius:6px;
+  border:1px solid #2563eb; background:#2563eb; color:#fff;
+  cursor:pointer; line-height:1; font-size:.9rem; white-space:nowrap;
+}
+button:hover, input[type="submit"]:hover{ filter:brightness(.95); }
+
+/* “Volver al listado” como botón azul (sin cambiar HTML) */
+a[href="/carro"], a[href$="/carro"]{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:6px 10px; margin:2px 4px; border-radius:6px;
+  border:1px solid #2563eb; background:#2563eb;
+  color:#fff !important; text-decoration:none;
+}
+
+/* Botón Editar (morado), coincide con index */
+td a button[type="button"]{
+  background:hsl(275,100%,59%); border-color:hsl(275,100%,59%); color:#fff;
+}
+
+/* Botones Eliminar producto (rojo) */
+form[onsubmit*="¿Estás seguro de eliminar este producto?"] button{
+  background:#ef4444; border-color:#ef4444; color:#fff;
+}
+
+/* Botón Eliminar carro completo (rojo) */
+form[onsubmit*="eliminar todo este carro"] button{
+  background:#ef4444; border-color:#ef4444; color:#fff;
+}
+
+/* ---------- Tabla (mismo estilo de index) ---------- */
+.table-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+table{
+  border-collapse:collapse;
+  width:100%;
+  margin-top:8px;
+  min-width:820px;             /* más columnas que index */
+  background:#fff;
+}
+th, td{
+  border:1px solid #999;
+  padding:6px;
+  text-align:center;
+  font-size:0.95rem;
+  vertical-align:middle;
+  word-break:break-word;
+}
+thead th{ background:#f3f4f6; }
+tbody tr:nth-child(odd){ background:#fafafa; }
+tbody tr:hover{ background:#f2f7ff; }
+
+/* Imágenes dentro de celdas */
+td img{
+  display:block; margin:0 auto;
+  max-width:min(200px, 100%); height:auto;
+}
+
+/* Acciones */
+td .btn{ display:inline-flex; }
+td a, td form{ display:inline; }
+
+/* ---------- Bloques de crédito ---------- */
+[id^="credito-opciones-"]{ margin-top:8px; }
+[id^="credito-opciones-"] select{
+  padding:6px 10px;
+  border:1px solid #999;
+  border-radius:6px;
+  background:#fff;
+}
+select:focus, input:focus{
+  border-color:#2563eb; outline:none;
+  box-shadow:0 0 0 2px rgba(37,99,235,.15);
+}
+
+/* Separador grueso (mismo que index) */
+hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; }
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 992px){
+  html { font-size:15px; }
+  .container, section > div, body > h1, body > h2, body > p, body > form, body > table, body > a { padding:12px; }
+}
+
+@media (max-width: 768px){
+  html { font-size:14px; }
+
+  /* Tabla con scroll y borde como en index */
+  table{
+    display:block;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    min-width:700px;
+  }
+
+  /* Acciones apiladas a ancho completo */
+  td a, td form{
+    display:block; width:100%; margin:6px 0;
+  }
+  td a button,
+  td form button,
+  input[type="submit"]{
+    width:100%; min-height:44px;
+  }
+}
+
+@media (max-width: 640px){
+  html { font-size:13.5px; }
+  th, td { padding:5px; }
+}
+
+/* Ajustes intermedios (en línea con index) */
+@media (min-width: 900px) and (max-width: 1399px){
+  html { font-size:15px; }
+  h1 { font-size: clamp(1.05rem, 0.8rem + 0.9vw, 1.6rem); }
+  h2 { font-size: clamp(1rem, 0.8rem + 0.4vw, 1.2rem); }
+  th, td { padding:5px; font-size:0.92rem; }
+  td img { max-width:170px; }
+  table { min-width:760px; }
+}
+@media (min-width: 768px) and (max-width: 899px){
+  html { font-size:14px; }
+  th, td { padding:4px; font-size:0.9rem; }
+  td img { max-width:150px; }
+  table { min-width:700px; }
+}

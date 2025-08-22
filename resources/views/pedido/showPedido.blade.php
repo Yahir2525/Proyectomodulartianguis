@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/pedido/showPedido.css') }}">
     <title>Detalle(s) del Pedido</title>
 </head>
@@ -41,7 +43,22 @@
                 $creditosVencidos = $creditosTodosActivos->filter(fn($c) => $c->fecha_vencimiento < now());
 
                 $puedeCrearCredito = $creditosTodosActivos->count() < 3;
+
+                /* NUEVO: bloqueo por nivel global del usuario */
+                $nivelUsuarioGlobal = strtolower((string)($usuario->nivel ?? $usuario->nivel_usuario ?? $usuario->nivel_riesgo ?? ''));
+                $bloqueadoPorNivelGlobal = ($nivelUsuarioGlobal === 'malo');
+
+                /* NUEVO: bloqueo por historial (pagos atrasados) global */
+                $bloqueadoPorHistorialGlobal = method_exists($usuario, 'tienePagosAtrasadosSinAbonar') && $usuario->tienePagosAtrasadosSinAbonar();
             @endphp
+
+            <!-- NUEVO: avisos globales -->
+            @if($bloqueadoPorNivelGlobal)
+                <p style="color:red;"><strong>Atención:</strong> El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar pedidos <strong>a contado</strong>.</p>
+            @endif
+            @if($bloqueadoPorHistorialGlobal)
+                <p style="color:red;"><strong>Atención:</strong> El usuario tiene pagos vencidos sin abonar. No podrá cerrar pedidos a crédito hasta liquidarlos.</p>
+            @endif
 
             {{-- Pedidos con crédito --}}
             @php
@@ -77,6 +94,14 @@
 
                                 $metodoPagoActual = $pedido->metodo_pago ?? '';
                                 $creditoSeleccionado = $pedido->id_credito;
+
+                                /* NUEVO: bloqueo por historial y nivel (fila) */
+                                $bloqueadoPorHistorial = method_exists($usuario, 'tienePagosAtrasadosSinAbonar') && $usuario->tienePagosAtrasadosSinAbonar();
+                                $nivelUsuario = strtolower((string)($usuario->nivel ?? $usuario->nivel_usuario ?? $usuario->nivel_riesgo ?? ''));
+                                $bloqueadoPorNivel = ($nivelUsuario === 'malo');
+
+                                /* NUEVO: unificar condiciones para mostrar opción "Crédito" */
+                                $bloqueoCreditoUI = $superaDiezMil || $bloqueadoPorHistorial || $bloqueadoPorNivel;
                             @endphp
                             <tr>
                                 <td>{{ $pedido->id_pedido }}</td>
@@ -120,16 +145,28 @@
                                                 </p>
                                             @endif
 
+                                            <!-- NUEVO: avisos por historial y nivel -->
+                                            @if($bloqueadoPorHistorial)
+                                                <p style="color:red;">
+                                                    <strong>Atención:</strong> El usuario tiene pagos vencidos sin abonar. No puede cerrar a crédito.
+                                                </p>
+                                            @endif
+                                            @if($bloqueadoPorNivel)
+                                                <p style="color:red;">
+                                                    <strong>Atención:</strong> El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar <strong>a contado</strong>.
+                                                </p>
+                                            @endif
+
                                             <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
                                             <select name="metodo_pago" required onchange="toggleCreditoOptions(this, {{ $pedido->id_pedido }})">
                                                 <option value="" {{ $metodoPagoActual === '' ? 'selected' : '' }}>-- Selecciona --</option>
                                                 <option value="contado" {{ $metodoPagoActual === 'contado' ? 'selected' : '' }}>Contado</option>
-                                                @if(!$superaDiezMil)
+                                                @if(!$bloqueoCreditoUI)
                                                     <option value="credito" {{ $metodoPagoActual === 'credito' ? 'selected' : '' }}>Crédito</option>
                                                 @endif
                                             </select>
 
-                                            <div id="credito-opciones-{{ $pedido->id_pedido }}" style="margin-top:8px; {{ $metodoPagoActual === 'credito' ? 'display:block;' : 'display:none;' }}">
+                                            <div id="credito-opciones-{{ $pedido->id_pedido }}" style="margin-top:8px; {{ ($metodoPagoActual === 'credito' && !$bloqueoCreditoUI) ? 'display:block;' : 'display:none;' }}">
                                                 <label>Seleccionar crédito:</label>
                                                 <select name="id_credito" class="select-credito">
                                                     @if($puedeCrearCredito)
@@ -144,7 +181,7 @@
 
                                                 @if(!$puedeCrearCredito)
                                                     <p style="color:orange; font-style: italic;">
-                                                        Ya tienes 3 créditos activos o créditos vencidos. No puedes crear uno nuevo, pero puedes usar los existentes.
+                                                        Ya tienes 3 créditos activos. No puedes crear uno nuevo, pero puedes usar los existentes.
                                                     </p>
                                                 @endif
                                             </div>
@@ -208,6 +245,13 @@
                             @php
                                 $totalPedido = $pedido->total_pedido;
                                 $metodoPagoActual = $pedido->metodo_pago ?? '';
+
+                                
+                                $bloqueadoPorHistorial = method_exists($usuario, 'tienePagosAtrasadosSinAbonar') && $usuario->tienePagosAtrasadosSinAbonar();
+                                $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? ''));
+                                $bloqueadoPorNivel = ($nivelUsuario === 'malo');
+
+                                $bloqueoCreditoUI = $bloqueadoPorHistorial || $bloqueadoPorNivel;
                             @endphp
                             <tr>
                                 <td>{{ $pedido->id_pedido }}</td>
@@ -236,12 +280,24 @@
                                         <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST" class="form-cierre">
                                             @csrf
                                             <input type="hidden" name="total" value="{{ $totalPedido }}" />
+                                            @if($bloqueadoPorHistorial)
+                                                <p style="color:red;">
+                                                    <strong>Atención:</strong> El usuario tiene pagos vencidos sin abonar. No puede cerrar a crédito.
+                                                </p>
+                                            @endif
+                                            @if($bloqueadoPorNivel)
+                                                    <p style="color:red;">
+                                                        <strong>Atención:</strong> El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar <strong>a contado</strong>.
+                                                    </p>
+                                            @endif
 
                                             <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
                                             <select name="metodo_pago" required>
                                                 <option value="" {{ $metodoPagoActual === '' ? 'selected' : '' }}>-- Selecciona --</option>
                                                 <option value="contado" {{ $metodoPagoActual === 'contado' ? 'selected' : '' }}>Contado</option>
-                                                <option value="credito" {{ $metodoPagoActual === 'credito' ? 'selected' : '' }}>Crédito</option>
+                                                @if(!$bloqueoCreditoUI)
+                                                    <option value="credito" {{ $metodoPagoActual === 'credito' ? 'selected' : '' }}>Crédito</option>
+                                                @endif
                                             </select>
 
                                             <button type="submit" style="margin-top:8px;">Cerrar pedido</button>
