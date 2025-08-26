@@ -28,8 +28,7 @@ class AbonoFactory extends Factory
             // Por defecto: mismo user del crédito
             'id_credito'   => $credito->id_credito,
             'id_user'      => $credito->id_user,
-
-            'monto_abono'  => $this->faker->randomFloat(2, 1, 1000),
+            'monto_abono' => $this->faker->numberBetween(1, 2000),
             'created_at'   => now(),
             'updated_at'   => now(),
         ];

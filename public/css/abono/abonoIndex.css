@@ -1,3 +1,6 @@
+/* ==== ABONO INDEX (modificado para que la TABLA luzca como carro create) ==== */
+
+/* Reset & tipografía */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
 body { margin: 0; color: #222; background: #fff87a; min-height: 100vh;}
@@ -75,35 +78,109 @@ input[type="submit"]{
 }
 input[type="submit"]:hover{ filter:brightness(.95); }
 
-/* Tabla */
-.table-wrap { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-table { border-collapse:collapse; width:100%; margin-top:8px; min-width:680px; background:#fff; }
-th, td { border:1px solid #999; padding:6px; text-align:center; font-size: 0.95rem; }
-thead th { background:#f3f4f6; }
-tbody tr:nth-child(odd) { background:#fafafa; }
-tbody tr:hover { background:#f2f7ff; }
+/* =================== TABLA (estética de carro create) =================== */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;                 /* conserva scroll si hace falta */
+  -webkit-overflow-scrolling: touch;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;                 /* bordes redondeados limpios */
+  table-layout: auto !important;    /* autoajuste real de columnas */
+}
+th, td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: .95rem;
+  white-space: normal;              /* envuelve por defecto */
+  overflow-wrap: anywhere;          /* evita desbordes de texto largos */
+}
+thead th { background: #f3f4f6; }
+tbody tr:nth-child(odd) { background: #fafafa; }
+tbody tr:hover { background: #f2f7ff; }
+
+/* Sugerencias de anchuras (ajusta según tus columnas reales) */
+table th:last-child,
+table td:last-child {               /* Acciones */
+  white-space: nowrap;
+  width: 1%;
+}
 
 /* Alineación de botones en la celda de Acciones */
 td .btn{ display:inline-flex; }
 form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
 
-/* Responsivo */
+/* =================== RESPONSIVE =================== */
 @media (max-width: 992px){
   html { font-size: 15px; }
   .container { padding: 12px; }
 }
+
 @media (max-width: 768px){
   html { font-size: 14px; }
-  th, td { padding:5px; }
-  table { min-width: 640px; }
+
+  /* --- Tabla como “tarjetas” (igual enfoque que carro create) --- */
+  table, thead, tbody, th, td, tr { display: block; }
+  thead { display: none; }
+
+  tbody tr {
+    background: #fff;
+    margin: 8px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    overflow: hidden;
+  }
+
+  td {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    white-space: normal;
+  }
+  td:first-child { border-top: none; }
+
+  /* Etiquetas por celda en móvil (preferible usar data-label en cada <td>) */
+  td::before {
+    content: attr(data-label);   /* ej. <td data-label="Cliente">Juan</td> */
+    font-weight: 600;
+    min-width: 120px;
+  }
+
+  /* Botones/enlaces a ancho completo en móvil dentro de la tabla */
+  td .btn,
+  td form,
+  td a,
+  td button,
+  td input[type="submit"] {
+    width: 100%;
+    margin: 6px 0;
+  }
+
+  /* Form en columna completa en móvil */
+  form{ grid-template-columns:1fr; }
+  #busqueda, input[type="submit"]{ width:100%; }
 }
+
 @media (max-width: 640px){
   html { font-size: 13.5px; }
-  form{ grid-template-columns:1fr; }       /* apilar en móvil */
-  #busqueda, input[type="submit"]{ width:100%; }
+
+  /* En móvil pequeño: refuerzo de estilos accesibles */
   /* Botones de acciones apilados y a ancho completo */
   td .btn{ display:block; width:100%; margin:6px 0; }
   td form{ display:block !important; }
+
   .table-wrap{
     border:1px solid #e5e7eb;
     border-radius:8px;
@@ -111,7 +188,8 @@ form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
   }
 }
 
-/* Botón "Buscar" del ABONO: evitar que se alargue en desktop */
+/* =================== Botón "Buscar" del ABONO =================== */
+/* En desktop: evitar que el botón se alargue */
 @media (min-width: 769px) {
   /* Selecciona el form que contiene el #busqueda */
   form:has(#busqueda) {
@@ -139,8 +217,10 @@ form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
   }
 }
 
+/* Misceláneos */
 hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }
 
+/* Fix para formularios dentro de dropdowns del navbar */
 .navbar .dropdown-menu form{
   display:block;
   grid-template-columns: initial;

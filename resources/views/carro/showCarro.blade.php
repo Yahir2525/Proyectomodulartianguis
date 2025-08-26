@@ -124,35 +124,42 @@
                 @php
                     $usuario = $carroItem->user;
 
-                    $creditosActivos = \App\Models\Credito::where('id_user', $usuario->id_user)
+                    // === Créditos activos (estado=1) ===
+                    $creditosTodos = \App\Models\Credito::where('id_user', $usuario->id_user)
                         ->where('estado', 1)
-                        ->whereDate('fecha_vencimiento', '>=', now())
                         ->get();
 
-                    $creditosVencidos = \App\Models\Credito::where('id_user', $usuario->id_user)
-                        ->where('estado', 1)
-                        ->whereDate('fecha_vencimiento', '<', now())
-                        ->get();
+                    // Vigentes (no vencidos por fecha)
+                    $creditosVigentes = $creditosTodos->filter(fn($c) => $c->fecha_vencimiento >= now());
 
-                    // Condición para bloquear creación de nuevo crédito:
-                    // No permitir si tiene 3 o más créditos activos.
-                    $puedeCrearCredito = ($creditosActivos->count() < 3);
+                    // Vencidos por fecha
+                    $creditosVencidos = $creditosTodos->filter(fn($c) => $c->fecha_vencimiento < now());
 
-                    // Filtra créditos para mostrar opciones válidas (que no excedan saldo)
-                    $creditosDisponibles = $creditosActivos->filter(function ($credito) use ($total) {
-                        return ($credito->saldo_total + $total) <= 10000;
-                    });
+                    // === Reglas de negocio ===
+                    // Permitir hasta 2 vencidos con saldo > 0
+                    $creditosVencidosConSaldo = $creditosVencidos->filter(fn($c) => (float)$c->saldo_total > 0);
+                    $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2;
 
-                    // Reglas de bloqueo para cerrar a crédito
-                    $totalCreditos = $creditosActivos->sum('saldo_total');
-                    $bloqueadoPorSaldo = ($totalCreditos + $total) > 10000;
-                    $bloqueadoPorHistorial = method_exists($usuario, 'tienePagosAtrasadosSinAbonar') && $usuario->tienePagosAtrasadosSinAbonar();
+                    // Tope $10,000 considerando vigentes
+                    $totalCreditosVigentes = $creditosVigentes->sum('saldo_total');
+                    $bloqueadoPorSaldo = ($totalCreditosVigentes + $total) > 10000;
 
-                    $nivelUsuario = strtolower((string)( $usuario->nivel_usuario ?? ''));
+                    // Nivel
+                    $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? ''));
                     $bloqueadoPorNivel = ($nivelUsuario === 'malo');
 
-                    $bloqueado = $bloqueadoPorSaldo || $bloqueadoPorHistorial || $bloqueadoPorNivel;
+                    // Puede crear nuevo si tiene < 3 activos (incluye vencidos)
+                    $puedeCrearCredito = ($creditosTodos->count() < 3);
+
+                    // Usables: vigentes que no rebasan tope con este pedido
+                    $creditosDisponibles = $creditosVigentes->filter(fn($c) => ($c->saldo_total + $total) <= 10000);
+
+                    // Si no hay usables y TAMPOCO puede crear nuevo, bloquear opción crédito
+                    $sinCreditosUsables = $creditosDisponibles->isEmpty() && !$puedeCrearCredito;
+
+                    $bloqueado = $bloqueadoPorSaldo || $bloqueadoPorHistorial || $bloqueadoPorNivel || $sinCreditosUsables;
                 @endphp
+
 
 
                 <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST">
@@ -163,17 +170,21 @@
                         <p style="color:red;">
                             <strong>No puedes cerrar este pedido a crédito:</strong><br>
                             @if($bloqueadoPorSaldo)
-                                - El total de créditos más este pedido excede los $10,000.<br>
+                                - El total de créditos vigentes más este pedido excede los $10,000.<br>
                             @endif
                             @if($bloqueadoPorHistorial)
-                                - Tienes pagos atrasados sin abonar. Tu acceso a crédito está bloqueado.<br>
+                                - Tienes más de 2 créditos vencidos con saldo pendiente.<br>
                             @endif
                             @if($bloqueadoPorNivel)
                                 - Tu nivel actual es <strong>"malo"</strong>. Solo puedes cerrar pedidos <strong>a contado</strong>.<br>
                             @endif
+                            @if($sinCreditosUsables)
+                                - No tienes créditos vigentes disponibles y no puedes crear uno nuevo.<br>
+                            @endif
                             Puedes cerrarlo como <strong>contado</strong>.
                         </p>
                     @endif
+
 
                     <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
                     <select name="metodo_pago" required onchange="mostrarCreditos(this, {{ $pedido->id_pedido }})">

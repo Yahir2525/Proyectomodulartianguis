@@ -9,6 +9,7 @@
     <title>Principal de pedidos</title>
 </head>
 <body>
+<x-barrageneral/>
 <h1>Principal de pedidos</h1>
 
 @if(Auth::check())
@@ -52,9 +53,13 @@
 
                 // Suponiendo que tienes método en User para pagos vencidos
                 $usuario = $pedidosUsuario->first()->user;
-                $usuarioBloqueadoPorPagosAtrasados = $usuario && method_exists($usuario, 'tienePagosAtrasadosSinAbonar')
-                    ? $usuario->tienePagosAtrasadosSinAbonar()
-                    : false;
+                $creditosVencidos = \App\Models\Credito::where('id_user', $usuario->id_user)
+                    ->where('estado', 1)
+                    ->whereDate('fecha_vencimiento', '<', now())
+                    ->get();
+
+                // permitir hasta 2 vencidos
+                $usuarioBloqueadoPorPagosAtrasados = $creditosVencidos->count() > 2;
 
                 /* NUEVO: detectar nivel del usuario (normalizado, con fallbacks) */
                 $nivelUsuarioGlobal = $usuario

@@ -22,11 +22,17 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\PrediccionController;
+use App\Support\MineriaPipeline;
 
-Route::get('/predicciones', [PrediccionController::class, 'predecirNiveles'])
-    ->name('predicciones.predecir');
-Route::get('/predicciones/aplicar', [PrediccionController::class, 'aplicarPrediccionesDesdeStorage'])
-    ->name('predicciones.aplicar');
+Route::get('/predicciones', function () {
+    MineriaPipeline::predecirNiveles();
+    return back()->with('success', 'Predicciones generadas.');
+})->name('predicciones.predecir');
+
+Route::get('/predicciones/aplicar', function () {
+    MineriaPipeline::aplicarPredicciones();
+    return back()->with('success', 'Predicciones aplicadas.');
+})->name('predicciones.aplicar');
 
 // Página principal
 Route::get('/', function () {
@@ -153,8 +159,8 @@ Route::middleware(['is_admin'])->group(function () {
     // })->name('dataset.export-download');
 
     Route::post('/dataset/actualizar', function () {
-        Artisan::call('export:dataset-mineria');
-
+        MineriaPipeline::exportarDataset();
         return back()->with('success', 'Dataset actualizado correctamente.');
     })->name('dataset.actualizar')->middleware('is_admin');
+
 });

@@ -10,6 +10,7 @@ use App\Models\Credito;
 use App\Models\Pedido;
 use App\Models\DetallePedido;
 use App\Models\Producto;
+use Carbon\Carbon;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Credito>
  */
@@ -35,7 +36,7 @@ class CreditoFactory extends Factory
         return [
             'id_user' => $userId,
             'fecha_liquidacion' => null,
-            'fecha_vencimiento' => $this->faker->dateTimeBetween('2025-01-01', '2025-12-31'),
+            'fecha_vencimiento' => $this->faker->dateTimeBetween(now()->addMinutes(5), now()->addMinutes(10), config('app.timezone')),
             'estado' => 1,
             'created_at' => now(),
             'updated_at' => now(),

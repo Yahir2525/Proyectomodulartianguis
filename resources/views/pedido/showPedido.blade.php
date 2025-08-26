@@ -28,39 +28,46 @@
             <h2>Pedidos de: {{ optional($pedidosUsuario->first()->user)->nombre_usuario ?? 'Desconocido' }}</h2>
 
             @php
-                // Obtener créditos activos y todos los créditos del usuario
+                /* ===================== COLECCIONES POR USUARIO (reutilizables) ===================== */
                 $usuario = $pedidosUsuario->first()->user;
 
+                // Activos (estado=1 y no vencidos por fecha)
                 $creditosActivos = \App\Models\Credito::where('id_user', $idUser)
                     ->where('estado', 1)
                     ->whereDate('fecha_vencimiento', '>=', now())
                     ->get();
 
+                // Todos los estado=1 (activos + vencidos)
                 $creditosTodosActivos = \App\Models\Credito::where('id_user', $idUser)
                     ->where('estado', 1)
                     ->get();
 
+                // Vencidos por fecha (subset en memoria para no repetir queries)
                 $creditosVencidos = $creditosTodosActivos->filter(fn($c) => $c->fecha_vencimiento < now());
 
+                // NUEVO: sólo nos interesan los vencidos con saldo > 0 para bloquear por “historial”
+                $creditosVencidosConSaldo = $creditosVencidos->filter(fn($c) => (float)$c->saldo_total > 0);
+
+                // Permitir crear crédito mientras no superes 3 activos (regla existente)
                 $puedeCrearCredito = $creditosTodosActivos->count() < 3;
 
-                /* NUEVO: bloqueo por nivel global del usuario */
+                /* ===================== BLOQUEOS GLOBALES ===================== */
+                // Nivel
                 $nivelUsuarioGlobal = strtolower((string)($usuario->nivel ?? $usuario->nivel_usuario ?? $usuario->nivel_riesgo ?? ''));
                 $bloqueadoPorNivelGlobal = ($nivelUsuarioGlobal === 'malo');
 
-                /* NUEVO: bloqueo por historial (pagos atrasados) global */
-                $bloqueadoPorHistorialGlobal = method_exists($usuario, 'tienePagosAtrasadosSinAbonar') && $usuario->tienePagosAtrasadosSinAbonar();
+                // HISTORIAL: AHORA SOLO BLOQUEA CON > 2 vencidos con saldo > 0 (permitimos 0, 1 o 2)
+                $bloqueadoPorHistorialGlobal = $creditosVencidosConSaldo->count() > 2;
             @endphp
 
-            <!-- NUEVO: avisos globales -->
             @if($bloqueadoPorNivelGlobal)
                 <p style="color:red;"><strong>Atención:</strong> El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar pedidos <strong>a contado</strong>.</p>
             @endif
             @if($bloqueadoPorHistorialGlobal)
-                <p style="color:red;"><strong>Atención:</strong> El usuario tiene pagos vencidos sin abonar. No podrá cerrar pedidos a crédito hasta liquidarlos.</p>
+                <p style="color:red;"><strong>Atención:</strong> El usuario tiene más de 2 créditos vencidos con saldo pendiente. No podrá cerrar pedidos a crédito.</p>
             @endif
 
-            {{-- Pedidos con crédito --}}
+            {{-- ===================== Pedidos con crédito ===================== --}}
             @php
                 $pedidosConCredito = $pedidosUsuario->filter(fn($p) => !is_null($p->id_credito));
             @endphp
@@ -87,20 +94,22 @@
                             @php
                                 $totalPedido = $pedido->total_pedido;
 
+                                // Deuda actual considerando SOLO los activos no vencidos (como antes)
                                 $deudaActual = $creditosActivos->sum('saldo_total');
                                 $superaDiezMil = $deudaActual >= 10000 || ($deudaActual + $totalPedido) > 10000;
 
+                                // Válidos (no rebasan 10k con el nuevo total)
                                 $creditosValidos = $creditosActivos->filter(fn($c) => ($c->saldo_total + $totalPedido) <= 10000);
 
                                 $metodoPagoActual = $pedido->metodo_pago ?? '';
                                 $creditoSeleccionado = $pedido->id_credito;
 
-                                /* NUEVO: bloqueo por historial y nivel (fila) */
-                                $bloqueadoPorHistorial = method_exists($usuario, 'tienePagosAtrasadosSinAbonar') && $usuario->tienePagosAtrasadosSinAbonar();
+                                // BLOQUEOS POR FILA (usamos las colecciones ya calculadas)
+                                $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2; // NUEVO criterio
                                 $nivelUsuario = strtolower((string)($usuario->nivel ?? $usuario->nivel_usuario ?? $usuario->nivel_riesgo ?? ''));
                                 $bloqueadoPorNivel = ($nivelUsuario === 'malo');
 
-                                /* NUEVO: unificar condiciones para mostrar opción "Crédito" */
+                                // La UI bloquea crédito solo si excede 10k, o nivel malo, o >2 vencidos con saldo
                                 $bloqueoCreditoUI = $superaDiezMil || $bloqueadoPorHistorial || $bloqueadoPorNivel;
                             @endphp
                             <tr>
@@ -145,10 +154,9 @@
                                                 </p>
                                             @endif
 
-                                            <!-- NUEVO: avisos por historial y nivel -->
                                             @if($bloqueadoPorHistorial)
                                                 <p style="color:red;">
-                                                    <strong>Atención:</strong> El usuario tiene pagos vencidos sin abonar. No puede cerrar a crédito.
+                                                    <strong>Atención:</strong> El usuario tiene más de 2 créditos vencidos con saldo pendiente. No puede cerrar a crédito.
                                                 </p>
                                             @endif
                                             @if($bloqueadoPorNivel)
@@ -219,7 +227,7 @@
                 </table>
             @endif
 
-            {{-- Pedidos sin crédito --}}
+            {{-- ===================== Pedidos sin crédito ===================== --}}
             @php
                 $pedidosSinCredito = $pedidosUsuario->filter(fn($p) => is_null($p->id_credito));
             @endphp
@@ -246,9 +254,9 @@
                                 $totalPedido = $pedido->total_pedido;
                                 $metodoPagoActual = $pedido->metodo_pago ?? '';
 
-                                
-                                $bloqueadoPorHistorial = method_exists($usuario, 'tienePagosAtrasadosSinAbonar') && $usuario->tienePagosAtrasadosSinAbonar();
-                                $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? ''));
+                                // Mismos bloqueos que arriba pero sin deuda (>10k lo validará el controlador al crear)
+                                $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2; // NUEVO
+                                $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? $usuario->nivel ?? $usuario->nivel_riesgo ?? ''));
                                 $bloqueadoPorNivel = ($nivelUsuario === 'malo');
 
                                 $bloqueoCreditoUI = $bloqueadoPorHistorial || $bloqueadoPorNivel;
@@ -280,16 +288,17 @@
                                         <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST" class="form-cierre">
                                             @csrf
                                             <input type="hidden" name="total" value="{{ $totalPedido }}" />
+
                                             @if($bloqueadoPorHistorial)
                                                 <p style="color:red;">
-                                                    <strong>Atención:</strong> El usuario tiene pagos vencidos sin abonar. No puede cerrar a crédito.
+                                                    <strong>Atención:</strong> El usuario tiene más de 2 créditos vencidos con saldo pendiente. No puede cerrar a crédito.
                                                 </p>
                                             @endif
                                             @if($bloqueadoPorNivel)
-                                                    <p style="color:red;">
-                                                        <strong>Atención:</strong> El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar <strong>a contado</strong>.
-                                                    </p>
-                                            @endif
+                                                <p style="color:red;">
+                                                    <strong>Atención:</strong> El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar <strong>a contado</strong>.
+                                                </p>
+                                            @endif>
 
                                             <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
                                             <select name="metodo_pago" required>

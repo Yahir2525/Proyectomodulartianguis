@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Support\MineriaPipeline;
 
 class PedidoController extends Controller
 {
@@ -219,7 +220,9 @@ class PedidoController extends Controller
             }
         }
 
-        $pedido->user->evaluarNivelUsuario();
+        DB::afterCommit(function () {
+            MineriaPipeline::ejecutarPipeline();
+        });
 
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha actualizado con éxito.');
     }
@@ -272,7 +275,9 @@ class PedidoController extends Controller
             }
         }
 
-        $user->evaluarNivelUsuario();
+        DB::afterCommit(function () {
+            MineriaPipeline::ejecutarPipeline();
+        });
 
         if ($metodo === 'credito') {
             $esNuevoCredito = empty($id_credito_nuevo);
@@ -329,6 +334,10 @@ class PedidoController extends Controller
         $pedido->total_pedido = $total;
         $pedido->save();
 
+        DB::afterCommit(function () {
+            MineriaPipeline::ejecutarPipeline();
+        });
+
         return redirect()->route('pedido.index')->with('success', 'Pedido cerrado correctamente.');
     }
 
@@ -379,7 +388,9 @@ class PedidoController extends Controller
         }
 
         $this->recalcularSaldoCredito($idCredito);
-        $pedido->user->evaluarNivelUsuario();
+        DB::afterCommit(function () {
+            MineriaPipeline::ejecutarPipeline();
+        });
 
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha eliminado con éxito.');
     }

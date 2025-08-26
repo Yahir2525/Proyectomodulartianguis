@@ -58,13 +58,9 @@
 
                 @php
                     $ahora = now();
-                    $activos = $creditosUsuario->filter(function($c) use ($ahora) {
-                        return (int)$c->estado === 1 && \Carbon\Carbon::parse($c->fecha_vencimiento) >= $ahora;
-                    });
-                    $vencidos = $creditosUsuario->filter(function($c) use ($ahora) {
-                        return (int)$c->estado === 1 && \Carbon\Carbon::parse($c->fecha_vencimiento) < $ahora;
-                    });
-                    $cerrados = $creditosUsuario->where('estado', 0);
+                    $activos = $creditosUsuario->filter(fn($c) => $c->estado == 1 && $c->fecha_vencimiento >= $ahora);
+                    $vencidos = $creditosUsuario->filter(fn($c) => $c->estado == 1 && $c->fecha_vencimiento < $ahora);
+                    $cerrados = $creditosUsuario->filter(fn($c) => $c->estado == 0);
                 @endphp
 
                 {{-- Créditos Activos --}}

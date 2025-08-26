@@ -77,128 +77,20 @@ class User extends Authenticatable
 
     public function tienePagosAtrasadosSinAbonar()
     {
-        $hoy = Carbon::now();
+        $hoy = Carbon::now()->startOfDay();
 
-        $creditosVencidos = $this->creditos()
+        return $this->creditos()
             ->where('estado', 1)
-            ->where('fecha_vencimiento', '<', $hoy)
             ->where('saldo_total', '>', 0)
-            ->get();
+            ->whereDate('fecha_vencimiento', '<', $hoy)
+            ->exists();
 
-        foreach ($creditosVencidos as $credito) {
-            $totalAbonado = $credito->abonos()->sum('monto_abono');
-
-            if ($totalAbonado < $credito->saldo_total) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public function pagaSiempreAdelantado(): bool
-    {
-        // Trae todos los créditos con sus abonos (activos o históricos)
-        $creditos = $this->creditos()->with('abonos')->get();
-
-        // Sólo consideramos créditos que realmente tengan abonos y fecha de vencimiento
-        $creditosConAbonos = $creditos->filter(function ($c) {
-            return $c->abonos->isNotEmpty() && !empty($c->fecha_vencimiento);
-        });
-
-        $total = $creditosConAbonos->count();
-        if ($total < 3) {
-            return false;
-        }
-
-        $adelantados = 0;
-
-        foreach ($creditosConAbonos as $credito) {
-            $ultimoAbono = $credito->abonos->sortByDesc('created_at')->first();
-            if (!$ultimoAbono) {
-                continue;
-            }
-
-            $vence = $credito->fecha_vencimiento instanceof \Illuminate\Support\Carbon
-                ? $credito->fecha_vencimiento->copy()
-                : \Illuminate\Support\Carbon::parse($credito->fecha_vencimiento);
-
-            // Cuenta como "adelantado" si el último abono fue >= 10 días ANTES del vencimiento
-            if ($ultimoAbono->created_at < $vence->copy()->subDays(10)) {
-                $adelantados++;
-            }
-        }
-
-        // Mantén el umbral del 70%
-        return $total > 0 && ($adelantados / $total) >= 0.7;
-    }
-
-
-    public function pagaTardePeroPaga(): bool
-    {
-        // Misma lógica original: último abono después del vencimiento y saldo_total == 0.
-        $creditos = $this->creditosActivos()->with('abonos')->get();
-        $cumple = 0;
-        $total = 0;
-
-        foreach ($creditos as $credito) {
-            $total++;
-
-            $ultimoAbono = $credito->abonos->sortByDesc('created_at')->first();
-
-            if ($ultimoAbono && $credito->fecha_vencimiento) {
-                $vence = $credito->fecha_vencimiento instanceof Carbon
-                    ? $credito->fecha_vencimiento->copy()
-                    : Carbon::parse($credito->fecha_vencimiento);
-
-                if ($ultimoAbono->created_at > $vence && (float)$credito->saldo_total == 0.0) {
-                    $cumple++;
-                }
-            }
-        }
-
-        return $total > 0 && ($cumple / $total) >= 0.7;
-    }
-
-    public function montoPromedio(): float
-    {
-        // Si ya tienes creditosActivos(), úsalo; si no, cambia por $this->creditos()
-        $creditos = $this->creditosActivos()
-            ->withSum('abonos', 'monto_abono')   // evita N+1
-            ->get();
-
-        if ($creditos->isEmpty()) return 0.0;
-
-        // promedio de (saldo_total + total_abonado) por crédito
-        return (float) $creditos->avg(function ($c) {
-            $abonado = (float) ($c->abonos_sum_monto_abono ?? 0);
-            return (float) $c->saldo_total + $abonado;
-        });
     }
 
     public function estaBloqueadoParaCredito(): bool
     {
         return $this->tienePagosAtrasadosSinAbonar();
     }
-
-    public function evaluarNivelUsuario(): void
-    {
-        // Misma estructura y decisiones que tenías.
-        if ($this->tienePagosAtrasadosSinAbonar()) {
-            $this->nivel_usuario = 'malo';
-            $this->dias_aplazo   = 0;
-        } elseif ($this->pagaSiempreAdelantado()) {
-            $this->nivel_usuario = 'excelente';
-            $this->dias_aplazo   = 1;
-        } else {
-            $this->nivel_usuario = 'bueno';
-            $this->dias_aplazo   = 0;
-        }
-
-        $this->save();
-    }
-
-    
 
     public function getImagenUrlAttribute(): ?string
     {

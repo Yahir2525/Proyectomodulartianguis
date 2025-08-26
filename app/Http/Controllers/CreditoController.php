@@ -73,7 +73,7 @@ class CreditoController extends Controller
         $user = User::find($userId);
         $diasAplazo = $user ? $user->dias_aplazo : 0;
 
-        $fechaVencimiento = now()->addDays($diasAplazo)->endOfDay();
+        $fechaVencimiento = now()->addDays($diasAplazo)->addMinutes(5);
 
 
         $credito = new Credito();
@@ -129,7 +129,7 @@ class CreditoController extends Controller
         $user = User::find($userId);
         $diasAplazo = $user ? $user->dias_aplazo : 0;
 
-        $fechaVencimiento = now()->addDays($diasAplazo)->endOfDay();;
+        $fechaVencimiento = now()->addDays($diasAplazo)->addMinutes(5);
 
         // Crear crédito
         $credito = new Credito();
@@ -225,7 +225,6 @@ class CreditoController extends Controller
         }
 
         $credito->fecha_liquidacion = $request->input('fecha_liquidacion', $credito->fecha_liquidacion);
-        $credito->fecha_vencimiento = $request->input('fecha_vencimiento', $credito->fecha_vencimiento);
         $credito->estado = $request->input('estado', $credito->estado);
 
         $credito->save();
