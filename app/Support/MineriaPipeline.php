@@ -5,7 +5,7 @@ namespace App\Support;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\PrediccionController; // <-- IMPORTA EL CONTROLLER
+use App\Http\Controllers\PrediccionController;
 use Carbon\Carbon;
 
 class MineriaPipeline
@@ -14,41 +14,35 @@ class MineriaPipeline
     {
         $tmp = fopen('php://temp', 'w+');
 
-        // Cabecera EXACTA esperada por el entrenamiento/inferencia (inputs9)
+        // Cabecera EXACTA esperada por el entrenamiento/inferencia (inputs_v4)
         fputcsv($tmp, [
             'id_user', 'nombre_usuario',
             'dias_aplazo',
             'total_creditos', 'creditos_activos', 'creditos_vencidos', 'creditos_liquidados',
-            'total_abonos', 'total_abonado', 'promedio_abonos', 'ultimo_abono_fecha',
+            'saldo_credito',
         ]);
 
-        $usuarios = User::with(['creditos.abonos'])->get();
+        $usuarios = User::with(['creditos'])->get();
 
         foreach ($usuarios as $user) {
             $creditos = $user->creditos ?? collect();
 
-            $activosCount = (int) $creditos->where('estado', 1)->count();
-            $vencidosCount = (int) $creditos->where('estado', 1)->where('fecha_vencimiento', '<', now())->count();
+            $activosCount    = (int) $creditos->where('estado', 1)->count();
+            $vencidosCount   = (int) $creditos->where('estado', 1)->where('fecha_vencimiento', '<', now())->count();
             $liquidadosCount = (int) $creditos->where('saldo_total', 0)->whereNotNull('fecha_liquidacion')->count();
 
             $totalCreditos = $activosCount + $vencidosCount + $liquidadosCount;
 
-            $sumaAbonos = 0.0;
-            $conteoAbonos = 0;
-            $ultimoAbono = null;
-
-            foreach ($creditos as $c) {
-                foreach ($c->abonos as $abono) {
-                    $sumaAbonos += (float) $abono->monto_abono;
-                    $conteoAbonos++;
-                    if (!$ultimoAbono || $abono->created_at > $ultimoAbono) {
-                        $ultimoAbono = $abono->created_at;
-                    }
+            // --- Nuevo cálculo de saldo_credito ---
+            // Regla: si todos son liquidados → saldo = 0
+            //        si hay activos/vencidos → tomar suma de saldo_total (respetando límite de 10000)
+            $saldo = 0;
+            if ($activosCount > 0 || $vencidosCount > 0) {
+                $saldo = (float) $creditos->sum('saldo_total');
+                if ($saldo > 10000) {
+                    $saldo = 10000; // límite máximo permitido
                 }
             }
-
-            $promedioAbonos = $conteoAbonos > 0 ? ($sumaAbonos / $conteoAbonos) : 0.0;
-            $ultimoAbonoStr = $ultimoAbono ? Carbon::parse($ultimoAbono)->format('d/m/Y') : null;
 
             fputcsv($tmp, [
                 $user->id_user,
@@ -59,11 +53,7 @@ class MineriaPipeline
                 $activosCount,
                 $vencidosCount,
                 $liquidadosCount,
-
-                (int) $conteoAbonos,
-                (float) $sumaAbonos,
-                (float) $promedioAbonos,
-                $ultimoAbonoStr,
+                $saldo,
             ]);
         }
 
@@ -78,15 +68,8 @@ class MineriaPipeline
     public static function aplicarPredicciones(string $disk = 'public', string $filename = 'mineria_dataset.csv'): void
     {
         try {
-            // OPCIÓN 1 (recomendada): instanciar vía contenedor y llamar método de instancia
             app()->make(PrediccionController::class)
                 ->aplicarPrediccionesDesdeStorage($disk, $filename);
-
-            // --- OPCIÓN 2 (equivalente): usar app()->call con parámetros ---
-            // app()->call([PrediccionController::class, 'aplicarPrediccionesDesdeStorage'], [
-            //     'disk' => $disk,
-            //     'filename' => $filename,
-            // ]);
 
             Log::info('[Mineria] Predicciones aplicadas desde storage.');
         } catch (\Throwable $e) {

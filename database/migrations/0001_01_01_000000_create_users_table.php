@@ -24,8 +24,8 @@ return new class extends Migration
             $table->string('direccion',80)->nullable();
             $table->string('nombre_usuario')->unique();
             $table->string('imagen')->nullable();
-            $table->string('nivel_usuario')->default('bueno');
-            $table->integer('dias_aplazo')->default(0);
+            $table->string('nivel_usuario')->default('excelente');
+            $table->integer('dias_aplazo')->default(1);
             $table->timestamps();
         });
 

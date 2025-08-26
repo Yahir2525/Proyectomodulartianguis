@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
             $direccion = $row[6] ?? null;
             $nombreUsuario = $row[7] ?? null;
             $nombreImagen    = trim((string)($row[8] ?? ''));
-            $nivel = $row[9] ?? 'bueno';
+            $nivel = $row[9] ?? 'excelente';
 
            
 

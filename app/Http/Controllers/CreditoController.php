@@ -240,7 +240,7 @@ class CreditoController extends Controller
             return redirect()->route('credito.index')->with('error', 'El crédito no se encontró.');
         }
 
-        if ($credito->fecha_vencimiento && $credito->fecha_vencimiento < now()) {
+        if ($credito->fecha_vencimiento && $credito->fecha_vencimiento < now() && $credito->saldo_total > 0) {
             return redirect()->route('credito.index')->with('error', 'El crédito no se puede eliminar porque está vencido.');
         }
 

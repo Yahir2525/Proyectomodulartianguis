@@ -56,8 +56,8 @@ class UserController extends Controller
         $user->telefono       = $request->input('telefono');
         $user->direccion      = $request->input('direccion');
         $user->nombre_usuario = $request->input('nombre_usuario');
-        $user->nivel_usuario  = 'bueno';
-        $user->dias_aplazo    = 0;
+        $user->nivel_usuario  = 'excelente';
+        $user->dias_aplazo    = 1;
 
         // Imagen de perfil (S3 privado o local)
         if ($request->hasFile('imagen')) {
