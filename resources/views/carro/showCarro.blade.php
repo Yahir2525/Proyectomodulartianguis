@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/carro/showCarro.css') }}">
     <title>Detalle(s) de Carro</title>
 </head>
 <body>
-<x-barrageneral/>
+<br><x-barrageneral/>
     <br><hr class="hr-grueso"><center><h1>Detalle del carro</h1></center><hr class="hr-grueso">
     @php
         // Normaliza variable para trabajar con uno o varios carros
@@ -159,9 +160,6 @@
 
                     $bloqueado = $bloqueadoPorSaldo || $bloqueadoPorHistorial || $bloqueadoPorNivel || $sinCreditosUsables;
                 @endphp
-
-
-
                 <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST">
                     @csrf
                     <input type="hidden" name="total" value="{{ $total }}" />

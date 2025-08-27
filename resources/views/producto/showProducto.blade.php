@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/producto/showProducto.css') }}">
     <title>Detalle del Producto</title>
     <style>
@@ -22,7 +23,8 @@
     @php use App\Models\CarroProducto; @endphp
 </head>
 <body>
-    <h1>Búsqueda de productos</h1>
+<br>
+    <br><hr class="hr-grueso"><center><h1>Detalles del producto</h1></center><hr class="hr-grueso"><br>
 
     {{-- Formularios de búsqueda --}}
     <form action="{{ url('/producto/showProducto') }}" method="GET">
@@ -92,6 +94,11 @@
                     @endforeach
                 </tbody>
             </table>
+
+            <!-- Links de paginación -->
+            <div class="mt-4 d-flex justify-content-center">
+                {{ $productos->links('pagination::bootstrap-5') }}
+            </div>
 
             <br>
 

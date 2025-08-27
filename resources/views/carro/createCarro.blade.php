@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/carro/createCarro.css') }}">
     <title>Crear Carro</title>
 
@@ -35,12 +36,10 @@
         }
     }
 
-    /* NUEVO: desactiva checkbox e input cantidad si no hay piezas disponibles */
     function desactivarProductosSinStock() {
         const filas = document.querySelectorAll('table tbody tr');
 
         filas.forEach(fila => {
-            // 8ª columna = "Piezas disponibles"
             const celdaDisp = fila.querySelector('td:nth-child(8)');
             if (!celdaDisp) return;
 
@@ -73,14 +72,14 @@
             inputNombre.addEventListener('input', filtrarPedidosPorUsuario);
             filtrarPedidosPorUsuario();
         }
-        desactivarProductosSinStock(); // <-- llamada añadida
+        desactivarProductosSinStock();
     });
     </script>
 
 </head>
 <body>
-<x-barracreate/>
-  <a id="top"></a>
+<br><x-barracreate/>
+    <a id="top"></a>
     <br><hr class="hr-grueso"><center><h1>Crear nuevo carro</h1></center><hr class="hr-grueso">
 
     @if(session('error'))
@@ -90,6 +89,13 @@
     @if(session('success'))
         <p style="color: green;">{{ session('success') }}</p>
     @endif
+
+    {{-- 🔍 Buscador de productos --}}
+    <form action="{{ route('carro.create') }}" method="GET" class="mb-3">
+        <label for="buscar_producto">Buscar producto:</label>
+        <input type="text" name="buscar" id="buscar_producto" placeholder="Ej. cortina, mesa..." value="{{ request('buscar') }}">
+        <button type="submit">Buscar</button>
+    </form>
 
     <form action="{{ route('carro.agregarMultiples') }}" method="POST">
         @csrf
@@ -111,7 +117,6 @@
             <tbody>
                 @foreach($productos as $producto)
                     @if (Auth::user()->hasRole('administrador') || $producto->estado_producto)
-
                     <tr class="{{ $producto->piezas_disponibles == 0 ? 'sin-stock' : '' }}">
                         <td>
                             <input type="checkbox" name="productos_seleccionados[]" value="{{ $producto->id_producto }}">
@@ -128,22 +133,19 @@
                         <td>{{ $producto->color }}</td>
                         <td>{{ $producto->tamanio }}</td>
                         <td>${{ number_format($producto->precio_unitario, 2) }}</td>
-                        @php
-                            // Si viene null o negativo, lo normalizamos a 0
-                            $disp = max(0, (int)($producto->piezas_disponibles ?? 0));
-                        @endphp
+                        @php $disp = max(0, (int)($producto->piezas_disponibles ?? 0)); @endphp
                         <td>{{ $disp }}</td>
                         <td>
                             <input
-                            type="number"
-                            name="cantidades[{{ $producto->id_producto }}]"
-                            class="cant-input"
-                            min="1"
-                            step="1"
-                            max="{{ $disp }}"
-                            {{ $disp === 0 ? 'disabled' : '' }}
-                            inputmode="numeric"
-                            pattern="[0-9]*"
+                                type="number"
+                                name="cantidades[{{ $producto->id_producto }}]"
+                                class="cant-input"
+                                min="1"
+                                step="1"
+                                max="{{ $disp }}"
+                                {{ $disp === 0 ? 'disabled' : '' }}
+                                inputmode="numeric"
+                                pattern="[0-9]*"
                             />
                         </td>
                     </tr>
@@ -151,6 +153,12 @@
                 @endforeach
             </tbody>
         </table>
+
+        {{-- 🔗 Links de paginación --}}
+        <div class="mt-4 d-flex justify-content-center">
+            {{ $productos->appends(['buscar' => request('buscar')])->links('pagination::bootstrap-5') }}
+        </div>
+
         <center>
         <br>
         {{-- Buscador de usuario para admin --}}

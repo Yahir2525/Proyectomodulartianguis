@@ -10,7 +10,7 @@
     
 </head>
 <body>
-<x-barrasesion/>
+<br><x-barrasesion/>
 <section class="hero is-fullheight">
   <div class="hero-body">
     <div class="container">
@@ -18,7 +18,7 @@
         <!-- Columna responsiva: 12 en móvil, 8 en tablet, 5 en desktop, 4 en widescreen -->
         <div class="column is-12-mobile is-8-tablet is-5-desktop is-4-widescreen">
           
-          <h1 class="title has-text-centered">Inicio de sesión</h1>
+          <br><hr class="hr-grueso"><center><h1>Inicio de sesión</h1></center><hr class="hr-grueso"><br>
           <p class="subtitle has-text-centered has-text-grey">Por favor ingrese sus datos</p>
 
           @if (session('error'))

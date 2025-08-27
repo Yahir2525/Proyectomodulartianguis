@@ -5,21 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/carro/carroIndex.css') }}">
     <title>Principal de carros</title>
-
     @php
         use App\Models\CarroProducto;
     @endphp
-
 </head>
 <body>
-<x-barrageneral/>
+<br><x-barrageneral/>
 <section>
     <div>
         <br><hr class="hr-grueso"><center><h1>Caja registradora</h1></center><hr class="hr-grueso">
-       
-
         @if(Auth::check())
             <br><p><a href="{{ url('/carro/create') }}">Registrar un nuevo carro</a></p>
 
@@ -132,46 +129,37 @@
                             @php
                                 $usuario = $carros->first()->user;
 
-                                // Créditos ACTIVOS (estado=1), sin filtrar por vencimiento
                                 $creditosTodos = \App\Models\Credito::where('id_user', $usuario->id_user)
                                     ->where('estado', 1)
                                     ->get();
 
-                                // Vigentes = activos con fecha_vencimiento futura o actual
                                 $creditosVigentes = $creditosTodos->filter(function($c) {
                                     return $c->fecha_vencimiento >= now();
                                 });
 
-                                // Activos pero vencidos (informativo)
                                 $creditosVencidos = $creditosTodos->filter(function($c) {
                                     return $c->fecha_vencimiento < now();
                                 });
 
-                                // Límite de crédito
                                 $totalCreditos = $creditosTodos->sum('saldo_total');
                                 $totalExcede = $totalPedido > 10000;
                                 $sumaExcede = ($totalCreditos + $totalPedido) > 10000;
 
-                                // === CAMBIO 1: permitir hasta 2 vencidos con saldo > 0 ===
                                 $creditosVencidosConSaldo = $creditosVencidos->filter(function($c) {
                                     return (float)$c->saldo_total > 0;
                                 });
                                 $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2;
 
-                                // Nivel
                                 $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? ''));
                                 $bloqueadoPorNivel = ($nivelUsuario === 'malo');
 
-                                // *** CAMBIO 2: contar activos INCLUYENDO vencidos para decidir si puede crear nuevo ***
                                 $activosInclVencidos = $creditosTodos->count();
                                 $puedeCrearCredito = $activosInclVencidos < 3;
 
-                                // Disponibles para usar: SOLO vigentes y que no rebasen tope con este pedido
                                 $creditosDisponibles = $creditosVigentes->filter(function($c) use ($totalPedido) {
                                     return ($c->saldo_total + $totalPedido) <= 10000;
                                 });
 
-                                // === CAMBIO 3: si no hay créditos usables PERO sí puede crear nuevo, NO bloquear la opción crédito ===
                                 $sinCreditosUsables = $creditosDisponibles->isEmpty() && !$puedeCrearCredito;
 
                                 $bloqueado = $totalExcede || $sumaExcede || $bloqueadoPorHistorial || $bloqueadoPorNivel || $sinCreditosUsables;
@@ -251,6 +239,12 @@
                         <hr>
                     @endif
                 @endforeach
+
+                <!-- 🔹 Links de paginación -->
+                <div class="mt-4 d-flex justify-content-center">
+                    {{ $carroIndex->links('pagination::bootstrap-5') }}
+                </div>
+
             @else
                 <p>No hay productos en el carrito.</p>
             @endif

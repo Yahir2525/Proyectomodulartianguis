@@ -9,12 +9,12 @@
     <title>Registro de Usuario</title>
 </head>
 <body class="bg-light">
-<x-barrasesion/>
+<br><x-barrasesion/>
 <div class="container min-vh-100 d-flex align-items-center py-4">
   <div class="row justify-content-center w-100">
     <div class="col-12 col-sm-10 col-md-8 col-lg-6">
       <div class="card shadow-sm">
-        <div class="card-header text-center">Registro de Usuario</div>
+        <br><hr class="hr-grueso"><center><h1>Registro de usuario</h1></center><hr class="hr-grueso"><br>
         <div class="card-body">
 
           @if(session('success'))

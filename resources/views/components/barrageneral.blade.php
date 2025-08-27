@@ -93,12 +93,13 @@
   /* Avatar chip */
   .avatar-chip{
     display:inline-flex; align-items:center; justify-content:center;
-    background:transparent; border-radius:999px; padding:.25rem .6rem;
+    background:transparent;   /* más oscuro por defecto */
+    border-radius:999px; padding:.25rem .6rem;
     transition:background .15s ease, transform .15s ease; line-height:1;
   }
-  .avatar-chip:hover{ background:rgba(255,255,255,.26); transform:translateY(-1px); }
+  .avatar-chip:hover{ background:rgba(0,0,0,0.25); transform:translateY(-1px); }
   .user-icon{ width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,.6); }
-  .avatar-chip .fa-user{ font-size:20px; width:20px; text-align:center; }
+  .avatar-chip .fa-user{ font-size:20px; width:20px; text-align:center; color:#000 !important; }
 
   /* Centrado real del menú entre logo y avatar */
   @media (min-width: 992px){
@@ -139,43 +140,47 @@
   @media (max-width: 991.98px){
     .navbar .dropdown-menu{ width:100%; max-width:none; }
   }
+
   /* --- Dropdown: que <a> y <button> se vean EXACTAMENTE igual --- */
-.navbar .dropdown-menu .dropdown-item{
-  display:block;
-  width:100%;
-  padding:6px 10px;
-  margin:0;
-  text-align:left;
-  font:inherit;
-  color:#222 !important;                 /* evita el azul del <a> */
-  background:transparent !important;     /* limpia fondo del <button> */
-  border:0 !important;
-  border-radius:0;
-  box-shadow:none !important;
-  line-height:1.25;
-  white-space:nowrap;
-}
+  .navbar .dropdown-menu .dropdown-item{
+    display:block;
+    width:100%;
+    padding:6px 10px;
+    margin:0;
+    text-align:left;
+    font:inherit;
+    color:#222 !important;                 /* evita el azul del <a> */
+    background:transparent !important;     /* limpia fondo del <button> */
+    border:0 !important;
+    border-radius:0;
+    box-shadow:none !important;
+    line-height:1.25;
+    white-space:nowrap;
+  }
 
-/* Estados unificados */
-.navbar .dropdown-menu .dropdown-item:hover,
-.navbar .dropdown-menu .dropdown-item:focus,
-.navbar .dropdown-menu .dropdown-item:active{
-  background:#f2f7ff !important;
-  color:#222 !important;
-  outline:0;
-}
+  /* Estados unificados */
+  .navbar .dropdown-menu .dropdown-item:hover,
+  .navbar .dropdown-menu .dropdown-item:focus,
+  .navbar .dropdown-menu .dropdown-item:active{
+    background:#f2f7ff !important;
+    color:#222 !important;
+    outline:0;
+  }
 
-/* Evita que reglas globales afecten al form del logout */
-.navbar .dropdown-menu form{
-  display:block;
-  margin:0;
-  padding:0;
-}
+  /* Evita que reglas globales afecten al form del logout */
+  .navbar .dropdown-menu form{
+    display:block;
+    margin:0;
+    padding:0;
+  }
 
-/* Quita apariencia nativa del botón del logout */
-.navbar .dropdown-menu button.dropdown-item{
-  -webkit-appearance:none;
-  appearance:none;
-}
+  /* Quita apariencia nativa del botón del logout */
+  .navbar .dropdown-menu button.dropdown-item{
+    -webkit-appearance:none;
+    appearance:none;
+  }
 
+  .navbar .dropdown-toggle::after {
+    border-top-color: #111 !important; /* flecha hacia abajo */
+  }
 </style>

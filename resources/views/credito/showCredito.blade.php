@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>Detalle(s) de Crédito</title>
     <style>
         table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
@@ -20,7 +21,8 @@
     </style>
 </head>
 <body>
-    <h1>Detalle(s) de Crédito</h1>
+<br>
+    <br><hr class="hr-grueso"><center><h1>Detalles del crédito</h1></center><hr class="hr-grueso"><br>
 
     @if(session('error'))
         <p class="error">{{ session('error') }}</p>

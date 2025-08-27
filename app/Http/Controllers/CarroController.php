@@ -13,6 +13,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class CarroController extends Controller
 {
@@ -22,8 +24,10 @@ class CarroController extends Controller
         $user = Auth::user();
 
         $carroIndex = $user->hasRole('administrador')
-            ? Carro::with(['productos', 'user', 'pedido'])->get()
-            : Carro::with(['productos', 'user', 'pedido'])->where('id_user', $user->id_user)->get();
+            ? Carro::with(['productos', 'user', 'pedido'])->paginate(5) // 🔹 ahora paginados de 5 en 5
+            : Carro::with(['productos', 'user', 'pedido'])
+                ->where('id_user', $user->id_user)
+                ->paginate(5);
 
         $reservasGlobales = CarroProducto::select('id_producto')
             ->selectRaw('SUM(cantidad) as total_reservado')
@@ -32,21 +36,41 @@ class CarroController extends Controller
 
         $todosProductos = Producto::all();
 
-        // Agrega esta línea solo si es administrador
         $usuarios = $user->hasRole('administrador') ? User::all() : collect();
 
         return view('carro.carroIndex', compact('carroIndex', 'reservasGlobales', 'todosProductos', 'usuarios'));
     }
 
-    public function create()
+
+    public function create(Request $request)
     {
         $usuario = Auth::user();
 
         $usuarios = $usuario->hasRole('administrador') ? User::all() : collect();
-
         $pedidos = Pedido::all();
-        $productos = Producto::all();
 
+        // 🔍 filtro de búsqueda
+        $query = Producto::query();
+
+        if ($busqueda = $request->input('buscar')) {
+            if (is_numeric($busqueda)) {
+                // Buscar por ID exacto
+                $query->where('id_producto', $busqueda);
+            } else {
+                // Buscar por nombre, material, color o tamaño
+                $query->where(function ($q) use ($busqueda) {
+                    $q->where('nombre', 'ILIKE', "%{$busqueda}%")
+                    ->orWhere('material', 'ILIKE', "%{$busqueda}%")
+                    ->orWhere('color', 'ILIKE', "%{$busqueda}%")
+                    ->orWhere('tamanio', 'ILIKE', "%{$busqueda}%");
+                });
+            }
+        }
+
+        // ⚡ paginar (ejemplo: 5 productos por página)
+        $productos = $query->paginate(5)->withQueryString();
+
+        // Calcular reservas y piezas disponibles
         $reservas = DB::table('carro_productos')
             ->select('id_producto', DB::raw('SUM(cantidad) as reservadas'))
             ->groupBy('id_producto')
@@ -58,6 +82,9 @@ class CarroController extends Controller
 
         return view('carro/createCarro', compact('usuario', 'usuarios', 'pedidos', 'productos'));
     }
+
+
+
 
     public function store(Request $request)
     {
@@ -307,31 +334,34 @@ class CarroController extends Controller
 
         $usuario = $carro->user;
 
-        // Filtrar productos: mostrar solo activos o el producto actualmente en el carro (aunque esté desactivado)
+        // Productos paginados de 10 en 10
         $productos = Producto::when(
             !$usuario->hasRole('administrador'),
             fn($q) => $q->where('estado_producto', true)
-        )->get()->map(function ($producto) use ($id_carro) {
+        )->paginate(10);
+
+        foreach ($productos as $producto) {
             $reservadas = CarroProducto::where('id_producto', $producto->id_producto)
                 ->where('id_carro', '!=', $id_carro)
                 ->sum('cantidad');
             $producto->piezas_disponibles = max(0, $producto->piezas - $reservadas);
-            return $producto;
-        });
+        }
 
-        // Asegurarse de que el producto actual siempre esté en la lista (aunque esté descontinuado)
+        // Garantizar que el producto actual siempre esté
         if (!$productos->contains('id_producto', $productoActual->id_producto)) {
             $productoActual->piezas_disponibles = max(0, $productoActual->piezas -
                 CarroProducto::where('id_producto', $productoActual->id_producto)
                     ->where('id_carro', '!=', $id_carro)
                     ->sum('cantidad'));
-            $productos->push($productoActual);
+            // Agregar manualmente al paginador
+            $productos->getCollection()->push($productoActual);
         }
 
         $pedidosUsuario = Pedido::where('id_user', $carro->id_user)->get();
 
         return view('carro.editCarro', compact('carro', 'productoActual', 'productos', 'cantidad', 'pedidosUsuario'));
     }
+
 
 
     public function update(Request $request, Carro $carro, $id_producto)

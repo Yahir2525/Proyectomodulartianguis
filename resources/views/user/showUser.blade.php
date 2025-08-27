@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/user/showUser.css') }}">
     <title>Usuarios encontrados</title>
     <style>
@@ -18,8 +19,8 @@
     </style>
 </head>
 <body>
-
-<h2>Buscar usuario</h2>
+<br>
+<br><hr class="hr-grueso"><center><h1>Detalles del usuario</h1></center><hr class="hr-grueso"><br>
 
 <form action="{{ url('/user/showUser') }}" method="GET">
     <label for="busqueda">Buscar por ID o nombre de usuario:</label>

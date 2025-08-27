@@ -137,4 +137,8 @@
   @media (max-width: 991.98px){
     .navbar .dropdown-menu{ width:100%; max-width:none; }
   }
+
+  .navbar .dropdown-toggle::after {
+    border-top-color: #111 !important; /* flecha hacia abajo */
+  }
 </style>

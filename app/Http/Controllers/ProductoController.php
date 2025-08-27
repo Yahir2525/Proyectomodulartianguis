@@ -4,39 +4,81 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use App\Models\Pedido;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProductoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $usuario = Auth::user();
 
-        // Productos visibles
+        // Base query según rol
         if ($usuario && $usuario->hasRole('administrador')) {
-            $productoIndex = Producto::all();
+            $query = Producto::query();
         } else {
-            $productoIndex = Producto::where('estado_producto', true)->get();
+            $query = Producto::where('estado_producto', true);
         }
 
-        // Usuarios y pedidos solo si hay usuario logueado
+        // ====== FILTROS ======
+        if ($request->filled('material')) {
+            $query->where('material', $request->material);
+        }
+
+        if ($request->filled('color')) {
+            $query->where('color', $request->color);
+        }
+
+        if ($request->filled('tamanio')) {
+            $query->where('tamanio', $request->tamanio);
+        }
+
+        if ($request->filled('precio_min')) {
+            $query->where('precio_unitario', '>=', $request->precio_min);
+        }
+
+        if ($request->filled('precio_max')) {
+            $query->where('precio_unitario', '<=', $request->precio_max);
+        }
+
+        if ($request->filled('estado')) {
+            $query->where('estado_producto', $request->estado);
+        }
+
+        // Paginación con query string
+        $productoIndex = $query->paginate(10)->withQueryString();
+
+        // ==== Opciones únicas para filtros (sin paginación) ====
+        $materiales = Producto::select('material')->distinct()->pluck('material');
+        $colores    = Producto::select('color')->distinct()->pluck('color');
+        $tamanios   = Producto::select('tamanio')->distinct()->pluck('tamanio');
+
+        // Usuarios y pedidos
         $usuarios = collect();
         $pedidosUsuario = collect();
 
         if ($usuario) {
             if ($usuario->hasRole('administrador')) {
-                $usuarios = \App\Models\User::all();
-                $pedidosUsuario = \App\Models\Pedido::with('user')->get();
+                $usuarios = User::all();
+                $pedidosUsuario = Pedido::with('user')->get();
             } else {
-                $pedidosUsuario = \App\Models\Pedido::where('id_user', $usuario->id_user)->get();
+                $pedidosUsuario = Pedido::where('id_user', $usuario->id_user)->get();
             }
         }
 
-        return view('producto.productoIndex', compact('productoIndex', 'pedidosUsuario', 'usuarios'));
-}
-
+        return view('producto.productoIndex', compact(
+            'productoIndex',
+            'pedidosUsuario',
+            'usuarios',
+            'materiales',
+            'colores',
+            'tamanios'
+        ));
+    }
 
 
 
@@ -114,21 +156,36 @@ class ProductoController extends Controller
     {
         $busqueda = $request->input('busqueda');
 
-        $productos = collect();
-        if (is_numeric($busqueda)) {
-            $producto = \App\Models\Producto::find($busqueda);
-            if ($producto) {
-                $productos->push($producto);
-            }
-        } elseif ($busqueda) {
-            $productos = \App\Models\Producto::where('nombre', 'ILIKE', "%$busqueda%")->get();
+        // Si no hay búsqueda, volver al index
+        if (empty($busqueda)) {
+            return redirect()->route('producto.index');
         }
 
-        $usuarios = \App\Models\User::all();
-        $pedidosUsuario = \App\Models\Pedido::with('user')->get();
+        if (is_numeric($busqueda)) {
+            $producto = Producto::find($busqueda);
+            if ($producto) {
+                $productos = new LengthAwarePaginator(
+                    [$producto],
+                    1,
+                    10,
+                    $request->input('page', 1),
+                    ['path' => $request->url(), 'query' => $request->query()]
+                );
+            } else {
+                $productos = collect(); // vacío
+            }
+        } else {
+            $productos = Producto::where('nombre', 'ILIKE', "%$busqueda%")
+                ->paginate(10)
+                ->withQueryString();
+        }
+
+        $usuarios = User::all();
+        $pedidosUsuario = Pedido::with('user')->get();
 
         return view('producto.showProducto', compact('productos', 'usuarios', 'pedidosUsuario'));
     }
+
     public function edit($id)
     {
         $producto = Producto::find($id);
