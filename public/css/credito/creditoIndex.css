@@ -1,1 +1,146 @@
-body { margin: 0; color: #222; background: #ffc58e; min-height: 100vh;}
+/* ==== RESET & TIPOGRAFÍA ==== */
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; color: #222; background: #fff87a; min-height: 100vh; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 14px; }
+h1 { margin: 0 0 8px; font-size: clamp(1.2rem, 1rem + 1vw, 1.8rem); text-align: center; }
+h2 { margin-top: 24px; font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem); }
+h3 { margin-top: 16px; font-size: 1rem; }
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; }
+
+/* ==== BOTONES ==== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  margin: 2px 4px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: .9rem;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:hover { filter: brightness(.95); }
+
+.btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold; }
+
+/* ==== FORMULARIO DE BÚSQUEDA ==== */
+form {
+  display: grid;
+  grid-template-columns: max-content minmax(200px, 320px) auto;
+  gap: 6px;
+  align-items: center;
+  margin: 10px 0;
+}
+form label { font-weight: 600; font-size: 0.95rem; }
+#busqueda {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  outline: none;
+  font-size: 0.95rem;
+}
+#busqueda:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+input[type="submit"] {
+  padding: 6px 10px;
+  font-size: .88rem;
+  border-radius: 6px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+}
+input[type="submit"]:hover { filter: brightness(.95); }
+
+/* ==== TABLAS ==== */
+.table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+th, td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  text-align: center;
+  font-size: .95rem;
+}
+thead th { background: #f3f4f6; }
+tbody tr:nth-child(odd) { background: #fafafa; }
+tbody tr:hover { background: #f2f7ff; }
+.cerrado { background: #f2f2f2; }
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 768px) {
+  table, thead, tbody, th, td, tr { display: block; }
+  thead { display: none; }
+  tbody tr {
+    background: #fff;
+    margin: 8px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    overflow: hidden;
+  }
+  td {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    border-top: 1px solid #f1f5f9;
+  }
+  td:first-child { border-top: none; }
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    min-width: 120px;
+  }
+  td .btn, td form, td input[type="submit"] {
+    width: 100%;
+    margin: 6px 0;
+  }
+  form { grid-template-columns: 1fr; }
+  #busqueda, input[type="submit"] { width: 100%; }
+}
+
+/* ==== FIX botón Buscar compacto en desktop ==== */
+@media (min-width: 769px) {
+  form:has(#busqueda) {
+    grid-template-columns: max-content minmax(200px, 320px) max-content; /* etiqueta | campo | botón */
+  }
+  form:has(#busqueda) input[type="submit"] {
+    justify-self: start;  /* se queda pegado, no se estira */
+    width: auto;          /* solo ocupa lo necesario */
+    padding: 4px 12px;    /* tamaño compacto */
+    font-size: 0.85rem;
+    min-height: 28px;
+    border-radius: 4px;
+    line-height: 1.2;
+  }
+}
+
+/* En móvil: el botón sí debe ocupar el ancho completo para accesibilidad */
+@media (max-width: 768px) {
+  form:has(#busqueda) input[type="submit"] {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 10px;
+    font-size: .9rem;
+  }
+}

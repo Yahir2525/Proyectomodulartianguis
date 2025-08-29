@@ -10,6 +10,8 @@
     <title>Crear Pedido</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br>
     <br><hr class="hr-grueso"><center><h1>Crear nuevo pedido</h1></center><hr class="hr-grueso"><br>
 
@@ -56,5 +58,8 @@
     <br>
     <a href="{{ url('/') }}">Inicio</a> |
     <a href="{{ url('/pedido') }}">Regresar</a>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

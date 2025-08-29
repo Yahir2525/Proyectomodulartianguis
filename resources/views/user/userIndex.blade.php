@@ -51,6 +51,8 @@
     </style>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br>
 <br><hr class="hr-grueso"><center><h1>Listado de usuarios</h1></center><hr class="hr-grueso"><br>
 
@@ -89,8 +91,10 @@
 
 @foreach (['Administradores' => $administradores, 'Usuarios normales' => $usuariosNormales] as $titulo => $grupo)
     @if ($grupo->isNotEmpty())
-        <div class="rol-header">{{ $titulo }}</div>
-        <table>
+        
+    <div class="rol-header">{{ $titulo }}</div>
+    <div class="table-responsive">
+        <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -144,8 +148,11 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     @endif
 @endforeach
-
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

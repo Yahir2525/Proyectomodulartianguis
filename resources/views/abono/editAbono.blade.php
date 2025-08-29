@@ -11,6 +11,8 @@
     <title>Editar Abono</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br><x-barracreate/>
     <section class="container">
     <br><hr class="hr-grueso"><center><h1>Editar Abono #{{ $abono->id_abono }}</h1></center><hr class="hr-grueso"><br>
@@ -36,7 +38,7 @@
         <div>
             <label for="monto_abono">Monto del Abono:</label>
             <input type="number" name="monto_abono" id="monto_abono" step="0.01" min="0" value="{{ old('monto_abono', $abono->monto_abono) }}" required>
-        </div><br>
+        </div>
 
         <div>
             <label for="id_credito">Seleccionar Crédito:</label>
@@ -52,8 +54,6 @@
                 @endforeach
             </select>
         </div>
-
-        <br>
         <button type="submit" class="btn btn-primary">Actualizar Abono</button>
     </form>
 
@@ -62,5 +62,8 @@
     <a href="{{ route('abono.index') }}" class="btn btn-primary">Cancelar</a>
     </div></center>
     </section>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

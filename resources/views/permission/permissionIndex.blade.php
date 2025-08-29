@@ -10,6 +10,8 @@
     <title>Página de roles</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br>
     <div>
         <a href="{{ url('role') }}">Roles</a> |
@@ -34,7 +36,8 @@
             <a href="{{ url('/permission/create') }}">Registrar nuevo permiso</a><br><br>
         @endcan
 
-        <table border="1" cellspacing="0" cellpadding="5">
+        <div class="table-responsive">
+        <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -64,6 +67,10 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     </div>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

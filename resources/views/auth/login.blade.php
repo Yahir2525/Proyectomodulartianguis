@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/sesion/login.css') }}">
-    <title>Login</title>
+    <title>Iniciar sesión</title>
     
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br><x-barrasesion/>
 <section class="hero is-fullheight">
   <div class="hero-body">
@@ -84,5 +87,8 @@
 <!-- (Opcional) Tu JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="js/scripts.js"></script>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

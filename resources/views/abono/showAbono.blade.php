@@ -10,6 +10,8 @@
     <title>Detalle(s) de Abono</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br><x-barrageneral/>
 <section class="container">
     <br><hr class="hr-grueso"><center><h1>Detalles del Abono</h1></center><hr class="hr-grueso">
@@ -39,8 +41,8 @@
                 <h2>Abonos del crédito #{{ $idCredito }} @if($nombreUsuario) de {{ $nombreUsuario }} @endif</h2>
             @endif
 
-            <div class="table-wrap">
-                <table>
+            <div class="table-responsive table-wrap">
+                    <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>ID del abono</th>
@@ -85,5 +87,8 @@
         <a href="{{ route('abono.index') }}" class="btn btn-warning">Volver al historial de abonos</a>
     </div>
 </section>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

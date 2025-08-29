@@ -10,6 +10,8 @@
     <title>Crear usuarios</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br>
 <div class="container mt-5">
     <br><hr class="hr-grueso"><center><h1>Principal de créditos</h1></center><hr class="hr-grueso"><br>
@@ -23,12 +25,6 @@
                     @endforeach
                 </ul>
                 @endif
-                <!-- <div class="card">
-                    <div class="card-header">
-                        <h4>Create User
-                            <a href="{{ url('user') }}" class="btn btn-danger float-end">Back</a>
-                        </h4>
-                    </div> -->
                     <div class="card-body">
                     <form action="{{ url('/user') }}" method="POST" enctype="multipart/form-data"> 
                             @csrf
@@ -143,5 +139,8 @@
             </div>
         </div>
     </div>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

@@ -19,6 +19,8 @@
     </style>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br>
 <br><hr class="hr-grueso"><center><h1>Detalles del usuario</h1></center><hr class="hr-grueso"><br>
 
@@ -42,7 +44,8 @@
 
 @if (isset($usuarios) && $usuarios->count())
     <h3>Resultados ({{ $usuarios->count() }})</h3>
-    <table>
+    <div class="table-responsive">
+        <table class="table table-bordered">
         <thead>
             <tr>
                 <th>ID</th>
@@ -90,7 +93,10 @@
             @endforeach
         </tbody>
     </table>
+    </div>
 @endif
-
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

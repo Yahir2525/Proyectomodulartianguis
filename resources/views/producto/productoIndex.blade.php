@@ -12,11 +12,12 @@
     @php use App\Models\CarroProducto; @endphp
 </head>
 <body class="producto-index">
-<br>
+<div class="page-container">
+<main class="content">
     @if (Auth::check())
-        <x-barrageneral/>
+        <br><x-barrageneral/>
     @else
-        <x-barrasesion/>
+        <br><x-barracreate/>
     @endif
 
 <section>
@@ -27,7 +28,7 @@
         <hr class="hr-grueso"><br>
 
         @can('create producto')
-            <a href="{{ url('/producto/create') }}">Registrar un nuevo producto</a>
+            <a href="{{ url('/producto/create') }}" class="btn btn-registrar">Registrar un nuevo producto</a>
         @endcan
         <br>
 
@@ -46,6 +47,17 @@
 
         {{-- ===== FILTROS ESPECIALES ===== --}}
         <form action="{{ url('/producto') }}" method="GET" class="filtros">
+            <div>
+                <label for="filtro_tipo">Tipo:</label>
+                <select name="tipo" id="filtro_tipo">
+                    <option value="">-- Todos --</option>
+                    @foreach ($tipos as $tipo)
+                        <option value="{{ $tipo }}" {{ request('tipo') == $tipo ? 'selected' : '' }}>
+                            {{ ucfirst($tipo) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
             <div>
                 <label for="filtro_material">Material:</label>
                 <select name="material" id="filtro_material">
@@ -89,21 +101,20 @@
                 <label for="precio_max">Precio máx:</label>
                 <input type="number" name="precio_max" id="precio_max" value="{{ request('precio_max') }}" min="0" step="0.01">
             </div>
+            @can('create producto')
+                <div>
+                    <label for="estado">Estado:</label>
+                    <select name="estado" id="estado">
+                        <option value="">-- Todos --</option>
+                        <option value="1" {{ request('estado') === '1' ? 'selected' : '' }}>Activo</option>
+                        <option value="0" {{ request('estado') === '0' ? 'selected' : '' }}>Descontinuado</option>
+                    </select>
+                </div>
+            @endcan
 
-            <div>
-                <label for="estado">Estado:</label>
-                <select name="estado" id="estado">
-                    <option value="">-- Todos --</option>
-                    <option value="1" {{ request('estado') === '1' ? 'selected' : '' }}>Activo</option>
-                    <option value="0" {{ request('estado') === '0' ? 'selected' : '' }}>Descontinuado</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <button type="submit" class="btn btn-registrar">Filtrar</button>
             <a href="{{ url('/producto') }}" class="btn btn-gray">Limpiar</a>
         </form>
-
-        <br>
 
         @if($productoIndex->isNotEmpty())
             @php $agrupadosPorTipo = $productoIndex->groupBy('tipo'); @endphp
@@ -114,8 +125,8 @@
 
                     @foreach ($agrupadosPorTipo as $tipo => $productos)
                         <h3>Tipo: {{ ucfirst($tipo) }}</h3>
-                        <div class="table-wrap">
-                            <table>
+                        <div class="table-responsive table-wrap">
+                            <table class="table table-bordered">
                                 <thead>
                                     <tr>
                                         <th>Seleccionar</th>
@@ -163,7 +174,7 @@
                                                     <input type="number" name="cantidades[{{ $producto->id_producto }}]" min="1" max="{{ $disponibles }}" class="cant-input" {{ $disponibles == 0 ? 'disabled' : '' }}>
                                                 </td>
                                                 <td>{{ $producto->estado_producto ? 'Activo' : 'Descontinuado' }}</td>
-                                                <td><a href="{{ route('producto.edit', $producto->id_producto) }}">Editar</a></td>
+                                                <td><a href="{{ route('producto.edit', $producto->id_producto) }}"  class="btn btn-edit">Editar</a></td>
                                             </tr>
                                         @endif
                                     @endforeach
@@ -174,15 +185,15 @@
                     @endforeach
 
                     <!-- Links de paginación -->
-                    <div class="mt-4 d-flex justify-content-center">
+                    <div class="mt-4 d-flex justify-content-center align-items-center gap-3 flex-wrap">
                         {{ $productoIndex->links('pagination::bootstrap-5') }}
                     </div>
 
                     {{-- ==== Parte inferior centrada ==== --}}
                     <div class="form-footer">
                         @if (Auth::user()->hasRole('administrador'))
-                            <label for="nombre_usuario">Buscar usuario:</label>
-                            <input list="usuarios" id="nombre_usuario" placeholder="Ej. Juan Pérez" autocomplete="off">
+                            <label for="nombre_usuario"><strong>Buscar usuario:</strong></label>
+                            <input list="usuarios" id="nombre_usuario" placeholder="Ej. Juan Pérez" autocomplete="off" class="form-input">
                             <input type="hidden" name="id_user" id="id_user">
 
                             <datalist id="usuarios">
@@ -234,8 +245,8 @@
                             <input type="hidden" name="id_user" value="{{ Auth::id() }}">
                         @endif
 
-                        <label for="id_pedido">Selecciona o crea un pedido:</label>
-                        <select name="id_pedido" id="id_pedido" required>
+                        <label for="id_pedido"><strong>Selecciona o crea un pedido:</strong></label>
+                        <select name="id_pedido" id="id_pedido" required class="form-input">
                             <option value="">-- Selecciona --</option>
                             <option value="nuevo">Crear nuevo pedido</option>
                             @foreach($pedidosUsuario as $pedido)
@@ -247,7 +258,7 @@
                             @endforeach
                         </select>
 
-                        <button type="submit" class="btn btn-primary">Agregar seleccionados al carrito</button>
+                        <button type="submit" class="btn btn-agregar">Agregar seleccionados al carrito</button>
                     </div>
                 </form>
             @endauth
@@ -318,5 +329,8 @@
         @endif
     </div>
 </section>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

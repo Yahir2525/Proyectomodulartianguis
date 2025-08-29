@@ -10,6 +10,8 @@
     <title>Editar usuario</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br>
 <div class="container mt-5">
     <br><hr class="hr-grueso"><center><h1>Editar usuario</h1></center><hr class="hr-grueso"><br>
@@ -168,6 +170,9 @@
             </div>
         </form>
     </div>
+</div>
+</main>
+<x-footer/>
 </div>
 </body>
 </html>

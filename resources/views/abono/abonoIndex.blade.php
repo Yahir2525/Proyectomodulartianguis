@@ -10,6 +10,8 @@
     <title>Principal de abonos</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br><x-barrageneral/>
 <section class="container">
 <br><hr class="hr-grueso"><center><h1>Historial de Abonos</h1></center><hr class="hr-grueso"><br>
@@ -17,11 +19,10 @@
         @can('create abono')
         <form action="{{ url('/abono/create') }}" method="GET" style="display:inline;">
             <button type="submit" class="btn btn-primary">Registrar nuevo abono</button>
-        </form>
+        </form><br><br>
         @endcan
-        <br>
         <form action="{{ url('/abono/showAbono') }}" method="GET">
-            <label for="busqueda">Buscar por ID de abono o nombre de usuario:</label>
+            <label for="busqueda">Buscar abono:</label>
             <input
                 type="text"
                 id="busqueda"
@@ -41,7 +42,7 @@
             @endcan
 
             <input type="submit" value="Buscar" />
-        </form>
+        </form><br>
 
         @if ($abonoIndex->isNotEmpty())
             @php
@@ -62,8 +63,8 @@
                     <h2>Abonos del crédito #{{ $idCredito }} @if($usuarioNombre) de {{ $usuarioNombre }} @endif</h2>
                 @endif
 
-                <div class="table-wrap">
-                    <table>
+                <div class="table-responsive table-wrap">
+                    <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>ID del abono</th>
@@ -76,25 +77,43 @@
                         </thead>
                         <tbody>
                             @foreach ($abonos as $abono)
+                                @php
+                                    $credito = $abono->credito;
+                                    $estaCerrado = $credito && $credito->estado == 0;
+                                    $estaVencido = $credito && $credito->fecha_vencimiento && $credito->fecha_vencimiento < now();
+                                @endphp
+
                                 <tr>
                                     <td>{{ $abono->id_abono }}</td>
                                     <td>{{ $abono->created_at }}</td>
                                     <td>{{ $abono->updated_at }}</td>
                                     <td>${{ number_format($abono->monto_abono, 2) }}</td>
+                                    
                                     <td>
                                         @can('edit abono')
-                                        <form action="{{ route('abono.edit', $abono->id_abono) }}" method="GET" style="display:inline;">
-                                            <button type="submit" class="btn btn-edit">Editar</button>
-                                        </form>
+                                            @if($estaCerrado)
+                                                <span class="info-msg text-danger">No editable (crédito cerrado)</span>
+                                            @else
+                                                <form action="{{ route('abono.edit', $abono->id_abono) }}" method="GET" style="display:inline;">
+                                                    <button type="submit" class="btn btn-edit">Editar</button>
+                                                </form>
+                                            @endif
                                         @endcan
                                     </td>
+                                    
                                     <td>
                                         @can('delete abono')
-                                        <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-danger" type="submit">Eliminar</button>
-                                        </form>
+                                            @if($estaCerrado)
+                                                <span class="info-msg text-danger">No eliminable (crédito cerrado)</span>
+                                            @elseif($estaVencido)
+                                                <span class="info-msg text-warning">No eliminable (crédito vencido)</span>
+                                            @else
+                                                <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-danger" type="submit">Eliminar</button>
+                                                </form>
+                                            @endif
                                         @endcan
                                     </td>
                                 </tr>
@@ -102,12 +121,13 @@
                         </tbody>
                     </table>
                 </div>
-
             @endforeach
         @else
             <p>No hay abonos registrados.</p>
         @endif
-
 </section>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

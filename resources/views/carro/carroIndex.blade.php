@@ -13,15 +13,18 @@
     @endphp
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br><x-barrageneral/>
 <section>
     <div>
         <br><hr class="hr-grueso"><center><h1>Caja registradora</h1></center><hr class="hr-grueso">
         @if(Auth::check())
-            <br><p><a href="{{ url('/carro/create') }}">Registrar un nuevo carro</a></p>
+           
+            <br><p><a href="{{ url('/carro/create') }}" class="btn btn-registrar">Registrar un nuevo carro</a></p>
 
-            <form action="{{ url('/carro/showCarro') }}" method="GET">
-                <label for="busqueda">Buscar por ID de carro o nombre de usuario:</label>
+            <form action="{{ url('/carro/showCarro') }}" method="GET" class="buscar">
+                <label for="busqueda">Buscar carro:</label>
                 <input type="text" id="busqueda" name="busqueda" placeholder="Ej. 21 o Carlitos"
                 list="{{ Auth::user()->can('edit carro') ? 'usuarios' : '' }}"
                 value="{{ request('busqueda') }}" />
@@ -34,10 +37,8 @@
                 </datalist>
                 @endcan
 
-                <input type="submit" value="Buscar" />
+                <input type="submit" value="Buscar" class="btn btn-warning" />
             </form>
-
-            <br>
 
             @if($carroIndex->isNotEmpty())
                 @php
@@ -64,7 +65,8 @@
                     @if ($hayProductos)
                         <h2>Pedido #{{ $idPedido }} de {{ optional($carros->first()->user)->nombre_usuario ?? 'Sin cliente' }}</h2>
 
-                        <table border="1" cellspacing="0" cellpadding="5">
+                        <div class="table-responsive">
+                        <table class="table table-bordered">
                             <thead>
                                 <tr>
                                     <th>ID carro</th>
@@ -103,18 +105,22 @@
                                             <td>{{ $subtotal }}</td>
                                             <td>
                                                 @if($pedido && $pedido->estado_pedido == 1)
-                                                    <a href="{{ route('carro.edit', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}">
-                                                        <button type="button">Editar</button>
+                                                    <a href="{{ route('carro.edit', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" class="btn btn-edit">
+                                                        Editar
                                                     </a>
+                                                @else
+                                                    <span style="color: black;">Pedido cerrado</span>
+                                                @endif
                                             </td>
                                             <td>
+                                                @if($pedido && $pedido->estado_pedido == 1)
                                                     <form action="{{ route('carro.eliminarProducto', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" method="POST" onsubmit="return confirm('¿Estás seguro?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit">Eliminar</button>
+                                                        <button type="submit" class="btn btn-danger">Eliminar</button>
                                                     </form>
                                                 @else
-                                                    <span style="color: gray;">Pedido cerrado</span>
+                                                    <span style="color: black;">Pedido cerrado</span>
                                                 @endif
                                             </td>
                                         </tr>
@@ -122,7 +128,7 @@
                                 @endforeach
                             </tbody>
                         </table>
-                        
+                        </div>
                         <br><p><strong>Total del pedido #{{ $idPedido }}: {{ $totalPedido }}</strong></p>
 
                         @if($pedido && $pedido->estado_pedido == 1)
@@ -168,8 +174,7 @@
                                 <form action="{{ route('carro.destroy', $carros->first()->id_carro) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar todo este carro?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" style="background-color:#d9534f; color:#fff; border:none; padding:6px 12px; cursor:pointer;">Eliminar carro completo
-                                    </button>
+                                    <button type="submit" class="btn btn-danger">Eliminar carro completo</button>
                                 </form>
                             </p>
 
@@ -198,7 +203,7 @@
                                         Puedes cerrarlo como <strong>contado</strong>.
                                     </p>
                                 @endif
-
+                            <div class="pedido-actions">
                                 <label for="metodo_pago_{{ $idPedido }}">Método de pago:</label>
                                 <select name="metodo_pago" required onchange="mostrarCreditos(this, {{ $idPedido }})">
                                     <option value="">-- Selecciona --</option>
@@ -229,8 +234,8 @@
                                         @endif
                                     @endif
                                 </div>
-
-                                <button type="submit" style="margin-top:8px;">Cerrar pedido</button>
+                                <button type="submit" class="btn btn-primary">Cerrar pedido</button>
+                            </div>
                             </form>
                         @else
                             <p style="color: gray;"><strong>Pedido cerrado</strong></p>
@@ -272,5 +277,8 @@
         div.style.display = select.value === 'credito' ? 'block' : 'none';
     }
     </script>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

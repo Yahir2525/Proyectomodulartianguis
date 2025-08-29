@@ -265,10 +265,6 @@ class AbonoController extends Controller
 
     }
 
-
-
-
-
     public function destroy(Abono $abono)
     {
         $abono = Abono::find($abono->id_abono);
@@ -278,11 +274,25 @@ class AbonoController extends Controller
         }
 
         $credito = Credito::find($abono->id_credito);
-        if ($credito) {
-            $credito->saldo_total += $abono->monto_abono;
-            $credito->save();
+
+        if (!$credito) {
+            return redirect()->route('abono.index')->with('error', 'El crédito asociado no existe.');
         }
 
+        // 🚫 Bloqueo si el crédito está cerrado o vencido
+        if ($credito->estado == 0) {
+            return redirect()->route('abono.index')->with('error', 'No se puede eliminar un abono de un crédito cerrado.');
+        }
+
+        if ($credito->fecha_vencimiento && $credito->fecha_vencimiento < now()) {
+            return redirect()->route('abono.index')->with('error', 'No se puede eliminar un abono de un crédito vencido.');
+        }
+
+        // ✅ Si pasa las validaciones, se revierte el saldo
+        $credito->saldo_total += $abono->monto_abono;
+        $credito->save();
+
+        // Ahora sí se elimina el abono
         $abono->delete();
 
         DB::afterCommit(function () {
@@ -291,6 +301,7 @@ class AbonoController extends Controller
 
         return redirect()->route('abono.index')->with('success', 'El abono se ha eliminado con éxito.');
     }
+
 
     public function aplicarAlCredito($id)
     {

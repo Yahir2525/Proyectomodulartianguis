@@ -14,7 +14,10 @@ p  { margin: 6px 0; }
 form { display: grid; gap: 12px; margin-top: 6px; }
 label { font-weight: 600; font-size: 0.95rem; }
 
+/* Inputs y selects con estilo ovalado */
 input[type="number"],
+input[type="text"],
+input[list],
 select {
   width: 100%;
   padding: 8px 10px;
@@ -23,8 +26,12 @@ select {
   background: #fff;
   outline: none;
   font-size: 0.95rem;
+  
 }
+
 input[type="number"]:focus,
+input[type="text"]:focus,
+input[list]:focus,
 select:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
@@ -36,7 +43,7 @@ button,
   width: 100%;
   padding: 8px 12px;
   min-height: 36px;
-  border-radius: 6px;
+  border-radius: 20px; /* ovalado */
   border: 1px solid #2563eb;
   background: #2563eb;
   color: #fff;
@@ -45,15 +52,16 @@ button,
   cursor: pointer;
   text-decoration: none; /* para <a> con .btn */
   display: inline-flex; align-items: center; justify-content: center;
+  font-weight: bold;
 }
 button:hover,
 .btn.btn-primary:hover { filter: brightness(.95); }
 
-/* Botón “Volver al listado” (enlace con aspecto de botón) */
+/* Botón “Volver al listado” */
 .back-wrap { margin-top: 10px; }
-.back-wrap .btn.btn-primary { width: auto; } /* si lo prefieres a ancho contenido */
+.back-wrap .btn.btn-primary { width: auto; }
 
-/* Mensajes de error (soporta inline style y clase .errors) */
+/* Mensajes de error */
 .errors {
   color: #7f1d1d;
   background: #fef2f2;
@@ -66,7 +74,7 @@ button:hover,
 .errors ul { margin: 0 0 0 18px; padding: 0; }
 .errors li { margin: 4px 0; }
 
-/* Si aún usas <div style="color:red;"> en el Blade, lo armonizamos: */
+/* Fix para inline style="color:red;" */
 [style*="color: red;"] {
   color: #7f1d1d !important;
   background: #fef2f2;
@@ -77,7 +85,7 @@ button:hover,
   margin: 10px auto 8px;
 }
 
-/* Ajustes responsivos para tipografía/espacios (igual que create) */
+/* Responsivo */
 @media (max-width: 768px) {
   html { font-size: 15px; }
   .container { padding: 14px; }
@@ -85,8 +93,11 @@ button:hover,
 @media (max-width: 640px) {
   html { font-size: 14px; }
   .container { padding: 12px; }
-  /* Botones a ancho completo en móvil */
   .btn.btn-primary { width: 100%; }
 }
 
 hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }
+
+form > div {
+  margin-bottom: 15px; /* separa cada bloque un poco */
+}

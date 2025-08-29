@@ -237,7 +237,7 @@ class PedidoController extends Controller
 
         $user = $pedido->user;
 
-        if ($user->tienePagosAtrasadosSinAbonar()) {
+        if ($user->nivel_usuario === 'malo') {
             return back()->with('error', 'No puedes cerrar el pedido porque tienes pagos vencidos sin abonar.');
         }
 

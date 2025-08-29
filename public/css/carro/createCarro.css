@@ -1,248 +1,210 @@
-/* ==== createCarro.css — estilo coherente con carroIndex (AUTOAJUSTE COLUMNAS) ==== */
+/* ==== PRODUCTO INDEX (similar a carro create) ==== */
 
 /* Reset & tipografía */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #47fb9e; min-height: 100vh;}
+body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
 
-/* -------- Container centrado -------- */
-.container {
-  max-width: clamp(1400px, 100vw, 1800px);
-  margin: 0 auto;
-  padding: 16px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.04);
-}
-
-/* -------- Fallback sin wrapper -------- */
-body > h1,
-body > hr,
-body > form,
-body > p,
-body > a,
-body > div:not(.container) {
-  max-width: clamp(1400px, 98vw, 1800px);
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
-/* Títulos */
-h1 { margin: 12px 0; font-size: clamp(1.25rem, 1rem + 1.2vw, 2rem); text-align: center; }
-h3 { margin: 16px 0 8px; font-size: clamp(1.05rem, 0.9rem + 0.6vw, 1.4rem); }
-
-/* Enlaces & botones */
+/* Layout */
+section { max-width: 1200px; margin: 0 auto; padding: 16px; }
+h1 { margin: 0 0 12px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
+h3 { margin-top: 24px; font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem); }
 a { color: #2563eb; text-decoration: none; }
 a:hover { text-decoration: underline; }
+hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
 
-button,
-input[type="submit"] {
+/* --- Botones reutilizables --- */
+/* Botones base */
+.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 12px;
+  padding: 6px 12px;
   margin: 2px 4px;
-  border-radius: 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: .9rem;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:hover { filter: brightness(.95); }
+
+/* Registrar (verde) */
+.btn-registrar { background:#15c221; border-color:#15c221; color:#fff; font-weight: bold; }
+
+/* Editar (morado) */
+.btn-edit { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; font-weight: bold;}
+
+/* Agregar (azul) */
+.btn-agregar { background:#2563eb; border-color:#2563eb; color:#fff; font-weight: bold;}
+
+/* Eliminar (rojo) */
+.btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold;}
+
+/* Utilitario gris */
+.btn-gray { background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold;}
+
+
+/* --- Formulario búsqueda --- */
+.buscar {
+  display: grid;
+  grid-template-columns: max-content minmax(220px, 340px) max-content;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0 18px;
+}
+.buscar label {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+#busqueda {
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.95rem;
+}
+#busqueda:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+.buscar input[type="submit"] {
+  padding: 6px 12px;
+  border-radius: 6px;
   border: 1px solid #2563eb;
   background: #2563eb;
   color: #fff;
   cursor: pointer;
-  line-height: 1;
-  font-size: .95rem;
-  white-space: nowrap;
+  font-weight: bold;
 }
-button:hover,
-input[type="submit"]:hover { filter: brightness(.95); }
-button:disabled { opacity: .6; cursor: not-allowed; }
+.buscar input[type="submit"]:hover { filter: brightness(.95); }
 
-/* “Ver carrito” como botón azul (sin cambiar HTML) */
-a[href="/carro"],
-a[href$="/carro"] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  margin: 2px 4px;
-  border-radius: 8px;
-  border: 1px solid #2563eb;
-  background: #2563eb;
-  color: #fff !important;
-  text-decoration: none;
-}
-a[href$="/carro"]:hover { filter: brightness(.95); }
-
-/* --- Botón "Ir arriba" azul --- */
-a[href="#top"] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  margin: 2px 4px;
-  border-radius: 8px;
-  border: 1px solid #2563eb;
-  background: #2563eb;
-  color: #fff !important;
-  text-decoration: none;
-}
-a[href="/carro"] + a[href="#top"],
-a[href$="/carro"] + a[href="#top"] { margin-left: 8px; }
-a[href="#top"]:hover { filter: brightness(.95); }
-
-/* Tabla (AUTOAJUSTE DE COLUMNAS) */
+/* =================== TABLA =================== */
+.table-wrap { width: 100%; overflow-x: auto; }
 table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  overflow: hidden;                 /* bordes redondeados limpios */
-  table-layout: auto !important;    /* <-- autoajuste real de columnas */
+  border-radius: 8px;
+  overflow: hidden;
 }
 th, td {
   border: 1px solid #e5e7eb;
-  padding: 8px;
+  padding: 8px 6px;
   text-align: center;
+  font-size: .9rem;
   vertical-align: middle;
-  font-size: .95rem;
-  white-space: normal;              /* envuelve por defecto */
-  overflow-wrap: anywhere;          /* evita desbordes de texto */
 }
-thead th { background: #f3f4f6; }
+thead th { background: #f3f4f6; font-weight: 600; }
 tbody tr:nth-child(odd) { background: #fafafa; }
 tbody tr:hover { background: #f2f7ff; }
 
-/* Columnas: guía de anchuras */
-table th:nth-child(1), table td:nth-child(1) { /* Seleccionar */
-  width: 1%;
-  white-space: nowrap;
-}
-table th:nth-child(2), table td:nth-child(2) { /* Imagen */
-  width: 150px;                                 /* acorde al tope de imagen */
-}
-table th:nth-child(3), table td:nth-child(3) { /* Nombre */
-  width: auto;                                   /* absorbe el resto */
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-table th:nth-child(4), table td:nth-child(4),  /* Material */
-table th:nth-child(5), table td:nth-child(5),  /* Color */
-table th:nth-child(6), table td:nth-child(6),  /* Tamaño */
-table th:nth-child(7), table td:nth-child(7),  /* Precio */
-table th:nth-child(8), table td:nth-child(8),  /* Piezas disp. */
-table th:nth-child(9), table td:nth-child(9)   /* Cantidad */
-{
-  width: 1%;                   /* que se contraigan al mínimo */
-  white-space: nowrap;         /* sin saltos para números/códigos cortos */
-}
+/* Estados de stock */
+.sin-stock { background: #ffe2e2 !important; }
+.resaltado { font-weight: bold; color: #b91c1c; }
 
-/* Imágenes: que no empujen columnas */
+/* Imagen */
 td img {
-  width: auto;
-  max-width: 140px;
-  height: auto;
-  display: block;
-  margin: 0 auto;
+  max-width: 120px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
 }
 
-/* Estados */
-.sin-stock { background: #fee2e2 !important; }
-.resaltado { font-weight: 700; color: #dc2626; }
-
-/* Inputs */
-input[type="text"],
-input[type="number"],
-select {
-  padding: 8px 10px;
-  border: 1px solid #9aa3ad;
-  border-radius: 8px;
-  background: #fff;
-  font-size: .95rem;
-  outline: none;
-}
-input[type="text"]:focus,
-input[type="number"]:focus,
-select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
-}
-.cant-input { width: 72px; max-width: 100%; }
-
-/* HR estilizado */
-hr {
-  border: none;
-  height: 1px;
-  background: #e5e7eb;
-  margin: 12px auto 16px;
-  max-width: 100%;
-}
-
-/* Seguridad anti-scroll lateral */
-html, body { overflow-x: hidden; }
-
-/* ---------- Responsivo ---------- */
+/* Responsive (tablas con muchas columnas → scroll) */
 @media (max-width: 992px) {
   html { font-size: 15px; }
+  section { padding: 12px; }
+  table { font-size: .85rem; }
+  td img { max-width: 80px; }
 }
 
 @media (max-width: 768px) {
   html { font-size: 14px; }
+  .buscar { grid-template-columns: 1fr; }
+  #busqueda, .buscar input[type="submit"] { width: 100%; }
 
-  /* “Tarjetas” para evitar scroll horizontal en móvil */
-  table, thead, tbody, th, td, tr { display: block; }
-  thead { display: none; }
-
-  tbody tr {
-    background: #fff;
-    margin: 8px 0;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    overflow: hidden;
-  }
-
-  td {
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    gap: 8px;
-    text-align: left;
-    padding: 10px 12px;
-    border: none;
-    border-top: 1px solid #f1f5f9;
-    white-space: normal;         /* en móvil, permite saltos */
-  }
-  td:first-child { border-top: none; }
-
-  /* Etiquetas por columna */
-  td:nth-child(1)::before { content: "Seleccionar"; font-weight: 400; }
-  td:nth-child(2)::before { content: "Imagen"; font-weight: 400; }
-  td:nth-child(3)::before { content: "Nombre"; font-weight: 700; }
-  td:nth-child(4)::before { content: "Material"; font-weight: 600; }
-  td:nth-child(5)::before { content: "Color"; font-weight: 600; }
-  td:nth-child(6)::before { content: "Tamaño"; font-weight: 600; }
-  td:nth-child(7)::before { content: "Precio"; font-weight: 600; }
-  td:nth-child(8)::before { content: "Piezas disponibles"; font-weight: 500; }
-  td:nth-child(9)::before { content: "Cantidad"; font-weight: 600; }
-
-  /* Botones/enlaces a ancho completo en móvil */
-  input[type="text"],
-  input[type="number"],
-  select,
-  button,
-  a[href="/carro"],
-  a[href$="/carro"],
-  a[href="#top"] {
-    width: 100%;
-    margin: 6px 0;
-  }
-  .cant-input { width: 100%; }
+  /* En móvil → usar scroll horizontal en tabla, no tarjetas (porque tienes demasiadas columnas) */
+  .table-wrap { overflow-x: auto; }
+  table { min-width: 800px; } /* fuerza scroll si no cabe */
 }
 
-/* (Se eliminó el override que encogía .container a 1100px en pantallas grandes) */
+@media (max-width: 480px) {
+  html { font-size: 13px; }
+  td, th { padding: 6px 4px; }
+  td img { max-width: 60px; }
+}
 
-hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }
+/* ==== SECCIÓN FINAL (usuario, pedido, botón) ==== */
+/* ==== CENTRAR PARTE INFERIOR ==== */
+.form-footer {
+  text-align: center;
+  margin-top: 24px;
+}
 
-a.arriba { color: #2563eb; text-decoration: none; }
-a.arriba:hover { text-decoration: underline; }
+.form-footer label,
+.form-footer select,
+.form-footer input,
+.form-footer button {
+  display: block;
+  margin: 8px auto;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+.filtros label {
+  font-weight: 600;
+  margin-right: 6px;
+}
+.filtros select,
+.filtros input {
+  padding: 4px 8px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  min-width: 120px;
+}
+
+.mt-4 .pagination {
+  margin-left: 12px; /* separa hacia la izquierda */
+}
+
+.pagination + .pagination-summary,
+.pagination-summary {
+  margin-left: 12px;
+}
+
+/* === Estilo uniforme para inputs/selects === */
+.form-input {
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;   /* mismo ovalado que filtros */
+  background: #fff;
+  font-size: 0.95rem;
+  min-width: 200px;
+}
+
+.form-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+  outline: none;
+}
+
+.form-footer button {
+  margin-top: 20px; /* aumenta separación entre el select y el botón */
+}
+
+.cant-input {
+  min-width: 20px; max-width: 60px;     /* ancho fijo */
+  text-align: left;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #999; /* un poco más pequeño que los demás */
+}

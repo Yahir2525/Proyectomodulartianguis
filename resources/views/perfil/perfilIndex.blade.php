@@ -10,6 +10,8 @@
     <title>Mi Perfil</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br><x-barraadmin/>
 <div class="container mt-5">
     <div class="card shadow">
@@ -93,6 +95,8 @@
 
 <!-- Bootstrap JS (opcional) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

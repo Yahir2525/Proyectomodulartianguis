@@ -10,6 +10,8 @@
     <title>Principal de roles</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br>
 <div class="container">
 
@@ -70,9 +72,8 @@
                     @endcan
                 </div>
             </div>
-
-            <div class="table-wrap">
-                <table class="perm-table">
+            <div class="table-responsive table-wrap">
+                <table class="table table-bordered perm-table">
                     <thead>
                         <tr>
                             <th style="width:70%">Permiso</th>
@@ -105,7 +106,9 @@
     @empty
         <p class="muted">No hay roles para mostrar.</p>
     @endforelse>
-
+</div>
+</main>
+<x-footer/>
 </div>
 </body>
 </html>

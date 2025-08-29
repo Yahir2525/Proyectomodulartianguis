@@ -1,1 +1,163 @@
-body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh;}
+/* ==== SHOW PRODUCTO (basado en productoIndex) ==== */
+
+/* Reset & tipografía */
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
+
+/* Layout */
+section { max-width: 1200px; margin: 0 auto; padding: 16px; }
+h1 { margin: 0 0 12px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
+h3 { margin-top: 24px; font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem); }
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
+
+/* --- Botones reutilizables --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  margin: 2px 4px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: .9rem;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:hover { filter: brightness(.95); }
+
+.btn-registrar { background:#15c221; border-color:#15c221; color:#fff; }
+.btn-edit { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; }
+.btn-agregar { background:#2563eb; border-color:#2563eb; color:#fff; }
+.btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; }
+.btn-gray { background:#6b7280; border-color:#6b7280; color:#fff; }
+
+/* --- Formulario búsqueda --- */
+.buscar {
+  display: grid;
+  grid-template-columns: max-content minmax(220px, 340px) max-content;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0 18px;
+}
+.buscar label {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+#busqueda {
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.95rem;
+}
+#busqueda:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+.buscar input[type="submit"] {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+.buscar input[type="submit"]:hover { filter: brightness(.95); }
+
+/* =================== TABLA =================== */
+.table-wrap { width: 100%; overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+th, td {
+  border: 1px solid #e5e7eb;
+  padding: 8px 6px;
+  text-align: center;
+  font-size: .9rem;
+  vertical-align: middle;
+}
+thead th { background: #f3f4f6; font-weight: 600; }
+tbody tr:nth-child(odd) { background: #fafafa; }
+tbody tr:hover { background: #f2f7ff; }
+
+/* Estados de stock */
+.sin-stock { background: #ffe2e2 !important; }
+.resaltado { font-weight: bold; color: #b91c1c; }
+
+/* Imagen */
+td img {
+  max-width: 120px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+
+/* Responsive (tablas con muchas columnas → scroll) */
+@media (max-width: 992px) {
+  html { font-size: 15px; }
+  section { padding: 12px; }
+  table { font-size: .85rem; }
+  td img { max-width: 80px; }
+}
+
+@media (max-width: 768px) {
+  html { font-size: 14px; }
+  .buscar { grid-template-columns: 1fr; }
+  #busqueda, .buscar input[type="submit"] { width: 100%; }
+  .table-wrap { overflow-x: auto; }
+  table { min-width: 800px; }
+}
+
+@media (max-width: 480px) {
+  html { font-size: 13px; }
+  td, th { padding: 6px 4px; }
+  td img { max-width: 60px; }
+}
+
+/* ==== SECCIÓN FINAL (usuario, pedido, botón) ==== */
+.form-footer {
+  text-align: center;
+  margin-top: 24px;
+}
+.form-footer label,
+.form-footer select,
+.form-footer input,
+.form-footer button {
+  display: block;
+  margin: 8px auto;
+}
+
+.form-input {
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.95rem;
+  min-width: 200px;
+}
+.form-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+  outline: none;
+}
+
+.form-footer button {
+  margin-top: 20px;
+}
+
+.cant-input {
+  min-width: 20px; max-width: 60px;     /* ancho fijo */
+  text-align: left;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #999; /* un poco más pequeño que los demás */
+}

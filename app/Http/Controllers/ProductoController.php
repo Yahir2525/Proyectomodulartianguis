@@ -25,6 +25,10 @@ class ProductoController extends Controller
         }
 
         // ====== FILTROS ======
+
+        if ($request->filled('tipo')) {
+            $query->where('tipo', $request->tipo);
+        }
         if ($request->filled('material')) {
             $query->where('material', $request->material);
         }
@@ -49,10 +53,15 @@ class ProductoController extends Controller
             $query->where('estado_producto', $request->estado);
         }
 
-        // Paginación con query string
-        $productoIndex = $query->paginate(10)->withQueryString();
+        // Paginación con orden estable (tipo + id_producto)
+        $productoIndex = $query
+            ->orderBy('tipo')          // agrupa por tipo
+            ->orderBy('id_producto')   // mantiene orden dentro del grupo
+            ->paginate(10)
+            ->withQueryString();
 
         // ==== Opciones únicas para filtros (sin paginación) ====
+        $tipos = Producto::select('tipo')->distinct()->pluck('tipo');
         $materiales = Producto::select('material')->distinct()->pluck('material');
         $colores    = Producto::select('color')->distinct()->pluck('color');
         $tamanios   = Producto::select('tamanio')->distinct()->pluck('tamanio');
@@ -76,11 +85,10 @@ class ProductoController extends Controller
             'usuarios',
             'materiales',
             'colores',
-            'tamanios'
+            'tamanios',
+            'tipos',
         ));
     }
-
-
 
     public function create()
     {
@@ -163,6 +171,7 @@ class ProductoController extends Controller
 
         if (is_numeric($busqueda)) {
             $producto = Producto::find($busqueda);
+
             if ($producto) {
                 $productos = new LengthAwarePaginator(
                     [$producto],
@@ -176,6 +185,8 @@ class ProductoController extends Controller
             }
         } else {
             $productos = Producto::where('nombre', 'ILIKE', "%$busqueda%")
+                ->orderBy('tipo')          // 🔹 asegura orden estable
+                ->orderBy('id_producto')   // 🔹 mantiene el orden dentro del tipo
                 ->paginate(10)
                 ->withQueryString();
         }

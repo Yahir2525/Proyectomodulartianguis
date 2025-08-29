@@ -10,6 +10,8 @@
     <title>Principal de pedidos</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br><x-barrageneral/>
 <br><hr class="hr-grueso"><center><h1>Listado de pedidos</h1></center><hr class="hr-grueso"><br>
 @if(Auth::check())
@@ -84,7 +86,8 @@
             @foreach($pedidosPorCredito as $idCredito => $pedidos)
                 <h3>{{ $idCredito ? 'Pedidos del crédito #' . $idCredito : 'Pedidos no adquiridos a crédito' }}</h3>
 
-                <table border="1" cellpadding="5" cellspacing="0">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
                     <thead>
                     <tr>
                         <th>ID pedido</th>
@@ -124,15 +127,10 @@
 
                             $puedeCrearNuevoCredito = $creditosActivos->count() < 3;
 
-                            // Si el usuario tiene pagos vencidos sin abonar (usar método en User)
-                            $usuarioBloqueadoPorPagosAtrasados = $usuario && method_exists($usuario, 'tienePagosAtrasadosSinAbonar')
-                                ? $usuario->tienePagosAtrasadosSinAbonar()
-                                : false;
-
                             $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? ''));
                             $bloqueadoPorNivel = ($nivelUsuario === 'malo');
 
-                            $bloqueoCreditoUI = $superaDiezMil || $usuarioBloqueadoPorPagosAtrasados || $bloqueadoPorNivel;
+                            $bloqueoCreditoUI = $superaDiezMil || $bloqueadoPorNivel;
                         @endphp
 
                         <tr>
@@ -251,6 +249,7 @@
                     @endforeach
                     </tbody>
                 </table>
+                </div>
             @endforeach
             <hr style="margin: 40px 0;">
         @endforeach
@@ -266,5 +265,8 @@ function toggleCreditoOptions(select, idPedido) {
     div.style.display = select.value === 'credito' ? 'block' : 'none';
 }
 </script>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

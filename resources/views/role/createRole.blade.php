@@ -10,6 +10,8 @@
     <title>Crear rol</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br>
     <div class="container">
         <nav class="top-nav">
@@ -100,5 +102,8 @@
         if (btnAll) btnAll.addEventListener('click', () => setAll(true));
         if (btnClear) btnClear.addEventListener('click', () => setAll(false));
     </script>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

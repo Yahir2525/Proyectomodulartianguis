@@ -2,13 +2,16 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/sesion/registro.css') }}">
     <title>Registro de Usuario</title>
 </head>
 <body class="bg-light">
+<div class="page-container">
+<main class="content">
 <br><x-barrasesion/>
 <div class="container min-vh-100 d-flex align-items-center py-4">
   <div class="row justify-content-center w-100">
@@ -75,5 +78,8 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

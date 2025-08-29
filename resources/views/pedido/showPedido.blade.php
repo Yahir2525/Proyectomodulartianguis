@@ -10,6 +10,8 @@
     <title>Detalle(s) del Pedido</title>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br>
     <br><hr class="hr-grueso"><center><h1>Detalles del pedido</h1></center><hr class="hr-grueso"><br>
 
@@ -38,8 +40,7 @@
                     ->where('estado', 1)
                     ->whereDate('fecha_vencimiento', '>=', now())
                     ->get();
-
-                // Todos los estado=1 (activos + vencidos)
+                    
                 $creditosTodosActivos = \App\Models\Credito::where('id_user', $idUser)
                     ->where('estado', 1)
                     ->get();
@@ -76,7 +77,8 @@
 
             @if($pedidosConCredito->isNotEmpty())
                 <h3>Pedidos con crédito</h3>
-                <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom:20px;">
+                <div class="table-responsive">
+                <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>ID Pedido</th>
@@ -227,16 +229,17 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             @endif
 
-            {{-- ===================== Pedidos sin crédito ===================== --}}
             @php
                 $pedidosSinCredito = $pedidosUsuario->filter(fn($p) => is_null($p->id_credito));
             @endphp
 
             @if($pedidosSinCredito->isNotEmpty())
                 <h3>Pedidos sin crédito</h3>
-                <table border="1" cellpadding="5" cellspacing="0" style="margin-bottom:30px;">
+                <div class="table-responsive">
+                <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>ID Pedido</th>
@@ -328,6 +331,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             @endif
 
             <hr style="margin: 40px 0;">
@@ -346,5 +350,8 @@ function toggleCreditoOptions(select, idPedido) {
     div.style.display = select.value === 'credito' ? 'block' : 'none';
 }
 </script>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

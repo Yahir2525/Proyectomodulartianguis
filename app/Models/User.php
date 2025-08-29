@@ -73,25 +73,6 @@ class User extends Authenticatable
         return $this->hasManyThrough(Abono::class, Credito::class, 'id_user', 'id_credito', 'id_user', 'id_credito');
     }
 
-    // ======= Comportamiento de crédito =======
-
-    public function tienePagosAtrasadosSinAbonar()
-    {
-        $hoy = Carbon::now()->startOfDay();
-
-        return $this->creditos()
-            ->where('estado', 1)
-            ->where('saldo_total', '>', 0)
-            ->whereDate('fecha_vencimiento', '<', $hoy)
-            ->exists();
-
-    }
-
-    public function estaBloqueadoParaCredito(): bool
-    {
-        return $this->tienePagosAtrasadosSinAbonar();
-    }
-
     public function getImagenUrlAttribute(): ?string
     {
         if (!$this->imagen) {

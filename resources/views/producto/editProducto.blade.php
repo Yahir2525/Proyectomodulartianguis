@@ -10,100 +10,99 @@
     <title>Editar Producto</title>
 </head>
 <body>
-<br>
-    <br><hr class="hr-grueso"><center><h1>Editar producto</h1></center><hr class="hr-grueso"><br>
+<div class="page-container">
+<main class="content">
+<br><x-barracreate/>
+    <div class="container">
+        <br><hr class="hr-grueso"><h1>Editar producto</h1><hr class="hr-grueso"><br>
 
-    @if ($errors->any())
-        <div style="color: red;">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-
-    <form action="{{ route('producto.update', $producto->id_producto) }}" method="POST" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
-
-        <label for="nombre">Nombre del producto:</label><br>
-        <input type="text" name="nombre" id="nombre" value="{{ old('nombre', $producto->nombre) }}"><br><br>
-
-        <label class="label" for="imagen">Actualizar imagen:</label>
-        <div class="control">
-            <input class="input" type="file" name="imagen" id="imagen" accept="image/*">
-        </div>
-        @if (!empty($producto->imagen_url))
-            <figure class="mt-3">
-                <p class="label">Actual:</p>
-                <img src="{{ $producto->imagen_url }}" alt="Imagen actual" style="max-width: 150px;">
-            </figure>
+        @if ($errors->any())
+            <div class="errors" role="alert">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
         @endif
-        @error('imagen')
-            <p class="help is-danger">{{ $message }}</p>
-        @enderror
 
+        <form action="{{ route('producto.update', $producto->id_producto) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
 
-        <label for="tipo">Tipo de producto:</label><br>
-        <input list="tipos" name="tipo" id="tipo" value="{{ old('tipo') }}">
-        <datalist id="tipos">
-            @foreach($tiposExistentes as $tipo)
-                <option value="{{ $tipo }}">{{ $tipo }}</option>
-            @endforeach
-        </datalist>
-        <br><br>
+            <label for="nombre">Nombre del producto:</label>
+            <input type="text" name="nombre" id="nombre" value="{{ old('nombre', $producto->nombre) }}">
 
-        <label for="material">Material:</label><br>
-        <input list="materiales" name="material" id="material" value="{{ old('material') }}">
-        <datalist id="materiales">
-            @foreach($materialesExistentes as $material)
-                <option value="{{ $material }}">
-            @endforeach
-        </datalist>
-        <br><br>
+            <label for="imagen">Actualizar imagen:</label>
+            <input type="file" name="imagen" id="imagen" accept="image/*">
+            @if (!empty($producto->imagen_url))
+                <div class="mt-2">
+                    <p><strong>Imagen actual:</strong></p>
+                    <img src="{{ $producto->imagen_url }}" alt="Imagen actual" style="max-width:150px; border-radius:6px;">
+                </div>
+            @endif
 
-        <label for="color">Color:</label><br>
-        <input list="colores" name="color" id="color" value="{{ old('color') }}">
-        <datalist id="colores">
-            @foreach($coloresExistentes as $color)
-                <option value="{{ $color }}">
-            @endforeach
-        </datalist>
-        <br><br>
+            <label for="tipo">Tipo de producto:</label>
+            <input list="tipos" name="tipo" id="tipo" value="{{ old('tipo', $producto->tipo) }}">
+            <datalist id="tipos">
+                @foreach($tiposExistentes as $tipo)
+                    <option value="{{ $tipo }}">
+                @endforeach
+            </datalist>
 
-        <label for="tamanio">Tamaño:</label><br>
-        <input list="tamanios" name="tamanio" id="tamanio" value="{{ old('tamanio') }}">
-        <datalist id="tamanios">
-            @foreach($tamaniosExistentes as $tamanio)
-                <option value="{{ $tamanio }}">
-            @endforeach
-        </datalist>
-        <br><br>
+            <label for="material">Material:</label>
+            <input list="materiales" name="material" id="material" value="{{ old('material', $producto->material) }}">
+            <datalist id="materiales">
+                @foreach($materialesExistentes as $material)
+                    <option value="{{ $material }}">
+                @endforeach
+            </datalist>
 
-        <label for="marca">Marca:</label><br>
-        <input list="marcas" name="marca" id="marca" value="{{ old('marca') }}">
-        <datalist id="marcas">
-            @foreach($marcasExistentes as $marca)
-                <option value="{{ $marca }}">
-            @endforeach
-        </datalist>
-        <br><br>
+            <label for="color">Color:</label>
+            <input list="colores" name="color" id="color" value="{{ old('color', $producto->color) }}">
+            <datalist id="colores">
+                @foreach($coloresExistentes as $color)
+                    <option value="{{ $color }}">
+                @endforeach
+            </datalist>
 
-        <label for="precio_unitario">Precio unitario ($):</label><br>
-        <input type="number" name="precio_unitario" id="precio_unitario" step="0.01" min="0" value="{{ old('precio_unitario', $producto->precio_unitario) }}"><br><br>
+            <label for="tamanio">Tamaño:</label>
+            <input list="tamanios" name="tamanio" id="tamanio" value="{{ old('tamanio', $producto->tamanio) }}">
+            <datalist id="tamanios">
+                @foreach($tamaniosExistentes as $tamanio)
+                    <option value="{{ $tamanio }}">
+                @endforeach
+            </datalist>
 
-        <label for="piezas">Piezas disponibles:</label><br>
-        <input type="number" name="piezas" id="piezas" min="0" value="{{ old('piezas', $producto->piezas) }}"><br><br>
-        
-        <label>
-            <input type="checkbox" name="estado_producto" value="1" {{ old('estado_producto', $producto->estado_producto ?? true) ? 'checked' : '' }}>
-            Producto activo
-        </label>
+            <label for="marca">Marca:</label>
+            <input list="marcas" name="marca" id="marca" value="{{ old('marca', $producto->marca) }}">
+            <datalist id="marcas">
+                @foreach($marcasExistentes as $marca)
+                    <option value="{{ $marca }}">
+                @endforeach
+            </datalist>
 
-        <button type="submit">Actualizar producto</button>
-        <a href="{{ route('producto.index') }}">Cancelar</a>
-    </form>
+            <label for="precio_unitario">Precio unitario ($):</label>
+            <input type="number" name="precio_unitario" id="precio_unitario" step="0.01" min="0" value="{{ old('precio_unitario', $producto->precio_unitario) }}">
+
+            <label for="piezas">Piezas disponibles:</label>
+            <input type="number" name="piezas" id="piezas" min="0" value="{{ old('piezas', $producto->piezas) }}">
+
+            <label class="switch">
+                <input type="checkbox" name="estado_producto" value="1" 
+                    {{ old('estado_producto', $producto->estado_producto ?? true) ? 'checked' : '' }}>
+                Producto activo
+            </label>
+
+            <button type="submit" class="btn btn-primary">Actualizar producto</button>
+
+            <center><div class="back-wrap">
+                <a href="{{ route('producto.index') }}" class="btn btn-gray">Cancelar</a>
+            </div></center>
+        </form>
+    </div>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

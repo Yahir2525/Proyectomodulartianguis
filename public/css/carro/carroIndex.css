@@ -1,30 +1,48 @@
-/* ===== carroIndex.css — estilo alineado con abonoIndex ===== */
+/* ==== CARRO INDEX (estilo unificado con productoIndex/showProducto) ==== */
 
 /* Reset & tipografía */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #47fb9e; min-height: 100vh; } /* 
-/* Contenedor principal (soporta tu estructura y el patrón de abono) */
-.container,
-section > div {
-  max-width: 1100px;                   
-  margin: 0 auto;
-  padding: 10px;
-}
+body { margin: 0; color: #222; background: #fff87a; min-height: 100vh; }
 
-/* Títulos */
-h1 { margin: 0 0 8px; font-size: clamp(1.2rem, 1rem + 1vw, 1.8rem); text-align: center; }
-h2 {
-  margin-top: 24px;
-  font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem);
-}
-
-/* Enlaces */
+/* Layout */
+section { max-width: 1200px; margin: 0 auto; padding: 16px; }
+h1 { margin: 0 0 12px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
+h2 { margin-top: 24px; font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem); }
 a { color: #2563eb; text-decoration: none; }
 a:hover { text-decoration: underline; }
+hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
 
-/* ---------- Botones (alineados a abonoIndex) ---------- */
-.btn{
+/* =================== TABLA =================== */
+.table-wrap { width: 100%; overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+th, td {
+  border: 1px solid #e5e7eb;
+  padding: 8px 6px;
+  text-align: center;
+  font-size: .9rem;
+  vertical-align: middle;
+}
+thead th { background: #f3f4f6; font-weight: 600; }
+tbody tr:nth-child(odd) { background: #fafafa; }
+tbody tr:hover { background: #f2f7ff; }
+
+/* Imagen */
+td img {
+  max-width: 120px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+
+/* Botones */
+.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -38,242 +56,99 @@ a:hover { text-decoration: underline; }
   text-decoration: none;
   white-space: nowrap;
 }
-.btn:hover{ filter: brightness(.95); }
+.btn:hover { filter: brightness(.95); }
 
-.btn-primary { background:#15c221; border-color:#15c221; color:#fff; } /* Registrar / acción principal */
-.btn-edit    { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; } /* Editar */
-.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; } /* Eliminar */
-.btn-gray    { background:#6b7280; border-color:#6b7280; color:#fff; } /* Utilitario */
+.btn-primary { background:#15c221; border-color:#15c221; color:#fff; font-weight: bold;}
+.btn-registrar { background:#15c221; border-color:#15c221; color:#fff; margin-left: 0%; margin-left: 0%; padding: 10px 12px; font-weight: bold;}
+.btn-edit    { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; font-weight: bold;}
+.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold;}
+.btn-gray    { background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold;}
+.btn-warning { background:#2563eb; border-color:#2563eb; color:#fff; font-weight: bold;}
 
-/* Igualamos los botones existentes a la estética de .btn/.btn-primary */
-button,
-input[type="submit"]{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* Centrar botones en celdas */
+td .btn { display: inline-flex; }
+
+/* Cuando el pedido esté cerrado */
+td .pedido-cerrado {
+  color: #6b7280;
+  font-style: italic;
+  font-size: .85rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  html { font-size: 15px; }
+  section { padding: 12px; }
+  table { font-size: .85rem; }
+  td img { max-width: 80px; }
+}
+
+@media (max-width: 768px) {
+  html { font-size: 14px; }
+  th, td { padding: 6px 4px; }
+  table { min-width: 800px; }
+}
+
+@media (max-width: 480px) {
+  html { font-size: 13px; }
+  td img { max-width: 60px; }
+  td .btn { display:block; width:100%; margin:6px 0; }
+}
+
+.pedido-actions {
+  display: flex;
+  align-items: center;   /* centra verticalmente */
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;       /* en móvil se apilan */
+}
+
+.pedido-actions select {
+  display: inline-block;
+  width: auto;        /* evita que se estire */
+  min-width: 200px;   /* ancho mínimo uniforme */
+  max-width: 280px;   /* evita que sea enorme */
   padding: 6px 10px;
-  margin: 2px 4px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  font-size: .9rem;
+  background: #fff;
+}
+
+
+.buscar {
+  display: grid;
+  grid-template-columns: max-content minmax(220px, 340px) max-content;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0 18px;
+}
+.buscar label {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+#busqueda {
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.95rem;
+}
+#busqueda:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+.buscar input[type="submit"] {
+  padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid #2563eb;
   background: #2563eb;
   color: #fff;
   cursor: pointer;
-  line-height: 1;
-  font-size: .9rem;
-  white-space: nowrap;
 }
-button:hover,
-input[type="submit"]:hover{ filter: brightness(.95); }
+.buscar input[type="submit"]:hover { filter: brightness(.95); }
 
-/* "Registrar un nuevo carro" con verde .btn-primary (como abono .btn-primary) */
-p > a[href$="/carro/create"]{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 10px;
-  margin: 2px 4px;
-  border-radius: 6px;
-  border: 1px solid #15c221;
-  background: #15c221;
-  color: #fff;
-  text-decoration: none;
+.mt-4 .pagination {
+  margin-left: 12px; /* separa hacia la izquierda */
 }
-p > a[href$="/carro/create"]:hover{ filter: brightness(.95); }
-
-/* Botón Editar (morado) */
-td a button[type="button"]{
-  background: hsl(275, 100%, 59%);
-  border-color: hsl(275, 100%, 59%);
-  color:#fff;
-}
-
-/* Botones Eliminar (rojo) */
-form[onsubmit*="¿Estás seguro?"] button,
-form[onsubmit*="eliminar todo este carro"] button{
-  background:#ef4444;
-  border-color:#ef4444;
-  color:#fff;
-}
-
-/* ---------- Formulario de búsqueda (alineado al patrón de abono) ---------- */
-form[action$="/carro/showCarro"]{
-  display:grid;
-  grid-template-columns: max-content minmax(220px, 360px) max-content; /* etiqueta | campo | botón */
-  gap:6px;
-  align-items:center;
-  margin:6px 0 10px;
-}
-form[action$="/carro/showCarro"] label{
-  margin:0;
-  font-weight:600;
-  white-space:nowrap;
-  font-size:0.95rem;
-}
-#busqueda,
-form[action$="/carro/showCarro"] select{
-  width:100%;
-  padding:6px 10px;
-  border:1px solid #999;
-  border-radius:6px;
-  background:#fff;
-  outline:none;
-  font-size:0.95rem;
-}
-#busqueda::placeholder{ color:#9aa3ad; }
-#busqueda:focus,
-form[action$="/carro/showCarro"] select:focus{
-  border-color:#2563eb;
-  box-shadow:0 0 0 2px rgba(37,99,235,.15);
-}
-
-/* Botón de submit del buscador (mismo look que abono) */
-form[action$="/carro/showCarro"] input[type="submit"]{
-  width:auto;
-  padding:6px 10px;
-  min-height:32px;
-  font-size:.88rem;
-  border-radius:6px;
-  border:1px solid #2563eb;
-  background:#2563eb;
-  color:#fff;
-  cursor:pointer;
-  line-height:1;
-}
-
-/* ---------- Tablas (mismo estilo de abono) ---------- */
-/* Envuélvelo con .table-wrap si puedes (opcional); si no, igual se ve bien */
-.table-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-
-table{
-  border-collapse:collapse;
-  width:100%;
-  margin-top:8px;
-  min-width:680px;
-  background:#fff;
-}
-th, td{
-  border:1px solid #999;
-  padding:6px;
-  text-align:center;
-  font-size:0.95rem;
-  vertical-align:middle;
-  word-break:break-word;
-}
-thead th{ background:#f3f4f6; }
-tbody tr:nth-child(odd){ background:#fafafa; }
-tbody tr:hover{ background:#f2f7ff; }
-
-/* Imágenes */
-td img{
-  max-width: min(200px, 100%);
-  height:auto;
-}
-
-/* Acciones */
-td .btn{ display:inline-flex; }
-td a, td form{ display:inline; }
-
-/* ---------- Bloques de crédito ---------- */
-[id^="credito-opciones-"]{ margin-top:8px; }
-[id^="credito-opciones-"] select{
-  padding:6px 10px;
-  border:1px solid #999;
-  border-radius:6px;
-  background:#fff;
-}
-
-/* ---------- Responsivo ---------- */
-@media (max-width: 992px){
-  html { font-size: 15px; }
-  .container, section > div { padding: 12px; }
-}
-
-@media (max-width: 768px){
-  html { font-size: 14px; }
-
-  /* Tabla con scroll y borde como en abono */
-  table{
-    display:block;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-    border:1px solid #e5e7eb;
-    border-radius:8px;
-    min-width:640px;
-  }
-
-  /* Formulario apilado */
-  form[action$="/carro/showCarro"]{
-    grid-template-columns:1fr;
-  }
-  form[action$="/carro/showCarro"] label,
-  form[action$="/carro/showCarro"] #busqueda,
-  form[action$="/carro/showCarro"] input[type="submit"],
-  form[action$="/carro/showCarro"] select{
-    width:100%;
-  }
-  form[action$="/carro/showCarro"] input[type="submit"]{
-    justify-self:stretch;
-    width:100%;
-    min-height:44px; /* accesible en móvil */
-  }
-}
-
-@media (max-width: 640px){
-  html { font-size: 13.5px; }
-  th, td { padding:5px; }
-
-  /* Acciones apiladas a ancho completo (como abono) */
-  td a, td form{
-    display:block;
-    width:100%;
-    margin:6px 0;
-  }
-  td a button,
-  td form button,
-  input[type="submit"]{
-    width:100%;
-    min-height:44px;
-  }
-
-  /* Estética de contenedor de tabla en móvil */
-  .table-wrap{
-    border:1px solid #e5e7eb;
-    border-radius:8px;
-    background:#fff;
-  }
-}
-
-/* Botón "Buscar" compacto en desktop (patrón :has de abono) */
-@media (min-width: 769px){
-  form:has(#busqueda){
-    grid-template-columns: max-content minmax(200px, 320px) max-content;
-  }
-  form:has(#busqueda) input[type="submit"]{
-    justify-self:start;
-    width:auto;
-    padding:2px 8px;
-    font-size:0.8rem;
-    min-height:26px;
-    border-radius:4px;
-    line-height:1;
-  }
-}
-
-/* Ajustes intermedios (coinciden con tu versión) */
-@media (min-width: 900px) and (max-width: 1399px){
-  html { font-size: 15px; }
-  h1 { font-size: clamp(1.05rem, 0.8rem + 0.9vw, 1.6rem); }
-  h2 { font-size: clamp(1rem, 0.8rem + 0.4vw, 1.2rem); }
-  th, td { padding: 5px; font-size: 0.92rem; }
-  td img { max-width: 170px; }
-  table { min-width: 720px; }
-}
-@media (min-width: 768px) and (max-width: 899px){
-  html { font-size: 14px; }
-  th, td { padding: 4px; font-size: 0.9rem; }
-  td img { max-width: 150px; }
-  table { min-width: 680px; }
-}
-
-/* Separador */
-hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; }

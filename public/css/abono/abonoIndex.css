@@ -3,7 +3,7 @@
 /* Reset & tipografía */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #fff87a; min-height: 100vh;}
+body { margin: 0; color: #222; background: #fff87a;  height: 100%;}
 
 /* Layout */
 .container { max-width: 1100px; margin: 0 auto; padding: 14px; }
@@ -29,10 +29,10 @@ a:hover { text-decoration: underline; }
 }
 .btn:hover{ filter: brightness(.95); }
 
-.btn-primary { background:#15c221; border-color:#15c221; color:#fff; } /* Registrar */
-.btn-edit    { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; } /* Editar */
-.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; } /* Eliminar */
-.btn-gray    { background:#6b7280; border-color:#6b7280; color:#fff; } /* Utilitario */
+.btn-primary { background:#15c221; border-color:#15c221; color:#fff; margin-left: 0%; padding: 10px 12px; font-weight: bold;} /* Registrar */
+.btn-edit    { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; font-weight: bold;} /* Editar */
+.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold;} /* Eliminar */
+.btn-gray    { background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold;} /* Utilitario */
 
 /* --- Formulario de búsqueda: label + input + botón en la misma fila --- */
 form{
@@ -75,6 +75,7 @@ input[type="submit"]{
   color:#fff;
   cursor:pointer;
   line-height:1;
+  font-weight: bold;
 }
 input[type="submit"]:hover{ filter:brightness(.95); }
 
@@ -196,13 +197,13 @@ form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
     grid-template-columns: max-content minmax(200px, 320px) max-content; /* etiqueta | campo | botón */
   }
   form:has(#busqueda) input[type="submit"] {
-    justify-self: start; /* no se estira */
-    width: auto;         /* solo lo necesario */
-    padding: 2px 8px;    /* compacto opcional */
-    font-size: 0.8rem;
-    min-height: 26px;
+    justify-self: start;  /* se queda pegado, no se estira */
+    width: auto;          /* solo ocupa lo necesario */
+    padding: 4px 12px;    /* tamaño compacto */
+    font-size: 0.85rem;
+    min-height: 28px;
     border-radius: 4px;
-    line-height: 1;
+    line-height: 1.2;
   }
 }
 
@@ -224,4 +225,23 @@ hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }
 .navbar .dropdown-menu form{
   display:block;
   grid-template-columns: initial;
+}
+
+.info-msg {
+  font-size: 0.85rem;
+  font-style: italic;
+  display: inline-block;
+  margin-top: 4px;
+}
+.text-danger { color: #b91c1c; }
+.text-warning { color: #f833ff; }
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;   /* altura mínima toda la pantalla */
+}
+
+.content {
+  flex: 1;             /* empuja el footer hacia abajo */
 }

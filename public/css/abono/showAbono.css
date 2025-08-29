@@ -35,14 +35,15 @@ th:nth-child(5), td:nth-child(5){ text-align: center; } /* Fecha */
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
+  font-weight: bold;
 }
 .btn:hover{ filter: brightness(.95); }
 
-.btn-primary{ background:#15c221; border-color:#15c221; color:#fff; }     /* primario */
-.btn-edit   { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; }
-.btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; }
-.btn-gray   { background:#6b7280; border-color:#6b7280; color:#fff; }
-.btn-warning { background:#2563eb; border-color:#2563eb; color:#fff; }
+.btn-primary{ background:#15c221; border-color:#15c221; color:#fff; font-weight: bold;}     /* primario */
+.btn-edit   { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; font-weight: bold;}
+.btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold;}
+.btn-gray   { background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold;}
+.btn-warning { background:#2563eb; border-color:#2563eb; color:#fff;font-weight: bold; }
 
 /* Alineación de botones en celdas */
 td .btn{ display:inline-flex; }

@@ -21,7 +21,8 @@
     </style>
 </head>
 <body>
-<br>
+<div class="page-container">
+<main class="content">
     <br><hr class="hr-grueso"><center><h1>Detalles del crédito</h1></center><hr class="hr-grueso"><br>
 
     @if(session('error'))
@@ -49,7 +50,8 @@
 
             @if($activos->isNotEmpty())
                 <h3>Activos</h3>
-                <table>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>ID Crédito</th>
@@ -79,6 +81,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             @endif
 
             @if($vencidos->isNotEmpty())
@@ -155,5 +158,8 @@
     @endif
 
     <a href="{{ url('/credito') }}">← Volver al listado de créditos</a>
+</main>
+<x-footer/>
+</div>
 </body>
 </html>

@@ -50,6 +50,8 @@
     </script>
 </head>
 <body>
+<div class="page-container">
+<main class="content">
 <br><x-barracreate/>
 <div class="container">
     <br><hr class="hr-grueso"><center><h1>Registrar nuevo abono</h1></center><hr class="hr-grueso"><br>
@@ -103,19 +105,22 @@
                     @endforeach
                 </select>
             </div>
-        </div><br>
+        </div>
 
         {{-- Monto --}}
         <div>
             <label for="monto_abono">Monto del abono</label>
             <input type="number" name="monto_abono" id="monto_abono" min="1" step="0.01" required>
         </div>
-        <br><button type="submit">Aplicar al crédito</button>
-    </form><br><br>
+        <button type="submit">Aplicar al crédito</button>
+    </form><br>
     <center>
     <div class="back-wrap">
     <a href="{{ route('abono.index') }}" class="btn btn-primary">Cancelar</a>
     </div></center>
+</div>
+</main>
+<x-footer/>
 </div>
 </body>
 </html>

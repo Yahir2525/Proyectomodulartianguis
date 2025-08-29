@@ -47,6 +47,7 @@ font-size: .94rem;
 line-height: 1;
 cursor: pointer;
 text-decoration: none;
+font-weight: bold;
 }
 button:hover,
 .btn.btn-primary:hover{ filter: brightness(.95); }
@@ -93,3 +94,7 @@ html { font-size: 14px; }
 }
 
 hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }
+
+form > div {
+  margin-bottom: 15px; /* separa cada bloque un poco */
+}
