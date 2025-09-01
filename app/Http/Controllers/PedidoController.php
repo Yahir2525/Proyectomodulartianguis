@@ -62,49 +62,58 @@ class PedidoController extends Controller
 
     public function show(Request $request)
     {
-        $busqueda = $request->input('busqueda');
+        $busqueda = $request->input('buscar');
         $user = Auth::user();
 
         if (!$busqueda) {
-            return back()->with('error', 'Debes ingresar un ID de pedido o un nombre de usuario.');
+            return redirect()->route('pedido.index')
+            ->with('info', 'Se mostró la lista completa porque no ingresaste ningún criterio de búsqueda.');
         }
 
-        // Buscar por ID de pedido (numérico)
+        // ===== 🔍 Búsqueda por ID parcial =====
         if (is_numeric($busqueda)) {
-            $pedido = Pedido::with('user')->find($busqueda);
-
-            if (!$pedido) {
-                return back()->with('error', 'El pedido no se encontró.');
+            if ($user->hasRole('administrador')) {
+                // Admin ve todos los pedidos cuyo id contenga la cadena
+                $pedidos = Pedido::with('user')
+                    ->where('id_pedido', 'LIKE', "%{$busqueda}%")
+                    ->get();
+            } else {
+                // Usuario normal solo sus propios pedidos
+                $pedidos = Pedido::with('user')
+                    ->where('id_pedido', 'LIKE', "%{$busqueda}%")
+                    ->where('id_user', $user->id_user)
+                    ->get();
             }
 
-            // Validar si el usuario tiene acceso
-            if (!$user->hasRole('administrador') && $pedido->id_user !== $user->id_user) {
-                return back()->with('error', 'No tienes permiso para ver este pedido.');
+            if ($pedidos->isEmpty()) {
+                return back()->with('error', 'No se encontraron pedidos con ese ID.');
             }
 
-            return view('pedido.showPedido', ['pedidos' => collect([$pedido])]);
+            $usuarios = $user->hasRole('administrador') ? User::all() : collect();
+            return view('pedido.showPedido', compact('pedidos', 'usuarios'));
         }
 
-        // Buscar por nombre de usuario (solo admin)
+        // ===== 🔍 Búsqueda por nombre de usuario (solo admin) =====
         if (!$user->hasRole('administrador')) {
             return back()->with('error', 'Solo puedes buscar tus propios pedidos por ID.');
         }
 
-        // Buscar múltiples usuarios con nombre similar
-        $usuarios = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->pluck('id_user');
+        $usuariosEncontrados = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->pluck('id_user');
 
-        if ($usuarios->isEmpty()) {
+        if ($usuariosEncontrados->isEmpty()) {
             return back()->with('error', 'No se encontraron usuarios con ese nombre.');
         }
 
-        $pedidos = Pedido::with('user')->whereIn('id_user', $usuarios)->get();
+        $pedidos = Pedido::with('user')->whereIn('id_user', $usuariosEncontrados)->get();
 
         if ($pedidos->isEmpty()) {
             return back()->with('error', 'No se encontraron pedidos para "' . $busqueda . '".');
         }
 
-        return view('pedido.showPedido', ['pedidos' => $pedidos]);
+        $usuarios = User::all(); // Para el datalist en la vista
+        return view('pedido.showPedido', compact('pedidos', 'usuarios'));
     }
+
 
     public function edit($id)
     {
@@ -133,7 +142,6 @@ class PedidoController extends Controller
         }
     }
 
-    // ✅ NUEVO: Helper central para checar si el usuario está en nivel "malo"
     private function esNivelMalo(User $user): bool
     {
         // Ajusta el nombre del campo según tu modelo User

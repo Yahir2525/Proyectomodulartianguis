@@ -1,4 +1,4 @@
-/* ==== PRODUCTO INDEX (similar a carro create) ==== */
+/* ==== CARRO CREATE (con centrado en responsive y tarjetas con data-label) ==== */
 
 /* Reset & tipografía */
 * { box-sizing: border-box; }
@@ -6,15 +6,18 @@ html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-seri
 body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
 
 /* Layout */
-section { max-width: 1200px; margin: 0 auto; padding: 16px; }
+section { 
+  max-width: 1200px; 
+  margin: 0 auto; 
+  padding: 16px; 
+}
 h1 { margin: 0 0 12px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
 h3 { margin-top: 24px; font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem); }
 a { color: #2563eb; text-decoration: none; }
 a:hover { text-decoration: underline; }
 hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
 
-/* --- Botones reutilizables --- */
-/* Botones base */
+/* --- Botones --- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -27,82 +30,113 @@ hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
+  font-weight: bold;
 }
 .btn:hover { filter: brightness(.95); }
 
-/* Registrar (verde) */
-.btn-registrar { background:#15c221; border-color:#15c221; color:#fff; font-weight: bold; }
-
-/* Editar (morado) */
-.btn-edit { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; font-weight: bold;}
-
-/* Agregar (azul) */
-.btn-agregar { background:#2563eb; border-color:#2563eb; color:#fff; font-weight: bold;}
-
-/* Eliminar (rojo) */
-.btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold;}
-
-/* Utilitario gris */
-.btn-gray { background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold;}
-
+.btn-registrar { background:#15c221; border-color:#15c221; color:#fff; }
+.btn-edit      { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; }
+.btn-agregar   { background:#2563eb; border-color:#2563eb; color:#fff; }
+.btn-danger    { background:#ef4444; border-color:#ef4444; color:#fff; }
+.btn-gray      { background:#6b7280; border-color:#6b7280; color:#fff; }
 
 /* --- Formulario búsqueda --- */
 .buscar {
   display: grid;
-  grid-template-columns: max-content minmax(220px, 340px) max-content;
-  gap: 8px;
+  grid-template-columns: max-content minmax(160px, 220px) max-content; 
+  gap: 6px;
   align-items: center;
   margin: 12px 0 18px;
+  justify-content: center; /* 🔹 centra en desktop */
 }
 .buscar label {
   margin: 0;
   font-weight: 600;
   white-space: nowrap;
+  font-size: 0.95rem;
 }
-#busqueda {
+#buscar {
+  width: 100%;
   padding: 6px 10px;
   border: 1px solid #999;
   border-radius: 6px;
   background: #fff;
   font-size: 0.95rem;
+  min-height: 32px;
 }
-#busqueda:focus {
+#buscar:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+  outline: none;
 }
-.buscar input[type="submit"] {
-  padding: 6px 12px;
+.buscar button {
+  background:#2563eb;
+  border:1px solid #2563eb;
+  border-radius:6px;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+  line-height: 1.2;
+  min-height: 32px;
+  padding:6px 12px;
+  font-size: .9rem;
+  width: auto;
+}
+
+/* ==== FILTROS ==== */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: center;
+  justify-content: center; /* 🔹 centrado */
+  margin: 20px 0;
+}
+.filtros label { font-weight: 600; margin-right: 6px; }
+.filtros select,
+.filtros input {
+  padding: 6px 10px;
+  border: 1px solid #999;
   border-radius: 6px;
-  border: 1px solid #2563eb;
-  background: #2563eb;
-  color: #fff;
-  cursor: pointer;
-  font-weight: bold;
+  min-width: 120px;
+  background: #fff;
+  font-size: 0.95rem;
 }
-.buscar input[type="submit"]:hover { filter: brightness(.95); }
+.filtros select:focus,
+.filtros input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+  outline: none;
+}
 
 /* =================== TABLA =================== */
-.table-wrap { width: 100%; overflow-x: auto; }
+.table-wrap { 
+  width: 100%; 
+  overflow-x: auto; 
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  justify-content: center; /* 🔹 centra la tabla dentro del scroll */
+}
 table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #000000;
   border-radius: 8px;
   overflow: hidden;
+  margin: 0 auto;
 }
-th, td {
-  border: 1px solid #e5e7eb;
-  padding: 8px 6px;
+th, td, tr {
+  border: 1px solid #000000;
+  padding: 8px;
   text-align: center;
-  font-size: .9rem;
-  vertical-align: middle;
+  font-size:.9rem;
 }
-thead th { background: #f3f4f6; font-weight: 600; }
+thead th { background:#f3f4f6; }
 tbody tr:nth-child(odd) { background: #fafafa; }
 tbody tr:hover { background: #f2f7ff; }
 
-/* Estados de stock */
+/* Estados */
 .sin-stock { background: #ffe2e2 !important; }
 .resaltado { font-weight: bold; color: #b91c1c; }
 
@@ -113,7 +147,7 @@ td img {
   box-shadow: 0 1px 2px rgba(0,0,0,.15);
 }
 
-/* Responsive (tablas con muchas columnas → scroll) */
+/* =================== RESPONSIVE =================== */
 @media (max-width: 992px) {
   html { font-size: 15px; }
   section { padding: 12px; }
@@ -123,88 +157,54 @@ td img {
 
 @media (max-width: 768px) {
   html { font-size: 14px; }
-  .buscar { grid-template-columns: 1fr; }
-  #busqueda, .buscar input[type="submit"] { width: 100%; }
 
-  /* En móvil → usar scroll horizontal en tabla, no tarjetas (porque tienes demasiadas columnas) */
-  .table-wrap { overflow-x: auto; }
-  table { min-width: 800px; } /* fuerza scroll si no cabe */
+  .buscar { grid-template-columns: 1fr; gap: 8px; }
+  #buscar, .buscar button { width: 100%; }
+  .buscar button {
+    min-height: 44px;
+    font-size: 1rem;
+    padding: 8px 12px;
+  }
+
+  .filtros { flex-direction: column; align-items: stretch; }
+  .filtros > div { width: 100%; }
+
+  /* Tabla → tarjetas con data-label */
+  table, thead, tbody, th, tr { display: block; }
+  thead { display: none; }
+  tbody tr {
+    background: #fff;
+    margin: 8px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    overflow: hidden;
+    padding: 8px 0;
+  }
+  td {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    border-top: 1px solid #f1f5f9;
+  }
+  td:first-child { border-top: none; }
+  td::before {
+    content: attr(data-label);  /* 🔹 usa data-label en el <td> */
+    font-weight: 600;
+    min-width: 120px;
+  }
+
+  /* Botones a ancho completo en móvil */
+  td .btn, td form, td input[type="submit"], td button {
+    width: 100%;
+    margin: 6px 0;
+  }
 }
 
 @media (max-width: 480px) {
   html { font-size: 13px; }
-  td, th { padding: 6px 4px; }
   td img { max-width: 60px; }
-}
-
-/* ==== SECCIÓN FINAL (usuario, pedido, botón) ==== */
-/* ==== CENTRAR PARTE INFERIOR ==== */
-.form-footer {
-  text-align: center;
-  margin-top: 24px;
-}
-
-.form-footer label,
-.form-footer select,
-.form-footer input,
-.form-footer button {
-  display: block;
-  margin: 8px auto;
-}
-
-.filtros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 18px;
-  align-items: center;
-  justify-content: center;
-  margin: 20px 0;
-}
-.filtros label {
-  font-weight: 600;
-  margin-right: 6px;
-}
-.filtros select,
-.filtros input {
-  padding: 4px 8px;
-  border: 1px solid #999;
-  border-radius: 6px;
-  min-width: 120px;
-}
-
-.mt-4 .pagination {
-  margin-left: 12px; /* separa hacia la izquierda */
-}
-
-.pagination + .pagination-summary,
-.pagination-summary {
-  margin-left: 12px;
-}
-
-/* === Estilo uniforme para inputs/selects === */
-.form-input {
-  padding: 6px 10px;
-  border: 1px solid #999;
-  border-radius: 6px;   /* mismo ovalado que filtros */
-  background: #fff;
-  font-size: 0.95rem;
-  min-width: 200px;
-}
-
-.form-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
-  outline: none;
-}
-
-.form-footer button {
-  margin-top: 20px; /* aumenta separación entre el select y el botón */
-}
-
-.cant-input {
-  min-width: 20px; max-width: 60px;     /* ancho fijo */
-  text-align: left;
-  padding: 4px 6px;
-  border-radius: 6px;
-  border: 1px solid #999; /* un poco más pequeño que los demás */
 }

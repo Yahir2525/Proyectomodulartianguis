@@ -108,4 +108,12 @@
     }
     }
 
+    .navbar-toggler {
+        padding: 8px 14px;   /* reduce espacio interno */
+        font-size: 1.25rem;  /* opcional, ícono más chico */
+        line-height: 1;
+        border: none;       /* opcional, quita borde gordo */
+        width: auto;        /* asegura que no se estire */
+    }
+
 </style>

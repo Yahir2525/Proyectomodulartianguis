@@ -32,15 +32,19 @@
     @if($pedidoCerrado)
         <p style="color:red;"><strong>Este pedido ya está cerrado. No puedes editar el carro.</strong></p>
     @else
-        {{-- 🔍 Buscador --}}
-        <form action="{{ route('carro.edit', ['id_carro' => $carro->id_carro, 'id_producto' => $productoActual->id_producto]) }}" method="GET" class="buscar">
+    <form action="{{ route('carro.edit', ['id_carro' => $carro->id_carro, 'id_producto' => $productoActual->id_producto]) }}" method="GET" >
+        <div class="buscar">
             <label for="buscar">Buscar producto:</label>
-            <input type="text" id="buscar" name="buscar" placeholder="Ej. mesa, cortina..." value="{{ request('buscar') }}">
+            <input list="productos" id="buscar" name="buscar"
+                placeholder="Ej. mesa, cortina..." value="{{ request('buscar') }}">
+            <datalist id="productos">
+                @foreach ($nombresUnicos as $nombre)
+                    <option value="{{ $nombre }}">{{ $nombre }}</option>
+                @endforeach
+            </datalist>
             <button type="submit" class="btn btn-agregar">Buscar</button>
-        </form>
-
-        {{-- ✅ Filtros --}}
-        <form action="{{ route('carro.edit', ['id_carro' => $carro->id_carro, 'id_producto' => $productoActual->id_producto]) }}" method="GET" class="filtros">
+        </div>
+        <div class="filtros">
             <div>
                 <label for="tipo">Tipo:</label>
                 <select name="tipo" id="tipo" class="form-input">
@@ -89,7 +93,8 @@
                 <button type="submit" class="btn btn-registrar">Filtrar</button>
                 <a href="{{ route('carro.edit', ['id_carro' => $carro->id_carro, 'id_producto' => $productoActual->id_producto]) }}" class="btn btn-gray">Limpiar</a>
             </div>
-        </form>
+        </div>
+    </form>
 
         {{-- 📋 Tabla de productos --}}
         <form action="{{ route('carro.update', ['carro' => $carro->id_carro, 'id_producto' => $productoActual->id_producto]) }}" method="POST">
@@ -108,7 +113,7 @@
                             <th>Color</th>
                             <th>Tamaño</th>
                             <th>Precio</th>
-                            <th>Piezas disponibles</th>
+                            <th>Disponibles</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
@@ -171,9 +176,10 @@
             @endif
 
             <br><br>
-            <label for="id_pedido">Selecciona un pedido existente (opcional):</label>
-            <select name="id_pedido">
-                <option value="">-- Ninguno --</option>
+            <label for="id_pedido">Selecciona un pedido existente o crea uno nuevo:</label>
+            <select name="id_pedido" class="form-input">
+                <option value="" disabled selected>-- Ninguno --</option>
+                <option value="nuevo">-- Crear nuevo pedido --</option>
                 @foreach($pedidosUsuario as $pedido)
                     <option value="{{ $pedido->id_pedido }}"
                         {{ $carro->id_pedido == $pedido->id_pedido ? 'selected' : '' }}
@@ -182,13 +188,6 @@
                     </option>
                 @endforeach
             </select>
-
-            <br><br>
-            <label>
-                <input type="checkbox" name="nuevo_pedido" value="1">
-                Crear un nuevo pedido
-            </label>
-
             <br><br>
             <button type="submit" class="btn btn-registrar">Actualizar Carro</button>
         </form>

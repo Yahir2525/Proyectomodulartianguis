@@ -19,15 +19,32 @@ use Illuminate\Pagination\Paginator;
 class CarroController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
-        $carroIndex = $user->hasRole('administrador')
-            ? Carro::with(['productos', 'user', 'pedido'])->paginate(5) // 🔹 ahora paginados de 5 en 5
-            : Carro::with(['productos', 'user', 'pedido'])
-                ->where('id_user', $user->id_user)
-                ->paginate(5);
+        $query = Carro::with(['productos', 'user', 'pedido']);
+
+        // ===== 🔍 Búsqueda =====
+        if ($request->filled('buscar')) {
+            $busqueda = $request->input('buscar');
+
+            if (is_numeric($busqueda)) {
+                $query->where('id_carro', 'LIKE', "%{$busqueda}%");
+            } else if ($user->hasRole('administrador')) {
+                $idsUsuarios = User::where('nombre_usuario', 'ILIKE', "%{$busqueda}%")->pluck('id_user');
+                $query->whereIn('id_user', $idsUsuarios);
+            } else {
+                // usuarios normales no pueden buscar por nombre
+                return back()->with('error', 'Solo puedes buscar tus carros por ID.');
+            }
+        }
+
+        if (!$user->hasRole('administrador')) {
+            $query->where('id_user', $user->id_user);
+        }
+
+        $carroIndex = $query->orderBy('id_carro')->paginate(5)->withQueryString();
 
         $reservasGlobales = CarroProducto::select('id_producto')
             ->selectRaw('SUM(cantidad) as total_reservado')
@@ -35,93 +52,100 @@ class CarroController extends Controller
             ->pluck('total_reservado', 'id_producto');
 
         $todosProductos = Producto::all();
-
         $usuarios = $user->hasRole('administrador') ? User::all() : collect();
 
         return view('carro.carroIndex', compact('carroIndex', 'reservasGlobales', 'todosProductos', 'usuarios'));
     }
 
-
     public function create(Request $request)
     {
-            $usuario = Auth::user();
+        $usuario = Auth::user();
 
-            $usuarios = $usuario->hasRole('administrador') ? User::all() : collect();
-            $pedidos = Pedido::all();
+        $usuarios = $usuario->hasRole('administrador') ? User::all() : collect();
+        $pedidos = Pedido::all();
 
-            // Base query
-            $query = Producto::query();
+        // Base query
+        $query = Producto::query();
 
-            // === 🔍 Buscador por ID, nombre, material, color o tamaño ===
-            if ($busqueda = $request->input('buscar')) {
-                if (is_numeric($busqueda)) {
-                    $query->where('id_producto', $busqueda);
-                } else {
-                    $query->where(function ($q) use ($busqueda) {
-                        $q->where('nombre', 'ILIKE', "%{$busqueda}%")
-                        ->orWhere('material', 'ILIKE', "%{$busqueda}%")
-                        ->orWhere('color', 'ILIKE', "%{$busqueda}%")
-                        ->orWhere('tamanio', 'ILIKE', "%{$busqueda}%");
-                    });
-                }
-            }
+        // === 🔍 Buscador por ID (coincidencia parcial), nombre, material, color o tamaño ===
+        if ($request->filled('buscar')) {
+            $busqueda = $request->input('buscar');
 
-            // === Filtros adicionales (igual que en producto.index) ===
-            if ($request->filled('tipo')) {
-                $query->where('tipo', $request->tipo);
+            if (is_numeric($busqueda)) {
+                $query->where('id_producto', 'LIKE', "%{$busqueda}%");
+            } else {
+                $query->where(function ($q) use ($busqueda) {
+                    $q->where('nombre', 'ILIKE', "%{$busqueda}%")
+                    ->orWhere('material', 'ILIKE', "%{$busqueda}%")
+                    ->orWhere('color', 'ILIKE', "%{$busqueda}%")
+                    ->orWhere('tamanio', 'ILIKE', "%{$busqueda}%");
+                });
             }
-            if ($request->filled('material')) {
-                $query->where('material', $request->material);
-            }
-            if ($request->filled('color')) {
-                $query->where('color', $request->color);
-            }
-            if ($request->filled('tamanio')) {
-                $query->where('tamanio', $request->tamanio);
-            }
-            if ($request->filled('precio_min')) {
-                $query->where('precio_unitario', '>=', $request->precio_min);
-            }
-            if ($request->filled('precio_max')) {
-                $query->where('precio_unitario', '<=', $request->precio_max);
-            }
-            if ($request->filled('estado')) {
-                $query->where('estado_producto', $request->estado);
-            }
+        }
 
-            // Paginación
-            $productos = $query
-                ->orderBy('tipo')
-                ->orderBy('id_producto')
-                ->paginate(10)
-                ->withQueryString();
+        // === Filtros adicionales ===
+        if ($request->filled('tipo')) {
+            $query->where('tipo', $request->tipo);
+        }
+        if ($request->filled('material')) {
+            $query->where('material', $request->material);
+        }
+        if ($request->filled('color')) {
+            $query->where('color', $request->color);
+        }
+        if ($request->filled('tamanio')) {
+            $query->where('tamanio', $request->tamanio);
+        }
+        if ($request->filled('precio_min')) {
+            $query->where('precio_unitario', '>=', $request->precio_min);
+        }
+        if ($request->filled('precio_max')) {
+            $query->where('precio_unitario', '<=', $request->precio_max);
+        }
+        if ($request->filled('estado')) {
+            $query->where('estado_producto', $request->estado);
+        }
 
-            // Calcular reservas y piezas disponibles
-            $reservas = DB::table('carro_productos')
-                ->select('id_producto', DB::raw('SUM(cantidad) as reservadas'))
-                ->groupBy('id_producto')
-                ->pluck('reservadas', 'id_producto');
+        // Paginación
+        $productos = $query
+            ->orderBy('tipo')
+            ->orderBy('id_producto')
+            ->paginate(10)
+            ->withQueryString();
 
-            foreach ($productos as $producto) {
-                $producto->piezas_disponibles = $producto->piezas - ($reservas[$producto->id_producto] ?? 0);
-            }
+        // Calcular reservas y piezas disponibles
+        $reservas = DB::table('carro_productos')
+            ->select('id_producto', DB::raw('SUM(cantidad) as reservadas'))
+            ->groupBy('id_producto')
+            ->pluck('reservadas', 'id_producto');
 
-            // === Opciones únicas para filtros ===
-            $tipos      = Producto::select('tipo')->distinct()->pluck('tipo');
-            $materiales = Producto::select('material')->distinct()->pluck('material');
-            $colores    = Producto::select('color')->distinct()->pluck('color');
-            $tamanios   = Producto::select('tamanio')->distinct()->pluck('tamanio');
+        foreach ($productos as $producto) {
+            $producto->piezas_disponibles = $producto->piezas - ($reservas[$producto->id_producto] ?? 0);
+        }
 
-            return view('carro/createCarro', compact(
-                'usuario',
-                'usuarios',
-                'pedidos',
-                'productos',
-                'tipos',
-                'materiales',
-                'colores',
-                'tamanios'
-            ));
+        // === Opciones únicas para filtros ===
+        $tipos      = Producto::select('tipo')->distinct()->pluck('tipo');
+        $materiales = Producto::select('material')->distinct()->pluck('material');
+        $colores    = Producto::select('color')->distinct()->pluck('color');
+        $tamanios   = Producto::select('tamanio')->distinct()->pluck('tamanio');
+
+        $nombresUnicos = Producto::select('nombre')
+            ->distinct()
+            ->orderBy('nombre')
+            ->limit(7)
+            ->pluck('nombre');
+
+        return view('carro/createCarro', compact(
+            'usuario',
+            'usuarios',
+            'pedidos',
+            'productos',
+            'tipos',
+            'materiales',
+            'colores',
+            'tamanios',
+            'nombresUnicos'
+        ));
     }
 
     public function store(Request $request)
@@ -143,23 +167,29 @@ class CarroController extends Controller
 
         $user = User::findOrFail($userId);
 
-        // Verificar bloqueo para crédito y método pago
-
-        // Crear o usar pedido
-        if ($request->has('nuevo_pedido')) {
+        if ($request->input('id_pedido') === 'nuevo') {
+            // crear un nuevo pedido
             $pedido = Pedido::create([
-                'id_user' => $userId,
+                'id_user' => $carro->id_user,
                 'estado_pedido' => 1,
                 'metodo_pago' => 'contado',
+                'total_pedido' => 0,
             ]);
+            $carro->id_pedido = $pedido->id_pedido;
+            $carro->save();
         } elseif ($request->filled('id_pedido')) {
+            // usar un pedido existente
             $pedido = Pedido::find($request->input('id_pedido'));
             if (!$pedido || $pedido->estado_pedido == 0) {
                 return back()->with('error', 'El pedido está cerrado o no existe.');
             }
+            $carro->id_pedido = $pedido->id_pedido;
+            $carro->save();
         } else {
-            return back()->with('error', 'Debes seleccionar un pedido o marcar "crear uno nuevo".');
+            // mantener el actual
+            $pedido = $carro->pedido;
         }
+
 
         // Calcular nuevo total con el producto que quiere agregar
         $totalAnterior = $pedido->total_pedido;
@@ -368,10 +398,12 @@ class CarroController extends Controller
         // Base query de productos
         $query = Producto::query();
 
-        // === 🔍 Buscador por ID, nombre, material, color o tamaño ===
-        if ($busqueda = $request->input('buscar')) {
+        // === 🔍 Buscador por ID (parcial), nombre, material, color o tamaño ===
+        if ($request->filled('buscar')) {
+            $busqueda = $request->input('buscar');
+
             if (is_numeric($busqueda)) {
-                $query->where('id_producto', $busqueda);
+                $query->where('id_producto', 'LIKE', "%{$busqueda}%");
             } else {
                 $query->where(function ($q) use ($busqueda) {
                     $q->where('nombre', 'ILIKE', "%{$busqueda}%")
@@ -444,6 +476,12 @@ class CarroController extends Controller
         $colores    = Producto::select('color')->distinct()->pluck('color');
         $tamanios   = Producto::select('tamanio')->distinct()->pluck('tamanio');
 
+        $nombresUnicos = Producto::select('nombre')
+            ->distinct()
+            ->orderBy('nombre')
+            ->limit(7)
+            ->pluck('nombre');
+
         $pedidosUsuario = Pedido::where('id_user', $carro->id_user)->get();
 
         return view('carro.editCarro', compact(
@@ -455,9 +493,11 @@ class CarroController extends Controller
             'tipos',
             'materiales',
             'colores',
-            'tamanios'
+            'tamanios',
+            'nombresUnicos'
         ));
     }
+
 
     public function update(Request $request, Carro $carro, $id_producto)
     {
@@ -468,24 +508,55 @@ class CarroController extends Controller
             return back()->with('error', 'Cantidad no válida.');
         }
 
-        // === Manejar nuevo pedido (igual que en create) ===
-        if ($request->has('nuevo_pedido')) {
-            $pedido = Pedido::create([
+        // === Manejar pedido seleccionado ===
+        if ($request->input('id_pedido') === 'nuevo') {
+            // crear un nuevo pedido
+            $pedidoNuevo = Pedido::create([
                 'id_user' => $carro->id_user,
                 'estado_pedido' => 1,
                 'metodo_pago' => 'contado',
+                'total_pedido' => 0,
             ]);
-            $carro->id_pedido = $pedido->id_pedido;
-            $carro->save();
+
+            // crear un nuevo carro para ese pedido
+            $carroNuevo = Carro::create([
+                'id_user' => $carro->id_user,
+                'id_pedido' => $pedidoNuevo->id_pedido,
+            ]);
+
+            // mover solo el producto seleccionado
+            $carro->productos()->detach($id_producto);
+            $carroNuevo->productos()->attach($nuevoIdProducto, ['cantidad' => $cantidadSolicitada]);
+
+            // recalcular totales
+            $this->recalcularTotalPedido($carro);
+            $this->recalcularTotalPedido($carroNuevo);
+
+            return redirect()->route('carro.index')->with('success', 'Producto movido a un nuevo pedido.');
         } elseif ($request->filled('id_pedido')) {
             $pedido = Pedido::find($request->input('id_pedido'));
             if (!$pedido || $pedido->estado_pedido == 0) {
                 return back()->with('error', 'El pedido está cerrado o no existe.');
             }
-            $carro->id_pedido = $pedido->id_pedido;
-            $carro->save();
+
+            // buscar o crear el carro del pedido existente
+            $carroDestino = Carro::firstOrCreate([
+                'id_pedido' => $pedido->id_pedido,
+                'id_user' => $carro->id_user,
+            ]);
+
+            // mover solo el producto seleccionado
+            $carro->productos()->detach($id_producto);
+            $carroDestino->productos()->attach($nuevoIdProducto, ['cantidad' => $cantidadSolicitada]);
+
+            // recalcular totales
+            $this->recalcularTotalPedido($carro);
+            $this->recalcularTotalPedido($carroDestino);
+
+            return redirect()->route('carro.index')->with('success', 'Producto movido a otro pedido.');
         } else {
-            $pedido = $carro->pedido; // usar el actual
+            // mantener el actual
+            $pedido = $carro->pedido;
         }
 
         // === Validar producto ===
@@ -529,10 +600,10 @@ class CarroController extends Controller
         $carro->load('productos');
 
         // === Recalcular total ===
-        $totalAnterior = $pedido->total_pedido;
+        $totalAnterior = $pedido->total_pedido ?? 0;
         $nuevoTotal = $this->recalcularTotalPedido($carro);
 
-        if ($pedido->estado_pedido == 0) {
+        if (isset($pedido) && $pedido->estado_pedido == 0) {
             if (!$this->validarPedidoConCreditoVencido($pedido)) {
                 return back()->with('error', 'No puedes aumentar un pedido asociado a un crédito vencido o cerrado.');
             }
@@ -550,7 +621,6 @@ class CarroController extends Controller
 
         return redirect()->route('carro.index')->with('success', 'Carro actualizado correctamente.');
     }
-
 
     public function destroy(Carro $carro)
     {
@@ -600,54 +670,48 @@ class CarroController extends Controller
 
     public function show(Request $request)
     {
-        $busqueda = $request->input('busqueda');
+        $busqueda = $request->input('buscar');
         $user = Auth::user();
 
         if (!$busqueda) {
-            return back()->with('error', 'Debes ingresar un ID de carro o un nombre de usuario.');
+            return redirect()->route('carro.index')
+            ->with('info', 'Se mostró la lista completa porque no ingresaste ningún criterio de búsqueda.');
         }
 
-        // Si es búsqueda por ID de carro
+        // ===== 🔍 Búsqueda por ID de carro (parcial) =====
         if (is_numeric($busqueda)) {
-            $carro = Carro::with(['productos', 'user', 'pedido'])->find($busqueda);
+            $carrosQuery = Carro::with(['productos', 'user', 'pedido'])
+                ->where('id_carro', 'LIKE', "%{$busqueda}%");
 
-            if (!$carro) {
-                return back()->with('error', 'El carro no se encontró.');
+            if (!$user->hasRole('administrador')) {
+                $carrosQuery->where('id_user', $user->id_user);
             }
 
-            // Validar acceso
-            if (!$user->hasRole('administrador') && $carro->id_user !== $user->id_user) {
-                return back()->with('error', 'No tienes permiso para ver este carro.');
+            $carros = $carrosQuery->orderBy('id_carro')->paginate(5)->withQueryString();
+
+            if ($carros->isEmpty()) {
+                return back()->with('error', 'No se encontraron carros con ese ID.');
             }
 
-            $carros = new \Illuminate\Pagination\LengthAwarePaginator(
-                [$carro],
-                1,
-                5,
-                $request->input('page', 1),
-                ['path' => $request->url(), 'query' => $request->query()]
-            );
+            $pedidosUsuario = Pedido::whereIn('id_user', $carros->pluck('id_user'))->get();
+            $usuarios = $user->hasRole('administrador') ? User::all() : collect();
 
-            // Traer todos los pedidos del usuario sin paginar
-            $pedidosUsuario = Pedido::where('id_user', $carro->id_user)->get();
-
-            return view('carro.showCarro', compact('carros', 'pedidosUsuario'));
+            return view('carro.showCarro', compact('carros', 'pedidosUsuario', 'usuarios'));
         }
 
-        // Si es búsqueda por nombre de usuario (solo admin)
+        // ===== 🔍 Búsqueda por nombre de usuario (solo admin) =====
         if (!$user->hasRole('administrador')) {
             return back()->with('error', 'No puedes buscar carros por nombre de usuario.');
         }
 
-        $usuarios = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->get();
+        $usuariosQuery = User::where('nombre_usuario', 'ILIKE', "%{$busqueda}%")->get();
 
-        if ($usuarios->isEmpty()) {
+        if ($usuariosQuery->isEmpty()) {
             return back()->with('error', 'No se encontraron usuarios con ese nombre.');
         }
 
-        // 🔹 Paginación de carros (5 por página)
         $carros = Carro::with(['productos', 'user', 'pedido'])
-            ->whereIn('id_user', $usuarios->pluck('id_user'))
+            ->whereIn('id_user', $usuariosQuery->pluck('id_user'))
             ->orderBy('id_carro')
             ->paginate(5)
             ->withQueryString();
@@ -656,10 +720,10 @@ class CarroController extends Controller
             return back()->with('error', 'No se encontraron carros para esos usuarios.');
         }
 
-        // Traer todos los pedidos de esos usuarios sin paginar
-        $pedidosUsuario = Pedido::whereIn('id_user', $usuarios->pluck('id_user'))->get();
+        $pedidosUsuario = Pedido::whereIn('id_user', $usuariosQuery->pluck('id_user'))->get();
+        $usuarios = User::all();
 
-        return view('carro.showCarro', compact('carros', 'pedidosUsuario'));
+        return view('carro.showCarro', compact('carros', 'pedidosUsuario', 'usuarios'));
     }
 
 

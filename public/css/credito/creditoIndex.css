@@ -30,15 +30,22 @@ hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; }
 .btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold; }
 
 /* ==== FORMULARIO DE BÚSQUEDA ==== */
-form {
+form:has(#buscar) {
   display: grid;
-  grid-template-columns: max-content minmax(200px, 320px) auto;
+  grid-template-columns: max-content minmax(160px, 220px) max-content;
   gap: 6px;
   align-items: center;
-  margin: 10px 0;
+  margin: 6px 0 10px;
 }
-form label { font-weight: 600; font-size: 0.95rem; }
-#busqueda {
+
+form:has(#buscar) label {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+#buscar {
   width: 100%;
   padding: 6px 10px;
   border: 1px solid #999;
@@ -46,22 +53,45 @@ form label { font-weight: 600; font-size: 0.95rem; }
   background: #fff;
   outline: none;
   font-size: 0.95rem;
+  min-height: 32px;        /* 🔹 asegura altura uniforme */
 }
-#busqueda:focus {
+#buscar::placeholder { color: #9aa3ad; }
+#buscar:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
 }
-input[type="submit"] {
-  padding: 6px 10px;
-  font-size: .88rem;
-  border-radius: 6px;
-  border: 1px solid #2563eb;
+
+/* Botón Buscar */
+form:has(#buscar) input[type="submit"] {
   background: #2563eb;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
   color: #fff;
-  cursor: pointer;
   font-weight: bold;
+  cursor: pointer;
+  line-height: 1.2;
+  min-height: 32px;        /* 🔹 iguala altura con el input */
+  width: auto;             /* 🔹 no se alarga en desktop */
+  padding: 6px 12px;
+  font-size: 0.95rem;
 }
-input[type="submit"]:hover { filter: brightness(.95); }
+
+/* Tamaños según viewport */
+@media (max-width: 768px) {
+  form:has(#buscar) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  #busqueda,
+  form:has(#buscar) input[type="submit"] {
+    width: 100%;           /* 🔹 ambos a lo ancho en móvil */
+  }
+  form:has(#buscar) input[type="submit"] {
+    min-height: 44px;      /* 🔹 accesible en móvil */
+    padding: 8px 12px;
+    font-size: 1rem;
+  }
+}
 
 /* ==== TABLAS ==== */
 .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -69,17 +99,17 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  border: 1px solid #000000;
+  border-radius: 8px;
   overflow: hidden;
 }
-th, td {
-  border: 1px solid #e5e7eb;
+th, td, tr {
+  border: 1px solid #000000;
   padding: 8px;
   text-align: center;
-  font-size: .95rem;
+  font-size:.9rem;
 }
-thead th { background: #f3f4f6; }
+thead th { background:#f3f4f6; }
 tbody tr:nth-child(odd) { background: #fafafa; }
 tbody tr:hover { background: #f2f7ff; }
 .cerrado { background: #f2f2f2; }
@@ -114,33 +144,5 @@ tbody tr:hover { background: #f2f7ff; }
   td .btn, td form, td input[type="submit"] {
     width: 100%;
     margin: 6px 0;
-  }
-  form { grid-template-columns: 1fr; }
-  #busqueda, input[type="submit"] { width: 100%; }
-}
-
-/* ==== FIX botón Buscar compacto en desktop ==== */
-@media (min-width: 769px) {
-  form:has(#busqueda) {
-    grid-template-columns: max-content minmax(200px, 320px) max-content; /* etiqueta | campo | botón */
-  }
-  form:has(#busqueda) input[type="submit"] {
-    justify-self: start;  /* se queda pegado, no se estira */
-    width: auto;          /* solo ocupa lo necesario */
-    padding: 4px 12px;    /* tamaño compacto */
-    font-size: 0.85rem;
-    min-height: 28px;
-    border-radius: 4px;
-    line-height: 1.2;
-  }
-}
-
-/* En móvil: el botón sí debe ocupar el ancho completo para accesibilidad */
-@media (max-width: 768px) {
-  form:has(#busqueda) input[type="submit"] {
-    width: 100%;
-    min-height: 44px;
-    padding: 8px 10px;
-    font-size: .9rem;
   }
 }

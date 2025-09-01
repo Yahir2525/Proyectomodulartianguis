@@ -1,1 +1,200 @@
-body { margin: 0; color: #222; background: #ffbdbd; min-height: 100vh;}
+/* ==== PEDIDO INDEX ==== */
+
+/* Reset & tipografía */
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; color: #222; background: #fff87a; }
+
+/* Layout */
+h1 { text-align: center; font-size: 1.6rem; margin: 0 auto 14px; }
+
+/* --- Contenedor general --- */
+.pedidos-container {
+  max-width: 1100px;   /* igual que la tabla */
+  margin: 0 auto;      /* centrado */
+  padding: 0 10px;     /* opcional: espacio interno */
+}
+
+/* --- Botones --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: .9rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+.btn-primary { background:#15c221; border: #15c221; color:#fff; }
+.btn-edit    { background:purple; color:#fff; }
+.btn-danger  { background:#ef4444; color:#fff; }
+.btn-gray    { background:#6b7280; color:#fff; }
+
+/* Badge gris para "Pedido cerrado" */
+.bg-gray {
+  background: #6b7280 !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+}
+
+/* --- Formulario búsqueda --- */
+form:has(#buscar) {
+  display: grid;
+  grid-template-columns: max-content minmax(160px, 220px) max-content;
+  gap: 6px;
+  align-items: center;
+  margin: 6px 0 10px;
+}
+
+form:has(#buscar) label {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+#buscar {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  outline: none;
+  font-size: 0.95rem;
+  min-height: 32px;        /* 🔹 asegura altura uniforme */
+}
+#buscar::placeholder { color: #9aa3ad; }
+#buscar:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+
+/* Botón Buscar */
+form:has(#buscar) input[type="submit"] {
+  background: #2563eb;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1.2;
+  min-height: 32px;        /* 🔹 iguala altura con el input */
+  width: auto;             /* 🔹 no se alarga en desktop */
+  padding: 6px 12px;
+  font-size: 0.95rem;
+}
+
+/* Tamaños según viewport */
+@media (max-width: 768px) {
+  form:has(#buscar) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  #busqueda,
+  form:has(#buscar) input[type="submit"] {
+    width: 100%;           /* 🔹 ambos a lo ancho en móvil */
+  }
+  form:has(#buscar) input[type="submit"] {
+    min-height: 44px;      /* 🔹 accesible en móvil */
+    padding: 8px 12px;
+    font-size: 1rem;
+  }
+}
+
+/* =================== TABLA =================== */
+.table-wrap {
+  max-width: 1100px;
+  margin: 0 auto 20px;
+  overflow-x:auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+th, td, tr {
+  border: 1px solid #000000;
+  padding: 8px;
+  text-align: center;
+  font-size:.9rem;
+}
+thead th { background:#f3f4f6; }
+
+/* --- Anchos --- */
+th:nth-child(1), td:nth-child(1) { width: 8%; }   /* ID pedido */
+th:nth-child(2), td:nth-child(2) { width: 8%; }   /* Crédito */
+th:nth-child(3), td:nth-child(3) { width: 8%; }   /* Total */
+th:nth-child(4), td:nth-child(4) { width: 8%; }   /* Estado */
+th:nth-child(5), td:nth-child(5) { width: 14%; }  /* Creado */
+th:nth-child(6), td:nth-child(6) { width: 14%; }  /* Actualizado */
+th:nth-child(7), td:nth-child(7) { width: 10%; }  /* Eliminar */
+th:nth-child(8), td:nth-child(8) { width: 14%; }  /* Método */
+th:nth-child(9), td:nth-child(9) { width: 10%; }  /* Reabrir */
+
+/* --- Columna Método (en vertical, centrado) --- */
+td[data-label="Método"] { text-align:center; }
+.col-metodo {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+.col-metodo form {
+  display:flex;
+  flex-direction:column;   /* 🔹 apilado */
+  gap:8px;
+  align-items:center;
+}
+.col-metodo select {
+  min-width:160px;
+  max-width:220px;
+  text-align:left;         /* 🔹 texto normal en select */
+}
+.col-metodo button {
+  min-width:160px;
+  text-align:center;       /* 🔹 botón centrado */
+}
+
+/* --- Columna Eliminar y Reabrir (separadas) --- */
+td[data-label="Eliminar"] form,
+td[data-label="Reabrir"] form {
+  display:block;
+  text-align:center;
+}
+td[data-label="Eliminar"] button,
+td[data-label="Reabrir"] button {
+  display:inline-block;
+  margin:0 auto;
+  min-width:auto;
+}
+
+/* =================== RESPONSIVE =================== */
+@media (max-width: 768px){
+  table, thead, tbody, th, td, tr { display:block; }
+  thead { display:none; }
+  tbody tr {
+    margin:8px 0;
+    border:1px solid #ddd;
+    border-radius:6px;
+  }
+  td {
+    display:grid;
+    grid-template-columns: max-content 1fr;
+    gap:8px;
+    text-align:left;
+  }
+  td::before {
+    content: attr(data-label);
+    font-weight:600;
+  }
+  form { flex-direction:column; }
+}
+
+

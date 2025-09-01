@@ -33,20 +33,22 @@
         <br>
 
         {{-- Buscador por ID o nombre --}}
-        <form action="{{ url('/producto/showProducto') }}" method="GET" class="buscar">
-            <label for="busqueda">Buscar por ID o por nombre:</label>
-            <input list="productos" id="busqueda" name="busqueda" placeholder="Ej. 21 o Cortina de baño" value="{{ request('busqueda') }}">
+        <form action="{{ url('/producto') }}" method="GET">
+        <div class="buscar">
+            <label for="buscar">Buscar por ID o por nombre:</label>
+            <input list="productos" id="buscar" name="buscar"
+                placeholder="Ej. 21 o Cortina de baño"
+                value="{{ request('buscar') }}">
             <datalist id="productos">
-                @foreach ($productoIndex as $producto)
-                    <option value="{{ $producto->id_producto }}">{{ $producto->nombre }}</option>
-                    <option value="{{ $producto->nombre }}">{{ $producto->nombre }}</option>
+                @foreach ($nombresUnicos as $nombre)
+                    <option value="{{ $nombre }}">{{ $nombre }}</option>
                 @endforeach
             </datalist>
             <input type="submit" value="Buscar">
-        </form>
+        </div>
 
         {{-- ===== FILTROS ESPECIALES ===== --}}
-        <form action="{{ url('/producto') }}" method="GET" class="filtros">
+        <div class="filtros">
             <div>
                 <label for="filtro_tipo">Tipo:</label>
                 <select name="tipo" id="filtro_tipo">
@@ -114,6 +116,7 @@
 
             <button type="submit" class="btn btn-registrar">Filtrar</button>
             <a href="{{ url('/producto') }}" class="btn btn-gray">Limpiar</a>
+        </div>
         </form>
 
         @if($productoIndex->isNotEmpty())
@@ -281,7 +284,7 @@
                                         <th>Color</th>
                                         <th>Tamaño</th>
                                         <th>Precio unitario</th>
-                                        <th>Piezas disponibles</th>
+                                        <th>Disponibles</th>
                                         <th>Estado</th>
                                     </tr>
                                 </thead>

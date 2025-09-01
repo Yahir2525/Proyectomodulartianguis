@@ -22,14 +22,14 @@
         </form><br><br>
         @endcan
         <form action="{{ url('/abono/showAbono') }}" method="GET">
-            <label for="busqueda">Buscar abono:</label>
+            <label for="buscar">Buscar abono:</label>
             <input
                 type="text"
-                id="busqueda"
-                name="busqueda"
+                id="buscar"
+                name="buscar"
                 placeholder="Ej. 21 o Carlitos"
                 list="{{ Auth::user()->can('edit abono') ? 'usuarios' : '' }}"
-                value="{{ request('busqueda') }}"
+                value="{{ request('buscar') }}"
                 autocomplete="off"
             />
 
@@ -84,12 +84,12 @@
                                 @endphp
 
                                 <tr>
-                                    <td>{{ $abono->id_abono }}</td>
-                                    <td>{{ $abono->created_at }}</td>
-                                    <td>{{ $abono->updated_at }}</td>
-                                    <td>${{ number_format($abono->monto_abono, 2) }}</td>
+                                    <td data-label="ID">{{ $abono->id_abono }}</td>
+                                    <td data-label="Creado">{{ $abono->created_at }}</td>
+                                    <td data-label="Actualizado">{{ $abono->updated_at }}</td>
+                                    <td data-label="Monto">${{ number_format($abono->monto_abono, 2) }}</td>
                                     
-                                    <td>
+                                    <td data-label="Editar">
                                         @can('edit abono')
                                             @if($estaCerrado)
                                                 <span class="info-msg text-danger">No editable (crédito cerrado)</span>
@@ -101,7 +101,7 @@
                                         @endcan
                                     </td>
                                     
-                                    <td>
+                                    <td data-label="Eliminar">
                                         @can('delete abono')
                                             @if($estaCerrado)
                                                 <span class="info-msg text-danger">No eliminable (crédito cerrado)</span>

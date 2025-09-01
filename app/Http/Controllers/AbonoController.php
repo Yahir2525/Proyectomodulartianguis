@@ -100,53 +100,59 @@ class AbonoController extends Controller
 
     public function show(Request $request)
     {
-        $busqueda = $request->input('busqueda');
+        $busqueda = $request->input('buscar');
         $user = Auth::user();
 
         if (!$busqueda) {
-            return back()->with('error', 'Debes ingresar un ID de abono o un nombre de usuario.');
+            return redirect()->route('abono.index')
+            ->with('info', 'Se mostró la lista completa porque no ingresaste ningún criterio de búsqueda.');
         }
 
-        // Si es numérico, se interpreta como ID de abono
+        // ===== 🔍 Búsqueda por ID parcial =====
         if (is_numeric($busqueda)) {
             if ($user->hasRole('administrador')) {
-                $abono = Abono::with(['user', 'credito'])->find($busqueda);
+                $abonos = Abono::with(['user', 'credito'])
+                    ->where('id_abono', 'LIKE', "%{$busqueda}%")
+                    ->get();
             } else {
-                $abono = Abono::with(['user', 'credito'])
-                    ->where('id_abono', $busqueda)
+                $abonos = Abono::with(['user', 'credito'])
+                    ->where('id_abono', 'LIKE', "%{$busqueda}%")
                     ->where('id_user', $user->id_user)
-                    ->first();
+                    ->get();
             }
 
-            if (!$abono) {
-                return back()->with('error', 'El abono no se encontró o no te pertenece.');
+            if ($abonos->isEmpty()) {
+                return back()->with('error', 'No se encontraron abonos con ese ID.');
             }
 
-            return view('abono.showAbono', ['abonos' => collect([$abono])]);
+            // 🔹 siempre pasa $usuarios para el datalist
+            $usuarios = $user->hasRole('administrador') ? User::all() : collect();
+            return view('abono.showAbono', compact('abonos', 'usuarios'));
         }
 
-        // Si no es número, se asume búsqueda por nombre (solo para admin)
-        // Si no es número, se asume búsqueda por nombre (solo para admin)
+        // ===== 🔍 Búsqueda por nombre de usuario (solo admin) =====
         if ($user->hasRole('administrador')) {
-            $usuario = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->get();
+            $usuariosEncontrados = User::where('nombre_usuario', 'ILIKE', "%{$busqueda}%")->get();
 
-            if (!$usuario) {
+            if ($usuariosEncontrados->isEmpty()) {
                 return back()->with('error', 'Usuario no encontrado.');
             }
-            
-            $abonos = Abono::with('user')->whereIn('id_user', $usuario->pluck('id_user'))->get();
+
+            $abonos = Abono::with(['user', 'credito'])
+                ->whereIn('id_user', $usuariosEncontrados->pluck('id_user'))
+                ->get();
 
             if ($abonos->isEmpty()) {
                 return back()->with('error', 'No se encontraron abonos para el usuario "' . $busqueda . '".');
             }
 
-            return view('abono.showAbono', ['abonos' => $abonos]);
+            // 🔹 para el datalist seguimos mandando TODOS los usuarios, no solo los encontrados
+            $usuarios = User::all();
+            return view('abono.showAbono', compact('abonos', 'usuarios'));
         }
-
 
         return back()->with('error', 'Solo puedes buscar tus abonos por ID.');
     }
-
 
 
     public function edit($id)

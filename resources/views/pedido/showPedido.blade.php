@@ -22,6 +22,30 @@
         <p style="color: red;"><strong>{{ session('error') }}</strong></p>
     @endif
 
+    <form action="{{ url('/pedido/showPedido') }}" method="GET" class="buscar">
+        <label for="buscar">Buscar por ID de pedido o nombre de usuario:</label>
+        <input 
+            type="text" 
+            id="buscar" 
+            name="buscar" 
+            placeholder="Ej. 21 o Pepito"
+            list="{{ Auth::user()->hasRole('administrador') ? 'usuarios' : '' }}"
+            value="{{ request('buscar') }}"
+            autocomplete="off"
+        />
+
+        @if(Auth::user()->hasRole('administrador'))
+            <datalist id="usuarios">
+                @foreach($usuarios as $usuario)
+                    <option value="{{ $usuario->nombre_usuario }}"></option>
+                @endforeach
+            </datalist>
+        @endif
+
+        <input type="submit" value="Buscar" />
+    </form>
+
+
     @if(isset($pedidos) && $pedidos->isNotEmpty())
 
         @php
@@ -32,7 +56,6 @@
             <h2>Pedidos de: {{ optional($pedidosUsuario->first()->user)->nombre_usuario ?? 'Desconocido' }}</h2>
 
             @php
-                /* ===================== COLECCIONES POR USUARIO (reutilizables) ===================== */
                 $usuario = $pedidosUsuario->first()->user;
 
                 // Activos (estado=1 y no vencidos por fecha)

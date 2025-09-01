@@ -4,14 +4,14 @@ html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-seri
 body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh;}
 
 /* Contenedor cómodo y centrado horizontal */
-.container { max-width: 400px; margin: 0 auto; padding: 16px; }
+.container { max-width: 420px; margin: 0 auto; padding: 18px; background:transparent;}
 
 /* Titulares / info */
-h1 { margin: 0 0 12px; font-size: clamp(1.2rem, 0.95rem + 1vw, 1.6rem); }
+h1 { margin: 0 0 14px; font-size: clamp(1.2rem, 0.95rem + 1vw, 1.6rem); }
 p  { margin: 6px 0; }
 
 /* Formulario fluido (simple y compacto) */
-form { display: grid; gap: 12px; margin-top: 6px; }
+form { display: grid; gap: 12px; }
 label { font-weight: 600; font-size: 0.95rem; }
 
 /* Inputs y selects con estilo ovalado */
@@ -43,7 +43,7 @@ button,
   width: 100%;
   padding: 8px 12px;
   min-height: 36px;
-  border-radius: 20px; /* ovalado */
+  border-radius: 6px; /* ovalado */
   border: 1px solid #2563eb;
   background: #2563eb;
   color: #fff;

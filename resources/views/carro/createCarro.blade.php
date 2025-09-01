@@ -94,71 +94,78 @@
     @endif
 
     {{-- Filtros de productos --}}
-    <form action="{{ route('carro.create') }}" method="GET" class="buscar">
-        <label for="busqueda">Buscar producto:</label>
-        <input type="text" id="busqueda" name="busqueda" placeholder="Ej. cortina, mesa..." value="{{ request('busqueda') }}">
-        <button type="submit" class="btn btn-agregar">Buscar</button>
-    </form>
+    <form action="{{ route('carro.create') }}" method="GET">
+        <div class="buscar">
+            <label for="buscar">Buscar producto:</label>
+            <input list="productos" id="buscar" name="buscar"
+                placeholder="Ej. mesa, cortina..." value="{{ request('buscar') }}">
+            <datalist id="productos">
+                @foreach ($nombresUnicos as $nombre)
+                    <option value="{{ $nombre }}">{{ $nombre }}</option>
+                @endforeach
+            </datalist>
+            <button type="submit" class="btn btn-agregar">Buscar</button>
+        </div>
 
-    {{-- ✅ Filtros --}}
-    <form action="{{ route('carro.create') }}" method="GET" class="filtros">
-        <div>
-            <label for="tipo">Tipo:</label>
-            <select name="tipo" id="tipo" class="form-input">
-                <option value="">-- Todos --</option>
-                @foreach($tipos as $tipo)
-                    <option value="{{ $tipo }}" {{ request('tipo') == $tipo ? 'selected' : '' }}>{{ $tipo }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label for="material">Material:</label>
-            <select name="material" id="material" class="form-input">
-                <option value="">-- Todos --</option>
-                @foreach($materiales as $material)
-                    <option value="{{ $material }}" {{ request('material') == $material ? 'selected' : '' }}>{{ $material }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label for="color">Color:</label>
-            <select name="color" id="color" class="form-input">
-                <option value="">-- Todos --</option>
-                @foreach($colores as $color)
-                    <option value="{{ $color }}" {{ request('color') == $color ? 'selected' : '' }}>{{ $color }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label for="tamanio">Tamaño:</label>
-            <select name="tamanio" id="tamanio" class="form-input">
-                <option value="">-- Todos --</option>
-                @foreach($tamanios as $tamanio)
-                    <option value="{{ $tamanio }}" {{ request('tamanio') == $tamanio ? 'selected' : '' }}>{{ $tamanio }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label for="precio_min">Precio mínimo:</label>
-            <input type="number" name="precio_min" id="precio_min" value="{{ request('precio_min') }}" class="form-input">
-        </div>
-        <div>
-            <label for="precio_max">Precio máximo:</label>
-            <input type="number" name="precio_max" id="precio_max" value="{{ request('precio_max') }}" class="form-input">
-        </div>
-        @can('create producto')
-        <div>
-            <label for="estado">Estado:</label>
-            <select name="estado" id="estado" class="form-input">
-                <option value="">-- Todos --</option>
-                <option value="1" {{ request('estado') === '1' ? 'selected' : '' }}>Activo</option>
-                <option value="0" {{ request('estado') === '0' ? 'selected' : '' }}>Inactivo</option>
-            </select>
-        </div>
-        @endcan
-        <div>
-            <button type="submit" class="btn btn-registrar">Filtrar</button>
-            <a href="{{ route('carro.create') }}" class="btn btn-gray">Limpiar</a>
+        <div class="filtros">
+            <div>
+                <label for="tipo">Tipo:</label>
+                <select name="tipo" id="tipo" class="form-input">
+                    <option value="">-- Todos --</option>
+                    @foreach($tipos as $tipo)
+                        <option value="{{ $tipo }}" {{ request('tipo') == $tipo ? 'selected' : '' }}>{{ $tipo }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="material">Material:</label>
+                <select name="material" id="material" class="form-input">
+                    <option value="">-- Todos --</option>
+                    @foreach($materiales as $material)
+                        <option value="{{ $material }}" {{ request('material') == $material ? 'selected' : '' }}>{{ $material }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="color">Color:</label>
+                <select name="color" id="color" class="form-input">
+                    <option value="">-- Todos --</option>
+                    @foreach($colores as $color)
+                        <option value="{{ $color }}" {{ request('color') == $color ? 'selected' : '' }}>{{ $color }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="tamanio">Tamaño:</label>
+                <select name="tamanio" id="tamanio" class="form-input">
+                    <option value="">-- Todos --</option>
+                    @foreach($tamanios as $tamanio)
+                        <option value="{{ $tamanio }}" {{ request('tamanio') == $tamanio ? 'selected' : '' }}>{{ $tamanio }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="precio_min">Precio mínimo:</label>
+                <input type="number" name="precio_min" id="precio_min" value="{{ request('precio_min') }}" class="form-input">
+            </div>
+            <div>
+                <label for="precio_max">Precio máximo:</label>
+                <input type="number" name="precio_max" id="precio_max" value="{{ request('precio_max') }}" class="form-input">
+            </div>
+            @can('create producto')
+            <div>
+                <label for="estado">Estado:</label>
+                <select name="estado" id="estado" class="form-input">
+                    <option value="">-- Todos --</option>
+                    <option value="1" {{ request('estado') === '1' ? 'selected' : '' }}>Activo</option>
+                    <option value="0" {{ request('estado') === '0' ? 'selected' : '' }}>Inactivo</option>
+                </select>
+            </div>
+            @endcan
+            <div class="acciones">
+                <button type="submit" class="btn btn-registrar">Filtrar</button>
+                <a href="{{ route('carro.create') }}" class="btn btn-gray">Limpiar</a>
+            </div>
         </div>
     </form>
 
@@ -171,8 +178,8 @@
                 <thead>
                     <tr>
                         <th>Seleccionar</th>
-                        <th>Imagen</th>
                         <th>Nombre</th>
+                        <th>Imagen</th>
                         <th>Material</th>
                         <th>Color</th>
                         <th>Tamaño</th>
@@ -185,24 +192,24 @@
                     @foreach($productos as $producto)
                         @if (Auth::user()->hasRole('administrador') || $producto->estado_producto)
                         <tr class="{{ $producto->piezas_disponibles == 0 ? 'sin-stock' : '' }}">
-                            <td>
+                            <td data-label="Seleccionar">
                                 <input type="checkbox" name="productos_seleccionados[]" value="{{ $producto->id_producto }}">
                             </td>
-                            <td>
+                            <td>{{ $producto->nombre }}</td>
+                            <td data-label="Imagen">
                                 @if (!empty($producto->imagen)) 
                                     <img src="{{ Storage::disk('s3')->url($producto->imagen) }}" alt="Foto de producto" width="250">
                                 @else
                                     <span>Sin imagen</span>
                                 @endif
                             </td>
-                            <td>{{ $producto->nombre }}</td>
-                            <td>{{ $producto->material }}</td>
-                            <td>{{ $producto->color }}</td>
-                            <td>{{ $producto->tamanio }}</td>
-                            <td>${{ number_format($producto->precio_unitario, 2) }}</td>
+                            <td data-label="Material">{{ $producto->material }}</td>
+                            <td data-label="Color">{{ $producto->color }}</td>
+                            <td data-label="Tamaño">{{ $producto->tamanio }}</td>
+                            <td data-label="Precio">${{ number_format($producto->precio_unitario, 2) }}</td>
                             @php $disp = max(0, (int)($producto->piezas_disponibles ?? 0)); @endphp
-                            <td>{{ $disp }}</td>
-                            <td>
+                            <td data-label="Disponibles">{{ $disp }}</td>
+                            <td data-label="Cantidad">
                                 <input type="number" name="cantidades[{{ $producto->id_producto }}]" class="cant-input form-input"
                                     min="1" step="1" max="{{ $disp }}" {{ $disp === 0 ? 'disabled' : '' }} />
                             </td>
@@ -238,7 +245,7 @@
 
         <label for="id_pedido">Selecciona un pedido existente (opcional):</label>
         <select name="id_pedido" id="id_pedido" class="form-input">
-            <option value="">-- Ninguno --</option>
+            <option value="" disabled selected>-- Ninguno --</option>
             @foreach($pedidos as $pedido)
                 <option value="{{ $pedido->id_pedido }}"
                         data-user="{{ $pedido->id_user }}"

@@ -28,6 +28,28 @@
     @if(session('error'))
         <p class="error">{{ session('error') }}</p>
     @endif
+    <form action="{{ url('/credito/showCredito') }}" method="GET" class="buscar">
+        <label for="buscar">Buscar crédito:</label>
+        <input 
+            type="text"
+            id="buscar"
+            name="buscar"
+            placeholder="Ej. 21 o Pepito"
+            list="{{ Auth::user()->hasRole('administrador') ? 'usuarios' : '' }}"
+            value="{{ request('buscar') }}"
+            autocomplete="off"
+        >
+
+        @if(Auth::user()->hasRole('administrador'))
+            <datalist id="usuarios">
+                @foreach($usuarios as $usuario)
+                    <option value="{{ $usuario->nombre_usuario }}"></option>
+                @endforeach
+            </datalist>
+        @endif
+
+        <input type="submit" value="Buscar">
+    </form><br>
 
     @if(isset($creditos) && $creditos->isNotEmpty())
         @php
@@ -48,6 +70,7 @@
                 $cerrados = $grupoCreditos->where('estado', 0);
             @endphp
 
+        
             @if($activos->isNotEmpty())
                 <h3>Activos</h3>
                 <div class="table-responsive">

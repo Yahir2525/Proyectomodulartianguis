@@ -20,14 +20,13 @@
     <div>
         <br><hr class="hr-grueso"><center><h1>Caja registradora</h1></center><hr class="hr-grueso">
         @if(Auth::check())
-           
             <br><p><a href="{{ url('/carro/create') }}" class="btn btn-registrar">Registrar un nuevo carro</a></p>
 
             <form action="{{ url('/carro/showCarro') }}" method="GET" class="buscar">
-                <label for="busqueda">Buscar carro:</label>
-                <input type="text" id="busqueda" name="busqueda" placeholder="Ej. 21 o Carlitos"
+                <label for="buscar">Buscar carro:</label>
+                <input type="text" id="buscar" name="buscar" placeholder="Ej. 21 o Carlitos"
                 list="{{ Auth::user()->can('edit carro') ? 'usuarios' : '' }}"
-                value="{{ request('busqueda') }}" />
+                value="{{ request('buscar') }}" />
 
                 @can('edit carro')
                 <datalist id="usuarios">
@@ -70,7 +69,7 @@
                             <thead>
                                 <tr>
                                     <th>ID carro</th>
-                                    <th>Producto</th>
+                                    <th>Nombre</th>
                                     <th>Imagen</th>
                                     <th>Cantidad</th>
                                     <th>Precio unitario</th>
@@ -91,19 +90,19 @@
                                             $totalPedido += $subtotal;
                                         @endphp
                                         <tr>
-                                            <td>{{ $carrito->id_carro }}</td>
-                                            <td>{{ $producto->nombre }}</td>
-                                            <td>
+                                            <td data-label="ID">{{ $carrito->id_carro }}</td>
+                                            <td data-label="Nombre">{{ $producto->nombre }}</td>
+                                            <td data-label="Imagen">
                                                 @if (!empty($producto->imagen)) 
                                                     <img src="{{ Storage::disk('s3')->url($producto->imagen) }}" alt="Foto de producto" width="250">
                                                 @else
                                                     <span>Sin imagen</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $producto->pivot->cantidad }}</td>
-                                            <td>{{ $producto->precio_unitario }}</td>
-                                            <td>{{ $subtotal }}</td>
-                                            <td>
+                                            <td data-label="Cantidad">{{ $producto->pivot->cantidad }}</td>
+                                            <td data-label="Precio">{{ $producto->precio_unitario }}</td>
+                                            <td data-label="Subtotal">{{ $subtotal }}</td>
+                                            <td data-label="Editar">
                                                 @if($pedido && $pedido->estado_pedido == 1)
                                                     <a href="{{ route('carro.edit', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" class="btn btn-edit">
                                                         Editar
@@ -112,7 +111,7 @@
                                                     <span style="color: black;">Pedido cerrado</span>
                                                 @endif
                                             </td>
-                                            <td>
+                                            <td data-label="Eliminar">
                                                 @if($pedido && $pedido->estado_pedido == 1)
                                                     <form action="{{ route('carro.eliminarProducto', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" method="POST" onsubmit="return confirm('¿Estás seguro?');">
                                                         @csrf

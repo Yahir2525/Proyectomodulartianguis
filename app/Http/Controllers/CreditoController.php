@@ -150,68 +150,67 @@ class CreditoController extends Controller
 
     public function show(Request $request)
     {
-        $busqueda = $request->input('busqueda');
+        $busqueda = $request->input('buscar');
         $user = Auth::user();
 
         if (!$busqueda) {
-            return back()->with('error', 'Debes ingresar un ID de crédito o un nombre de usuario.');
+            return redirect()->route('credito.index')
+            >with('info', 'Se mostró la lista completa porque no ingresaste ningún criterio de búsqueda.');
         }
 
-        // Si es un número, se interpreta como ID de crédito
+        // ===== 🔍 Búsqueda por ID parcial =====
         if (is_numeric($busqueda)) {
             if ($user->hasRole('administrador')) {
-                // Administrador puede ver cualquier crédito
-                $credito = Credito::with('user')->find($busqueda);
+                // Admin puede buscar créditos cuyo ID contenga el valor
+                $creditos = Credito::with('user')
+                    ->where('id_credito', 'LIKE', "%{$busqueda}%")
+                    ->get();
             } else {
-                // Usuario normal solo puede ver sus propios créditos
-                $credito = Credito::with('user')
-                    ->where('id_credito', $busqueda)
+                // Usuario normal solo puede buscar entre sus propios créditos
+                $creditos = Credito::with('user')
+                    ->where('id_credito', 'LIKE', "%{$busqueda}%")
                     ->where('id_user', $user->id_user)
-                    ->first();
+                    ->get();
             }
 
-            if (!$credito) {
-                return back()->with('error', 'El crédito no se encontró o no te pertenece.');
+            if ($creditos->isEmpty()) {
+                return back()->with('error', 'No se encontraron créditos con ese ID.');
             }
-
-            // Retornamos vista con solo ese crédito dentro de una colección
-            return view('credito.showCredito', ['creditos' => collect([$credito])]);
+            $usuarios = $user->hasRole('administrador') ? User::all() : collect();
+            return view('credito.showCredito', compact('creditos', 'usuarios'));
         }
 
-        // Si es texto, se interpreta como nombre de usuario (solo admins)
+        // ===== 🔍 Búsqueda por nombre de usuario (solo admin) =====
         if ($user->hasRole('administrador')) {
-            // Búsqueda por nombre de usuario con coincidencia exacta (ILIKE)
-            $usuario = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->get();
+            $usuarios = User::where('nombre_usuario', 'ILIKE', "%{$busqueda}%")->get();
 
-            if (!$usuario) {
+            if ($usuarios->isEmpty()) {
                 return back()->with('error', 'Usuario no encontrado.');
             }
 
-            // Buscamos todos los créditos del usuario encontrado
-            $creditos = Credito::with('user')->whereIn('id_user', $usuario->pluck('id_user'))->get();
+            $creditos = Credito::with('user')
+                ->whereIn('id_user', $usuarios->pluck('id_user'))
+                ->get();
 
             if ($creditos->isEmpty()) {
                 return back()->with('error', 'No se encontraron créditos para el usuario "' . $busqueda . '".');
             }
 
-            return view('credito.showCredito', ['creditos' => $creditos]);
+            $usuarios = $user->hasRole('administrador') ? User::all() : collect();
+
+            return view('credito.showCredito', compact('creditos', 'usuarios'));
         }
 
         // Usuario no admin intenta buscar por nombre (no permitido)
         return back()->with('error', 'Solo puedes buscar tus créditos por ID.');
     }
 
-
-
     public function edit($id)
     {
         $credito = Credito::find($id);
-        // $cliente = Cliente::all();
-        // $compra = Compra::all();
 
         if (!$credito) {
             return redirect()->back()->with('error', 'El credito no se encontró.');
-                // return redirect()->route('/producto/productoIndex')->with('error', 'El producto no se encontró.');
         }
         return view('/credito/editCredito', ['credito' => $credito]);
     }

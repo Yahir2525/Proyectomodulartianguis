@@ -24,47 +24,64 @@ class ProductoController extends Controller
             $query = Producto::where('estado_producto', true);
         }
 
-        // ====== FILTROS ======
+        // ====== 🔍 BÚSQUEDA ======
+        if ($request->filled('buscar')) {
+            $busqueda = $request->input('buscar');
 
+            if (is_numeric($busqueda)) {
+                $query->where('id_producto', 'LIKE', "%{$busqueda}%");
+            } else {
+                $query->where(function ($q) use ($busqueda) {
+                    $q->where('nombre', 'ILIKE', "%{$busqueda}%")
+                    ->orWhere('material', 'ILIKE', "%{$busqueda}%")
+                    ->orWhere('color', 'ILIKE', "%{$busqueda}%")
+                    ->orWhere('tamanio', 'ILIKE', "%{$busqueda}%");
+                });
+            }
+        }
+
+        // ====== 🎛 FILTROS ======
         if ($request->filled('tipo')) {
             $query->where('tipo', $request->tipo);
         }
         if ($request->filled('material')) {
             $query->where('material', $request->material);
         }
-
         if ($request->filled('color')) {
             $query->where('color', $request->color);
         }
-
         if ($request->filled('tamanio')) {
             $query->where('tamanio', $request->tamanio);
         }
-
         if ($request->filled('precio_min')) {
             $query->where('precio_unitario', '>=', $request->precio_min);
         }
-
         if ($request->filled('precio_max')) {
             $query->where('precio_unitario', '<=', $request->precio_max);
         }
-
         if ($request->filled('estado')) {
             $query->where('estado_producto', $request->estado);
         }
 
-        // Paginación con orden estable (tipo + id_producto)
+        // ====== 📑 Paginación ======
         $productoIndex = $query
-            ->orderBy('tipo')          // agrupa por tipo
-            ->orderBy('id_producto')   // mantiene orden dentro del grupo
+            ->orderBy('tipo')
+            ->orderBy('id_producto')
             ->paginate(10)
             ->withQueryString();
 
-        // ==== Opciones únicas para filtros (sin paginación) ====
-        $tipos = Producto::select('tipo')->distinct()->pluck('tipo');
+        // ==== Opciones únicas para filtros ====
+        $tipos      = Producto::select('tipo')->distinct()->pluck('tipo');
         $materiales = Producto::select('material')->distinct()->pluck('material');
         $colores    = Producto::select('color')->distinct()->pluck('color');
         $tamanios   = Producto::select('tamanio')->distinct()->pluck('tamanio');
+
+        // Nombres únicos para datalist
+        $nombresUnicos = Producto::select('nombre')
+            ->distinct()
+            ->orderBy('nombre')
+            ->limit(7)
+            ->pluck('nombre');
 
         // Usuarios y pedidos
         $usuarios = collect();
@@ -87,6 +104,7 @@ class ProductoController extends Controller
             'colores',
             'tamanios',
             'tipos',
+            'nombresUnicos',
         ));
     }
 
@@ -162,11 +180,12 @@ class ProductoController extends Controller
 
     public function show(Request $request)
     {
-        $busqueda = $request->input('busqueda');
+        $busqueda = $request->input('buscar');
 
         // Si no hay búsqueda, volver al index
-        if (empty($busqueda)) {
-            return redirect()->route('producto.index');
+        if (!$busqueda) {
+            return redirect()->route('producto.index')
+            ->with('info', 'Se mostró la lista completa porque no ingresaste ningún criterio de búsqueda.');
         }
 
         if (is_numeric($busqueda)) {
@@ -191,10 +210,16 @@ class ProductoController extends Controller
                 ->withQueryString();
         }
 
+        $nombresUnicos = Producto::select('nombre')
+        ->distinct()
+        ->orderBy('nombre')
+        ->limit(7)
+        ->pluck('nombre');
+
         $usuarios = User::all();
         $pedidosUsuario = Pedido::with('user')->get();
 
-        return view('producto.showProducto', compact('productos', 'usuarios', 'pedidosUsuario'));
+        return view('producto.showProducto', compact('productos', 'usuarios', 'pedidosUsuario', 'nombresUnicos'));
     }
 
     public function edit($id)
@@ -222,7 +247,7 @@ class ProductoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $producto = \App\Models\Producto::find($id);
+        $producto = Producto::find($id);
         if (!$producto) {
             return redirect()->route('producto.index')->with('error', 'Producto no encontrado.');
         }
@@ -296,7 +321,6 @@ class ProductoController extends Controller
             ->with('success', 'Producto actualizado correctamente.')
             ->with('imagen_url', $urlTemporal);
     }
-
 
     public function destroy($id)
     {

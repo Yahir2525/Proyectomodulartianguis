@@ -16,6 +16,22 @@
 <section>
     <br><hr class="hr-grueso"><h1>Detalles del carro</h1><hr class="hr-grueso">
 
+    <form action="{{ url('/carro/showCarro') }}" method="GET" class="buscar">
+        <label for="buscar">Buscar carro:</label>
+        <input type="text" id="buscar" name="buscar" placeholder="Ej. 21 o Carlitos"
+        list="{{ Auth::user()->can('edit carro') ? 'usuarios' : '' }}"
+        value="{{ request('buscar') }}" />
+
+        @can('edit carro')
+        <datalist id="usuarios">
+            @foreach($usuarios as $usuario)
+                <option value="{{ $usuario->nombre_usuario }}"></option>
+            @endforeach
+        </datalist>
+        @endcan
+        <input type="submit" value="Buscar" class="btn btn-warning" />
+    </form>
+
     @php
         $listaCarros = isset($carros) ? $carros : (isset($carro) ? collect([$carro]) : collect([]));
 

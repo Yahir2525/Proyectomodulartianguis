@@ -6,7 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/producto/productoIndex.css') }}"><!-- usamos el mismo CSS del index -->
+    <link rel="stylesheet" href="{{ asset('css/producto/showIndex.css') }}"><!-- usamos el mismo CSS del index -->
     <title>Detalle del Producto</title>
     @php use App\Models\CarroProducto; @endphp
 </head>
@@ -26,18 +26,17 @@
         <center><h1>Detalles del producto</h1></center>
         <hr class="hr-grueso"><br>
 
-        {{-- Buscador (mismo estilo que index, pero sin filtros) --}}
         <form action="{{ url('/producto/showProducto') }}" method="GET" class="buscar">
             <label for="busqueda">Buscar por ID o por nombre:</label>
             <input list="productos" id="busqueda" name="busqueda" placeholder="Ej. 21 o Cortina de baño" value="{{ request('busqueda') }}">
             <datalist id="productos">
-                @foreach ($productos as $producto)
-                    <option value="{{ $producto->id_producto }}">{{ $producto->nombre }}</option>
-                    <option value="{{ $producto->nombre }}">{{ $producto->nombre }}</option>
+                @foreach ($nombresUnicos as $nombre)
+                    <option value="{{ $nombre }}">{{ $nombre }}</option>
                 @endforeach
             </datalist>
             <input type="submit" value="Buscar">
         </form>
+
 
         @if($productos->isEmpty())
             <p>No se encontraron productos.</p>
@@ -60,8 +59,8 @@
                                     <th>Material</th>
                                     <th>Color</th>
                                     <th>Tamaño</th>
-                                    <th>Precio unitario</th>
-                                    <th>Piezas disponibles</th>
+                                    <th>Precio</th>
+                                    <th>Disponibles</th>
                                     <th>Cantidad</th>
                                     <th>Estado</th>
                                     <th>Editar</th>

@@ -15,6 +15,27 @@
 <br><x-barrageneral/>
 <section class="container">
     <br><hr class="hr-grueso"><center><h1>Detalles del Abono</h1></center><hr class="hr-grueso">
+    <br>
+    <form action="{{ url('/abono/showAbono') }}" method="GET" class="buscar">
+        <label for="buscar">Buscar abono:</label>
+        <input
+            type="text"
+            id="buscar"
+            name="buscar"
+            placeholder="Ej. 21 o Carlitos"
+            list="{{ Auth::user()->can('edit abono') ? 'usuarios' : '' }}"
+            value="{{ request('buscar') }}"
+            autocomplete="off"
+        />
+        @can('edit abono')
+            <datalist id="usuarios">
+                @foreach($usuarios as $usuario)
+                    <option value="{{ $usuario->nombre_usuario }}"></option>
+                @endforeach
+            </datalist>
+        @endcan
+        <input type="submit" value="Buscar" />
+    </form><br>
 
     @php
         $listaAbonos = isset($abonos) ? $abonos : (isset($abono) ? collect([$abono]) : collect([]));
@@ -41,6 +62,7 @@
                 <h2>Abonos del crédito #{{ $idCredito }} @if($nombreUsuario) de {{ $nombreUsuario }} @endif</h2>
             @endif
 
+            
             <div class="table-responsive table-wrap">
                     <table class="table table-bordered">
                     <thead>
@@ -56,17 +78,17 @@
                     <tbody>
                         @foreach($grupoAbonos as $abono)
                             <tr>
-                                <td>{{ $abono->id_abono }}</td>
+                                <td data-label="ID">{{ $abono->id_abono }}</td>
                                 
-                                <td>{{ $abono->created_at }}</td>
-                                <td>{{ $abono->updated_at }}</td>
-                                <td>${{ number_format($abono->monto_abono, 2) }}</td>
-                                <td>
+                                <td data-label="Creado">{{ $abono->created_at }}</td>
+                                <td data-label="Actualizado">{{ $abono->updated_at }}</td>
+                                <td data-label="Monto">${{ number_format($abono->monto_abono, 2) }}</td>
+                                <td data-label="Editar">
                                     @can('edit abono')
                                         <a href="{{ route('abono.edit', $abono->id_abono) }}" class="btn btn-edit">Editar</a>
                                     @endcan
                                 </td>
-                                <td>
+                                <td data-label="Eliminar">
                                     @can('delete abono')
                                         <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
                                             @csrf

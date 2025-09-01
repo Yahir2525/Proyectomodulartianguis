@@ -1,4 +1,4 @@
-/* ==== PRODUCTO INDEX (similar a carro create) ==== */
+/* ==== PRODUCTO INDEX (similar a carro create, estilo unificado) ==== */
 
 /* Reset & tipografía */
 * { box-sizing: border-box; }
@@ -13,8 +13,7 @@ a { color: #2563eb; text-decoration: none; }
 a:hover { text-decoration: underline; }
 hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
 
-/* --- Botones reutilizables --- */
-/* Botones base */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -27,30 +26,21 @@ hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
+  font-weight: bold;
 }
 .btn:hover { filter: brightness(.95); }
 
-/* Registrar (verde) */
 .btn-registrar { background:#15c221; border-color:#15c221; color:#fff; }
-
-/* Editar (morado) */
-.btn-edit { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; }
-
-/* Agregar (azul) */
-.btn-agregar { background:#2563eb; border-color:#2563eb; color:#fff; }
-
-/* Eliminar (rojo) */
-.btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; }
-
-/* Utilitario gris */
-.btn-gray { background:#6b7280; border-color:#6b7280; color:#fff; }
-
+.btn-edit      { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; }
+.btn-agregar   { background:#2563eb; border-color:#2563eb; color:#fff; }
+.btn-danger    { background:#ef4444; border-color:#ef4444; color:#fff; }
+.btn-gray      { background:#6b7280; border-color:#6b7280; color:#fff; }
 
 /* --- Formulario búsqueda --- */
 .buscar {
   display: grid;
-  grid-template-columns: max-content minmax(220px, 340px) max-content;
-  gap: 8px;
+  grid-template-columns: max-content minmax(160px, 220px) max-content; /* compacto en desktop */
+  gap: 6px;
   align-items: center;
   margin: 12px 0 18px;
 }
@@ -58,25 +48,34 @@ hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
   margin: 0;
   font-weight: 600;
   white-space: nowrap;
+  font-size: 0.95rem;
 }
-#busqueda {
+#buscar {
+  width: 100%;
   padding: 6px 10px;
   border: 1px solid #999;
   border-radius: 6px;
   background: #fff;
   font-size: 0.95rem;
+  min-height: 32px;
 }
-#busqueda:focus {
+#buscar:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+  outline: none;
 }
 .buscar input[type="submit"] {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid #2563eb;
-  background: #2563eb;
-  color: #fff;
-  cursor: pointer;
+  background:#2563eb;
+  border:1px solid #2563eb;
+  border-radius:6px;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+  line-height: 1.2;
+  min-height: 32px;
+  padding:6px 12px;
+  font-size: .9rem;
+  width: auto;
 }
 .buscar input[type="submit"]:hover { filter: brightness(.95); }
 
@@ -86,18 +85,17 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #000000;
   border-radius: 8px;
   overflow: hidden;
 }
-th, td {
-  border: 1px solid #e5e7eb;
-  padding: 8px 6px;
+th, td, tr {
+  border: 1px solid #000000;
+  padding: 8px;
   text-align: center;
-  font-size: .9rem;
-  vertical-align: middle;
+  font-size:.9rem;
 }
-thead th { background: #f3f4f6; font-weight: 600; }
+thead th { background:#f3f4f6; }
 tbody tr:nth-child(odd) { background: #fafafa; }
 tbody tr:hover { background: #f2f7ff; }
 
@@ -122,12 +120,17 @@ td img {
 
 @media (max-width: 768px) {
   html { font-size: 14px; }
-  .buscar { grid-template-columns: 1fr; }
-  #busqueda, .buscar input[type="submit"] { width: 100%; }
+  .buscar { grid-template-columns: 1fr; gap: 8px; }
+  #buscar, .buscar input[type="submit"] { width: 100%; }
+  .buscar input[type="submit"] {
+    min-height: 44px;
+    font-size: 1rem;
+    padding: 8px 12px;
+  }
 
-  /* En móvil → usar scroll horizontal en tabla, no tarjetas (porque tienes demasiadas columnas) */
+  /* En móvil → usar scroll horizontal en tabla, no tarjetas */
   .table-wrap { overflow-x: auto; }
-  table { min-width: 800px; } /* fuerza scroll si no cabe */
+  table { min-width: 800px; }
 }
 
 @media (max-width: 480px) {
@@ -137,12 +140,10 @@ td img {
 }
 
 /* ==== SECCIÓN FINAL (usuario, pedido, botón) ==== */
-/* ==== CENTRAR PARTE INFERIOR ==== */
 .form-footer {
   text-align: center;
   margin-top: 24px;
 }
-
 .form-footer label,
 .form-footer select,
 .form-footer input,
@@ -150,7 +151,11 @@ td img {
   display: block;
   margin: 8px auto;
 }
+.form-footer button {
+  margin-top: 20px;
+}
 
+/* ==== FILTROS ==== */
 .filtros {
   display: flex;
   flex-wrap: wrap;
@@ -159,51 +164,55 @@ td img {
   justify-content: center;
   margin: 20px 0;
 }
-.filtros label {
-  font-weight: 600;
-  margin-right: 6px;
-}
+.filtros label { font-weight: 600; margin-right: 6px; }
 .filtros select,
 .filtros input {
-  padding: 4px 8px;
+  padding: 6px 10px;
   border: 1px solid #999;
   border-radius: 6px;
   min-width: 120px;
+  background: #fff;
+  font-size: 0.95rem;
+}
+.filtros select:focus,
+.filtros input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+  outline: none;
 }
 
-.mt-4 .pagination {
-  margin-left: 12px; /* separa hacia la izquierda */
-}
-
+.mt-4 .pagination { margin-left: 12px; }
 .pagination + .pagination-summary,
-.pagination-summary {
-  margin-left: 12px;
-}
+.pagination-summary { margin-left: 12px; }
 
 /* === Estilo uniforme para inputs/selects === */
 .form-input {
   padding: 6px 10px;
   border: 1px solid #999;
-  border-radius: 6px;   /* mismo ovalado que filtros */
+  border-radius: 6px;
   background: #fff;
   font-size: 0.95rem;
   min-width: 200px;
 }
-
 .form-input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
   outline: none;
 }
 
-.form-footer button {
-  margin-top: 20px; /* aumenta separación entre el select y el botón */
-}
-
+/* Cantidad */
 .cant-input {
-  min-width: 20px; max-width: 60px;     /* ancho fijo */
+  min-width: 40px;
+  max-width: 70px;
   text-align: left;
   padding: 4px 6px;
   border-radius: 6px;
-  border: 1px solid #999; /* un poco más pequeño que los demás */
+  border: 1px solid #999;
+  font-size: 0.9rem;
+  background: #fff;
+}
+.cant-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+  outline: none;
 }

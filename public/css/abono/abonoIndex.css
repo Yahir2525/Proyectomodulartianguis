@@ -1,19 +1,18 @@
-/* ==== ABONO INDEX (modificado para que la TABLA luzca como carro create) ==== */
-
-/* Reset & tipografía */
+/* ==== RESET & TIPOGRAFÍA ==== */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #fff87a;  height: 100%;}
+body { margin: 0; color: #222; background: #fff87a; min-height: 100vh; }
 
-/* Layout */
 .container { max-width: 1100px; margin: 0 auto; padding: 14px; }
 h1 { margin: 0 0 8px; font-size: clamp(1.2rem, 1rem + 1vw, 1.8rem); text-align: center; }
 h2 { margin-top: 24px; font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem); }
+h3 { margin-top: 16px; font-size: 1rem; }
 a { color: #2563eb; text-decoration: none; }
 a:hover { text-decoration: underline; }
+hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; }
 
-/* --- Botones reutilizables --- */
-.btn{
+/* ==== BOTONES ==== */
+.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -22,112 +21,100 @@ a:hover { text-decoration: underline; }
   border-radius: 6px;
   border: 1px solid transparent;
   font-size: .9rem;
-  line-height: 1;
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
 }
-.btn:hover{ filter: brightness(.95); }
+.btn:hover { filter: brightness(.95); }
 
-.btn-primary { background:#15c221; border-color:#15c221; color:#fff; margin-left: 0%; padding: 10px 12px; font-weight: bold;} /* Registrar */
-.btn-edit    { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; font-weight: bold;} /* Editar */
-.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold;} /* Eliminar */
-.btn-gray    { background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold;} /* Utilitario */
+.btn-primary { background:#15c221; border-color:#15c221; color:#fff; font-weight: bold; } /* Registrar */
+.btn-edit    { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; font-weight: bold; } /* Editar */
+.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold; } /* Eliminar */
+.btn-gray    { background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold; } /* Utilitario */
 
-/* --- Formulario de búsqueda: label + input + botón en la misma fila --- */
-form{
-  display:grid;
-  grid-template-columns: max-content minmax(200px, 320px) auto; /* etiqueta | campo | botón */
-  gap:6px;
-  align-items:center;
-  margin:6px 0 10px;
+/* ==== FORMULARIO DE BÚSQUEDA ==== */
+form:has(#buscar) {
+  display: grid;
+  grid-template-columns: max-content minmax(160px, 220px) max-content;
+  gap: 6px;
+  align-items: center;
+  margin: 6px 0 10px;
 }
-form label{
-  margin:0;
-  font-weight:600;
-  white-space:nowrap;
+form:has(#buscar) label {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
   font-size: 0.95rem;
 }
-#busqueda{
-  width:100%;
-  padding:6px 10px;
-  border:1px solid #999;
-  border-radius:6px;
-  background:#fff;
-  outline:none;
-  font-size: 0.95rem;
-}
-#busqueda::placeholder{ color:#9aa3ad; }
-#busqueda:focus{
-  border-color:#2563eb;
-  box-shadow:0 0 0 2px rgba(37,99,235,.15);
-}
-
-/* Botón Buscar con estilo consistente */
-input[type="submit"]{
-  width:auto;
-  padding:6px 10px;
-  min-height:32px;
-  font-size:.88rem;
-  border-radius:6px;
-  border:1px solid #2563eb;
-  background:#2563eb;
-  color:#fff;
-  cursor:pointer;
-  line-height:1;
-  font-weight: bold;
-}
-input[type="submit"]:hover{ filter:brightness(.95); }
-
-/* =================== TABLA (estética de carro create) =================== */
-.table-wrap {
+#buscar {
   width: 100%;
-  overflow-x: auto;                 /* conserva scroll si hace falta */
-  -webkit-overflow-scrolling: touch;
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  outline: none;
+  font-size: 0.95rem;
+  min-height: 32px;
 }
+#buscar::placeholder { color: #9aa3ad; }
+#buscar:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+form:has(#buscar) input[type="submit"] {
+  background: #2563eb;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1.2;
+  min-height: 32px;
+  padding: 6px 12px;
+  font-size: 0.95rem;
+}
+@media (max-width: 768px) {
+  form:has(#buscar) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  #buscar,
+  form:has(#buscar) input[type="submit"] {
+    width: 100%;
+  }
+  form:has(#buscar) input[type="submit"] {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 1rem;
+  }
+}
+
+/* ==== TABLAS ==== */
+.table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  overflow: hidden;                 /* bordes redondeados limpios */
-  table-layout: auto !important;    /* autoajuste real de columnas */
+  border: 1px solid #000;
+  border-radius: 8px;
+  overflow: hidden;
 }
-th, td {
-  border: 1px solid #e5e7eb;
+th, td, tr {
+  border: 1px solid #000;
   padding: 8px;
   text-align: center;
-  vertical-align: middle;
-  font-size: .95rem;
-  white-space: normal;              /* envuelve por defecto */
-  overflow-wrap: anywhere;          /* evita desbordes de texto largos */
+  font-size:.9rem;
 }
-thead th { background: #f3f4f6; }
+thead th { background:#f3f4f6; }
 tbody tr:nth-child(odd) { background: #fafafa; }
 tbody tr:hover { background: #f2f7ff; }
 
-/* Sugerencias de anchuras (ajusta según tus columnas reales) */
-table th:last-child,
-table td:last-child {               /* Acciones */
-  white-space: nowrap;
-  width: 1%;
-}
+/* Botones dentro de la tabla */
+td .btn { display:inline-flex; }
+form[method="POST"][style*="display:inline"] .btn { margin-left:6px; }
 
-/* Alineación de botones en la celda de Acciones */
-td .btn{ display:inline-flex; }
-form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
-
-/* =================== RESPONSIVE =================== */
-@media (max-width: 992px){
-  html { font-size: 15px; }
-  .container { padding: 12px; }
-}
-
-@media (max-width: 768px){
-  html { font-size: 14px; }
-
-  /* --- Tabla como “tarjetas” (igual enfoque que carro create) --- */
+/* ==== RESPONSIVE (Tablas → tarjetas) ==== */
+@media (max-width: 768px) {
   table, thead, tbody, th, td, tr { display: block; }
   thead { display: none; }
 
@@ -139,7 +126,6 @@ form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
     overflow: hidden;
   }
-
   td {
     display: grid;
     grid-template-columns: max-content 1fr;
@@ -148,100 +134,15 @@ form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
     padding: 10px 12px;
     border: none;
     border-top: 1px solid #f1f5f9;
-    white-space: normal;
   }
   td:first-child { border-top: none; }
-
-  /* Etiquetas por celda en móvil (preferible usar data-label en cada <td>) */
   td::before {
-    content: attr(data-label);   /* ej. <td data-label="Cliente">Juan</td> */
+    content: attr(data-label); /* se rellena en HTML */
     font-weight: 600;
     min-width: 120px;
   }
-
-  /* Botones/enlaces a ancho completo en móvil dentro de la tabla */
-  td .btn,
-  td form,
-  td a,
-  td button,
-  td input[type="submit"] {
+  td .btn, td form, td a, td button, td input[type="submit"] {
     width: 100%;
     margin: 6px 0;
   }
-
-  /* Form en columna completa en móvil */
-  form{ grid-template-columns:1fr; }
-  #busqueda, input[type="submit"]{ width:100%; }
-}
-
-@media (max-width: 640px){
-  html { font-size: 13.5px; }
-
-  /* En móvil pequeño: refuerzo de estilos accesibles */
-  /* Botones de acciones apilados y a ancho completo */
-  td .btn{ display:block; width:100%; margin:6px 0; }
-  td form{ display:block !important; }
-
-  .table-wrap{
-    border:1px solid #e5e7eb;
-    border-radius:8px;
-    background:#fff;
-  }
-}
-
-/* =================== Botón "Buscar" del ABONO =================== */
-/* En desktop: evitar que el botón se alargue */
-@media (min-width: 769px) {
-  /* Selecciona el form que contiene el #busqueda */
-  form:has(#busqueda) {
-    grid-template-columns: max-content minmax(200px, 320px) max-content; /* etiqueta | campo | botón */
-  }
-  form:has(#busqueda) input[type="submit"] {
-    justify-self: start;  /* se queda pegado, no se estira */
-    width: auto;          /* solo ocupa lo necesario */
-    padding: 4px 12px;    /* tamaño compacto */
-    font-size: 0.85rem;
-    min-height: 28px;
-    border-radius: 4px;
-    line-height: 1.2;
-  }
-}
-
-/* En móvil: que sí llene el ancho (accesible) */
-@media (max-width: 768px) {
-  form:has(#busqueda) input[type="submit"] {
-    justify-self: stretch;
-    width: 100%;
-    min-height: 44px;
-    padding: 6px 10px;
-    font-size: .9rem;
-  }
-}
-
-/* Misceláneos */
-hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }
-
-/* Fix para formularios dentro de dropdowns del navbar */
-.navbar .dropdown-menu form{
-  display:block;
-  grid-template-columns: initial;
-}
-
-.info-msg {
-  font-size: 0.85rem;
-  font-style: italic;
-  display: inline-block;
-  margin-top: 4px;
-}
-.text-danger { color: #b91c1c; }
-.text-warning { color: #f833ff; }
-
-.page-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;   /* altura mínima toda la pantalla */
-}
-
-.content {
-  flex: 1;             /* empuja el footer hacia abajo */
 }

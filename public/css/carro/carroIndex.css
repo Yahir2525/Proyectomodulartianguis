@@ -14,23 +14,22 @@ a:hover { text-decoration: underline; }
 hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
 
 /* =================== TABLA =================== */
-.table-wrap { width: 100%; overflow-x: auto; }
+.table-wrap { width: 100%; }
 table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #000000;
   border-radius: 8px;
   overflow: hidden;
 }
-th, td {
-  border: 1px solid #e5e7eb;
-  padding: 8px 6px;
+th, td, tr {
+  border: 1px solid #000000;
+  padding: 8px;
   text-align: center;
-  font-size: .9rem;
-  vertical-align: middle;
+  font-size:.9rem;
 }
-thead th { background: #f3f4f6; font-weight: 600; }
+thead th { background:#f3f4f6; }
 tbody tr:nth-child(odd) { background: #fafafa; }
 tbody tr:hover { background: #f2f7ff; }
 
@@ -58,12 +57,12 @@ td img {
 }
 .btn:hover { filter: brightness(.95); }
 
-.btn-primary { background:#15c221; border-color:#15c221; color:#fff; font-weight: bold;}
-.btn-registrar { background:#15c221; border-color:#15c221; color:#fff; margin-left: 0%; margin-left: 0%; padding: 10px 12px; font-weight: bold;}
-.btn-edit    { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; font-weight: bold;}
-.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold;}
-.btn-gray    { background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold;}
-.btn-warning { background:#2563eb; border-color:#2563eb; color:#fff; font-weight: bold;}
+.btn-primary  { background:#15c221; border-color:#15c221; color:#fff; font-weight: bold;}
+.btn-registrar{ background:#15c221; border-color:#15c221; color:#fff; padding: 10px 12px; font-weight: bold;}
+.btn-edit     { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; font-weight: bold;}
+.btn-danger   { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold;}
+.btn-gray     { background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold;}
+.btn-warning  { background:#2563eb; border-color:#2563eb; color:#fff; font-weight: bold;}
 
 /* Centrar botones en celdas */
 td .btn { display: inline-flex; }
@@ -75,7 +74,7 @@ td .pedido-cerrado {
   font-size: .85rem;
 }
 
-/* Responsive */
+/* =================== RESPONSIVE =================== */
 @media (max-width: 992px) {
   html { font-size: 15px; }
   section { padding: 12px; }
@@ -85,70 +84,134 @@ td .pedido-cerrado {
 
 @media (max-width: 768px) {
   html { font-size: 14px; }
-  th, td { padding: 6px 4px; }
-  table { min-width: 800px; }
+
+  /* 🔹 Tabla → tarjetas en móvil */
+  table, thead, tbody, th, td, tr { display: block; }
+  thead { display: none; }
+
+  tbody tr {
+    background: #fff;
+    margin: 8px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    overflow: hidden;
+  }
+
+  td {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    border-top: 1px solid #f1f5f9;
+    white-space: normal;
+  }
+  td:first-child { border-top: none; }
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    min-width: 120px;
+  }
+
+  /* Botones full width */
+  td .btn,
+  td form,
+  td a,
+  td button,
+  td input[type="submit"] {
+    width: 100%;
+    margin: 6px 0;
+  }
+
+  td img {
+    max-width: 100px;
+    margin-top: 6px;
+  }
 }
 
 @media (max-width: 480px) {
   html { font-size: 13px; }
-  td img { max-width: 60px; }
+  td img { max-width: 80px; }
   td .btn { display:block; width:100%; margin:6px 0; }
+  td form { display:block !important; }
+  .table-wrap {
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    background:#fff;
+  }
 }
 
+/* =================== BUSCADOR =================== */
+form:has(#buscar) {
+  display: grid;
+  grid-template-columns: max-content minmax(160px, 220px) max-content;
+  gap: 6px;
+  align-items: center;
+  margin: 6px 0 10px;
+}
+form:has(#buscar) label {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+#buscar {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  outline: none;
+  font-size: 0.95rem;
+  min-height: 32px;
+}
+#buscar::placeholder { color: #9aa3ad; }
+#buscar:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+}
+form:has(#buscar) input[type="submit"] {
+  background: #2563eb;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1.2;
+  min-height: 32px;
+  padding: 6px 12px;
+  font-size: 0.95rem;
+}
+@media (max-width: 768px) {
+  form:has(#buscar) { grid-template-columns: 1fr; gap: 8px; }
+  #buscar,
+  form:has(#buscar) input[type="submit"] { width: 100%; }
+  form:has(#buscar) input[type="submit"] {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 1rem;
+  }
+}
+
+.mt-4 .pagination { margin-left: 12px; }
+
+/* =================== PEDIDO ACTIONS =================== */
 .pedido-actions {
   display: flex;
-  align-items: center;   /* centra verticalmente */
+  align-items: center;
   gap: 12px;
   margin-top: 10px;
-  flex-wrap: wrap;       /* en móvil se apilan */
+  flex-wrap: wrap;
 }
-
 .pedido-actions select {
   display: inline-block;
-  width: auto;        /* evita que se estire */
-  min-width: 200px;   /* ancho mínimo uniforme */
-  max-width: 280px;   /* evita que sea enorme */
+  min-width: 200px;
+  max-width: 280px;
   padding: 6px 10px;
   border: 1px solid #999;
   border-radius: 6px;
   font-size: .9rem;
   background: #fff;
-}
-
-
-.buscar {
-  display: grid;
-  grid-template-columns: max-content minmax(220px, 340px) max-content;
-  gap: 8px;
-  align-items: center;
-  margin: 12px 0 18px;
-}
-.buscar label {
-  margin: 0;
-  font-weight: 600;
-  white-space: nowrap;
-}
-#busqueda {
-  padding: 6px 10px;
-  border: 1px solid #999;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 0.95rem;
-}
-#busqueda:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
-}
-.buscar input[type="submit"] {
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid #2563eb;
-  background: #2563eb;
-  color: #fff;
-  cursor: pointer;
-}
-.buscar input[type="submit"]:hover { filter: brightness(.95); }
-
-.mt-4 .pagination {
-  margin-left: 12px; /* separa hacia la izquierda */
 }
