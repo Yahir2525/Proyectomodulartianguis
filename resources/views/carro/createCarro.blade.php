@@ -40,16 +40,13 @@
         const filas = document.querySelectorAll('table tbody tr');
 
         filas.forEach(fila => {
-            const celdaDisp = fila.querySelector('td:nth-child(8)');
-            if (!celdaDisp) return;
-
-            const num = parseInt((celdaDisp.textContent || '0').replace(/[^\d-]/g, ''), 10);
-            const disp = isNaN(num) ? 0 : num;
+            const disp = parseInt(fila.dataset.disp || "0", 10);
+            const estado = parseInt(fila.dataset.estado || "0", 10);
 
             const chk = fila.querySelector('td:first-child input[type="checkbox"]');
             const qty = fila.querySelector('td:last-child input[type="number"]');
 
-            if (disp <= 0) {
+            if (disp <= 0 || estado === 0) {
                 if (chk) { chk.checked = false; chk.disabled = true; }
                 if (qty) { qty.value = ''; qty.disabled = true; }
                 fila.classList.add('sin-stock');
@@ -191,9 +188,14 @@
                 <tbody>
                     @foreach($productos as $producto)
                         @if (Auth::user()->hasRole('administrador') || $producto->estado_producto)
-                        <tr class="{{ $producto->piezas_disponibles == 0 ? 'sin-stock' : '' }}">
+                        <tr class="{{ ($producto->piezas_disponibles == 0 || !$producto->estado_producto) ? 'sin-stock' : '' }}"
+                            data-disp="{{ (int)($producto->piezas_disponibles ?? 0) }}"
+                            data-estado="{{ $producto->estado_producto }}">
                             <td data-label="Seleccionar">
-                                <input type="checkbox" name="productos_seleccionados[]" value="{{ $producto->id_producto }}">
+                                <input type="checkbox" 
+                                    name="productos_seleccionados[]" 
+                                    value="{{ $producto->id_producto }}"
+                                    {{ ($producto->piezas_disponibles == 0 || !$producto->estado_producto) ? 'disabled' : '' }}>
                             </td>
                             <td>{{ $producto->nombre }}</td>
                             <td data-label="Imagen">
@@ -207,11 +209,13 @@
                             <td data-label="Color">{{ $producto->color }}</td>
                             <td data-label="Tamaño">{{ $producto->tamanio }}</td>
                             <td data-label="Precio">${{ number_format($producto->precio_unitario, 2) }}</td>
-                            @php $disp = max(0, (int)($producto->piezas_disponibles ?? 0)); @endphp
-                            <td data-label="Disponibles">{{ $disp }}</td>
+                            <td data-label="Disponibles">{{ (int)($producto->piezas_disponibles ?? 0) }}</td>
                             <td data-label="Cantidad">
-                                <input type="number" name="cantidades[{{ $producto->id_producto }}]" class="cant-input form-input"
-                                    min="1" step="1" max="{{ $disp }}" {{ $disp === 0 ? 'disabled' : '' }} />
+                                <input type="number" 
+                                    name="cantidades[{{ $producto->id_producto }}]" 
+                                    class="cant-input form-input"
+                                    min="1" step="1" max="{{ (int)($producto->piezas_disponibles ?? 0) }}"
+                                    {{ ($producto->piezas_disponibles == 0 || !$producto->estado_producto) ? 'disabled' : '' }} />
                             </td>
                         </tr>
                         @endif

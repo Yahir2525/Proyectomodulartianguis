@@ -17,8 +17,8 @@
 <section>
     <br><hr class="hr-grueso"><center><h1>Editar carro</h1></center><hr class="hr-grueso"><br>
     @php
-        $pedidoCerrado = $carro->pedido && $carro->pedido->estado_pedido == 0;
-        $descontinuado = !$productoActual->estado_producto;
+        $pedidoCerrado  = $carro->pedido && $carro->pedido->estado_pedido == 0;
+        $descontinuado  = !$productoActual->estado_producto;
     @endphp
 
     @if(session('error'))
@@ -120,33 +120,34 @@
                     <tbody>
                         @foreach($productos as $producto)
                             @php
-                                $esActual = $producto->id_producto == $productoActual->id_producto;
-                                $sinStock = $producto->piezas_disponibles == 0;
-                                $desactivado = !$producto->estado_producto;
-                                $deshabilitado = (!$esActual && ($sinStock || $desactivado));
+                                $esActual       = $producto->id_producto == $productoActual->id_producto;
+                                $sinStock       = $producto->piezas_disponibles == 0;
+                                $descontinuado  = $producto->estado_producto == 0;
+                                $deshabilitado  = (!$esActual && ($sinStock || $descontinuado));
                             @endphp
-                            <tr class="{{ $sinStock || $desactivado ? 'sin-stock' : '' }}">
-                                <td>
+
+                            <tr class="{{ $sinStock || $descontinuado ? 'sin-stock' : '' }}">
+                                <td data-label="Seleccionar">
                                     <input type="radio"
                                         name="id_producto"
                                         value="{{ $producto->id_producto }}"
                                         {{ $esActual ? 'checked' : '' }}
                                         {{ $deshabilitado ? 'disabled' : '' }}>
                                 </td>
-                                <td>
+                                <td data-label="Imagen">
                                     @if (!empty($producto->imagen)) 
                                         <img src="{{ Storage::disk('s3')->url($producto->imagen) }}" alt="Foto de producto" width="200">
                                     @else
                                         <span>Sin imagen</span>
                                     @endif
                                 </td>
-                                <td>{{ $producto->nombre }}</td>
-                                <td>{{ $producto->material }}</td>
-                                <td>{{ $producto->color }}</td>
-                                <td>{{ $producto->tamanio }}</td>
-                                <td>${{ number_format($producto->precio_unitario, 2) }}</td>
-                                <td class="{{ $sinStock ? 'resaltado' : '' }}">{{ $producto->piezas_disponibles }}</td>
-                                <td>{{ $producto->estado_producto ? 'Activo' : 'Descontinuado' }}</td>
+                                <td data-label="Nombre">{{ $producto->nombre }}</td>
+                                <td data-label="Material">{{ $producto->material }}</td>
+                                <td data-label="Color">{{ $producto->color }}</td>
+                                <td data-label="Tamaño">{{ $producto->tamanio }}</td>
+                                <td data-label="Precio">${{ number_format($producto->precio_unitario, 2) }}</td>
+                                <td data-label="Disponibles" class="{{ $sinStock ? 'resaltado' : '' }}">{{ $producto->piezas_disponibles }}</td>
+                                <td data-label="Estado">{{ $producto->estado_producto ? 'Activo' : 'Inactivo' }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -158,6 +159,18 @@
                 {{ $productos->appends(request()->query())->links('pagination::bootstrap-5') }}
             </div>
 
+            @if($paginaCorrecta)
+                <div class="mt-3 text-center">
+                    <a href="{{ route('carro.edit', [
+                        'id_carro' => $carro->id_carro,
+                        'id_producto' => $productoActual->id_producto,
+                        'page' => $paginaCorrecta
+                    ] + request()->query()) }}" class="btn btn-agregar">
+                        Ir a la página del producto actual
+                    </a>
+                </div>
+            @endif
+
             <center><br>
             <label for="cantidad">Cantidad:</label>
             <input type="number"
@@ -168,10 +181,11 @@
                 value="{{ $cantidad }}"
                 required
                 class="cant-input form-input"
+                {{ $descontinuado && $cantidad == 0 ? 'disabled' : '' }}
             >
             @if($descontinuado)
                 <p style="color: red;">
-                    Este producto está descontinuado. Solo puedes reducir la cantidad actual (máximo {{ $cantidad }}).
+                    Este producto está inactivo. Solo puedes reducir la cantidad actual (máximo {{ $cantidad }}).
                 </p>
             @endif
 

@@ -94,14 +94,11 @@ th, td, tr {
   padding: 8px;
   text-align: center;
   font-size:.9rem;
+  vertical-align: middle;
 }
 thead th { background:#f3f4f6; }
 tbody tr:nth-child(odd) { background: #fafafa; }
 tbody tr:hover { background: #f2f7ff; }
-
-/* Estados de stock */
-.sin-stock { background: #ffe2e2 !important; }
-.resaltado { font-weight: bold; color: #b91c1c; }
 
 /* Imagen */
 td img {

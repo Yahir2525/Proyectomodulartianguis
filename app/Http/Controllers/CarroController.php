@@ -162,7 +162,7 @@ class CarroController extends Controller
 
         // Validar que el producto esté activo (no descontinuado)
         if (!$producto->estado_producto) {
-            return back()->with('error', 'Este producto está descontinuado y no puede ser agregado.');
+            return back()->with('error', 'Este producto está inactivo y no puede ser agregado.');
         }
 
         $user = User::findOrFail($userId);
@@ -301,7 +301,7 @@ class CarroController extends Controller
                 return back()->with('error', "El producto con ID $idProducto no existe.");
             }
             if (!$producto->estado_producto) {
-                return back()->with('error', "El producto \"{$producto->nombre}\" está descontinuado y no puede ser agregado.");
+                return back()->with('error', "El producto \"{$producto->nombre}\" está inactivo y no puede ser agregado.");
             }
         }
 
@@ -442,7 +442,8 @@ class CarroController extends Controller
         $allIds = (clone $query)->orderBy('tipo')->orderBy('id_producto')->pluck('id_producto');
         $posicion = $allIds->search($productoActual->id_producto);
 
-        if ($posicion !== false) {
+        $paginaCorrecta = null;
+        if ($posicion !== false && !$request->has('navegacion')) {
             $paginaCorrecta = ceil(($posicion + 1) / $perPage);
             $paginaSolicitada = $request->input('page', 1);
 
@@ -450,10 +451,15 @@ class CarroController extends Controller
                 return redirect()->route('carro.edit', [
                     'id_carro' => $id_carro,
                     'id_producto' => $id_producto,
-                    'page' => $paginaCorrecta
+                    'page' => $paginaCorrecta,
+                    'navegacion' => 1 // bandera para evitar loop
                 ] + $request->query());
             }
+        } elseif ($posicion !== false) {
+            // Si ya tiene navegación, de todos modos mandamos el valor a la vista
+            $paginaCorrecta = ceil(($posicion + 1) / $perPage);
         }
+
 
         // Paginación de 10 en 10
         $productos = $query
@@ -494,7 +500,8 @@ class CarroController extends Controller
             'materiales',
             'colores',
             'tamanios',
-            'nombresUnicos'
+            'nombresUnicos',
+            'paginaCorrecta'
         ));
     }
 
@@ -566,7 +573,7 @@ class CarroController extends Controller
             $cantidadActual = $carro->productos()->find($id_producto)->pivot->cantidad;
 
             if (!$producto->estado_producto && $cantidadSolicitada > $cantidadActual) {
-                return back()->with('error', 'No puedes aumentar la cantidad de un producto descontinuado.');
+                return back()->with('error', 'No puedes aumentar la cantidad de un producto inactivo.');
             }
 
             $reservadas = CarroProducto::where('id_producto', $id_producto)

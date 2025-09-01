@@ -37,7 +37,6 @@
             <input type="submit" value="Buscar">
         </form>
 
-
         @if($productos->isEmpty())
             <p>No se encontraron productos.</p>
         @else
@@ -74,11 +73,12 @@
                                         $esAdmin = Auth::check() && Auth::user()->hasRole('administrador');
                                     @endphp
                                     @if ($esAdmin || $producto->estado_producto)
-                                        <tr class="{{ $disponibles == 0 ? 'sin-stock' : '' }}">
+                                        <tr class="{{ ($disponibles == 0 || $producto->estado_producto == 0) ? 'sin-stock' : '' }}">
                                             <td>
-                                                <input type="checkbox" name="productos_seleccionados[]" 
-                                                        value="{{ $producto->id_producto }}" 
-                                                        {{ $disponibles == 0 ? 'disabled' : '' }}>
+                                                <input type="checkbox" 
+                                                    name="productos_seleccionados[]" 
+                                                    value="{{ $producto->id_producto }}" 
+                                                    {{ ($disponibles == 0 || $producto->estado_producto == 0) ? 'disabled' : '' }}>
                                             </td>
                                             <td>{{ $producto->id_producto }}</td>
                                             <td>{{ $producto->nombre }}</td>
@@ -94,12 +94,15 @@
                                             <td>{{ $producto->tamanio }}</td>
                                             <td>${{ number_format($producto->precio_unitario, 2) }}</td>
                                             <td class="{{ $disponibles == 0 ? 'resaltado' : '' }}">{{ $disponibles }}</td>
-                                            <td>
-                                                <input type="number" name="cantidades[{{ $producto->id_producto }}]" 
-                                                        min="1" max="{{ $disponibles }}" 
-                                                        class="cant-input" {{ $disponibles == 0 ? 'disabled' : '' }}>
+                                            <td data-label="Cantidad">
+                                                <input type="number" 
+                                                    name="cantidades[{{ $producto->id_producto }}]" 
+                                                    min="1" 
+                                                    max="{{ $disponibles }}" 
+                                                    class="cant-input"
+                                                    {{ ($disponibles == 0 || $producto->estado_producto == 0) ? 'disabled' : '' }}>
                                             </td>
-                                            <td>{{ $producto->estado_producto ? 'Activo' : 'Descontinuado' }}</td>
+                                            <td>{{ $producto->estado_producto ? 'Activo' : 'Inactivo' }}</td>
                                             <td><a href="{{ route('producto.edit', $producto->id_producto) }}" class="btn btn-edit">Editar</a></td>
                                         </tr>
                                     @endif

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Support\MineriaPipeline;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PedidoController extends Controller
 {
@@ -255,6 +256,10 @@ class PedidoController extends Controller
         $id_credito_anterior = $pedido->id_credito;
         $total_anterior = $pedido->total_pedido;
 
+        if ($total <= 0) {
+            return back()->with('error', 'No puedes cerrar un pedido con total $0.');
+        }
+
         // ✅ NUEVO: bloquear cierre a crédito para usuarios con nivel "malo"
         $user->refresh(); // Garantiza nivel actualizado si lo modificó un job externo
         if ($metodo === 'credito' && $this->esNivelMalo($user)) {
@@ -346,7 +351,7 @@ class PedidoController extends Controller
             MineriaPipeline::ejecutarPipeline();
         });
 
-        return redirect()->route('pedido.index')->with('success', 'Pedido cerrado correctamente.');
+        return $this->generarTicket($pedido->id_pedido);
     }
 
     public function reabrir(Request $request, $id_pedido)
@@ -490,5 +495,16 @@ class PedidoController extends Controller
 
         // Validar que no supere $10,000
         return $nuevoSaldo <= 10000;
+    }
+
+    public function generarTicket($id)
+    {
+        $pedido = Pedido::with(['carro.productos', 'user', 'credito'])->findOrFail($id);
+
+        $pdf = Pdf::loadView('pdf.ticket', compact('pedido'))
+                ->setPaper([0, 0, 226.77, 600], 'portrait'); // tamaño de ticket aprox 80mm
+
+        // return $pdf->stream("ticket_pedido_$id.pdf"); // mostrar en navegador
+        return $pdf->download("ticket_pedido_$id.pdf"); // forzar descarga
     }
 }
