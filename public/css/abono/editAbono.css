@@ -49,6 +49,8 @@ cursor: pointer;
 text-decoration: none;
 font-weight: bold;
 }
+.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold; } /* Eliminar */
+
 button:hover,
 .btn.btn-primary:hover{ filter: brightness(.95); }
 

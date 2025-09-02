@@ -116,7 +116,7 @@
     </form><br>
     <center>
     <div class="back-wrap">
-    <a href="{{ route('abono.index') }}" class="btn btn-primary">Cancelar</a>
+    <a href="{{ route('abono.index') }}" class="btn btn-danger">Cancelar</a>
     </div></center>
 </div>
 </main>

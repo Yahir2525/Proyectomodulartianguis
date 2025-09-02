@@ -103,7 +103,6 @@
                             <th>ID pedido</th>
                             <th>Crédito</th>
                             <th>Total</th>
-                            <th>Estado</th>
                             <th>Creado</th>
                             <th>Actualizado</th>
                             <th>Eliminar</th>
@@ -137,7 +136,6 @@
                                 <td data-label="ID">{{ $pedido->id_pedido }}</td>
                                 <td data-label="Crédito">{{ $pedido->id_credito ?? 'N/A' }}</td>
                                 <td data-label="Total">${{ number_format($totalPedido, 2) }}</td>
-                                <td data-label="Estado">{{ $pedido->estado_pedido == 1 ? 'Abierto' : 'Cerrado' }}</td>
                                 <td data-label="Creado">{{ $pedido->created_at }}</td>
                                 <td data-label="Actualizado">{{ $pedido->updated_at }}</td>
                                 <td data-label="Eliminar">
@@ -186,11 +184,12 @@
                                             </form>
                                         </div>
                                     @else
-                                        <span class="badge bg-secondary metodo-badge">
+                                        <span class="badge bg-gray">
                                             {{ ucfirst($pedido->metodo_pago ?? 'Sin seleccionar') }}
                                         </span>
                                     @endif
                                 </td>
+
 
                                 @if($hayCerrados && Auth::user()->can('edit pedido'))
                                     <td data-label="Reabrir">
@@ -199,6 +198,8 @@
                                                 @csrf
                                                 <button type="submit" class="btn btn-edit btn-sm">Reabrir</button>
                                             </form>
+                                        @else
+                                            <span class="badge bg-gray">Pedido abierto</span>
                                         @endif
                                     </td>
                                 @endif

@@ -29,8 +29,8 @@ hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
   font-weight: bold;
 }
 .btn:hover { filter: brightness(.95); }
-
-.btn-registrar { background:#15c221; border-color:#15c221; color:#fff; }
+.btn-primary  { background:#15c221; border-color:#15c221; color:#fff;}
+.btn-registrar { background:#15c221; border-color:#15c221; color:#fff; margin-left: 0;}
 .btn-edit      { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; }
 .btn-agregar   { background:#2563eb; border-color:#2563eb; color:#fff; }
 .btn-danger    { background:#ef4444; border-color:#ef4444; color:#fff; }

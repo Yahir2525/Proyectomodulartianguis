@@ -37,7 +37,7 @@
         @endif
 
         <input type="submit" value="Buscar">
-    </form>
+    </form><br>
 
 
     @if($creditoIndex->isNotEmpty())
@@ -110,11 +110,11 @@
                         @foreach($vencidos as $credito)
                             <tr>
                                 <td data-label="ID">{{ $credito->id_credito }}</td>
-                                <td data-label="Creación">{{ $credito->created_at }}</td>
-                                <td data-label="Liquidación">{{ $credito->fecha_liquidacion ?? 'Aún no liquidado' }}</td>
+                                <td data-label="Creado">{{ $credito->created_at }}</td>
+                                <td data-label="Liquidado">{{ $credito->fecha_liquidacion ?? 'Aún no liquidado' }}</td>
                                 <td data-label="Vencimiento">{{ $credito->fecha_vencimiento }}</td>
                                 <td data-label="Saldo">${{ number_format($credito->saldo_total, 2) }}</td>
-                                <td data-label="Acciones">
+                                <td data-label="Eliminar">
                                     <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" style="display:inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-danger">Eliminar</button>
@@ -126,7 +126,6 @@
                 </table>
                 </div>
             @endif
-
             {{-- Cerrados --}}
             @if($cerrados->isNotEmpty())
                 <h3>Cerrados</h3>
@@ -135,6 +134,7 @@
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Creación</th>
                             <th>Liquidación</th>
                             <th>Vencimiento</th>
                             <th>Saldo</th>
@@ -145,10 +145,11 @@
                         @foreach($cerrados as $credito)
                             <tr>
                                 <td data-label="ID">{{ $credito->id_credito }}</td>
-                                <td data-label="Liquidación">{{ $credito->fecha_liquidacion ?? '-' }}</td>
+                                <td data-label="Creado">{{ $credito->created_at }}</td>
+                                <td data-label="Liquidado">{{ $credito->fecha_liquidacion ?? '-' }}</td>
                                 <td data-label="Vencimiento">{{ $credito->fecha_vencimiento }}</td>
                                 <td data-label="Saldo">${{ number_format($credito->saldo_total, 2) }}</td>
-                                <td data-label="Acciones">
+                                <td data-label="Eliminar">
                                     <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" style="display:inline">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-danger">Eliminar</button>
@@ -165,7 +166,6 @@
     @else
         <p>No hay créditos registrados.</p>
     @endif
-
 </section>
 </main>
 <x-footer/>

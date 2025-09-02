@@ -42,7 +42,7 @@
             @endcan
 
             <input type="submit" value="Buscar" />
-        </form><br>
+        </form>
 
         @if ($abonoIndex->isNotEmpty())
             @php

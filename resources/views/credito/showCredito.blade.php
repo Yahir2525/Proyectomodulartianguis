@@ -6,181 +6,172 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/credito/creditoIndex.css') }}">
     <title>Detalle(s) de Crédito</title>
-    <style>
-        table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
-        th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
-        th { background-color: #eee; }
-        h2 { margin-top: 40px; color: #2c3e50; }
-        h3 { margin-top: 20px; color: #34495e; }
-        p.error { color: red; font-weight: bold; }
-        a { display: inline-block; margin-top: 15px; color: #2980b9; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        button { background-color: #c0392b; color: white; border: none; padding: 6px 10px; cursor: pointer; border-radius: 3px; }
-        button:hover { background-color: #e74c3c; }
-    </style>
 </head>
 <body>
+<br><x-barrageneral/>
 <div class="page-container">
 <main class="content">
-    <br><hr class="hr-grueso"><center><h1>Detalles del crédito</h1></center><hr class="hr-grueso"><br>
+    <section class="container">
+        <br><hr class="hr-grueso"><h1>Detalles del crédito</h1><hr class="hr-grueso"><br>
 
-    @if(session('error'))
-        <p class="error">{{ session('error') }}</p>
-    @endif
-    <form action="{{ url('/credito/showCredito') }}" method="GET" class="buscar">
-        <label for="buscar">Buscar crédito:</label>
-        <input 
-            type="text"
-            id="buscar"
-            name="buscar"
-            placeholder="Ej. 21 o Pepito"
-            list="{{ Auth::user()->hasRole('administrador') ? 'usuarios' : '' }}"
-            value="{{ request('buscar') }}"
-            autocomplete="off"
-        >
-
-        @if(Auth::user()->hasRole('administrador'))
-            <datalist id="usuarios">
-                @foreach($usuarios as $usuario)
-                    <option value="{{ $usuario->nombre_usuario }}"></option>
-                @endforeach
-            </datalist>
+        @if(session('error'))
+            <p class="error">{{ session('error') }}</p>
         @endif
 
-        <input type="submit" value="Buscar">
-    </form><br>
+        <!-- Formulario de búsqueda -->
+        <form action="{{ url('/credito/showCredito') }}" method="GET">
+            <label for="buscar">Buscar crédito:</label>
+            <input 
+                type="text"
+                id="buscar"
+                name="buscar"
+                placeholder="Ej. 21 o Pepito"
+                list="{{ Auth::user()->hasRole('administrador') ? 'usuarios' : '' }}"
+                value="{{ request('buscar') }}"
+                autocomplete="off"
+            >
 
-    @if(isset($creditos) && $creditos->isNotEmpty())
-        @php
-            $creditosPorUsuario = $creditos->groupBy(fn($c) => optional($c->user)->nombre_usuario ?? 'Usuario desconocido');
-        @endphp
+            @if(Auth::user()->hasRole('administrador'))
+                <datalist id="usuarios">
+                    @foreach($usuarios as $usuario)
+                        <option value="{{ $usuario->nombre_usuario }}"></option>
+                    @endforeach
+                </datalist>
+            @endif
 
-        @foreach($creditosPorUsuario as $usuario => $grupoCreditos)
-            <h2>Créditos de {{ $usuario }}</h2>
+            <input type="submit" value="Buscar">
+        </form><br>
 
+        @if(isset($creditos) && $creditos->isNotEmpty())
             @php
-                $ahora = now();
-                $activos = $grupoCreditos->filter(function($c) use ($ahora) {
-                    return (int)$c->estado === 1 && \Carbon\Carbon::parse($c->fecha_vencimiento) >= $ahora;
-                });
-                $vencidos = $grupoCreditos->filter(function($c) use ($ahora) {
-                    return (int)$c->estado === 1 && \Carbon\Carbon::parse($c->fecha_vencimiento) < $ahora;
-                });
-                $cerrados = $grupoCreditos->where('estado', 0);
+                $creditosPorUsuario = $creditos->groupBy(fn($c) => optional($c->user)->nombre_usuario ?? 'Usuario desconocido');
             @endphp
 
-        
-            @if($activos->isNotEmpty())
-                <h3>Activos</h3>
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>ID Crédito</th>
-                            <th>Fecha de creación</th>
-                            <th>Fecha de liquidación</th>
-                            <th>Fecha de vencimiento</th>
-                            <th>Saldo total</th>
-                            <th>Eliminar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($activos as $credito)
+            @foreach($creditosPorUsuario as $usuario => $grupoCreditos)
+                <h2>Créditos de {{ $usuario }}</h2>
+
+                @php
+                    $ahora = now();
+                    $activos = $grupoCreditos->filter(fn($c) => (int)$c->estado === 1 && \Carbon\Carbon::parse($c->fecha_vencimiento) >= $ahora);
+                    $vencidos = $grupoCreditos->filter(fn($c) => (int)$c->estado === 1 && \Carbon\Carbon::parse($c->fecha_vencimiento) < $ahora);
+                    $cerrados = $grupoCreditos->where('estado', 0);
+                @endphp
+
+                {{-- Activos --}}
+                @if($activos->isNotEmpty())
+                    <h3>Activos</h3>
+                    <div class="table-wrap">
+                    <table>
+                        <thead>
                             <tr>
-                                <td>{{ $credito->id_credito }}</td>
-                                <td>{{ $credito->created_at }}</td>
-                                <td>{{ $credito->fecha_liquidacion ?? 'Aún no liquidado' }}</td>
-                                <td>{{ $credito->fecha_vencimiento }}</td>
-                                <td>${{ number_format($credito->saldo_total, 2) }}</td>
-                                <td>
-                                    <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" onsubmit="return confirm('¿Eliminar este crédito?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit">Eliminar</button>
-                                    </form>
-                                </td>
+                                <th>ID</th>
+                                <th>Creación</th>
+                                <th>Liquidación</th>
+                                <th>Vencimiento</th>
+                                <th>Saldo</th>
+                                <th>Acciones</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                </div>
-            @endif
-
-            @if($vencidos->isNotEmpty())
-                <h3>Vencidos</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID Crédito</th>
-                            <th>Fecha de creación</th>
-                            <th>Fecha de liquidación</th>
-                            <th>Fecha de vencimiento</th>
-                            <th>Saldo total</th>
-                            <th>Eliminar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($vencidos as $credito)
+                        </thead>
+                        <tbody>
+                            @foreach($activos as $credito)
+                                <tr>
+                                    <td data-label="ID">{{ $credito->id_credito }}</td>
+                                    <td data-label="Creado">{{ $credito->created_at }}</td>
+                                    <td data-label="Liquidado">{{ $credito->fecha_liquidacion ?? 'Aún no liquidado' }}</td>
+                                    <td data-label="Vencimiento">{{ $credito->fecha_vencimiento }}</td>
+                                    <td data-label="Saldo">${{ number_format($credito->saldo_total, 2) }}</td>
+                                    <td data-label="Eliminar">
+                                        <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" style="display:inline" onsubmit="return confirm('¿Eliminar este crédito?');">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    </div>
+                @endif
+                {{-- Vencidos --}}
+                @if($vencidos->isNotEmpty())
+                    <h3>Vencidos</h3>
+                    <div class="table-wrap">
+                    <table>
+                        <thead>
                             <tr>
-                                <td>{{ $credito->id_credito }}</td>
-                                <td>{{ $credito->created_at }}</td>
-                                <td>{{ $credito->fecha_liquidacion ?? 'Aún no liquidado' }}</td>
-                                <td>{{ $credito->fecha_vencimiento }}</td>
-                                <td>${{ number_format($credito->saldo_total, 2) }}</td>
-                                <td>
-                                    <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" onsubmit="return confirm('¿Eliminar este crédito?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit">Eliminar</button>
-                                    </form>
-                                </td>
+                                <th>ID</th>
+                                <th>Creación</th>
+                                <th>Liquidación</th>
+                                <th>Vencimiento</th>
+                                <th>Saldo</th>
+                                <th>Acciones</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
-
-            @if($cerrados->isNotEmpty())
-                <h3>Cerrados</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID Crédito</th>
-                            <th>Fecha de creación</th>
-                            <th>Fecha de liquidación</th>
-                            <th>Fecha de vencimiento</th>
-                            <th>Saldo total</th>
-                            <th>Eliminar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($cerrados as $credito)
+                        </thead>
+                        <tbody>
+                            @foreach($vencidos as $credito)
+                                <tr>
+                                    <td data-label="ID">{{ $credito->id_credito }}</td>
+                                    <td data-label="Creado">{{ $credito->created_at }}</td>
+                                    <td data-label="Liquidado">{{ $credito->fecha_liquidacion ?? 'Aún no liquidado' }}</td>
+                                    <td data-label="Vencimiento">{{ $credito->fecha_vencimiento }}</td>
+                                    <td data-label="Saldo">${{ number_format($credito->saldo_total, 2) }}</td>
+                                    <td data-label="Eliminar">
+                                        <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" style="display:inline" onsubmit="return confirm('¿Eliminar este crédito?');">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    </div>
+                @endif
+                {{-- Cerrados --}}
+                @if($cerrados->isNotEmpty())
+                    <h3>Cerrados</h3>
+                    <div class="table-wrap">
+                    <table class="cerrado">
+                        <thead>
                             <tr>
-                                <td>{{ $credito->id_credito }}</td>
-                                <td>{{ $credito->created_at }}</td>
-                                <td>{{ $credito->fecha_liquidacion ?? '-' }}</td>
-                                <td>{{ $credito->fecha_vencimiento }}</td>
-                                <td>${{ number_format($credito->saldo_total, 2) }}</td>
-                                <td>
-                                    <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" onsubmit="return confirm('¿Eliminar este crédito?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit">Eliminar</button>
-                                    </form>
-                                </td>
+                                <th>ID</th>
+                                <th>Creación</th>
+                                <th>Liquidación</th>
+                                <th>Vencimiento</th>
+                                <th>Saldo</th>
+                                <th>Acciones</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
+                        </thead>
+                        <tbody>
+                            @foreach($cerrados as $credito)
+                                <tr>
+                                    <td data-label="ID">{{ $credito->id_credito }}</td>
+                                    <td data-label="Creaado">{{ $credito->created_at }}</td>
+                                    <td data-label="Liquidado">{{ $credito->fecha_liquidacion ?? '-' }}</td>
+                                    <td data-label="Vencimiento">{{ $credito->fecha_vencimiento }}</td>
+                                    <td data-label="Saldo">${{ number_format($credito->saldo_total, 2) }}</td>
+                                    <td data-label="Eliminar">
+                                        <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" style="display:inline" onsubmit="return confirm('¿Eliminar este crédito?');">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    </div>
+                @endif
 
-        @endforeach
-    @else
-        <p>No se encontraron créditos.</p>
-    @endif
-
-    <a href="{{ url('/credito') }}">← Volver al listado de créditos</a>
+            @endforeach
+        @else
+            <p>No se encontraron créditos.</p>
+        @endif
+        <br>
+       <center><a href="{{ url('/carro') }}" class="btn btn-secondary fw-bold"  >Volver al listado</a></center>
+    </section>
 </main>
 <x-footer/>
 </div>

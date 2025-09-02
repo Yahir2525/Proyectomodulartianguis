@@ -77,24 +77,43 @@
                     </thead>
                     <tbody>
                         @foreach($grupoAbonos as $abono)
+                            @php
+                                $credito = $abono->credito;
+                                $estaCerrado = $credito && $credito->estado == 0;
+                                $estaVencido = $credito && $credito->fecha_vencimiento && $credito->fecha_vencimiento < now();
+                            @endphp
+
                             <tr>
                                 <td data-label="ID">{{ $abono->id_abono }}</td>
-                                
                                 <td data-label="Creado">{{ $abono->created_at }}</td>
                                 <td data-label="Actualizado">{{ $abono->updated_at }}</td>
                                 <td data-label="Monto">${{ number_format($abono->monto_abono, 2) }}</td>
+
+                                {{-- Columna Editar --}}
                                 <td data-label="Editar">
                                     @can('edit abono')
-                                        <a href="{{ route('abono.edit', $abono->id_abono) }}" class="btn btn-edit">Editar</a>
+                                        @if($estaCerrado)
+                                            <span class="info-msg text-danger">No editable (crédito cerrado)</span>
+                                        @else
+                                            <a href="{{ route('abono.edit', $abono->id_abono) }}" class="btn btn-edit">Editar</a>
+                                        @endif
                                     @endcan
                                 </td>
+
+                                {{-- Columna Eliminar --}}
                                 <td data-label="Eliminar">
                                     @can('delete abono')
-                                        <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">Eliminar</button>
-                                        </form>
+                                        @if($estaCerrado)
+                                            <span class="info-msg text-danger">No eliminable (crédito cerrado)</span>
+                                        @elseif($estaVencido)
+                                            <span class="info-msg text-warning">No eliminable (crédito vencido)</span>
+                                        @else
+                                            <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                                            </form>
+                                        @endif
                                     @endcan
                                 </td>
                             </tr>

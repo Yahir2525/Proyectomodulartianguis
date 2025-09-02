@@ -166,7 +166,8 @@ class AbonoController extends Controller
         // Créditos activos del usuario
         $creditos = Credito::with('user')
             ->where('id_user', $abono->id_user)
-            ->where('estado', 1)
+            ->where('estado', 1) // solo activos
+            ->where('saldo_total', '>', 0) // con saldo positivo
             ->get();
 
         // Obtener el crédito asociado al abono, aunque esté cerrado
@@ -205,6 +206,18 @@ class AbonoController extends Controller
         if (!$creditoNuevo) {
             return redirect()->route('abono.index')->with('error', 'El crédito no existe.');
         }
+
+        // En duda, revisar bien esta validación y la de abajo de no se puede asignar
+        $creditoNuevo = Credito::where('id_credito', $nuevoCreditoId)
+            ->where('estado', 1)
+            ->where('saldo_total', '>', 0)
+            ->first();
+
+        if (!$creditoNuevo && $nuevoCreditoId != $abono->id_credito) {
+            return redirect()->route('abono.index')
+                ->with('error', 'No se puede asignar un abono a un crédito cerrado o sin saldo.');
+        }
+
 
         // Revertir al crédito anterior si cambió
         if ($creditoAnteriorId && $creditoAnteriorId != $nuevoCreditoId) {

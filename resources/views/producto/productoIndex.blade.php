@@ -114,7 +114,7 @@
                 </div>
             @endcan
 
-            <button type="submit" class="btn btn-registrar">Filtrar</button>
+            <button type="submit" class="btn btn-primary">Filtrar</button>
             <a href="{{ url('/producto') }}" class="btn btn-gray">Limpiar</a>
         </div>
         </form>

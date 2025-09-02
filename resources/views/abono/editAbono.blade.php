@@ -46,7 +46,8 @@
                 <option value="">-- Selecciona un crédito --</option>
                 @foreach ($creditos as $credito)
                     <option value="{{ $credito->id_credito }}"
-                        {{ $abono->id_credito == $credito->id_credito ? 'selected' : '' }}>
+                        {{ $abono->id_credito == $credito->id_credito ? 'selected' : '' }}
+                        {{ ($credito->estado == 0 || $credito->saldo_total <= 0) ? 'disabled' : '' }}>
                         Crédito #{{ $credito->id_credito }} -
                         Saldo: ${{ number_format($credito->saldo_total, 2) }}
                         @if($credito->estado == 0) (cerrado) @endif
@@ -59,7 +60,7 @@
 
     <br><center>
     <div class="back-wrap">
-    <a href="{{ route('abono.index') }}" class="btn btn-primary">Cancelar</a>
+    <a href="{{ route('abono.index') }}" class="btn btn-danger">Cancelar</a>
     </div></center>
     </section>
 </main>
