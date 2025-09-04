@@ -330,7 +330,7 @@ class PedidoController extends Controller
                     'id_user' => $user->id_user,
                     'saldo_total' => $total,
                     'fecha_liquidacion' => null,
-                    'fecha_vencimiento' => now()->addDays($user->dias_aplazo)->endOfDay(),
+                    'fecha_vencimiento' => now()->addDays($user->dias_aplazo)->addMinutes(5),
                     'estado' => 1,
                 ]);
 

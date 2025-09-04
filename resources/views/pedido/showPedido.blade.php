@@ -12,7 +12,8 @@
 <body>
 <div class="page-container">
 <main class="content">
-<br>
+<br><x-barrageneral/>
+<section class="pedidos-container">
     <br><hr class="hr-grueso"><center><h1>Detalles del pedido</h1></center><hr class="hr-grueso"><br>
 
     @if(session('success'))
@@ -68,31 +69,16 @@
                     ->where('estado', 1)
                     ->get();
 
-                // Vencidos por fecha (subset en memoria para no repetir queries)
+                // Vencidos por fecha
                 $creditosVencidos = $creditosTodosActivos->filter(fn($c) => $c->fecha_vencimiento < now());
 
-                // NUEVO: sólo nos interesan los vencidos con saldo > 0 para bloquear por “historial”
+                // Solo vencidos con saldo > 0
                 $creditosVencidosConSaldo = $creditosVencidos->filter(fn($c) => (float)$c->saldo_total > 0);
 
-                // Permitir crear crédito mientras no superes 3 activos (regla existente)
                 $puedeCrearCredito = $creditosTodosActivos->count() < 3;
 
-                /* ===================== BLOQUEOS GLOBALES ===================== */
-                // Nivel
                 $nivelUsuarioGlobal = strtolower((string)($usuario->nivel ?? $usuario->nivel_usuario ?? $usuario->nivel_riesgo ?? ''));
-                $bloqueadoPorNivelGlobal = ($nivelUsuarioGlobal === 'malo');
-
-                // HISTORIAL: AHORA SOLO BLOQUEA CON > 2 vencidos con saldo > 0 (permitimos 0, 1 o 2)
-                $bloqueadoPorHistorialGlobal = $creditosVencidosConSaldo->count() > 2;
             @endphp
-
-            @if($bloqueadoPorNivelGlobal)
-                <p style="color:red;"><strong>Atención:</strong> El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar pedidos <strong>a contado</strong>.</p>
-            @endif
-            @if($bloqueadoPorHistorialGlobal)
-                <p style="color:red;"><strong>Atención:</strong> El usuario tiene más de 2 créditos vencidos con saldo pendiente. No podrá cerrar pedidos a crédito.</p>
-            @endif
-
             {{-- ===================== Pedidos con crédito ===================== --}}
             @php
                 $pedidosConCredito = $pedidosUsuario->filter(fn($p) => !is_null($p->id_credito));
@@ -100,100 +86,62 @@
 
             @if($pedidosConCredito->isNotEmpty())
                 <h3>Pedidos con crédito</h3>
-                <div class="table-responsive">
-                <table class="table table-bordered">
+                <div class="table-wrap">
+                <table>
                     <thead>
                         <tr>
                             <th>ID Pedido</th>
                             <th>Crédito</th>
                             <th>Total</th>
-                            <th>Estado</th>
-                            <th>Método</th>
                             <th>Creado</th>
                             <th>Actualizado</th>
-                            <th>Editar</th>
                             <th>Eliminar</th>
-                            <th>Acción</th>
+                            <th>Método</th>
+                            <th>Reabrir</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($pedidosConCredito as $pedido)
                             @php
                                 $totalPedido = $pedido->total_pedido;
-
-                                // Deuda actual considerando SOLO los activos no vencidos (como antes)
                                 $deudaActual = $creditosActivos->sum('saldo_total');
                                 $superaDiezMil = $deudaActual >= 10000 || ($deudaActual + $totalPedido) > 10000;
-
-                                // Válidos (no rebasan 10k con el nuevo total)
                                 $creditosValidos = $creditosActivos->filter(fn($c) => ($c->saldo_total + $totalPedido) <= 10000);
-
                                 $metodoPagoActual = $pedido->metodo_pago ?? '';
                                 $creditoSeleccionado = $pedido->id_credito;
-
-                                // BLOQUEOS POR FILA (usamos las colecciones ya calculadas)
-                                $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2; // NUEVO criterio
+                                $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2;
                                 $nivelUsuario = strtolower((string)($usuario->nivel ?? $usuario->nivel_usuario ?? $usuario->nivel_riesgo ?? ''));
                                 $bloqueadoPorNivel = ($nivelUsuario === 'malo');
-
-                                // La UI bloquea crédito solo si excede 10k, o nivel malo, o >2 vencidos con saldo
                                 $bloqueoCreditoUI = $superaDiezMil || $bloqueadoPorHistorial || $bloqueadoPorNivel;
                             @endphp
                             <tr>
-                                <td>{{ $pedido->id_pedido }}</td>
-                                <td>{{ $pedido->id_credito }}</td>
-                                <td>${{ number_format($totalPedido, 2) }}</td>
-                                <td>{{ $pedido->estado_pedido == 1 ? 'Abierto' : 'Cerrado' }}</td>
-                                <td>{{ $pedido->metodo_pago ?? 'Sin seleccionar' }}</td>
-                                <td>{{ $pedido->created_at }}</td>
-                                <td>{{ $pedido->updated_at }}</td>
+                                <td data-label="ID">{{ $pedido->id_pedido }}</td>
+                                <td data-label="Crédito">{{ $pedido->id_credito }}</td>
+                                <td data-label="Total">${{ number_format($totalPedido, 2) }}</td>
+                                <td data-label="Creado">{{ $pedido->created_at }}</td>
+                                <td data-label="Actualizado">{{ $pedido->updated_at }}</td>
 
-                                @if($pedido->estado_pedido == 1)
-                                    <td><a href="{{ route('pedido.edit', $pedido->id_pedido) }}?total={{ $totalPedido }}">Editar</a></td>
-                                    <td>
+                                <td data-label="Eliminar">
+                                    @if($pedido->estado_pedido == 1)
                                         <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar este pedido?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit">Eliminar</button>
+                                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
                                         </form>
-                                    </td>
-                                @else
-                                    <td></td>
-                                    <td></td>
-                                @endif
+                                    @else
+                                        <span class="badge bg-gray">Pedido cerrado</span>
+                                    @endif
+                                </td>
 
-                                <td>
+                                <td data-label="Método">
                                     @if($pedido->estado_pedido == 1)
                                         <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST" class="form-cierre">
                                             @csrf
                                             <input type="hidden" name="total" value="{{ $totalPedido }}" />
 
-                                            @if($superaDiezMil)
-                                                <p style="color:red;">
-                                                    <strong>No puedes cerrar este pedido con crédito:</strong><br>
-                                                    @if($deudaActual >= 10000)
-                                                        - El usuario ya debe ${{ number_format($deudaActual, 2) }}.<br>
-                                                    @endif
-                                                    @if(($deudaActual + $totalPedido) > 10000)
-                                                        - Con este pedido, la deuda sería ${{ number_format($deudaActual + $totalPedido, 2) }}.<br>
-                                                    @endif
-                                                    Usa la opción <strong>Contado</strong>.
-                                                </p>
-                                            @endif
-
-                                            @if($bloqueadoPorHistorial)
-                                                <p style="color:red;">
-                                                    <strong>Atención:</strong> El usuario tiene más de 2 créditos vencidos con saldo pendiente. No puede cerrar a crédito.
-                                                </p>
-                                            @endif
-                                            @if($bloqueadoPorNivel)
-                                                <p style="color:red;">
-                                                    <strong>Atención:</strong> El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar <strong>a contado</strong>.
-                                                </p>
-                                            @endif
-
                                             <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
-                                            <select name="metodo_pago" required onchange="toggleCreditoOptions(this, {{ $pedido->id_pedido }})">
+                                            <select name="metodo_pago" class="form-select form-select-sm metodo-select"
+                                                    required onchange="toggleCreditoOptions(this, {{ $pedido->id_pedido }})">
                                                 <option value="" {{ $metodoPagoActual === '' ? 'selected' : '' }}>-- Selecciona --</option>
                                                 <option value="contado" {{ $metodoPagoActual === 'contado' ? 'selected' : '' }}>Contado</option>
                                                 @if(!$bloqueoCreditoUI)
@@ -203,7 +151,7 @@
 
                                             <div id="credito-opciones-{{ $pedido->id_pedido }}" style="margin-top:8px; {{ ($metodoPagoActual === 'credito' && !$bloqueoCreditoUI) ? 'display:block;' : 'display:none;' }}">
                                                 <label>Seleccionar crédito:</label>
-                                                <select name="id_credito" class="select-credito">
+                                                <select name="id_credito" class="form-select form-select-sm metodo-select">
                                                     @if($puedeCrearCredito)
                                                         <option value="" {{ is_null($creditoSeleccionado) ? 'selected' : '' }}>-- Crear nuevo crédito --</option>
                                                     @endif
@@ -213,17 +161,17 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
-
-                                                @if(!$puedeCrearCredito)
-                                                    <p style="color:orange; font-style: italic;">
-                                                        Ya tienes 3 créditos activos. No puedes crear uno nuevo, pero puedes usar los existentes.
-                                                    </p>
-                                                @endif
                                             </div>
 
-                                            <button type="submit" style="margin-top:8px;">Cerrar pedido</button>
+                                            <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">Cerrar pedido</button>
                                         </form>
                                     @else
+                                        <span class="badge bg-gray">{{ ucfirst($pedido->metodo_pago ?? 'Sin seleccionar') }}</span>
+                                    @endif
+                                </td>
+
+                                <td data-label="Reabrir">
+                                    @if($pedido->estado_pedido == 0)
                                         @can('edit pedido')
                                             @php
                                                 $puedeReabrir = true;
@@ -238,16 +186,19 @@
                                             @if ($puedeReabrir)
                                                 <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST">
                                                     @csrf
-                                                    <button type="submit">Reabrir pedido</button>
+                                                    <button type="submit" class="btn btn-edit btn-sm">Reabrir</button>
                                                 </form>
                                             @else
-                                                <p style="color:red;">No se puede reabrir: el crédito está cerrado o vencido.</p>
+                                                <span class="badge bg-gray">Crédito cerrado</span>
                                             @endif
                                         @else
-                                            Pedido cerrado
+                                            <span class="badge bg-gray">Pedido cerrado</span>
                                         @endcan
+                                    @else
+                                        <span class="badge bg-gray">Pedido abierto</span>
                                     @endif
                                 </td>
+
                             </tr>
                         @endforeach
                     </tbody>
@@ -261,19 +212,18 @@
 
             @if($pedidosSinCredito->isNotEmpty())
                 <h3>Pedidos sin crédito</h3>
-                <div class="table-responsive">
-                <table class="table table-bordered">
+                <div class="table-wrap">
+                <table>
                     <thead>
                         <tr>
                             <th>ID Pedido</th>
+                            <th>Crédito</th>
                             <th>Total</th>
-                            <th>Estado</th>
-                            <th>Método</th>
                             <th>Creado</th>
                             <th>Actualizado</th>
-                            <th>Editar</th>
                             <th>Eliminar</th>
-                            <th>Acción</th>
+                            <th>Método</th>
+                            <th>Reabrir</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -281,73 +231,75 @@
                             @php
                                 $totalPedido = $pedido->total_pedido;
                                 $metodoPagoActual = $pedido->metodo_pago ?? '';
-
-                                // Mismos bloqueos que arriba pero sin deuda (>10k lo validará el controlador al crear)
-                                $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2; // NUEVO
+                                $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2;
                                 $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? $usuario->nivel ?? $usuario->nivel_riesgo ?? ''));
                                 $bloqueadoPorNivel = ($nivelUsuario === 'malo');
-
                                 $bloqueoCreditoUI = $bloqueadoPorHistorial || $bloqueadoPorNivel;
                             @endphp
                             <tr>
-                                <td>{{ $pedido->id_pedido }}</td>
-                                <td>${{ number_format($totalPedido, 2) }}</td>
-                                <td>{{ $pedido->estado_pedido == 1 ? 'Abierto' : 'Cerrado' }}</td>
-                                <td>{{ $pedido->metodo_pago ?? 'Sin seleccionar' }}</td>
-                                <td>{{ $pedido->created_at }}</td>
-                                <td>{{ $pedido->updated_at }}</td>
+                                <td data-label="ID">{{ $pedido->id_pedido }}</td>
+                                <td data-label="Crédito">N/A</td>
+                                <td data-label="Total">${{ number_format($totalPedido, 2) }}</td>
+                                <td data-label="Creado">{{ $pedido->created_at }}</td>
+                                <td data-label="Actualizado">{{ $pedido->updated_at }}</td>
 
-                                @if($pedido->estado_pedido == 1)
-                                    <td><a href="{{ route('pedido.edit', $pedido->id_pedido) }}?total={{ $totalPedido }}">Editar</a></td>
-                                    <td>
+                                <td data-label="Eliminar">
+                                    @if($pedido->estado_pedido == 1)
                                         <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar este pedido?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit">Eliminar</button>
+                                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
                                         </form>
-                                    </td>
-                                @else
-                                    <td></td>
-                                    <td></td>
-                                @endif
+                                    @else
+                                        <span class="badge bg-gray">Pedido cerrado</span>
+                                    @endif
+                                </td>
 
-                                <td>
+                                <td data-label="Método">
                                     @if($pedido->estado_pedido == 1)
                                         <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST" class="form-cierre">
                                             @csrf
                                             <input type="hidden" name="total" value="{{ $totalPedido }}" />
-
-                                            @if($bloqueadoPorHistorial)
-                                                <p style="color:red;">
-                                                    <strong>Atención:</strong> El usuario tiene más de 2 créditos vencidos con saldo pendiente. No puede cerrar a crédito.
-                                                </p>
-                                            @endif
-                                            @if($bloqueadoPorNivel)
-                                                <p style="color:red;">
-                                                    <strong>Atención:</strong> El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar <strong>a contado</strong>.
-                                                </p>
-                                            @endif>
-
-                                            <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
-                                            <select name="metodo_pago" required>
+                                            <select name="metodo_pago" class="form-select form-select-sm metodo-select" required>
                                                 <option value="" {{ $metodoPagoActual === '' ? 'selected' : '' }}>-- Selecciona --</option>
                                                 <option value="contado" {{ $metodoPagoActual === 'contado' ? 'selected' : '' }}>Contado</option>
                                                 @if(!$bloqueoCreditoUI)
                                                     <option value="credito" {{ $metodoPagoActual === 'credito' ? 'selected' : '' }}>Crédito</option>
                                                 @endif
                                             </select>
-
-                                            <button type="submit" style="margin-top:8px;">Cerrar pedido</button>
+                                            <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">Cerrar pedido</button>
                                         </form>
                                     @else
+                                        <span class="badge bg-gray">{{ ucfirst($pedido->metodo_pago ?? 'Sin seleccionar') }}</span>
+                                    @endif
+                                </td>
+
+                                <td data-label="Reabrir">
+                                    @if($pedido->estado_pedido == 0)
                                         @can('edit pedido')
-                                            <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST">
-                                                @csrf
-                                                <button type="submit">Reabrir pedido</button>
-                                            </form>
+                                            @php
+                                                $puedeReabrir = true;
+                                                if ($pedido->id_credito) {
+                                                    $credito = \App\Models\Credito::find($pedido->id_credito);
+                                                    if (!$credito || $credito->estado == 0 || now()->greaterThan($credito->fecha_vencimiento)) {
+                                                        $puedeReabrir = false;
+                                                    }
+                                                }
+                                            @endphp
+
+                                            @if ($puedeReabrir)
+                                                <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-edit btn-sm">Reabrir</button>
+                                                </form>
+                                            @else
+                                                <span class="badge bg-gray">Crédito cerrado</span>
+                                            @endif
                                         @else
-                                            Pedido cerrado
+                                            <span class="badge bg-gray">Pedido cerrado</span>
                                         @endcan
+                                    @else
+                                        <span class="badge bg-gray">Pedido abierto</span>
                                     @endif
                                 </td>
                             </tr>
@@ -373,6 +325,7 @@ function toggleCreditoOptions(select, idPedido) {
     div.style.display = select.value === 'credito' ? 'block' : 'none';
 }
 </script>
+</section>
 </main>
 <x-footer/>
 </div>
