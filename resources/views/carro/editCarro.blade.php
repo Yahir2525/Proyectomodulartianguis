@@ -95,8 +95,6 @@
             </div>
         </div>
     </form>
-
-        {{-- 📋 Tabla de productos --}}
         <form action="{{ route('carro.update', ['carro' => $carro->id_carro, 'id_producto' => $productoActual->id_producto]) }}" method="POST">
             @csrf
             @method('PUT')
@@ -195,10 +193,24 @@
                 <option value="" disabled selected>-- Ninguno --</option>
                 <option value="nuevo">-- Crear nuevo pedido --</option>
                 @foreach($pedidosUsuario as $pedido)
+                    @php
+                        $creditoCerrado = $pedido->id_credito && $pedido->credito && $pedido->credito->estado == 0;
+                        $creditoVencido = $pedido->id_credito && $pedido->credito && $pedido->credito->fecha_vencimiento < now();
+
+                        // 🔒 Deshabilitar si está cerrado, o si el crédito está cerrado/vencido
+                        $deshabilitado = ($pedido->estado_pedido == 0) || $creditoCerrado || $creditoVencido;
+                    @endphp
                     <option value="{{ $pedido->id_pedido }}"
                         {{ $carro->id_pedido == $pedido->id_pedido ? 'selected' : '' }}
-                        {{ $pedido->estado_pedido == 0 ? 'disabled' : '' }}>
-                        Pedido #{{ $pedido->id_pedido }}{{ $pedido->estado_pedido == 0 ? ' (cerrado)' : '' }}
+                        {{ $deshabilitado ? 'disabled' : '' }}>
+                        Pedido #{{ $pedido->id_pedido }}
+                        @if($pedido->estado_pedido == 0)
+                            (cerrado)
+                        @elseif($creditoCerrado)
+                            (crédito cerrado)
+                        @elseif($creditoVencido)
+                            (crédito vencido)
+                        @endif
                     </option>
                 @endforeach
             </select>

@@ -152,8 +152,7 @@
                     $creditosTodos = \App\Models\Credito::where('id_user', $usuario->id_user)->where('estado', 1)->get();
                     $creditosVigentes = $creditosTodos->filter(fn($c) => $c->fecha_vencimiento >= now());
                     $creditosVencidos = $creditosTodos->filter(fn($c) => $c->fecha_vencimiento < now());
-                    $creditosVencidosConSaldo = $creditosVencidos->filter(fn($c) => (float)$c->saldo_total > 0);
-                    $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2;
+                    $bloqueadoPorHistorial = $creditosVencidos->count() >= 2;
                     $totalCreditosVigentes = $creditosVigentes->sum('saldo_total');
                     $bloqueadoPorSaldo = ($totalCreditosVigentes + $total) > 10000;
                     $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? ''));
@@ -168,14 +167,15 @@
                     @csrf
                     <input type="hidden" name="total" value="{{ $total }}" />
 
+
                     @if($bloqueado)
                         <p style="color:red;">
                             <strong>No puedes cerrar este pedido a crédito:</strong><br>
-                            @if($bloqueadoPorSaldo) - El total de créditos vigentes más este pedido excede los $10,000.<br>@endif
-                            @if($bloqueadoPorHistorial) - Tienes más de 2 créditos vencidos con saldo pendiente.<br>@endif
-                            @if($bloqueadoPorNivel) - Tu nivel actual es <strong>"malo"</strong>. Solo puedes cerrar pedidos <strong>a contado</strong>.<br>@endif
+                            @if($bloqueadoPorSaldo) - La suma de créditos activos más este pedido excede los $10,000.<br>@endif
+                            @if($bloqueadoPorHistorial) - El usuario tiene más de 2 créditos vencidos con saldo pendiente. No podrá cerrar pedidos a crédito.<br>@endif
+                            @if($bloqueadoPorNivel) - El nivel del usuario es <strong>"malo"</strong>. No podrá cerrar pedidos a crédito.<br>@endif
                             @if($sinCreditosUsables) - No tienes créditos vigentes disponibles y no puedes crear uno nuevo.<br>@endif
-                            Puedes cerrarlo como <strong>contado</strong>.
+                            <br>Puedes cerrarlo como <strong>contado</strong>.
                         </p>
                     @endif
                     <div class="pedido-actions">
@@ -204,7 +204,7 @@
 
                                 @if(!$puedeCrearCredito)
                                     <p style="color:orange; font-style: italic;">
-                                        Ya tienes 3 créditos activos o créditos vencidos. No puedes crear uno nuevo, pero puedes usar los existentes.
+                                        - Ya tienes 3 créditos activos (incluye vencidos). No puedes crear uno nuevo, pero puedes usar los existentes vigentes.
                                     </p>
                                 @endif
                             @endif

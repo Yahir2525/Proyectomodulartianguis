@@ -546,6 +546,15 @@ class CarroController extends Controller
                 return back()->with('error', 'El pedido está cerrado o no existe.');
             }
 
+            // 🚨 Validar crédito asociado
+            if ($pedido->id_credito) {
+                $credito = Credito::find($pedido->id_credito);
+
+                if (!$credito || $credito->estado == 0 || now()->greaterThan($credito->fecha_vencimiento)) {
+                    return back()->with('error', 'No puedes mover productos a un pedido con crédito cerrado o vencido.');
+                }
+            }
+
             // buscar o crear el carro del pedido existente
             $carroDestino = Carro::firstOrCreate([
                 'id_pedido' => $pedido->id_pedido,
@@ -564,6 +573,15 @@ class CarroController extends Controller
         } else {
             // mantener el actual
             $pedido = $carro->pedido;
+
+            // 🚨 Validar crédito del pedido actual
+            if ($pedido && $pedido->id_credito) {
+                $credito = Credito::find($pedido->id_credito);
+
+                if (!$credito || $credito->estado == 0 || now()->greaterThan($credito->fecha_vencimiento)) {
+                    return back()->with('error', 'No puedes modificar productos en un pedido con crédito cerrado o vencido.');
+                }
+            }
         }
 
         // === Validar producto ===
@@ -629,6 +647,8 @@ class CarroController extends Controller
         return redirect()->route('carro.index')->with('success', 'Carro actualizado correctamente.');
     }
 
+
+
     public function destroy(Carro $carro)
     {
         $pedido = $carro->pedido;
@@ -647,14 +667,76 @@ class CarroController extends Controller
         return redirect()->route('carro.index')->with('success', 'Carro eliminado.');
     }
 
+    // private function recalcularTotalPedido($carro)
+    // {
+    //     $total = 0;
+    //     foreach ($carro->productos as $prod) {
+    //         $total += $prod->precio_unitario * $prod->pivot->cantidad;
+    //     }
+
+    //     // actualizar el total en el pedido
+    //     if ($carro->pedido) {
+    //         $carro->pedido->total_pedido = $total;
+    //         $carro->pedido->save();
+    //     }
+
+    //     return $total;
+    // }
+
+    // private function recalcularTotalPedido($carro)
+    // {
+    //     $total = 0;
+    //     foreach ($carro->productos as $prod) {
+    //         $total += $prod->precio_unitario * $prod->pivot->cantidad;
+    //     }
+    //     return $total;
+    // }
+
     private function recalcularTotalPedido($carro)
     {
         $total = 0;
         foreach ($carro->productos as $prod) {
             $total += $prod->precio_unitario * $prod->pivot->cantidad;
         }
+
+        $pedido = $carro->pedido;
+
+        if ($pedido) {
+            // Obtener el total anterior en BD antes de sobrescribir
+            $totalAnterior = $pedido->getOriginal('total_pedido') ?? 0;
+
+            // Actualizar el pedido con el nuevo total
+            $pedido->total_pedido = $total;
+            $pedido->save();
+
+            // 🚨 Si el pedido quedó vacío y tenía un crédito
+            if ($total == 0 && $pedido->id_credito) {
+                $credito = Credito::find($pedido->id_credito);
+                if ($credito) {
+                    // Restar el total anterior al saldo
+                    $credito->saldo_total = max(0, $credito->saldo_total - $totalAnterior);
+
+                    // Si el crédito ya está en 0 → cerrarlo y marcar fecha de liquidación
+                    if ($credito->saldo_total == 0) {
+                        $credito->estado = 0;
+                        $credito->fecha_liquidacion = now(); // última modificación que lo cerró
+                    }
+
+                    $credito->save();
+                }
+
+                // Quitar relación del pedido con el crédito
+                $pedido->id_credito = null;
+                $pedido->metodo_pago = null;
+                $pedido->save();
+            }
+        }
+
         return $total;
     }
+
+
+
 
     private function actualizarCreditoConDiferencia(Pedido $pedido, $totalAnterior, $nuevoTotal)
     {

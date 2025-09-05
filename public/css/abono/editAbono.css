@@ -7,7 +7,7 @@ body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh;}
 .container { max-width: 400px; margin: 0 auto; padding: 16px; }
 
 /* Titulares / info */
-h1 { margin: 0 0 12px; font-size: clamp(1.2rem, 0.95rem + 1vw, 1.6rem); }
+h1 { margin: 0 0 16px; margin-top: 12px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
 p  { margin: 6px 0; }
 
 /* Formulario fluido y compacto */
@@ -95,7 +95,7 @@ html { font-size: 14px; }
 .btn.btn-primary, button{ width: 100%; }
 }
 
-hr.hr-grueso { height:1px; border:none; background:#000000ff; margin:1px 0; }
+hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; margin-top: 12px; }
 
 form > div {
   margin-bottom: 15px; /* separa cada bloque un poco */

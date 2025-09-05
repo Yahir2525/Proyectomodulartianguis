@@ -17,7 +17,6 @@
 <main class="content">
 <br><x-barrageneral/>
 <section>
-    <div>
         <br><hr class="hr-grueso"><center><h1>Caja registradora</h1></center><hr class="hr-grueso">
         @if(Auth::check())
             <br><p><a href="{{ url('/carro/create') }}" class="btn btn-registrar">Registrar un nuevo carro</a></p>
@@ -150,10 +149,7 @@
                                 $totalExcede = $totalPedido > 10000;
                                 $sumaExcede = ($totalCreditos + $totalPedido) > 10000;
 
-                                $creditosVencidosConSaldo = $creditosVencidos->filter(function($c) {
-                                    return (float)$c->saldo_total > 0;
-                                });
-                                $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2;
+                                $bloqueadoPorHistorial = $creditosVencidos->count() >= 2;
 
                                 $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? ''));
                                 $bloqueadoPorNivel = ($nivelUsuario === 'malo');
@@ -191,15 +187,15 @@
                                             - La suma de créditos activos más este pedido excede los $10,000.<br>
                                         @endif
                                         @if($bloqueadoPorHistorial)
-                                            - Tienes pagos atrasados sin abonar. Tu acceso a crédito está bloqueado.<br>
+                                            - El usuario tiene más de 2 créditos vencidos con saldo pendiente. No podrá cerrar pedidos a crédito.<br>
                                         @endif
                                         @if($bloqueadoPorNivel)
-                                            - Tu nivel actual es <strong>"malo"</strong>. Solo puedes cerrar pedidos <strong>a contado</strong>.<br>
+                                            - El nivel del usuario es <strong>"malo"</strong>. No podrá cerrar pedidos a crédito.<br>
                                         @endif
                                         @if($sinCreditosUsables)
                                             - No tienes créditos vigentes disponibles y no puedes crear uno nuevo.<br>
                                         @endif
-                                        Puedes cerrarlo como <strong>contado</strong>.
+                                        <br>Puedes cerrarlo como <strong>contado</strong>.
                                     </p>
                                 @endif
                             <div class="pedido-actions">
@@ -228,7 +224,7 @@
 
                                         @if(!$puedeCrearCredito)
                                             <p style="color:orange; font-style: italic;">
-                                                Ya tienes 3 créditos activos (incluye vencidos). No puedes crear uno nuevo, pero puedes usar los existentes vigentes.
+                                                - Ya tienes 3 créditos activos (incluye vencidos). No puedes crear uno nuevo, pero puedes usar los existentes vigentes.
                                             </p>
                                         @endif
                                     @endif
@@ -253,7 +249,6 @@
                 <p>No hay productos en el carrito.</p>
             @endif
         @endif
-    </div>
 </section>
 
     <script>

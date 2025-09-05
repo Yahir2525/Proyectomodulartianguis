@@ -59,7 +59,7 @@
             @php
                 $usuario = $pedidosUsuario->first()->user;
 
-                // Activos (estado=1 y no vencidos por fecha)
+                // Créditos activos (estado=1 y no vencidos por fecha)
                 $creditosActivos = \App\Models\Credito::where('id_user', $idUser)
                     ->where('estado', 1)
                     ->whereDate('fecha_vencimiento', '>=', now())
@@ -69,16 +69,29 @@
                     ->where('estado', 1)
                     ->get();
 
-                // Vencidos por fecha
+                // Créditos vencidos
                 $creditosVencidos = $creditosTodosActivos->filter(fn($c) => $c->fecha_vencimiento < now());
 
-                // Solo vencidos con saldo > 0
-                $creditosVencidosConSaldo = $creditosVencidos->filter(fn($c) => (float)$c->saldo_total > 0);
+                // Validaciones globales
+                $usuarioBloqueadoPorPagosAtrasados = $creditosVencidos->count() >= 2;
+                $nivelUsuarioGlobal = strtolower((string)($usuario->nivel ?? $usuario->nivel_usuario ?? $usuario->nivel_riesgo ?? ''));
+                $bloqueadoPorNivelGlobal = ($nivelUsuarioGlobal === 'malo');
 
                 $puedeCrearCredito = $creditosTodosActivos->count() < 3;
-
-                $nivelUsuarioGlobal = strtolower((string)($usuario->nivel ?? $usuario->nivel_usuario ?? $usuario->nivel_riesgo ?? ''));
             @endphp
+
+            {{-- Mensajes globales --}}
+            @if($usuarioBloqueadoPorPagosAtrasados)
+                <p class="info-msg text-danger">
+                    - El usuario tiene más de 2 créditos vencidos con saldo pendiente. No podrá cerrar pedidos a crédito. Usa la opción <strong>Contado</strong>.
+                </p>
+            @endif
+            @if($bloqueadoPorNivelGlobal)
+                <p class="info-msg text-danger">
+                    - El nivel del usuario es <strong>"malo"</strong>. No podrá cerrar pedidos a crédito. Usa la opción <strong>Contado</strong>.
+                </p>
+            @endif
+
             {{-- ===================== Pedidos con crédito ===================== --}}
             @php
                 $pedidosConCredito = $pedidosUsuario->filter(fn($p) => !is_null($p->id_credito));
@@ -106,12 +119,14 @@
                                 $totalPedido = $pedido->total_pedido;
                                 $deudaActual = $creditosActivos->sum('saldo_total');
                                 $superaDiezMil = $deudaActual >= 10000 || ($deudaActual + $totalPedido) > 10000;
+
                                 $creditosValidos = $creditosActivos->filter(fn($c) => ($c->saldo_total + $totalPedido) <= 10000);
+
                                 $metodoPagoActual = $pedido->metodo_pago ?? '';
                                 $creditoSeleccionado = $pedido->id_credito;
-                                $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2;
-                                $nivelUsuario = strtolower((string)($usuario->nivel ?? $usuario->nivel_usuario ?? $usuario->nivel_riesgo ?? ''));
-                                $bloqueadoPorNivel = ($nivelUsuario === 'malo');
+
+                                $bloqueadoPorHistorial = $creditosVencidos->count() >= 2;
+                                $bloqueadoPorNivel = ($nivelUsuarioGlobal === 'malo');
                                 $bloqueoCreditoUI = $superaDiezMil || $bloqueadoPorHistorial || $bloqueadoPorNivel;
                             @endphp
                             <tr>
@@ -139,34 +154,54 @@
                                             @csrf
                                             <input type="hidden" name="total" value="{{ $totalPedido }}" />
 
-                                            <label for="metodo_pago_{{ $pedido->id_pedido }}">Método de pago:</label>
+                                            @if($superaDiezMil)
+                                                <p class="info-msg text-danger">
+                                                    No puedes cerrar este pedido con crédito:<br>
+                                                    @if($deudaActual == 10000)
+                                                        - El usuario ya debe 10000.<br>
+                                                    @endif
+                                                    @if(($deudaActual + $totalPedido) > 10000)
+                                                        - Con este pedido, la deuda superaría los 10000 pesos.<br>
+                                                    @endif
+                                                    Usa la opción <strong>Contado</strong>.
+                                                </p>
+                                            @endif
+
                                             <select name="metodo_pago" class="form-select form-select-sm metodo-select"
                                                     required onchange="toggleCreditoOptions(this, {{ $pedido->id_pedido }})">
-                                                <option value="" {{ $metodoPagoActual === '' ? 'selected' : '' }}>-- Selecciona --</option>
-                                                <option value="contado" {{ $metodoPagoActual === 'contado' ? 'selected' : '' }}>Contado</option>
+                                                <option value="">-- Selecciona --</option>
+                                                <option value="contado" {{ $pedido->metodo_pago == 'contado' ? 'selected' : '' }}>Contado</option>
                                                 @if(!$bloqueoCreditoUI)
-                                                    <option value="credito" {{ $metodoPagoActual === 'credito' ? 'selected' : '' }}>Crédito</option>
+                                                    <option value="credito" {{ $pedido->metodo_pago == 'credito' ? 'selected' : '' }}>Crédito</option>
                                                 @endif
                                             </select>
 
-                                            <div id="credito-opciones-{{ $pedido->id_pedido }}" style="margin-top:8px; {{ ($metodoPagoActual === 'credito' && !$bloqueoCreditoUI) ? 'display:block;' : 'display:none;' }}">
-                                                <label>Seleccionar crédito:</label>
-                                                <select name="id_credito" class="form-select form-select-sm metodo-select">
-                                                    @if($puedeCrearCredito)
-                                                        <option value="" {{ is_null($creditoSeleccionado) ? 'selected' : '' }}>-- Crear nuevo crédito --</option>
+                                            @if(!$bloqueoCreditoUI)
+                                                <div id="credito-opciones-{{ $pedido->id_pedido }}" class="credito-select"
+                                                    style="display:{{ ($pedido->metodo_pago == 'credito') ? 'block' : 'none' }};">
+                                                    <select name="id_credito" class="form-select form-select-sm metodo-select">
+                                                        @if($puedeCrearCredito)
+                                                            <option value="" {{ $pedido->id_credito === null ? 'selected' : '' }}>-- Nuevo crédito --</option>
+                                                        @endif
+                                                        @foreach($creditosActivos as $credito)
+                                                            <option value="{{ $credito->id_credito }}" {{ $pedido->id_credito == $credito->id_credito ? 'selected' : '' }}>
+                                                                Crédito #{{ $credito->id_credito }} - Saldo: ${{ number_format($credito->saldo_total, 2) }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @if(!$puedeCrearCredito)
+                                                        <p class="info-msg text-warning">
+                                                            Ya tienes 3 créditos activos (incluye vencidos). No puedes crear uno nuevo, pero puedes usar los existentes vigentes.
+                                                        </p>
                                                     @endif
-                                                    @foreach($creditosValidos as $credito)
-                                                        <option value="{{ $credito->id_credito }}" {{ $creditoSeleccionado == $credito->id_credito ? 'selected' : '' }}>
-                                                            Crédito #{{ $credito->id_credito }} - Saldo: ${{ number_format($credito->saldo_total, 2) }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-
+                                                </div>
+                                            @endif
                                             <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">Cerrar pedido</button>
                                         </form>
                                     @else
-                                        <span class="badge bg-gray">{{ ucfirst($pedido->metodo_pago ?? 'Sin seleccionar') }}</span>
+                                        <span class="badge bg-gray">
+                                            {{ ucfirst($pedido->metodo_pago ?? 'Sin seleccionar') }}
+                                        </span>
                                     @endif
                                 </td>
 
@@ -175,10 +210,14 @@
                                         @can('edit pedido')
                                             @php
                                                 $puedeReabrir = true;
+                                                $mensajeCredito = null;
+
                                                 if ($pedido->id_credito) {
                                                     $credito = \App\Models\Credito::find($pedido->id_credito);
+
                                                     if (!$credito || $credito->estado == 0 || now()->greaterThan($credito->fecha_vencimiento)) {
                                                         $puedeReabrir = false;
+                                                        $mensajeCredito = "Crédito cerrado o vencido";
                                                     }
                                                 }
                                             @endphp
@@ -189,7 +228,7 @@
                                                     <button type="submit" class="btn btn-edit btn-sm">Reabrir</button>
                                                 </form>
                                             @else
-                                                <span class="badge bg-gray">Crédito cerrado</span>
+                                                <span class="badge bg-gray">{{ $mensajeCredito }}</span>
                                             @endif
                                         @else
                                             <span class="badge bg-gray">Pedido cerrado</span>
@@ -198,7 +237,6 @@
                                         <span class="badge bg-gray">Pedido abierto</span>
                                     @endif
                                 </td>
-
                             </tr>
                         @endforeach
                     </tbody>
@@ -206,6 +244,7 @@
                 </div>
             @endif
 
+            {{-- ===================== Pedidos sin crédito ===================== --}}
             @php
                 $pedidosSinCredito = $pedidosUsuario->filter(fn($p) => is_null($p->id_credito));
             @endphp
@@ -231,9 +270,8 @@
                             @php
                                 $totalPedido = $pedido->total_pedido;
                                 $metodoPagoActual = $pedido->metodo_pago ?? '';
-                                $bloqueadoPorHistorial = $creditosVencidosConSaldo->count() > 2;
-                                $nivelUsuario = strtolower((string)($usuario->nivel_usuario ?? $usuario->nivel ?? $usuario->nivel_riesgo ?? ''));
-                                $bloqueadoPorNivel = ($nivelUsuario === 'malo');
+                                $bloqueadoPorHistorial = $creditosVencidos->count() >= 2;
+                                $bloqueadoPorNivel = ($nivelUsuarioGlobal === 'malo');
                                 $bloqueoCreditoUI = $bloqueadoPorHistorial || $bloqueadoPorNivel;
                             @endphp
                             <tr>
@@ -260,29 +298,72 @@
                                         <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST" class="form-cierre">
                                             @csrf
                                             <input type="hidden" name="total" value="{{ $totalPedido }}" />
-                                            <select name="metodo_pago" class="form-select form-select-sm metodo-select" required>
-                                                <option value="" {{ $metodoPagoActual === '' ? 'selected' : '' }}>-- Selecciona --</option>
-                                                <option value="contado" {{ $metodoPagoActual === 'contado' ? 'selected' : '' }}>Contado</option>
+
+                                            {{-- Mensajes por fila --}}
+                                            @if($superaDiezMil)
+                                                <p class="info-msg text-danger">
+                                                    No puedes cerrar este pedido con crédito:<br>
+                                                    @if($deudaActual == 10000)
+                                                        - El usuario ya debe 10000.<br>
+                                                    @endif
+                                                    @if(($deudaActual + $totalPedido) > 10000)
+                                                        - Con este pedido, la deuda superaría los 10000 pesos.<br>
+                                                    @endif
+                                                    Usa la opción <strong>Contado</strong>.
+                                                </p>
+                                            @endif
+
+                                            <select name="metodo_pago" class="form-select form-select-sm metodo-select"
+                                                    required onchange="toggleCreditoOptions(this, {{ $pedido->id_pedido }})">
+                                                <option value="">-- Selecciona --</option>
+                                                <option value="contado" {{ $pedido->metodo_pago == 'contado' ? 'selected' : '' }}>Contado</option>
                                                 @if(!$bloqueoCreditoUI)
-                                                    <option value="credito" {{ $metodoPagoActual === 'credito' ? 'selected' : '' }}>Crédito</option>
+                                                    <option value="credito" {{ $pedido->metodo_pago == 'credito' ? 'selected' : '' }}>Crédito</option>
                                                 @endif
                                             </select>
+
+                                            @if(!$bloqueoCreditoUI)
+                                                <div id="credito-opciones-{{ $pedido->id_pedido }}" class="credito-select"
+                                                    style="display:{{ ($pedido->metodo_pago == 'credito') ? 'block' : 'none' }};">
+                                                    <select name="id_credito" class="form-select form-select-sm metodo-select">
+                                                        @if($puedeCrearCredito)
+                                                            <option value="" {{ $pedido->id_credito === null ? 'selected' : '' }}>-- Nuevo crédito --</option>
+                                                        @endif
+                                                        @foreach($creditosActivos as $credito)
+                                                            <option value="{{ $credito->id_credito }}" {{ $pedido->id_credito == $credito->id_credito ? 'selected' : '' }}>
+                                                                Crédito #{{ $credito->id_credito }} - Saldo: ${{ number_format($credito->saldo_total, 2) }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @if(!$puedeCrearCredito)
+                                                        <p class="info-msg text-warning">
+                                                            - Ya tienes 3 créditos activos (incluye vencidos). No puedes crear uno nuevo, pero puedes usar los existentes vigentes.
+                                                        </p>
+                                                    @endif
+                                                </div>
+                                            @endif
+
                                             <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">Cerrar pedido</button>
                                         </form>
                                     @else
-                                        <span class="badge bg-gray">{{ ucfirst($pedido->metodo_pago ?? 'Sin seleccionar') }}</span>
+                                        <span class="badge bg-gray">
+                                            {{ ucfirst($pedido->metodo_pago ?? 'Sin seleccionar') }}
+                                        </span>
                                     @endif
                                 </td>
-
                                 <td data-label="Reabrir">
                                     @if($pedido->estado_pedido == 0)
                                         @can('edit pedido')
                                             @php
                                                 $puedeReabrir = true;
+                                                $mensajeCredito = null;
+
                                                 if ($pedido->id_credito) {
                                                     $credito = \App\Models\Credito::find($pedido->id_credito);
+
                                                     if (!$credito || $credito->estado == 0 || now()->greaterThan($credito->fecha_vencimiento)) {
                                                         $puedeReabrir = false;
+                                                        $mensajeCredito = "Crédito cerrado o vencido";
                                                     }
                                                 }
                                             @endphp
@@ -293,7 +374,7 @@
                                                     <button type="submit" class="btn btn-edit btn-sm">Reabrir</button>
                                                 </form>
                                             @else
-                                                <span class="badge bg-gray">Crédito cerrado</span>
+                                                <span class="badge bg-gray">{{ $mensajeCredito }}</span>
                                             @endif
                                         @else
                                             <span class="badge bg-gray">Pedido cerrado</span>
@@ -302,6 +383,7 @@
                                         <span class="badge bg-gray">Pedido abierto</span>
                                     @endif
                                 </td>
+
                             </tr>
                         @endforeach
                     </tbody>

@@ -260,8 +260,8 @@ class PedidoController extends Controller
             return back()->with('error', 'No puedes cerrar un pedido con total $0.');
         }
 
-        // ✅ NUEVO: bloquear cierre a crédito para usuarios con nivel "malo"
-        $user->refresh(); // Garantiza nivel actualizado si lo modificó un job externo
+        // ✅ Bloquear cierre a crédito para usuarios con nivel "malo"
+        $user->refresh();
         if ($metodo === 'credito' && $this->esNivelMalo($user)) {
             return back()->with('error', 'Tu nivel actual es "malo". Solo puedes cerrar pedidos a contado.');
         }
@@ -299,8 +299,9 @@ class PedidoController extends Controller
                 // Usar crédito existente
                 $credito = Credito::find($id_credito_nuevo);
 
+                // ✅ Bloquear si el crédito está cerrado o vencido
                 if (!$credito || $credito->estado == 0 || $credito->fecha_vencimiento < now()) {
-                    return back()->with('error', 'El crédito seleccionado no es válido.');
+                    return back()->with('error', 'No puedes cerrar el pedido porque el crédito seleccionado está cerrado o vencido.');
                 }
 
                 // ✅ Solo sumar diferencia si es el mismo crédito
@@ -318,10 +319,6 @@ class PedidoController extends Controller
                     return $c->estado == 1 && $c->fecha_vencimiento >= now();
                 });
 
-                $creditosVencidos = $creditosUsuario->filter(function ($c) {
-                    return $c->estado == 1 && $c->fecha_vencimiento < now();
-                });
-
                 if ($creditosActivos->count() >= 3) {
                     return back()->with('error', 'Ya tienes 3 créditos activos. No puedes crear uno nuevo.');
                 }
@@ -330,7 +327,7 @@ class PedidoController extends Controller
                     'id_user' => $user->id_user,
                     'saldo_total' => $total,
                     'fecha_liquidacion' => null,
-                    'fecha_vencimiento' => now()->addDays($user->dias_aplazo)->addMinutes(5),
+                    'fecha_vencimiento' => now()->addDays($user->dias_aplazo)->addMinutes(10),
                     'estado' => 1,
                 ]);
 
@@ -354,27 +351,52 @@ class PedidoController extends Controller
         return $this->generarTicket($pedido->id_pedido);
     }
 
+
     public function reabrir(Request $request, $id_pedido)
     {
         $pedido = Pedido::findOrFail($id_pedido);
 
-        // Si el pedido tiene un crédito asociado, verificar que no esté cerrado
         if ($pedido->id_credito) {
             $credito = Credito::find($pedido->id_credito);
 
-            if ($credito && $credito->estado == 0) {
-                return redirect()->back()->with('error', 'No se puede reabrir el pedido porque está asociado a un crédito cerrado.');
+            // 🚨 Bloquear si el crédito está cerrado o vencido
+            if ($credito && ($credito->estado == 0 || now()->greaterThan($credito->fecha_vencimiento))) {
+                return redirect()->back()->with('error', 'No se puede reabrir el pedido porque está asociado a un crédito cerrado o vencido.');
+            }
+
+            if ($credito) {
+                // 🚨 Bloquear si el pedido supera el saldo disponible
+                if ($pedido->total_pedido > $credito->saldo_total) {
+                    return redirect()->back()->with('error', 'No se puede reabrir este pedido porque su total supera el saldo restante del crédito.');
+                }
+
+                // 🔹 Restar total del pedido al crédito
+                $credito->saldo_total -= $pedido->total_pedido;
+
+                if ($credito->saldo_total <= 0) {
+                    $credito->saldo_total = 0;
+                    $credito->estado = 0; // Cerrado
+                    $credito->fecha_liquidacion = now();
+                }
+
+                $credito->save();
             }
         }
 
         // Guardamos el total antes de abrir
         session()->put("total_anterior_pedido_{$pedido->id_pedido}", $pedido->total_pedido);
 
+        // 🔹 Reabrir en limpio
         $pedido->estado_pedido = 1;
+        $pedido->metodo_pago = null;
+        $pedido->id_credito = null;
         $pedido->save();
 
-        return redirect()->back()->with('success', 'Pedido reabierto.');
+        return redirect()->back()->with('success', 'Pedido reabierto. Selecciona nuevamente método de pago y/o crédito.');
     }
+
+
+
 
     public function destroy(Pedido $pedido)
     {

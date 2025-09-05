@@ -261,14 +261,23 @@
                             <option value="">-- Selecciona --</option>
                             <option value="nuevo">Crear nuevo pedido</option>
                             @foreach($pedidosUsuario as $pedido)
-                                <option value="{{ $pedido->id_pedido }}"
-                                        data-user="{{ $pedido->id_user }}"
-                                        {{ $pedido->estado_pedido == 0 ? 'disabled' : '' }}>
-                                    Pedido #{{ $pedido->id_pedido }} - {{ $pedido->user->nombre_usuario ?? 'Usuario' }} {{ $pedido->estado_pedido == 0 ? '(CERRADO)' : '' }}
-                                </option>
+                                @php
+                                    $ocultar = false;
+
+                                    if ($pedido->id_credito && $pedido->credito) {
+                                        $ocultar = ($pedido->credito->estado == 0) || ($pedido->credito->fecha_vencimiento < now());
+                                    }
+                                @endphp
+
+                                @if(!$ocultar)
+                                    <option value="{{ $pedido->id_pedido }}"
+                                            data-user="{{ $pedido->id_user }}"
+                                            {{ $pedido->estado_pedido == 0 ? 'disabled' : '' }}>
+                                        Pedido #{{ $pedido->id_pedido }} - {{ $pedido->user->nombre_usuario ?? 'Usuario' }} {{ $pedido->estado_pedido == 0 ? '(CERRADO)' : '' }}
+                                    </option>
+                                @endif
                             @endforeach
                         </select>
-
                         <button type="submit" class="btn btn-agregar">Agregar seleccionados al carrito</button>
                     </div>
                 </form>

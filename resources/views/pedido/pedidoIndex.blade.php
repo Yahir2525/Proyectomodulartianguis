@@ -75,12 +75,12 @@
             {{-- Mensajes globales --}}
             @if($usuarioBloqueadoPorPagosAtrasados)
                 <p class="info-msg text-danger">
-                    El usuario tiene más de 2 créditos vencidos con saldo pendiente. No podrá cerrar pedidos a crédito.
+                    - El usuario tiene más de 2 créditos vencidos con saldo pendiente. No podrá cerrar pedidos a crédito. Usa la opción <strong>Contado</strong>.
                 </p>
             @endif
             @if($bloqueadoPorNivelGlobal)
                 <p class="info-msg text-danger">
-                    El nivel del usuario es <strong>"malo"</strong>. Solo puede cerrar pedidos <strong>a contado</strong>.
+                    - El nivel del usuario es <strong>"malo"</strong>. No podrá cerrar pedidos a crédito. Usa la opción <strong>Contado</strong>.
                 </p>
             @endif
 
@@ -147,11 +147,11 @@
                                             @if($superaDiezMil)
                                                 <p class="info-msg text-danger">
                                                     No puedes cerrar este pedido con crédito:<br>
-                                                    @if($deudaActual >= 10000)
-                                                        - El usuario ya debe ${{ number_format($deudaActual, 2) }}.<br>
+                                                    @if($deudaActual == 10000)
+                                                        - El usuario ya debe 10000.<br>
                                                     @endif
                                                     @if(($deudaActual + $totalPedido) > 10000)
-                                                        - Con este pedido, la deuda sería ${{ number_format($deudaActual + $totalPedido, 2) }}.<br>
+                                                        - Con este pedido, la deuda superaría los 10000 pesos.<br>
                                                     @endif
                                                     Usa la opción <strong>Contado</strong>.
                                                 </p>
@@ -181,7 +181,7 @@
                                                     </select>
                                                     @if(!$puedeCrearNuevoCredito)
                                                         <p class="info-msg text-warning">
-                                                            Ya tienes 3 créditos activos. No puedes crear uno nuevo, pero puedes usar los existentes.
+                                                            - Ya tienes 3 créditos activos (incluye vencidos). No puedes crear uno nuevo, pero puedes usar los existentes vigentes.
                                                         </p>
                                                     @endif
                                                 </div>
@@ -201,20 +201,25 @@
                                         @if($pedido->estado_pedido == 0)
                                             @php
                                                 $puedeReabrir = true;
+                                                $mensajeCredito = null;
+
                                                 if ($pedido->id_credito) {
                                                     $credito = \App\Models\Credito::find($pedido->id_credito);
+
                                                     if (!$credito || $credito->estado == 0 || now()->greaterThan($credito->fecha_vencimiento)) {
                                                         $puedeReabrir = false;
+                                                        $mensajeCredito = "Crédito cerrado o vencido";
                                                     }
                                                 }
                                             @endphp
+
                                             @if($puedeReabrir)
                                                 <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST">
                                                     @csrf
                                                     <button type="submit" class="btn btn-edit btn-sm">Reabrir</button>
                                                 </form>
                                             @else
-                                                <span class="badge bg-gray">Crédito cerrado</span>
+                                                <span class="badge bg-gray">{{ $mensajeCredito }}</span>
                                             @endif
                                         @else
                                             <span class="badge bg-gray">Pedido abierto</span>
