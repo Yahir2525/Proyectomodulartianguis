@@ -91,7 +91,7 @@
     @endif
 
     {{-- Filtros de productos --}}
-    <form action="{{ route('carro.create') }}" method="GET">
+    <form id="form-filtros" action="{{ route('carro.create') }}" method="GET">
         <div class="buscar">
             <label for="buscar">Buscar producto:</label>
             <input list="productos" id="buscar" name="buscar"
@@ -149,7 +149,7 @@
                 <label for="precio_max">Precio máximo:</label>
                 <input type="number" name="precio_max" id="precio_max" value="{{ request('precio_max') }}" class="form-input">
             </div>
-            @can('create producto')
+            <!-- @can('create producto')
             <div>
                 <label for="estado">Estado:</label>
                 <select name="estado" id="estado" class="form-input">
@@ -158,16 +158,16 @@
                     <option value="0" {{ request('estado') === '0' ? 'selected' : '' }}>Inactivo</option>
                 </select>
             </div>
-            @endcan
+            @endcan -->
             <div class="acciones">
                 <button type="submit" class="btn btn-registrar">Filtrar</button>
-                <a href="{{ route('carro.create') }}" class="btn btn-gray">Limpiar</a>
+                <a id="btn-limpiar" href="{{ route('carro.create') }}" class="btn btn-gray">Limpiar</a>
             </div>
         </div>
     </form>
 
     {{-- Lista de productos --}}
-    <form action="{{ route('carro.agregarMultiples') }}" method="POST">
+    <form id="form-seleccion" action="{{ route('carro.agregarMultiples') }}" method="POST">
         @csrf
         <h3>Selecciona productos</h3><br>
         <div class="table-wrap">
@@ -190,12 +190,17 @@
                         @if (Auth::user()->hasRole('administrador') || $producto->estado_producto)
                         <tr class="{{ ($producto->piezas_disponibles == 0 || !$producto->estado_producto) ? 'sin-stock' : '' }}"
                             data-disp="{{ (int)($producto->piezas_disponibles ?? 0) }}"
-                            data-estado="{{ $producto->estado_producto }}">
+                            data-estado="{{ $producto->estado_producto }}"
+                            data-id="{{ $producto->id_producto }}" >
+
                             <td data-label="Seleccionar">
-                                <input type="checkbox" 
-                                    name="productos_seleccionados[]" 
+                                <input type="checkbox"
+                                    class="chk-producto"
+                                    data-id="{{ $producto->id_producto }}"  {{-- NUEVO --}}
+                                    name="productos_seleccionados[]"
                                     value="{{ $producto->id_producto }}"
-                                    {{ ($producto->piezas_disponibles == 0 || !$producto->estado_producto) ? 'disabled' : '' }}>
+                                    {{ ($producto->piezas_disponibles == 0 || !$producto->estado_producto) ? 'disabled' : '' }}
+                                    {{ array_key_exists($producto->id_producto, $seleccion ?? []) ? 'checked' : '' }}>
                             </td>
                             <td>{{ $producto->nombre }}</td>
                             <td data-label="Imagen">
@@ -211,10 +216,12 @@
                             <td data-label="Precio">${{ number_format($producto->precio_unitario, 2) }}</td>
                             <td data-label="Disponibles">{{ (int)($producto->piezas_disponibles ?? 0) }}</td>
                             <td data-label="Cantidad">
-                                <input type="number" 
-                                    name="cantidades[{{ $producto->id_producto }}]" 
+                                <input type="number"
+                                    name="cantidades[{{ $producto->id_producto }}]"
                                     class="cant-input form-input"
+                                    data-id="{{ $producto->id_producto }}"  {{-- NUEVO --}}
                                     min="1" step="1" max="{{ (int)($producto->piezas_disponibles ?? 0) }}"
+                                    value="{{ $seleccion[$producto->id_producto] ?? '' }}"
                                     {{ ($producto->piezas_disponibles == 0 || !$producto->estado_producto) ? 'disabled' : '' }} />
                             </td>
                         </tr>
@@ -249,16 +256,16 @@
 
         <label for="id_pedido">Selecciona un pedido existente (opcional):</label>
         <select name="id_pedido" id="id_pedido" class="form-input">
-            <option value="" disabled selected>-- Ninguno --</option>
-            @foreach($pedidos as $pedido)
-                <option value="{{ $pedido->id_pedido }}"
-                        data-user="{{ $pedido->id_user }}"
-                        {{ session('pedido_reciente') == $pedido->id_pedido ? 'selected' : '' }}
-                        {{ $pedido->estado_pedido == 0 ? 'disabled' : '' }}>
-                    Pedido #{{ $pedido->id_pedido }}{{ $pedido->estado_pedido == 0 ? ' (cerrado)' : '' }}
-                </option>
-            @endforeach
-            <option value="nuevo">Crear nuevo pedido</option>
+        <option value="" disabled selected>-- Ninguno --</option>
+        @foreach($pedidos as $pedido)
+            @continue($pedido->estado_pedido == 0)
+            <option value="{{ $pedido->id_pedido }}"
+                    data-user="{{ $pedido->id_user }}"
+                    {{ session('pedido_reciente') == $pedido->id_pedido ? 'selected' : '' }}>
+                Pedido #{{ $pedido->id_pedido }}
+            </option>
+        @endforeach
+        <option value="nuevo">Crear nuevo pedido</option>
         </select>
 
         <br><br>
@@ -273,5 +280,218 @@
 </main>
 <x-footer/>
 </div>
+<script>
+(function() {
+    // Lee selección desde la URL: sel[123]=2
+    function leerSeleccionDeURL() {
+        const params = new URLSearchParams(location.search);
+        const sel = new Map();
+        for (const [k, v] of params.entries()) {
+            if (k.startsWith('sel[') && k.endsWith(']')) {
+                const id = k.slice(4, -1);
+                const qty = parseInt(v, 10);
+                if (!isNaN(qty) && qty > 0) sel.set(id, qty);
+            }
+        }
+        return sel;
+    }
+
+    // Estado en memoria (no localStorage)
+    const seleccion = leerSeleccionDeURL();
+
+    // Sincroniza checks/cantidades visibles con el estado
+    function aplicarSeleccionEnTabla() {
+        document.querySelectorAll('tr[data-id]').forEach(tr => {
+            const id = tr.dataset.id;
+            const chk = tr.querySelector('.chk-producto');
+            const qty = tr.querySelector('.cant-input');
+            const max = qty ? parseInt(qty.max || '0', 10) : 0;
+
+            if (seleccion.has(id)) {
+                const val = Math.min(Math.max(seleccion.get(id), 1), isNaN(max) ? 999999 : max);
+                if (chk && !chk.disabled) chk.checked = true;
+                if (qty && !qty.disabled) qty.value = val;
+                seleccion.set(id, val); // clamp
+            } else {
+                if (chk && !chk.disabled) chk.checked = false;
+                if (qty && !qty.disabled) qty.value = '';
+            }
+        });
+    }
+
+    // Escuchar cambios y actualizar el Map
+    function wireEventos() {
+        document.querySelectorAll('.chk-producto').forEach(chk => {
+            chk.addEventListener('change', () => {
+                const id = chk.dataset.id;
+                const tr = chk.closest('tr[data-id]');
+                const qty = tr ? tr.querySelector('.cant-input') : null;
+
+                if (chk.checked) {
+                    let val = qty && qty.value ? parseInt(qty.value, 10) : 1;
+                    const max = qty ? parseInt(qty.max || '0', 10) : 0;
+                    if (isNaN(val) || val < 1) val = 1;
+                    if (!isNaN(max) && max > 0) val = Math.min(val, max);
+                    if (qty && !qty.disabled) qty.value = val;
+                    seleccion.set(id, val);
+                } else {
+                    seleccion.delete(id);
+                    if (qty && !qty.disabled) qty.value = '';
+                }
+            });
+        });
+
+        // Reemplaza tu listener actual de '.cant-input' por este:
+        document.querySelectorAll('.cant-input').forEach(inp => {
+        // INPUT: permitir borrar (vacío) o ceros para deseleccionar
+        inp.addEventListener('input', () => {
+            const id  = inp.dataset.id;
+            const tr  = inp.closest('tr[data-id]');
+            const chk = tr ? tr.querySelector('.chk-producto') : null;
+
+            const raw = (inp.value || '').trim();
+
+            // vacío o SOLO ceros => deseleccionar y NO clamping
+            if (raw === '' || /^0+$/.test(raw)) {
+            if (chk && !chk.disabled) chk.checked = false;
+            seleccion.delete(id);
+            // deja inp.value tal cual (puede quedar vacío)
+            return;
+            }
+
+            // si aún no es un entero positivo, no fuerces nada (ej: mientras escribe)
+            if (!/^\d+$/.test(raw)) return;
+
+            // número válido => ahora sí clamping a [1..max]
+            let val = parseInt(raw, 10);
+            const max = parseInt(inp.max || '0', 10);
+            if (!isNaN(max) && max > 0 && val > max) val = max;
+            if (val < 1) val = 1;
+
+            inp.value = String(val);
+            if (chk && !chk.disabled) chk.checked = true;
+            seleccion.set(id, val);
+        });
+
+        // BLUR: si quedó vacío/ceros, deselecciona; si quedó número, clamp final
+        inp.addEventListener('blur', () => {
+            const id  = inp.dataset.id;
+            const tr  = inp.closest('tr[data-id]');
+            const chk = tr ? tr.querySelector('.chk-producto') : null;
+
+            const raw = (inp.value || '').trim();
+
+            if (raw === '' || /^0+$/.test(raw)) {
+            if (chk && chk.checked) chk.checked = false;
+            seleccion.delete(id);
+            inp.value = ''; // opcional: normalizar a vacío
+            return;
+            }
+
+            if (/^\d+$/.test(raw)) {
+            let val = parseInt(raw, 10);
+            const max = parseInt(inp.max || '0', 10);
+            if (!isNaN(max) && max > 0 && val > max) val = max;
+            if (val < 1) val = 1;
+            inp.value = String(val);
+            if (chk && !chk.disabled) chk.checked = true;
+            seleccion.set(id, val);
+            }
+        });
+        });
+
+
+    }
+
+    // Limpia sel[*] de una URL y agrega los actuales
+    function conSeleccionEnURL(urlString) {
+        const url = new URL(urlString, location.origin);
+        // elimina claves previas sel[...]
+        [...url.searchParams.keys()].forEach(k => {
+            if (k.startsWith('sel[') && k.endsWith(']')) url.searchParams.delete(k);
+        });
+        // agrega el estado actual
+        seleccion.forEach((qty, id) => {
+            url.searchParams.append(`sel[${id}]`, String(qty));
+        });
+        return url.toString();
+    }
+
+    // 3.a) Paginación: interceptar y reescribir href con sel[*]
+    document.querySelectorAll('.pagination a.page-link, .pagination a').forEach(a => {
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            const href = conSeleccionEnURL(a.href);
+            location.href = href;
+        });
+    });
+
+    // 3.b) Filtros (GET): antes de enviar, agregamos sel[*] como hidden inputs
+    const formFiltros = document.getElementById('form-filtros');
+    if (formFiltros) {
+        formFiltros.addEventListener('submit', (e) => {
+            // El envío es por GET, más robusto hacerlo vía URL
+            e.preventDefault();
+            const action = formFiltros.getAttribute('action') || location.pathname;
+            // Combinar filtros actuales + seleccion
+            const formData = new FormData(formFiltros);
+            const url = new URL(action, location.origin);
+            // Pasar todos los campos del form a la URL
+            for (const [k, v] of formData.entries()) {
+                if (v !== '') url.searchParams.append(k, v);
+            }
+            // Agregar sel[*]
+            seleccion.forEach((qty, id) => url.searchParams.append(`sel[${id}]`, String(qty)));
+            location.href = url.toString();
+        });
+    }
+
+    const btnLimpiar = document.getElementById('btn-limpiar');
+    if (btnLimpiar) {
+      btnLimpiar.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Navega a carro.create pero agregando sel[*] actuales
+        location.href = conSeleccionEnURL(this.href);
+      });
+    }
+
+
+    // 3.c) Antes del POST final, inyectar todos los seleccionados como hidden
+    const formSeleccion = document.getElementById('form-seleccion');
+    if (formSeleccion) {
+    formSeleccion.addEventListener('submit', () => {
+        // 1) borra inyecciones previas e inyecta hidden (tu código existente)
+        formSeleccion.querySelectorAll('input.__dyn').forEach(n => n.remove());
+        seleccion.forEach((qty, id) => {
+        const hidId = document.createElement('input');
+        hidId.type = 'hidden';
+        hidId.name = 'productos_seleccionados[]';
+        hidId.value = id;
+        hidId.className = '__dyn';
+        formSeleccion.appendChild(hidId);
+
+        const hidQty = document.createElement('input');
+        hidQty.type = 'hidden';
+        hidQty.name = `cantidades[${id}]`;
+        hidQty.value = String(qty);
+        hidQty.className = '__dyn';
+        formSeleccion.appendChild(hidQty);
+        });
+
+        // 2) evita duplicados: no envíes los inputs visibles
+        document.querySelectorAll('.chk-producto, .cant-input').forEach(el => {
+        el.disabled = true;          // más simple
+        // alternativamente: el.setAttribute('data-old-name', el.name); el.name = '';
+        });
+    });
+    }
+
+
+    // Al cargar: aplica selección y conecta eventos
+    aplicarSeleccionEnTabla();
+    wireEventos();
+})();
+</script>
+
 </body>
 </html>

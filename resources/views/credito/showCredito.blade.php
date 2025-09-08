@@ -42,7 +42,7 @@
             @endif
 
             <input type="submit" value="Buscar">
-        </form><br>
+        </form>
 
         @if(isset($creditos) && $creditos->isNotEmpty())
             @php
@@ -71,7 +71,10 @@
                                 <th>Liquidación</th>
                                 <th>Vencimiento</th>
                                 <th>Saldo</th>
-                                <th>Acciones</th>
+                                @if($activos)
+                                <th>Estado</th>
+                                @endif
+                                <!-- <th>Eliminar</th> -->
                             </tr>
                         </thead>
                         <tbody>
@@ -82,12 +85,15 @@
                                     <td data-label="Liquidado">{{ $credito->fecha_liquidacion ?? 'Aún no liquidado' }}</td>
                                     <td data-label="Vencimiento">{{ $credito->fecha_vencimiento }}</td>
                                     <td data-label="Saldo">${{ number_format($credito->saldo_total, 2) }}</td>
-                                    <td data-label="Eliminar">
+                                    @if($activos)
+                                    <td data-label="Estado"><span class="badge bg-activo">Crédito activo</span></td>
+                                    @endif
+                                    <!-- <td data-label="Eliminar">
                                         <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" style="display:inline" onsubmit="return confirm('¿Eliminar este crédito?');">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-danger">Eliminar</button>
                                         </form>
-                                    </td>
+                                    </td> -->
                                 </tr>
                             @endforeach
                         </tbody>
@@ -106,7 +112,10 @@
                                 <th>Liquidación</th>
                                 <th>Vencimiento</th>
                                 <th>Saldo</th>
-                                <th>Acciones</th>
+                                @if($vencidos)
+                                <th>Estado</th>
+                                @endif
+                                <!-- <th>Eliminar</th> -->
                             </tr>
                         </thead>
                         <tbody>
@@ -117,12 +126,15 @@
                                     <td data-label="Liquidado">{{ $credito->fecha_liquidacion ?? 'Aún no liquidado' }}</td>
                                     <td data-label="Vencimiento">{{ $credito->fecha_vencimiento }}</td>
                                     <td data-label="Saldo">${{ number_format($credito->saldo_total, 2) }}</td>
-                                    <td data-label="Eliminar">
+                                    @if($vencidos)
+                                    <td data-label="Estado"><span class="badge bg-vencido">Crédito vencido</span></td>
+                                    @endif
+                                    <!-- <td data-label="Eliminar">
                                         <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" style="display:inline" onsubmit="return confirm('¿Eliminar este crédito?');">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-danger">Eliminar</button>
                                         </form>
-                                    </td>
+                                    </td> -->
                                 </tr>
                             @endforeach
                         </tbody>
@@ -141,23 +153,29 @@
                                 <th>Liquidación</th>
                                 <th>Vencimiento</th>
                                 <th>Saldo</th>
-                                <th>Acciones</th>
+                                @if($cerrados)
+                                <th>Estado</th>
+                                @endif
+                                <!-- <th>Eliminar</th> -->
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($cerrados as $credito)
                                 <tr>
                                     <td data-label="ID">{{ $credito->id_credito }}</td>
-                                    <td data-label="Creaado">{{ $credito->created_at }}</td>
+                                    <td data-label="Creado">{{ $credito->created_at }}</td>
                                     <td data-label="Liquidado">{{ $credito->fecha_liquidacion ?? '-' }}</td>
                                     <td data-label="Vencimiento">{{ $credito->fecha_vencimiento }}</td>
                                     <td data-label="Saldo">${{ number_format($credito->saldo_total, 2) }}</td>
-                                    <td data-label="Eliminar">
+                                    @if($cerrados)
+                                    <td data-label="Estado"><span class="badge bg-cerrado">Crédito cerrado</span></td>
+                                    @endif
+                                    <!-- <td data-label="Eliminar">
                                         <form action="{{ url('/credito', $credito->id_credito) }}" method="POST" style="display:inline" onsubmit="return confirm('¿Eliminar este crédito?');">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-danger">Eliminar</button>
                                         </form>
-                                    </td>
+                                    </td> -->
                                 </tr>
                             @endforeach
                         </tbody>
@@ -169,8 +187,8 @@
         @else
             <p>No se encontraron créditos.</p>
         @endif
-        <br>
-       <center><a href="{{ url('/carro') }}" class="btn btn-secondary fw-bold"  >Volver al listado</a></center>
+        <br><br>
+    <center><a href="{{ url('/carro') }}" class="btn btn-secondary fw-bold">Volver al listado</a></center>
     </section>
 </main>
 <x-footer/>

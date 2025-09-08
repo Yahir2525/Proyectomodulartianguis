@@ -14,7 +14,7 @@
 <main class="content">
 <br><x-barrageneral/>
 <section class="container">
-<br><hr class="hr-grueso"><center><h1>Historial de Abonos</h1></center><hr class="hr-grueso"><br>
+<br><hr class="hr-grueso"><center><h1>Listado de abonos</h1></center><hr class="hr-grueso"><br>
 
         @can('create abono')
         <form action="{{ url('/abono/create') }}" method="GET" style="display:inline;">
@@ -92,7 +92,7 @@
                                     <td data-label="Editar">
                                         @can('edit abono')
                                             @if($estaCerrado)
-                                                <span class="info-msg text-danger">No editable (crédito cerrado)</span>
+                                                <span class="badge bg-cerrado">Crédito cerrado</span>
                                             @else
                                                 <form action="{{ route('abono.edit', $abono->id_abono) }}" method="GET" style="display:inline;">
                                                     <button type="submit" class="btn btn-edit">Editar</button>
@@ -104,9 +104,9 @@
                                     <td data-label="Eliminar">
                                         @can('delete abono')
                                             @if($estaCerrado)
-                                                <span class="info-msg text-danger">No eliminable (crédito cerrado)</span>
+                                                <span class="badge bg-cerrado">Crédito cerrado</span>
                                             @elseif($estaVencido)
-                                                <span class="info-msg text-warning">No eliminable (crédito vencido)</span>
+                                                <span class="badge bg-vencido">Crédito vencido</span>
                                             @else
                                                 <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
                                                     @csrf

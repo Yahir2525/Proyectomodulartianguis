@@ -44,8 +44,8 @@ button,
   padding: 8px 12px;
   min-height: 36px;
   border-radius: 6px; /* ovalado */
-  border: 1px solid #2563eb;
-  background: #2563eb;
+  border: 1px solid #16a34a;
+  background: #16a34a;
   color: #fff;
   font-size: .94rem;
   line-height: 1;
@@ -54,7 +54,7 @@ button,
   display: inline-flex; align-items: center; justify-content: center;
   font-weight: bold;
 }
-.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold; } /* Eliminar */
+.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; } /* Eliminar */
 
 button:hover,
 .btn.btn-primary:hover { filter: brightness(.95); }

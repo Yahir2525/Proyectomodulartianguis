@@ -33,6 +33,8 @@
         <p style="color:red;"><strong>Este pedido ya está cerrado. No puedes editar el carro.</strong></p>
     @else
     <form action="{{ route('carro.edit', ['id_carro' => $carro->id_carro, 'id_producto' => $productoActual->id_producto]) }}" method="GET" >
+        <input type="hidden" name="sel_id"  value="{{ $selId ?? $productoActual->id_producto }}">
+        <input type="hidden" name="sel_qty" value="{{ $selQty ?? $cantidad }}">
         <div class="buscar">
             <label for="buscar">Buscar producto:</label>
             <input list="productos" id="buscar" name="buscar"
@@ -91,7 +93,9 @@
             </div>
             <div>
                 <button type="submit" class="btn btn-registrar">Filtrar</button>
-                <a href="{{ route('carro.edit', ['id_carro' => $carro->id_carro, 'id_producto' => $productoActual->id_producto]) }}" class="btn btn-gray">Limpiar</a>
+                <a id="btn-limpiar"
+                href="{{ route('carro.edit', ['id_carro' => $carro->id_carro, 'id_producto' => $productoActual->id_producto, 'sel_id' => $selId, 'sel_qty' => $selQty]) }}"
+                class="btn btn-gray">Limpiar</a>
             </div>
         </div>
     </form>
@@ -118,19 +122,28 @@
                     <tbody>
                         @foreach($productos as $producto)
                             @php
-                                $esActual       = $producto->id_producto == $productoActual->id_producto;
-                                $sinStock       = $producto->piezas_disponibles == 0;
-                                $descontinuado  = $producto->estado_producto == 0;
-                                $deshabilitado  = (!$esActual && ($sinStock || $descontinuado));
+                                $sinStock      = $producto->piezas_disponibles == 0;
+                                $inactivo      = $producto->estado_producto == 0;
+
+                                // seleccionado actual desde el controller:
+                                $esSeleccionado = isset($selId) && ((int)$selId === (int)$producto->id_producto);
+
+                                // Mantener seleccionable el original; para otros, bloquear si sin stock o inactivo
+                                $esOriginal      = ((int)$producto->id_producto === (int)$productoActual->id_producto);
+                                $deshabilitado   = (!$esOriginal && ($sinStock || $inactivo));
                             @endphp
 
-                            <tr class="{{ $sinStock || $descontinuado ? 'sin-stock' : '' }}">
+                            <tr class="{{ $sinStock || $inactivo ? 'sin-stock' : '' }}"data-id="{{ $producto->id_producto }}"
+                            data-disp="{{ $producto->piezas_disponibles }}"
+                            data-estado="{{ (int)$producto->estado_producto }}">
                                 <td data-label="Seleccionar">
                                     <input type="radio"
+                                        class="rad-producto"
                                         name="id_producto"
                                         value="{{ $producto->id_producto }}"
-                                        {{ $esActual ? 'checked' : '' }}
-                                        {{ $deshabilitado ? 'disabled' : '' }}>
+                                        {{ $esSeleccionado ? 'checked' : '' }}
+                                        {{ $deshabilitado ? 'disabled' : '' }}
+                                    >
                                 </td>
                                 <td data-label="Imagen">
                                     @if (!empty($producto->imagen)) 
@@ -154,20 +167,38 @@
 
             {{-- Links de paginación --}}
             <div class="mt-4 d-flex justify-content-center">
-                {{ $productos->appends(request()->query())->links('pagination::bootstrap-5') }}
+                {{ $productos ->appends(request()->except('page') + [
+                        'sel_id'  => $selId ?? $productoActual->id_producto,
+                        'sel_qty' => $selQty ?? $cantidad,
+                    ])->links('pagination::bootstrap-5') }}
             </div>
 
             @if($paginaCorrecta)
-                <div class="mt-3 text-center">
-                    <a href="{{ route('carro.edit', [
-                        'id_carro' => $carro->id_carro,
-                        'id_producto' => $productoActual->id_producto,
-                        'page' => $paginaCorrecta
-                    ] + request()->query()) }}" class="btn btn-agregar">
-                        Ir a la página del producto actual
-                    </a>
-                </div>
+            <div class="mt-3 text-center">
+                <a href="{{ route('carro.edit', [
+                    'id_carro'    => $carro->id_carro,
+                    'id_producto' => $productoActual->id_producto,
+                    'page'        => $paginaCorrecta,
+                    'sel_id'      => $selId,
+                    'sel_qty'     => $selQty,
+                    'navegacion'  => 1,
+                ] + request()->except(['page','navegacion','sel_id','sel_qty'])) }}" class="btn btn-agregar">
+                Ir a la página del producto actual
+                </a>
+            </div>
             @endif
+
+            @php
+                // Producto actualmente "seleccionado" (si está en la página; si no, usa el original)
+                $prodSel = $productos->firstWhere('id_producto', $selId) ?: $productoActual;
+
+                $selSinStock = ($prodSel->piezas_disponibles ?? 0) == 0;
+                $selInactivo = (int)($prodSel->estado_producto ?? 0) == 0;
+
+                // Si es el original e inactivo, mantén tu regla: solo permitir reducir (max = $cantidad original)
+                $esOriginalSel = ((int)$prodSel->id_producto === (int)$productoActual->id_producto);
+                $maxCantidad   = ($esOriginalSel && $selInactivo) ? $cantidad : ($prodSel->piezas_disponibles ?? $productoActual->piezas_disponibles);
+            @endphp
 
             <center><br>
             <label for="cantidad">Cantidad:</label>
@@ -175,17 +206,18 @@
                 name="cantidad"
                 id="cantidad"
                 min="1"
-                max="{{ $descontinuado ? $cantidad : $productoActual->piezas_disponibles }}"
-                value="{{ $cantidad }}"
+                max="{{ (int)$maxCantidad }}"
+                value="{{ (int)$selQty }}"
                 required
                 class="cant-input form-input"
-                {{ $descontinuado && $cantidad == 0 ? 'disabled' : '' }}
             >
-            @if($descontinuado)
+
+            @if($esOriginalSel && $selInactivo)
                 <p style="color: red;">
                     Este producto está inactivo. Solo puedes reducir la cantidad actual (máximo {{ $cantidad }}).
                 </p>
             @endif
+
 
             <br><br>
             <label for="id_pedido">Selecciona un pedido existente o crea uno nuevo:</label>
@@ -194,24 +226,15 @@
                 <option value="nuevo">-- Crear nuevo pedido --</option>
                 @foreach($pedidosUsuario as $pedido)
                     @php
-                        $creditoCerrado = $pedido->id_credito && $pedido->credito && $pedido->credito->estado == 0;
-                        $creditoVencido = $pedido->id_credito && $pedido->credito && $pedido->credito->fecha_vencimiento < now();
-
-                        // 🔒 Deshabilitar si está cerrado, o si el crédito está cerrado/vencido
-                        $deshabilitado = ($pedido->estado_pedido == 0) || $creditoCerrado || $creditoVencido;
+                        // Solo deshabilitar si el pedido está cerrado
+                        $deshabilitado = ($pedido->estado_pedido == 0);
                     @endphp
-                    <option value="{{ $pedido->id_pedido }}"
-                        {{ $carro->id_pedido == $pedido->id_pedido ? 'selected' : '' }}
-                        {{ $deshabilitado ? 'disabled' : '' }}>
-                        Pedido #{{ $pedido->id_pedido }}
-                        @if($pedido->estado_pedido == 0)
-                            (cerrado)
-                        @elseif($creditoCerrado)
-                            (crédito cerrado)
-                        @elseif($creditoVencido)
-                            (crédito vencido)
-                        @endif
-                    </option>
+                    @if(!$deshabilitado)
+                        <option value="{{ $pedido->id_pedido }}"
+                            {{ $carro->id_pedido == $pedido->id_pedido ? 'selected' : '' }}>
+                            Pedido #{{ $pedido->id_pedido }}
+                        </option>
+                    @endif
                 @endforeach
             </select>
             <br><br>
@@ -226,5 +249,239 @@
 </main>
 <x-footer/>
 </div>
+<script>
+(function () {
+  // =========================
+  // Helpers
+  // =========================
+  const qs  = (s, c) => (c || document).querySelector(s);
+  const qsa = (s, c) => Array.from((c || document).querySelectorAll(s));
+  const i10 = (v, d = 0) => { const n = parseInt(v, 10); return Number.isNaN(n) ? d : n; };
+
+  function getSelFromUIOnly() {
+    const r   = qs('.rad-producto:checked');
+    const qty = qs('#cantidad');
+    return { id: r ? String(r.value) : null, qty: qty && qty.value ? String(qty.value) : null };
+  }
+  function getSelFromURLOnly() {
+    const u = new URL(location.href);
+    const id  = u.searchParams.get('sel_id');
+    const qty = u.searchParams.get('sel_qty');
+    return { id: id || null, qty: qty || null };
+  }
+  // ✅ Efectiva: UI si existe; si no, URL
+  function getEffectiveSel() {
+    let { id, qty } = getSelFromUIOnly();
+    if (!id) {
+      const f = getSelFromURLOnly();
+      id  = id  || f.id;
+      qty = qty || f.qty;
+    }
+    return { id, qty };
+  }
+
+  function pushSelToURL({ id, qty }) {
+    const u = new URL(location.href);
+    if (id)  u.searchParams.set('sel_id', id);  else u.searchParams.delete('sel_id');
+    if (qty) u.searchParams.set('sel_qty', qty); else u.searchParams.delete('sel_qty');
+    history.replaceState(null, '', u.toString());
+  }
+
+  // Construye destino con selección efectiva (UI o URL)
+  function withSelParams(url) {
+    const u = new URL(url, location.origin);
+    const { id, qty } = getEffectiveSel();
+    u.searchParams.delete('sel_id'); u.searchParams.delete('sel_qty');
+    if (id)  u.searchParams.set('sel_id', id);
+    if (qty) u.searchParams.set('sel_qty', qty);
+    return u.toString();
+  }
+
+  // Ajusta min/max de cantidad según fila seleccionada
+  function applyQtyBoundsFromRow(row) {
+    const qtyI = qs('#cantidad');
+    if (!row || !qtyI) return;
+    const disp = i10(row.getAttribute('data-disp'), 0);
+    qtyI.min = '1';
+    qtyI.max = String(Math.max(0, disp));
+
+    // ❗No clamp si el campo está vacío o con solo ceros
+    const raw = (qtyI.value || '').trim();
+    if (raw === '' || /^0+$/.test(raw)) return;
+
+    let v = i10(raw, 1);
+    const max = i10(qtyI.max || '1', 1);
+    if (max > 0 && v > max) v = max;
+    if (v < 1) v = 1;
+    qtyI.value = String(v);
+  }
+
+  // Mantén hidden inputs sincronizados con la selección efectiva
+  function syncHiddenFilters() {
+    const { id, qty } = getEffectiveSel();
+    const hidId  = qs('input[name="sel_id"]');
+    const hidQty = qs('input[name="sel_qty"]');
+    if (hidId)  hidId.value  = id  || '';
+    if (hidQty) hidQty.value = qty || '';
+  }
+
+  // =========================
+  // Al cargar
+  // =========================
+
+  // 1) Asegura que la URL porte sel_id/sel_qty
+  (function ensureURLHasSelection() {
+    const fromURL = getSelFromURLOnly();
+    if (!fromURL.id || !fromURL.qty) {
+      const eff = getEffectiveSel(); // usará UI si existe
+      if (eff.id || eff.qty) pushSelToURL(eff);
+    }
+  })();
+
+  // 2) Refleja (si procede) la selección de la URL en la UI actual
+  (function applySelectionFromURL() {
+    const { id, qty } = getSelFromURLOnly();
+    const qtyI = qs('#cantidad');
+
+    if (id) {
+      const radio = qs(`.rad-producto[value="${CSS.escape(id)}"]`);
+      if (radio && !radio.disabled) {
+        radio.checked = true;
+        applyQtyBoundsFromRow(radio.closest('tr[data-id]'));
+      }
+    }
+    if (qtyI && qty) {
+      const max = i10(qtyI.max || '0', 0);
+      let v = i10(qty, 1);
+      if (max > 0) v = Math.min(v, max);
+      if (v < 1) v = 1;
+      qtyI.value = String(v);
+    }
+  })();
+
+  syncHiddenFilters(); // inicial
+
+  // =========================
+  // Eventos
+  // =========================
+
+  // Radio change → ajusta límites + sube a URL + hidden
+  qsa('.rad-producto').forEach(r => {
+    r.addEventListener('change', () => {
+      applyQtyBoundsFromRow(r.closest('tr[data-id]'));
+      const eff = getEffectiveSel(); // ahora UI ya tiene id
+      pushSelToURL(eff);
+      syncHiddenFilters();
+    });
+  });
+
+  // --- Cantidad: regla de ceros/vacío + clamp cuando sea número válido ---
+  const qtyI = qs('#cantidad');
+  if (qtyI) {
+    // INPUT: permitir borrar y ceros → deseleccionar, sin clamp
+    qtyI.addEventListener('input', () => {
+      const raw = (qtyI.value || '').trim();
+      const radio = qs('.rad-producto:checked');
+
+      // vacío o SOLO ceros => deseleccionar y limpiar selección en URL/hidden
+      if (raw === '' || /^0+$/.test(raw)) {
+        if (radio && !radio.disabled) radio.checked = false;
+        pushSelToURL({ id: null, qty: null });
+        syncHiddenFilters();
+        return;
+      }
+
+      // si aún no es un entero positivo, no fuerces (p.ej. mientras teclea)
+      if (!/^\d+$/.test(raw)) return;
+
+      // número válido => ahora sí clamping a [1..max] (si hay radio, toma su disp)
+      let val = parseInt(raw, 10);
+      let max = i10(qtyI.max || '0', 0);
+      const row = radio ? radio.closest('tr[data-id]') : null;
+      if (row) max = i10(row.getAttribute('data-disp'), max);
+
+      if (max > 0 && val > max) val = max;
+      if (val < 1) val = 1;
+
+      qtyI.value = String(val);
+
+      // Mantén la selección actual (no seleccionamos un radio automáticamente si no hay uno)
+      const id = radio ? radio.value : getSelFromURLOnly().id;
+      pushSelToURL({ id: id || null, qty: String(val) });
+      syncHiddenFilters();
+    });
+
+    // BLUR: normalización final (si quedó vacío/ceros, deselecciona; si número, clamp final)
+    qtyI.addEventListener('blur', () => {
+      const raw = (qtyI.value || '').trim();
+      const radio = qs('.rad-producto:checked');
+
+      if (raw === '' || /^0+$/.test(raw)) {
+        if (radio && radio.checked) radio.checked = false;
+        qtyI.value = ''; // opcional: normalizar a vacío
+        pushSelToURL({ id: null, qty: null });
+        syncHiddenFilters();
+        return;
+      }
+
+      if (/^\d+$/.test(raw)) {
+        let val = parseInt(raw, 10);
+        let max = i10(qtyI.max || '0', 0);
+        const row = radio ? radio.closest('tr[data-id]') : null;
+        if (row) max = i10(row.getAttribute('data-disp'), max);
+
+        if (max > 0 && val > max) val = max;
+        if (val < 1) val = 1;
+
+        qtyI.value = String(val);
+        const id = radio ? radio.value : getSelFromURLOnly().id;
+        pushSelToURL({ id: id || null, qty: String(val) });
+        syncHiddenFilters();
+      }
+    });
+  }
+
+  // Paginación → conserva sel_id/sel_qty
+  qsa('.pagination a.page-link, .pagination a').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      pushSelToURL(getEffectiveSel());
+      location.href = withSelParams(a.href);
+    });
+  });
+
+  // Filtros (GET): añade sel_id/sel_qty al submit
+  const formFiltros = document.getElementById('form-filtros');
+  if (formFiltros) {
+    formFiltros.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const action   = formFiltros.getAttribute('action') || location.pathname;
+      const formData = new FormData(formFiltros);
+      const url      = new URL(action, location.origin);
+
+      for (const [k, v] of formData.entries()) {
+        if (v !== '') url.searchParams.append(k, v);
+      }
+      const { id, qty } = getEffectiveSel();
+      if (id)  url.searchParams.set('sel_id', id);
+      if (qty) url.searchParams.set('sel_qty', qty);
+
+      location.href = url.toString();
+    });
+  }
+
+  // Limpiar: borra filtros pero preserva selección efectiva (si existe)
+  const btnLimpiar = document.getElementById('btn-limpiar');
+  if (btnLimpiar) {
+    btnLimpiar.addEventListener('click', (e) => {
+      e.preventDefault();
+      pushSelToURL(getEffectiveSel());
+      location.href = withSelParams(btnLimpiar.href);
+    });
+  }
+})();
+</script>
+
+
 </body>
 </html>

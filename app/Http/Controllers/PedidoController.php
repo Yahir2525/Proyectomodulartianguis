@@ -348,7 +348,8 @@ class PedidoController extends Controller
             MineriaPipeline::ejecutarPipeline();
         });
 
-        return $this->generarTicket($pedido->id_pedido);
+        // return $this->generarTicket($pedido->id_pedido);
+        return redirect()->route('pedido.index')->with('success', 'El pedido se ha cerrado con éxito.');
     }
 
 
@@ -394,9 +395,6 @@ class PedidoController extends Controller
 
         return redirect()->back()->with('success', 'Pedido reabierto. Selecciona nuevamente método de pago y/o crédito.');
     }
-
-
-
 
     public function destroy(Pedido $pedido)
     {
@@ -519,14 +517,14 @@ class PedidoController extends Controller
         return $nuevoSaldo <= 10000;
     }
 
-    public function generarTicket($id)
-    {
-        $pedido = Pedido::with(['carro.productos', 'user', 'credito'])->findOrFail($id);
+    // public function generarTicket($id)
+    // {
+    //     $pedido = Pedido::with(['carro.productos', 'user', 'credito'])->findOrFail($id);
 
-        $pdf = Pdf::loadView('pdf.ticket', compact('pedido'))
-                ->setPaper([0, 0, 226.77, 600], 'portrait'); // tamaño de ticket aprox 80mm
+    //     $pdf = Pdf::loadView('pdf.ticket', compact('pedido'))
+    //             ->setPaper([0, 0, 226.77, 600], 'portrait'); // tamaño de ticket aprox 80mm
 
-        // return $pdf->stream("ticket_pedido_$id.pdf"); // mostrar en navegador
-        return $pdf->download("ticket_pedido_$id.pdf"); // forzar descarga
-    }
+    //     // return $pdf->stream("ticket_pedido_$id.pdf"); // mostrar en navegador
+    //     return $pdf->download("ticket_pedido_$id.pdf"); // forzar descarga
+    // }
 }

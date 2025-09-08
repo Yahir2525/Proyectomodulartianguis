@@ -73,8 +73,10 @@
                                     <th>Cantidad</th>
                                     <th>Precio unitario</th>
                                     <th>Subtotal</th>
-                                    <th>Editar</th>
-                                    <th>Eliminar Producto</th>
+                                    @if($pedido && $pedido->estado_pedido == 1)
+                                        <th>Editar</th>
+                                        <th>Eliminar producto</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -101,25 +103,19 @@
                                             <td data-label="Cantidad">{{ $producto->pivot->cantidad }}</td>
                                             <td data-label="Precio">{{ $producto->precio_unitario }}</td>
                                             <td data-label="Subtotal">{{ $subtotal }}</td>
+                                            @if($pedido && $pedido->estado_pedido == 1)
                                             <td data-label="Editar">
-                                                @if($pedido && $pedido->estado_pedido == 1)
                                                     <a href="{{ route('carro.edit', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" class="btn btn-edit">
                                                         Editar
                                                     </a>
-                                                @else
-                                                    <span style="color: black;">Pedido cerrado</span>
-                                                @endif
                                             </td>
                                             <td data-label="Eliminar">
-                                                @if($pedido && $pedido->estado_pedido == 1)
                                                     <form action="{{ route('carro.eliminarProducto', ['id_carro' => $carrito->id_carro, 'id_producto' => $producto->id_producto]) }}" method="POST" onsubmit="return confirm('¿Estás seguro?');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-danger">Eliminar</button>
                                                     </form>
-                                                @else
-                                                    <span style="color: black;">Pedido cerrado</span>
-                                                @endif
+                                            @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -161,9 +157,7 @@
                                     return ($c->saldo_total + $totalPedido) <= 10000;
                                 });
 
-                                $sinCreditosUsables = $creditosDisponibles->isEmpty() && !$puedeCrearCredito;
-
-                                $bloqueado = $totalExcede || $sumaExcede || $bloqueadoPorHistorial || $bloqueadoPorNivel || $sinCreditosUsables;
+                                $bloqueado = $totalExcede || $sumaExcede || $bloqueadoPorHistorial || $bloqueadoPorNivel;
                             @endphp
                             <p>
                                 <form action="{{ route('carro.destroy', $carros->first()->id_carro) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar todo este carro?');">
@@ -178,26 +172,33 @@
                                 <input type="hidden" name="total" value="{{ $totalPedido }}" />
 
                                 @if($bloqueado)
-                                    <p style="color:red;">
-                                        <strong>No puedes cerrar este pedido a crédito:</strong><br>
-                                        @if($totalExcede)
-                                            - El total del pedido excede los $10,000.<br>
-                                        @endif
-                                        @if($sumaExcede)
-                                            - La suma de créditos activos más este pedido excede los $10,000.<br>
-                                        @endif
-                                        @if($bloqueadoPorHistorial)
-                                            - El usuario tiene más de 2 créditos vencidos con saldo pendiente. No podrá cerrar pedidos a crédito.<br>
-                                        @endif
-                                        @if($bloqueadoPorNivel)
-                                            - El nivel del usuario es <strong>"malo"</strong>. No podrá cerrar pedidos a crédito.<br>
-                                        @endif
-                                        @if($sinCreditosUsables)
-                                            - No tienes créditos vigentes disponibles y no puedes crear uno nuevo.<br>
-                                        @endif
-                                        <br>Puedes cerrarlo como <strong>contado</strong>.
-                                    </p>
+                                    @php
+                                        $mensajes = [];
+
+                                        if ($totalExcede) {
+                                            $mensajes[] = "- El total del pedido excede los $10,000 pesos.";
+                                        }
+                                        if ($sumaExcede) {
+                                            $mensajes[] = "- Con este pedido, el adeudo superaría los $10,000 pesos.";
+                                        }
+                                        if ($bloqueadoPorHistorial) {
+                                            $mensajes[] = "- Tiene 2 o más créditos vencidos con saldo pendiente.";
+                                        }
+                                        if ($bloqueadoPorNivel) {
+                                            $mensajes[] = "- Su nivel de usuario es \"malo\".";
+                                        }
+                                    @endphp
+
+                                    @if(!empty($mensajes))
+                                        <div class="badge bg-mensaje">
+                                            @foreach($mensajes as $mensaje)
+                                                <p style="margin: 0;">{{ $mensaje }}</p>
+                                            @endforeach
+                                            <p style="margin: 0;">Puedes cerrarlo como <strong>contado</strong>.</p>
+                                        </div>
+                                    @endif
                                 @endif
+
                             <div class="pedido-actions">
                                 <label for="metodo_pago_{{ $idPedido }}">Método de pago:</label>
                                 <select name="metodo_pago" required onchange="mostrarCreditos(this, {{ $idPedido }})">
@@ -208,7 +209,7 @@
                                     @endif
                                 </select>
 
-                                <div id="credito-opciones-{{ $idPedido }}" style="display:none; margin-top:8px;">
+                                <div id="credito-opciones-{{ $idPedido }}" style="display:none;">
                                     @if(!$bloqueado)
                                         <label>Seleccionar crédito:</label>
                                         <select name="id_credito" class="select-credito">
@@ -223,8 +224,8 @@
                                         </select>
 
                                         @if(!$puedeCrearCredito)
-                                            <p style="color:orange; font-style: italic;">
-                                                - Ya tienes 3 créditos activos (incluye vencidos). No puedes crear uno nuevo, pero puedes usar los existentes vigentes.
+                                            <p class="badge bg-mensajes">
+                                                - Tiene 3 créditos activos/vencidos.<br>Le recomendamos usar uno existente.
                                             </p>
                                         @endif
                                     @endif
@@ -233,14 +234,13 @@
                             </div>
                             </form>
                         @else
-                            <p style="color: gray;"><strong>Pedido cerrado</strong></p>
+                            <p class="badge bg-cerrado">Pedido cerrado</p>
                         @endif
 
                         <hr>
                     @endif
                 @endforeach
 
-                <!-- 🔹 Links de paginación -->
                 <div class="mt-4 d-flex justify-content-center">
                     {{ $carroIndex->links('pagination::bootstrap-5') }}
                 </div>

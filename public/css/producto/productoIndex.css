@@ -96,8 +96,8 @@ th, td, tr {
   font-size:.9rem;
   vertical-align: middle;
 }
-thead th { background:#f3f4f6; }
-tbody tr:nth-child(odd) { background: #fafafa; }
+thead th { background:#ffffff; }
+tbody tr:nth-child(odd) { background: #ffffff; }
 tbody tr:hover { background: #f2f7ff; }
 
 /* Imagen */
@@ -213,3 +213,4 @@ td img {
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
   outline: none;
 }
+

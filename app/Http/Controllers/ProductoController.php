@@ -17,6 +17,8 @@ class ProductoController extends Controller
     {
         $usuario = Auth::user();
 
+        $seleccion = $request->input('sel', []);
+
         // Base query según rol
         if ($usuario && $usuario->hasRole('administrador')) {
             $query = Producto::query();
@@ -90,9 +92,13 @@ class ProductoController extends Controller
         if ($usuario) {
             if ($usuario->hasRole('administrador')) {
                 $usuarios = User::all();
-                $pedidosUsuario = Pedido::with('user')->get();
+                $pedidosUsuario = Pedido::with('user')
+                    ->where('estado_pedido', 1) // solo abiertos
+                    ->get();
             } else {
-                $pedidosUsuario = Pedido::where('id_user', $usuario->id_user)->get();
+                $pedidosUsuario = Pedido::where('id_user', $usuario->id_user)
+                    ->where('estado_pedido', 1) // solo abiertos
+                    ->get();
             }
         }
 
@@ -105,6 +111,7 @@ class ProductoController extends Controller
             'tamanios',
             'tipos',
             'nombresUnicos',
+            'seleccion',
         ));
     }
 
@@ -182,6 +189,8 @@ class ProductoController extends Controller
     {
         $busqueda = $request->input('buscar');
 
+        $seleccion = $request->input('sel', []);
+
         // Si no hay búsqueda, volver al index
         if (!$busqueda) {
             return redirect()->route('producto.index')
@@ -219,7 +228,7 @@ class ProductoController extends Controller
         $usuarios = User::all();
         $pedidosUsuario = Pedido::with('user')->get();
 
-        return view('producto.showProducto', compact('productos', 'usuarios', 'pedidosUsuario', 'nombresUnicos'));
+        return view('producto.showProducto', compact('productos', 'usuarios', 'pedidosUsuario', 'nombresUnicos', 'seleccion'));
     }
 
     public function edit($id)

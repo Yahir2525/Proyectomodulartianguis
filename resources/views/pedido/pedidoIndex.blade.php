@@ -18,7 +18,7 @@
 
 @if(Auth::check())
     <form action="{{ url('/pedido/showPedido') }}" method="GET" class="buscar">
-        <label for="buscar">Buscar por ID de pedido o nombre de usuario:</label>
+        <label for="buscar">Buscar pedido</label>
         <input 
             type="text" 
             id="buscar" 
@@ -73,16 +73,28 @@
             @endphp
 
             {{-- Mensajes globales --}}
-            @if($usuarioBloqueadoPorPagosAtrasados)
-                <p class="info-msg text-danger">
-                    - El usuario tiene más de 2 créditos vencidos con saldo pendiente. No podrá cerrar pedidos a crédito. Usa la opción <strong>Contado</strong>.
-                </p>
+            @php
+                $mensajes = [];
+
+                if ($bloqueadoPorNivelGlobal) {
+                    $mensajes[] = "- Su nivel de usuario es \"malo\".";
+                }
+
+                if ($usuarioBloqueadoPorPagosAtrasados) {
+                    $mensajes[] = "- Tiene 2 o más créditos vencidos con saldo pendiente.";
+                }
+                
+            @endphp
+
+            @if(!empty($mensajes))
+                <div class="badge bg-mensaje">
+                    @foreach($mensajes as $mensaje)
+                        <p style="margin: 0;">{{ $mensaje }}</p>
+                    @endforeach
+                    <p style="margin: 0;">Usa la opción <strong>Contado</strong>.</p>
+                </div>
             @endif
-            @if($bloqueadoPorNivelGlobal)
-                <p class="info-msg text-danger">
-                    - El nivel del usuario es <strong>"malo"</strong>. No podrá cerrar pedidos a crédito. Usa la opción <strong>Contado</strong>.
-                </p>
-            @endif
+
 
             @php $pedidosPorCredito = $pedidosUsuario->groupBy('id_credito'); @endphp
             @foreach($pedidosPorCredito as $idCredito => $pedidos)
@@ -91,7 +103,10 @@
                         {{ $idCredito ? 'Pedidos del crédito #' . $idCredito : 'Pedidos no adquiridos a crédito' }}
                     </h3>
 
-                    @php $hayCerrados = $pedidos->contains(fn($p) => $p->estado_pedido == 0); @endphp
+                    @php 
+                    $hayAbiertos = $pedidos->contains(fn($p) => $p->estado_pedido == 1);
+                    $hayCerrados = $pedidos->contains(fn($p) => $p->estado_pedido == 0); 
+                    @endphp
 
                     <table>
                         <thead>
@@ -101,7 +116,9 @@
                             <th>Total</th>
                             <th>Creado</th>
                             <th>Actualizado</th>
-                            <th>Eliminar</th>
+                            @if($hayAbiertos)
+                                <th>Eliminar</th>
+                            @endif
                             <th>Método</th>
                             @if($hayCerrados && Auth::user()->can('edit pedido'))
                                 <th>Reabrir</th>
@@ -112,6 +129,7 @@
                         @foreach ($pedidos as $pedido)
                             @php
                                 $totalPedido = $pedido->total_pedido;
+                                $totalExcede = $totalPedido > 10000;
                                 $deudaActual = $creditosActivos->sum('saldo_total');
                                 $superaDiezMil = $deudaActual >= 10000 || ($deudaActual + $totalPedido) > 10000;
 
@@ -125,37 +143,51 @@
                                 <td data-label="Total">${{ number_format($totalPedido, 2) }}</td>
                                 <td data-label="Creado">{{ $pedido->created_at }}</td>
                                 <td data-label="Actualizado">{{ $pedido->updated_at }}</td>
-                                <td data-label="Eliminar">
-                                    @if($pedido->estado_pedido == 1)
-                                        <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST" onsubmit="return confirm('¿Eliminar pedido?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                                        </form>
-                                    @else
-                                        <span class="badge bg-gray">Pedido cerrado</span>
-                                    @endif
-                                </td>
-
+                                @if($hayAbiertos)
+                                    <td data-label="Eliminar">
+                                        @if($pedido->estado_pedido == 1)
+                                            <form action="{{ url('/pedido', $pedido->id_pedido) }}" method="POST" onsubmit="return confirm('¿Eliminar pedido?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                                            </form>
+                                        @else
+                                            <span class="badge bg-cerrado">Pedido cerrado</span>
+                                        @endif
+                                    </td>
+                                @endif
                                 <td data-label="Método">
                                     @if($pedido->estado_pedido == 1)
                                         <form action="{{ route('pedido.cerrar', $pedido->id_pedido) }}" method="POST" class="form-cierre">
                                             @csrf
                                             <input type="hidden" name="total" value="{{ $totalPedido }}" />
 
-                                            {{-- Mensajes por fila --}}
                                             @if($superaDiezMil)
-                                                <p class="info-msg text-danger">
-                                                    No puedes cerrar este pedido con crédito:<br>
-                                                    @if($deudaActual == 10000)
-                                                        - El usuario ya debe 10000.<br>
-                                                    @endif
-                                                    @if(($deudaActual + $totalPedido) > 10000)
-                                                        - Con este pedido, la deuda superaría los 10000 pesos.<br>
-                                                    @endif
-                                                    Usa la opción <strong>Contado</strong>.
-                                                </p>
+                                                @php
+                                                    $mensajes = [];
+
+                                                    if ($totalExcede){
+                                                        $mensajes[] = "- El total del pedido,";
+                                                        $mensajes[] = "excede los $10,000 pesos.";
+                                                    }
+
+                                                    elseif ($totalPedido <= 10000 && ($deudaActual + $totalPedido) > 10000) {
+                                                        $mensajes[] = "- Con este pedido,";
+                                                        $mensajes[] = "el adeudo superaría";
+                                                        $mensajes[] = "los $10,000 pesos.";
+                                                    }
+                                                @endphp
+
+                                                @if(!empty($mensajes))
+                                                    <p class="badge bg-mensaje">
+                                                        @foreach($mensajes as $mensaje)
+                                                            {{ $mensaje }}<br>
+                                                        @endforeach
+                                                        Usa la opción <strong>Contado</strong>.
+                                                    </p>
+                                                @endif
                                             @endif
+
 
                                             <select name="metodo_pago" class="form-select form-select-sm metodo-select"
                                                     required onchange="toggleCreditoOptions(this, {{ $pedido->id_pedido }})">
@@ -180,8 +212,8 @@
                                                         @endforeach
                                                     </select>
                                                     @if(!$puedeCrearNuevoCredito)
-                                                        <p class="info-msg text-warning">
-                                                            - Ya tienes 3 créditos activos (incluye vencidos). No puedes crear uno nuevo, pero puedes usar los existentes vigentes.
+                                                        <p class="badge bg-mensajes">
+                                                            - Tiene 3 créditos activos (incluye vencidos).<br>No puede crear uno nuevo,<br>le recomendamos usar uno existente.
                                                         </p>
                                                     @endif
                                                 </div>
@@ -190,7 +222,7 @@
                                             <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">Cerrar pedido</button>
                                         </form>
                                     @else
-                                        <span class="badge bg-gray">
+                                        <span class="badge bg-metodo">
                                             {{ ucfirst($pedido->metodo_pago ?? 'Sin seleccionar') }}
                                         </span>
                                     @endif
@@ -202,27 +234,32 @@
                                             @php
                                                 $puedeReabrir = true;
                                                 $mensajeCredito = null;
+                                                $claseEstado = "bg-gray";
 
                                                 if ($pedido->id_credito) {
                                                     $credito = \App\Models\Credito::find($pedido->id_credito);
 
-                                                    if (!$credito || $credito->estado == 0 || now()->greaterThan($credito->fecha_vencimiento)) {
+                                                    if (!$credito || $credito->estado == 0) {
                                                         $puedeReabrir = false;
-                                                        $mensajeCredito = "Crédito cerrado o vencido";
+                                                        $mensajeCredito = "Crédito cerrado";
+                                                        $claseEstado = "estado-cerrado";
+                                                    } elseif (now()->greaterThan($credito->fecha_vencimiento)) {
+                                                        $puedeReabrir = false;
+                                                        $mensajeCredito = "Crédito vencido";
+                                                        $claseEstado = "estado-vencido";
                                                     }
                                                 }
                                             @endphp
-
                                             @if($puedeReabrir)
                                                 <form action="{{ route('pedido.reabrir', $pedido->id_pedido) }}" method="POST">
                                                     @csrf
                                                     <button type="submit" class="btn btn-edit btn-sm">Reabrir</button>
                                                 </form>
                                             @else
-                                                <span class="badge bg-gray">{{ $mensajeCredito }}</span>
+                                                <span class="badge {{ $claseEstado }}">{{ $mensajeCredito }}</span>
                                             @endif
                                         @else
-                                            <span class="badge bg-gray">Pedido abierto</span>
+                                            <span class="badge bg-activo">Pedido abierto</span>
                                         @endif
                                     </td>
                                 @endif

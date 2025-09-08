@@ -34,8 +34,8 @@
                 @endforeach
             </datalist>
         @endcan
-        <input type="submit" value="Buscar" />
-    </form><br>
+        <input type="submit" value="Buscar"/>
+    </form>
 
     @php
         $listaAbonos = isset($abonos) ? $abonos : (isset($abono) ? collect([$abono]) : collect([]));
@@ -93,7 +93,7 @@
                                 <td data-label="Editar">
                                     @can('edit abono')
                                         @if($estaCerrado)
-                                            <span class="info-msg text-danger">No editable (crédito cerrado)</span>
+                                            <span class="badge bg-cerrado">Crédito cerrado</span>
                                         @else
                                             <a href="{{ route('abono.edit', $abono->id_abono) }}" class="btn btn-edit">Editar</a>
                                         @endif
@@ -104,9 +104,9 @@
                                 <td data-label="Eliminar">
                                     @can('delete abono')
                                         @if($estaCerrado)
-                                            <span class="info-msg text-danger">No eliminable (crédito cerrado)</span>
+                                            <span class="badge bg-cerrado">Crédito cerrado</span>
                                         @elseif($estaVencido)
-                                            <span class="info-msg text-warning">No eliminable (crédito vencido)</span>
+                                            <span class="badge bg-vencido">Crédito vencido</span>
                                         @else
                                             <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
                                                 @csrf
@@ -125,7 +125,7 @@
     @endif
 
     <br><div class="back-wrap">
-        <a href="{{ route('abono.index') }}" class="btn btn-warning">Volver al historial de abonos</a>
+        <a href="{{ route('abono.index') }}" class="btn btn-warning">Volver al listado</a>
     </div>
 </section>
 </main>

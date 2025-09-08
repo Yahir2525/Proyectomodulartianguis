@@ -25,7 +25,7 @@ class CarroController extends Controller
 
         $query = Carro::with(['productos', 'user', 'pedido']);
 
-        // ===== 🔍 Búsqueda =====
+        // ===== Búsqueda =====
         if ($request->filled('buscar')) {
             $busqueda = $request->input('buscar');
 
@@ -62,12 +62,14 @@ class CarroController extends Controller
         $usuario = Auth::user();
 
         $usuarios = $usuario->hasRole('administrador') ? User::all() : collect();
-        $pedidos = Pedido::all();
+        $pedidos = Pedido::where('estado_pedido', 1)->get();
+
+        $seleccion = $request->input('sel', []);
 
         // Base query
         $query = Producto::query();
 
-        // === 🔍 Buscador por ID (coincidencia parcial), nombre, material, color o tamaño ===
+        // === Buscador por ID (coincidencia parcial), nombre, material, color o tamaño ===
         if ($request->filled('buscar')) {
             $busqueda = $request->input('buscar');
 
@@ -144,7 +146,8 @@ class CarroController extends Controller
             'materiales',
             'colores',
             'tamanios',
-            'nombresUnicos'
+            'nombresUnicos',
+            'seleccion'
         ));
     }
 
@@ -250,15 +253,31 @@ class CarroController extends Controller
 
     public function agregarMultiples(Request $request)
     {
-        $userId = $request->input('id_user');
-        $idPedido = $request->input('id_pedido');
+        $userId     = $request->input('id_user');
+        $idPedido   = $request->input('id_pedido');
+
         $seleccionados = $request->input('productos_seleccionados', []);
-        $cantidades = $request->input('cantidades', []);
+        $cantidades    = $request->input('cantidades', []);
+
+        // 🔹 Dedup de los seleccionados (por si llegan visibles + ocultos)
+        $seleccionados = array_values(array_unique(array_map('strval', $seleccionados)));
+
+        // 🔹 NUEVO: construir SELECCIÓN EFECTIVA (checks + cantidades > 0)
+        //    Así evitamos crear pedido si nadie seleccionó nada,
+        //    y contamos casos donde el usuario solo escribió cantidad.
+        $idsPorCantidad    = array_keys(array_filter($cantidades, fn($c) => (int)$c > 0));
+        $seleccionEfectiva = array_values(array_unique(array_map('strval', array_merge($seleccionados, $idsPorCantidad))));
+
+        // 🔹 NUEVO: validar ANTES de crear/abrir pedido
+        if (empty($seleccionEfectiva)) {
+            return back()->with('error', 'No seleccionaste ningún producto.');
+        }
 
         $user = User::findOrFail($userId);
 
+        // Abrir o crear pedido (ahora sí)
         if ($idPedido === 'nuevo') {
-            $pedido = Pedido::create(['id_user' => $userId, 'estado_pedido' => 1]);
+            $pedido   = Pedido::create(['id_user' => $userId, 'estado_pedido' => 1]);
             $idPedido = $pedido->id_pedido;
         } else {
             $pedido = Pedido::find($idPedido);
@@ -267,35 +286,30 @@ class CarroController extends Controller
             }
         }
 
-        if (empty($seleccionados)) {
-            return back()->with('error', 'No seleccionaste ningún producto.');
-        }
-
-        // Calcular nuevo total sumando productos seleccionados * cantidades
+        // Calcular nuevo total sumando productos * cantidades (usa selección efectiva)
         $nuevoTotal = $pedido->total_pedido;
-        foreach ($seleccionados as $idProducto) {
+        foreach ($seleccionEfectiva as $idProducto) {
             $producto = Producto::find($idProducto);
-            $cantidad = (int) ($cantidades[$idProducto] ?? 0);
+            if (!$producto) continue;
+            $cantidad = (int)($cantidades[$idProducto] ?? 0);
             if ($cantidad <= 0) continue;
             $nuevoTotal += $producto->precio_unitario * $cantidad;
         }
 
-        // Aplicar reglas de comportamiento de pago
+        // Reglas de comportamiento de pago (sin cambios)
         if ($user->nivel_usuario === 'malo') {
             if ($request->input('metodo_pago') === 'credito') {
                 return back()->with('error', 'No puedes aumentar el total del pedido a crédito porque tienes pagos atrasados sin abonar.');
             }
         }
 
-
         $carro = Carro::firstOrCreate(
             ['id_pedido' => $pedido->id_pedido],
-            ['id_user' => $pedido->id_user]
+            ['id_user'   => $pedido->id_user]
         );
 
-
-        // Validar que ninguno de los productos seleccionados esté descontinuado
-        foreach ($seleccionados as $idProducto) {
+        // Validar inactivos (usa selección efectiva)
+        foreach ($seleccionEfectiva as $idProducto) {
             $producto = Producto::find($idProducto);
             if (!$producto) {
                 return back()->with('error', "El producto con ID $idProducto no existe.");
@@ -307,12 +321,13 @@ class CarroController extends Controller
 
         $totalAnterior = $pedido->total_pedido;
 
-        foreach ($seleccionados as $idProducto) {
-            $cantidad = (int) ($cantidades[$idProducto] ?? 0);
+        // Agregar/actualizar productos (usa selección efectiva)
+        foreach ($seleccionEfectiva as $idProducto) {
+            $cantidad = (int)($cantidades[$idProducto] ?? 0);
             if ($cantidad <= 0) continue;
 
-            $producto = Producto::find($idProducto);
-            $reservadas = CarroProducto::where('id_producto', $idProducto)->sum('cantidad');
+            $producto    = Producto::find($idProducto);
+            $reservadas  = CarroProducto::where('id_producto', $idProducto)->sum('cantidad');
             $disponibles = max(0, $producto->piezas - $reservadas);
 
             if ($cantidad > $disponibles) {
@@ -344,12 +359,11 @@ class CarroController extends Controller
             $pedido->save();
             $totalOriginal = $pedido->getOriginal('total_pedido');
             $this->actualizarCreditoConDiferencia($pedido, $totalOriginal, $nuevoTotal);
-
         }
-
 
         return redirect()->route('carro.index')->with('success', 'Productos agregados correctamente.');
     }
+
 
     public function eliminarProducto($id_carro, $id_producto)
     {
@@ -437,29 +451,36 @@ class CarroController extends Controller
             $query->where('estado_producto', $request->estado);
         }
 
-        // === 📌 Calcular página real del producto actual ===
+        // === 📌 NUEVO: Selección actual (persistencia entre páginas/filtros) ===
         $perPage = 10;
-        $allIds = (clone $query)->orderBy('tipo')->orderBy('id_producto')->pluck('id_producto');
-        $posicion = $allIds->search($productoActual->id_producto);
+        $selId   = (int) $request->input('sel_id', $productoActual->id_producto);
+        $selQty  = (int) $request->input('sel_qty', $cantidad);
+        if ($selQty < 1) { $selQty = 1; } // guardrail suave
+
+        // === 📌 Calcular página real de la SELECCIÓN (no solo del original) ===
+        $allIds   = (clone $query)->orderBy('tipo')->orderBy('id_producto')->pluck('id_producto');
+        $posicion = $allIds->search($selId);
 
         $paginaCorrecta = null;
         if ($posicion !== false && !$request->has('navegacion')) {
-            $paginaCorrecta = ceil(($posicion + 1) / $perPage);
-            $paginaSolicitada = $request->input('page', 1);
+            $paginaCorrecta   = (int) ceil(($posicion + 1) / $perPage);
+            $paginaSolicitada = (int) $request->input('page', 1);
 
             if ($paginaSolicitada != $paginaCorrecta) {
                 return redirect()->route('carro.edit', [
-                    'id_carro' => $id_carro,
+                    'id_carro'    => $id_carro,
                     'id_producto' => $id_producto,
-                    'page' => $paginaCorrecta,
-                    'navegacion' => 1 // bandera para evitar loop
+                    'page'        => $paginaCorrecta,
+                    'navegacion'  => 1, // evita loop
+                    // mantener selección actual:
+                    'sel_id'      => $selId,
+                    'sel_qty'     => $selQty,
                 ] + $request->query());
             }
         } elseif ($posicion !== false) {
             // Si ya tiene navegación, de todos modos mandamos el valor a la vista
-            $paginaCorrecta = ceil(($posicion + 1) / $perPage);
+            $paginaCorrecta = (int) ceil(($posicion + 1) / $perPage);
         }
-
 
         // Paginación de 10 en 10
         $productos = $query
@@ -502,9 +523,12 @@ class CarroController extends Controller
             'tamanios',
             'nombresUnicos',
             'paginaCorrecta'
-        ));
+        ) + [
+            // NUEVO: expone la selección actual a la vista (si no la usas, no afecta)
+            'selId'  => $selId,
+            'selQty' => $selQty,
+        ]);
     }
-
 
     public function update(Request $request, Carro $carro, $id_producto)
     {
@@ -648,7 +672,6 @@ class CarroController extends Controller
     }
 
 
-
     public function destroy(Carro $carro)
     {
         $pedido = $carro->pedido;
@@ -674,7 +697,7 @@ class CarroController extends Controller
     //         $total += $prod->precio_unitario * $prod->pivot->cantidad;
     //     }
 
-    //     // actualizar el total en el pedido
+        // actualizar el total en el pedido
     //     if ($carro->pedido) {
     //         $carro->pedido->total_pedido = $total;
     //         $carro->pedido->save();
@@ -709,7 +732,7 @@ class CarroController extends Controller
             $pedido->total_pedido = $total;
             $pedido->save();
 
-            // 🚨 Si el pedido quedó vacío y tenía un crédito
+            // Si el pedido quedó vacío y tenía un crédito
             if ($total == 0 && $pedido->id_credito) {
                 $credito = Credito::find($pedido->id_credito);
                 if ($credito) {
@@ -734,9 +757,6 @@ class CarroController extends Controller
 
         return $total;
     }
-
-
-
 
     private function actualizarCreditoConDiferencia(Pedido $pedido, $totalAnterior, $nuevoTotal)
     {

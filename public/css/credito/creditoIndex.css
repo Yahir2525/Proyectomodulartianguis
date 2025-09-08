@@ -27,7 +27,35 @@ hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; margin-to
 }
 .btn:hover { filter: brightness(.95); }
 
-.btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; font-weight: bold; }
+.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; } /* Eliminar */
+.bg-cerrado {
+  background: #db2777 !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+  font-weight: bold;
+}
+.bg-vencido {
+  background: #ea580c !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+  font-weight: bold;
+}
+
+.bg-activo {
+  background: #16a34a !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+  font-weight: bold;
+}
 
 /* ==== FORMULARIO DE BÚSQUEDA ==== */
 form:has(#buscar) {
@@ -110,8 +138,8 @@ th, td, tr {
   font-size:.9rem;
   vertical-align: middle;
 }
-thead th { background:#f3f4f6; }
-tbody tr:nth-child(odd) { background: #fafafa; }
+thead th { background:#ffffff; }
+tbody tr:nth-child(odd) { background: #ffffff; }
 tbody tr:hover { background: #f2f7ff; }
 .cerrado { background: #f2f2f2; }
 

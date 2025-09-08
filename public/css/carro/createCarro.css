@@ -133,8 +133,8 @@ th, td, tr {
   font-size:.9rem;
   vertical-align: middle;
 }
-thead th { background:#f3f4f6; }
-tbody tr:nth-child(odd) { background: #fafafa; }
+thead th { background:#ffffff; }
+tbody tr:nth-child(odd) { background: #ffffff; }
 tbody tr:hover { background: #f2f7ff; }
 
 /* Imagen */
@@ -204,4 +204,36 @@ td img {
 @media (max-width: 480px) {
   html { font-size: 13px; }
   td img { max-width: 60px; }
+}
+
+.form-input {
+  padding: 6px 10px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.95rem;
+  min-width: 200px;
+}
+
+.form-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+  outline: none;
+}
+
+/* Cantidad */
+.cant-input {
+  min-width: 40px;
+  max-width: 70px;
+  text-align: left;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #999;
+  font-size: 0.9rem;
+  background: #fff;
+}
+.cant-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15);
+  outline: none;
 }

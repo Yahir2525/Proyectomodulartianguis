@@ -96,7 +96,7 @@ Route::middleware(['is_user'])->group(function () {
     Route::resource('pedido', PedidoController::class);
     Route::post('/pedido/cerrar/{id_pedido}', [PedidoController::class, 'cerrar'])->name('pedido.cerrar');
     Route::post('/pedido/{id}/reabrir', [PedidoController::class, 'reabrir'])->name('pedido.reabrir');
-    Route::get('/pedido/{id}/ticket', [PedidoController::class, 'generarTicket'])->name('pedido.ticket');
+    // Route::get('/pedido/{id}/ticket', [PedidoController::class, 'generarTicket'])->name('pedido.ticket');
 
     // Créditos
     Route::resource('credito', CreditoController::class);

@@ -83,9 +83,9 @@ th, td, tr {
   font-size:.9rem;
   vertical-align: middle;
 }
-thead th { background:#f3f4f6; }
-tbody tr:nth-child(odd){ background: #fafafa; }
-tbody tr:hover{ background: #f2f7ff; }
+thead th { background:#ffffff; }
+tbody tr:nth-child(odd) { background: #ffffff; }
+tbody tr:hover { background: #f2f7ff; }
 
 /* Botones */
 .btn{
@@ -104,18 +104,35 @@ tbody tr:hover{ background: #f2f7ff; }
   font-weight: bold;
 }
 .btn:hover{ filter: brightness(.95); }
-.btn-primary{ background:#15c221; border-color:#15c221; color:#fff; }
-.btn-edit   { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; }
-.btn-danger { background:#ef4444; border-color:#ef4444; color:#fff; }
-.btn-gray   { background:#6b7280; border-color:#6b7280; color:#fff; }
-.btn-warning{ background:#2563eb; border-color:#2563eb; color:#fff; }
+.btn-primary { background:#16a34a; border-color:#16a34a; color:#fff; font-weight: bold; } /* Registrar */
+.btn-edit    { background:#7c3aed; border-color:#7c3aed; color:#fff; font-weight: bold; } /* Editar */
+.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; } /* Eliminar */
+.btn-warning{ background:#6b7280; border-color:#6b7280; color:#fff; padding: 10px 14px; justify-content:center; border-radius: 6px; font-weight: bold; }
+.bg-cerrado {
+  background: #db2777 !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+  font-weight: bold;
+}
+.bg-vencido {
+  background: #ea580c !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+  font-weight: bold;
+}
 
 /* Alineación de botones en celdas */
 td .btn{ display:inline-flex; }
 form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
 
 /* Botón inferior */
-.back-wrap{ margin-top: 12px; text-align: center; }
+.back-wrap{ margin-top: 10px; text-align: center; }
 
 /* ==== RESPONSIVE ==== */
 @media (max-width: 992px){
@@ -179,3 +196,4 @@ form[method="POST"][style*="display:inline"] .btn{ margin-left:6px; }
 }
 
 hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; margin-top: 12px; }
+

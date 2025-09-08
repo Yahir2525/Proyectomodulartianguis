@@ -15,11 +15,14 @@
 <main class="content">
 <br><x-barracreate/>
     <section class="container">
-    <br><hr class="hr-grueso"><center><h1>Editar Abono #{{ $abono->id_abono }}</h1></center><hr class="hr-grueso"><br>
+    <br><hr class="hr-grueso"><center><h1>Editar abono #{{ $abono->id_abono }}</h1></center><hr class="hr-grueso"><br>
 
     {{-- Información adicional del abono --}}
-    <p><strong>Usuario:</strong> {{ $abono->user->nombre_usuario ?? 'Usuario no disponible' }}</p><br>
-    <p><strong>Fecha de abono:</strong> {{ $abono->created_at->format('d/m/Y H:i') }}</p><br>
+    <p><strong>Usuario:</strong></p>
+    <p class="datoabono">{{ $abono->user->nombre_usuario ?? 'Usuario no disponible' }}</p>
+
+    <p><strong>Fecha de abono:</strong></p>
+    <p class="datoabono">{{ $abono->created_at->format('d/m/Y H:i') }}</p>
 
     @if ($errors->any())
         <div style="color: red;">

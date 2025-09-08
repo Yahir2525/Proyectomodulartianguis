@@ -33,7 +33,7 @@
         <br>
 
         {{-- Buscador por ID o nombre --}}
-        <form action="{{ url('/producto') }}" method="GET">
+        <form id="form-filtros" action="{{ url('/producto') }}" method="GET">
         <div class="buscar">
             <label for="buscar">Buscar por ID o por nombre:</label>
             <input list="productos" id="buscar" name="buscar"
@@ -100,7 +100,7 @@
                 <label for="precio_min">Precio mín:</label>
                 <input type="number" name="precio_min" id="precio_min" value="{{ request('precio_min') }}" min="0" step="0.01">
 
-                <label for="precio_max">Precio máx:</label>
+                <label for="precio_max" style="margin-left: 14px;">Precio máx:</label>
                 <input type="number" name="precio_max" id="precio_max" value="{{ request('precio_max') }}" min="0" step="0.01">
             </div>
             @can('create producto')
@@ -115,7 +115,7 @@
             @endcan
 
             <button type="submit" class="btn btn-primary">Filtrar</button>
-            <a href="{{ url('/producto') }}" class="btn btn-gray">Limpiar</a>
+            <a id="btn-limpiar" href="{{ url('/producto') }}" class="btn btn-gray">Limpiar</a>
         </div>
         </form>
 
@@ -123,7 +123,7 @@
             @php $agrupadosPorTipo = $productoIndex->groupBy('tipo'); @endphp
 
             @auth
-                <form action="{{ url('/carro/agregar-multiples') }}" method="POST">
+                <form id="form-seleccion" action="{{ url('/carro/agregar-multiples') }}" method="POST">
                     @csrf
 
                     @foreach ($agrupadosPorTipo as $tipo => $productos)
@@ -152,15 +152,25 @@
                                             $reservadas = CarroProducto::where('id_producto', $producto->id_producto)->sum('cantidad');
                                             $disponibles = max(0, $producto->piezas - $reservadas);
                                             $esAdmin = Auth::check() && Auth::user()->hasRole('administrador');
+                                            $bloqueado = ($disponibles == 0) || ($producto->estado_producto == 0);
                                         @endphp
 
                                         @if ($esAdmin || $producto->estado_producto)
-                                            <tr class="{{ ($disponibles == 0 || $producto->estado_producto == 0) ? 'sin-stock' : '' }}">
-                                                <td>
-                                                    <input type="checkbox" 
-                                                        name="productos_seleccionados[]" 
-                                                        value="{{ $producto->id_producto }}" 
-                                                        {{ ($disponibles == 0 || $producto->estado_producto == 0) ? 'disabled' : '' }}>
+                                            <tr data-id="{{ $producto->id_producto }}"
+                                                data-disp="{{ $disponibles }}"
+                                                data-estado="{{ (int)$producto->estado_producto }}"
+                                                class="{{ $bloqueado ? 'sin-stock' : '' }}">
+                                                <td data-label="Seleccionar">
+                                                    <input type="checkbox"
+                                                    class="chk-producto"
+                                                    data-id="{{ $producto->id_producto }}"
+                                                    name="productos_seleccionados[]"
+                                                    value="{{ $producto->id_producto }}"
+                                                    {{-- si está bloqueado, no permitir selección --}}
+                                                    {{ $bloqueado ? 'disabled' : '' }}
+                                                    {{-- solo marcar si NO está bloqueado y viene en sel[] --}}
+                                                    {{ (!$bloqueado && array_key_exists($producto->id_producto, $seleccion ?? [])) ? 'checked' : '' }}
+                                                    >
                                                 </td>
                                                 <td>{{ $producto->id_producto }}</td>
                                                 <td>{{ $producto->nombre }}</td>
@@ -177,12 +187,15 @@
                                                 <td>${{ number_format($producto->precio_unitario, 2) }}</td>
                                                 <td class="{{ $disponibles == 0 ? 'resaltado' : '' }}">{{ $disponibles }}</td>
                                                 <td data-label="Cantidad">
-                                                    <input type="number" 
-                                                        name="cantidades[{{ $producto->id_producto }}]" 
-                                                        min="1" 
-                                                        max="{{ $disponibles }}" 
-                                                        class="cant-input"
-                                                        {{ ($disponibles == 0 || $producto->estado_producto == 0) ? 'disabled' : '' }}>
+                                                    <input type="number"
+                                                    class="cant-input form-input"
+                                                    name="cantidades[{{ $producto->id_producto }}]"
+                                                    data-id="{{ $producto->id_producto }}"
+                                                    min="1" step="1"
+                                                    max="{{ $disponibles }}" {{-- importante para clamp en JS --}}
+                                                    value="{{ !$bloqueado ? ($seleccion[$producto->id_producto] ?? '') : '' }}"
+                                                    {{ $bloqueado ? 'disabled' : '' }}
+                                                    >
                                                 </td>
                                                 <td>{{ $producto->estado_producto ? 'Activo' : 'Inactivo' }}</td>
                                                 <td><a href="{{ route('producto.edit', $producto->id_producto) }}"  class="btn btn-edit">Editar</a></td>
@@ -213,72 +226,25 @@
                                 @endforeach
                             </datalist>
 
-                            <script>
-                                const inputUsuario = document.getElementById('nombre_usuario');
-                                const idUsuario = document.getElementById('id_user');
-                                const datalistUsuarios = document.getElementById('usuarios');
-                                const selectPedido = document.getElementById('id_pedido');
-
-                                inputUsuario.addEventListener('input', () => {
-                                    const option = Array.from(datalistUsuarios.options).find(o => o.value === inputUsuario.value);
-                                    if (option) {
-                                        idUsuario.value = option.dataset.userid;
-                                        filtrarPedidos(option.dataset.userid);
-                                    } else {
-                                        idUsuario.value = '';
-                                        mostrarTodosPedidos();
-                                    }
-                                });
-
-                                function filtrarPedidos(userId) {
-                                    const opciones = document.querySelectorAll('#id_pedido option');
-                                    opciones.forEach(opcion => {
-                                        if (opcion.value === 'nuevo') {
-                                            opcion.hidden = false;
-                                        } else {
-                                            opcion.hidden = opcion.dataset.user !== userId;
-                                        }
-                                    });
-                                    if (selectPedido.value) {
-                                        const opcionSeleccionada = selectPedido.querySelector(`option[value="${selectPedido.value}"]`);
-                                        if (opcionSeleccionada && opcionSeleccionada.value !== 'nuevo' && opcionSeleccionada.dataset.user !== userId) {
-                                            selectPedido.value = '';
-                                        }
-                                    }
-                                }
-                                function mostrarTodosPedidos() {
-                                    const opciones = document.querySelectorAll('#id_pedido option');
-                                    opciones.forEach(opcion => { opcion.hidden = false; });
-                                    selectPedido.value = '';
-                                }
-                            </script>
+                            
                         @else
                             <input type="hidden" name="id_user" value="{{ Auth::id() }}">
                         @endif
 
                         <label for="id_pedido"><strong>Selecciona o crea un pedido:</strong></label>
                         <select name="id_pedido" id="id_pedido" required class="form-input">
-                            <option value="">-- Selecciona --</option>
-                            <option value="nuevo">Crear nuevo pedido</option>
-                            @foreach($pedidosUsuario as $pedido)
-                                @php
-                                    $ocultar = false;
+                        <option value="">-- Selecciona --</option>
+                        <option value="nuevo">Crear nuevo pedido</option>
 
-                                    if ($pedido->id_credito && $pedido->credito) {
-                                        $ocultar = ($pedido->credito->estado == 0) || ($pedido->credito->fecha_vencimiento < now());
-                                    }
-                                @endphp
-
-                                @if(!$ocultar)
-                                    <option value="{{ $pedido->id_pedido }}"
-                                            data-user="{{ $pedido->id_user }}"
-                                            {{ $pedido->estado_pedido == 0 ? 'disabled' : '' }}>
-                                        Pedido #{{ $pedido->id_pedido }} - {{ $pedido->user->nombre_usuario ?? 'Usuario' }} {{ $pedido->estado_pedido == 0 ? '(CERRADO)' : '' }}
-                                    </option>
-                                @endif
-                            @endforeach
+                        @foreach($pedidosUsuario as $pedido)
+                            @continue($pedido->estado_pedido == 0) {{-- 🔥 oculta cerrados --}}
+                            <option value="{{ $pedido->id_pedido }}"
+                                    data-user="{{ $pedido->id_user }}">
+                                Pedido #{{ $pedido->id_pedido }} - {{ $pedido->user->nombre_usuario ?? 'Usuario' }}
+                            </option>
+                        @endforeach
                         </select>
-                        <button type="submit" class="btn btn-agregar">Agregar seleccionados al carrito</button>
+                        <button type="submit" class="btn btn-registrar">Agregar seleccionados al carrito</button>
                     </div>
                 </form>
             @endauth
@@ -352,5 +318,263 @@
 </main>
 <x-footer/>
 </div>
+<script>
+(function() {
+  // --- Lee selección desde la URL: sel[123]=2 ---
+  function leerSeleccionDeURL() {
+    const params = new URLSearchParams(location.search);
+    const sel = new Map();
+    for (const [k, v] of params.entries()) {
+      if (k.startsWith('sel[') && k.endsWith(']')) {
+        const id = k.slice(4, -1);
+        const qty = parseInt(v, 10);
+        if (!isNaN(qty) && qty > 0) sel.set(id, qty);
+      }
+    }
+    return sel;
+  }
+
+  // Estado en memoria (no localStorage)
+  const seleccion = leerSeleccionDeURL();
+
+  // --- Pinta checks/cantidades visibles según el estado ---
+  function aplicarSeleccionEnTabla() {
+    document.querySelectorAll('tr[data-id]').forEach(tr => {
+      const id  = tr.dataset.id;
+      const chk = tr.querySelector('.chk-producto');
+      const qty = tr.querySelector('.cant-input');
+      const max = qty ? parseInt(qty.max || '0', 10) : 0;
+
+      if (seleccion.has(id)) {
+        let val = seleccion.get(id);
+        if (isNaN(val) || val < 1) val = 1;
+        if (!isNaN(max) && max > 0) val = Math.min(val, max);
+        if (chk && !chk.disabled) chk.checked = true;
+        if (qty && !qty.disabled) qty.value = val;
+        seleccion.set(id, val); // clamp
+      } else {
+        if (chk && !chk.disabled) chk.checked = false;
+        if (qty && !qty.disabled) qty.value = '';
+      }
+    });
+  }
+
+  // --- Cambios a checks y cantidades ---
+  function wireEventos() {
+    // Check/uncheck
+    document.querySelectorAll('.chk-producto').forEach(chk => {
+      chk.addEventListener('change', () => {
+        const tr  = chk.closest('tr[data-id]');
+        const id  = tr?.dataset.id;
+        const qty = tr?.querySelector('.cant-input');
+
+        if (!id) return;
+
+        if (chk.checked) {
+          // si no hay cantidad, por defecto 1 (limitado por max)
+          let val = qty && qty.value ? parseInt(qty.value, 10) : 1;
+          const max = qty ? parseInt(qty.max || '0', 10) : 0;
+          if (isNaN(val) || val < 1) val = 1;
+          if (!isNaN(max) && max > 0) val = Math.min(val, max);
+          if (qty && !qty.disabled) qty.value = val;
+          seleccion.set(id, val);
+        } else {
+          // desmarcar => limpiar cantidad y quitar del estado
+          seleccion.delete(id);
+          if (qty && !qty.disabled) qty.value = '';
+        }
+      });
+    });
+
+    // Cantidad (con soporte para “vacío” y “solo ceros”)
+    document.querySelectorAll('.cant-input').forEach(inp => {
+      const onInput = () => {
+        const tr  = inp.closest('tr[data-id]');
+        const id  = tr?.dataset.id;
+        const chk = tr?.querySelector('.chk-producto');
+        if (!id) return;
+
+        const raw = (inp.value || '').trim();
+
+        // vacío o SOLO ceros => deseleccionar y limpiar estado, sin clamp
+        if (raw === '' || /^0+$/.test(raw)) {
+          if (chk && !chk.disabled) chk.checked = false;
+          seleccion.delete(id);
+          // no cambies inp.value aquí; el usuario puede seguir tecleando
+          return;
+        }
+
+        // Si no es entero positivo todavía (p.ej. tecleando), no fuerces
+        if (!/^\d+$/.test(raw)) return;
+
+        // número válido => clamp a [1..max]
+        let val = parseInt(raw, 10);
+        const max = parseInt(inp.max || '0', 10);
+        if (!isNaN(max) && max > 0 && val > max) val = max;
+        if (val < 1) val = 1;
+
+        inp.value = String(val);
+
+        // marcar automáticamente el checkbox
+        if (chk && !chk.disabled) chk.checked = true;
+
+        // actualizar estado
+        seleccion.set(id, val);
+      };
+
+      const onBlur = () => {
+        const tr  = inp.closest('tr[data-id]');
+        const id  = tr?.dataset.id;
+        const chk = tr?.querySelector('.chk-producto');
+        if (!id) return;
+
+        const raw = (inp.value || '').trim();
+
+        // Al salir: si quedó vacío o solo ceros, limpiar y desmarcar
+        if (raw === '' || /^0+$/.test(raw)) {
+          if (chk && chk.checked) chk.checked = false;
+          inp.value = ''; // normalizamos a vacío
+          seleccion.delete(id);
+          return;
+        }
+
+        if (/^\d+$/.test(raw)) {
+          let val = parseInt(raw, 10);
+          const max = parseInt(inp.max || '0', 10);
+          if (!isNaN(max) && max > 0 && val > max) val = max;
+          if (val < 1) val = 1;
+          inp.value = String(val);
+          if (chk && !chk.disabled) chk.checked = true;
+          seleccion.set(id, val);
+        }
+      };
+
+      inp.addEventListener('input', onInput);
+      inp.addEventListener('blur', onBlur);
+    });
+  }
+
+  // --- Pone sel[*] actuales en una URL (paginación/limpiar/filtrar) ---
+  function conSeleccionEnURL(urlString) {
+    const url = new URL(urlString, location.origin);
+    // limpia claves sel[*]
+    [...url.searchParams.keys()].forEach(k => {
+      if (k.startsWith('sel[') && k.endsWith(']')) url.searchParams.delete(k);
+    });
+    // agrega selección actual
+    seleccion.forEach((qty, id) => {
+      url.searchParams.append(`sel[${id}]`, String(qty));
+    });
+    return url.toString();
+  }
+
+  // --- Paginación: intercepta para mantener sel[*] ---
+  document.querySelectorAll('.pagination a.page-link, .pagination a').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      location.href = conSeleccionEnURL(a.href);
+    });
+  });
+
+  // --- Filtros (GET): agrega sel[*] a la URL antes de enviar ---
+  const formFiltros = document.getElementById('form-filtros');
+  if (formFiltros) {
+    formFiltros.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const action  = formFiltros.getAttribute('action') || location.pathname;
+      const formData= new FormData(formFiltros);
+      const url     = new URL(action, location.origin);
+
+      for (const [k, v] of formData.entries()) {
+        if (v !== '') url.searchParams.append(k, v);
+      }
+      seleccion.forEach((qty, id) => url.searchParams.append(`sel[${id}]`, String(qty)));
+      location.href = url.toString();
+    });
+  }
+
+  // --- Limpiar: navega a /producto pero conservando solo sel[*] ---
+  const btnLimpiar = document.getElementById('btn-limpiar');
+  if (btnLimpiar) {
+    btnLimpiar.addEventListener('click', function (e) {
+      e.preventDefault();
+      location.href = conSeleccionEnURL(this.href);
+    });
+  }
+
+  // --- Envío final (POST): inyecta hidden con el estado y deshabilita visibles ---
+  const formSeleccion = document.getElementById('form-seleccion');
+  if (formSeleccion) {
+    formSeleccion.addEventListener('submit', () => {
+      // borra inyecciones previas
+      formSeleccion.querySelectorAll('input.__dyn').forEach(n => n.remove());
+      // inyecta estado actual
+      seleccion.forEach((qty, id) => {
+        const hidId = document.createElement('input');
+        hidId.type = 'hidden';
+        hidId.name = 'productos_seleccionados[]';
+        hidId.value = id;
+        hidId.className = '__dyn';
+        formSeleccion.appendChild(hidId);
+
+        const hidQty = document.createElement('input');
+        hidQty.type = 'hidden';
+        hidQty.name = `cantidades[${id}]`;
+        hidQty.value = String(qty);
+        hidQty.className = '__dyn';
+        formSeleccion.appendChild(hidQty);
+      });
+
+      // evita duplicados: no envíes inputs visibles
+      document.querySelectorAll('.chk-producto, .cant-input').forEach(el => {
+        el.disabled = true;
+      });
+    });
+  }
+
+  // Init
+  aplicarSeleccionEnTabla();
+  wireEventos();
+})();
+</script>
+<script>
+    const inputUsuario = document.getElementById('nombre_usuario');
+    const idUsuario = document.getElementById('id_user');
+    const datalistUsuarios = document.getElementById('usuarios');
+    const selectPedido = document.getElementById('id_pedido');
+
+    inputUsuario.addEventListener('input', () => {
+        const option = Array.from(datalistUsuarios.options).find(o => o.value === inputUsuario.value);
+        if (option) {
+            idUsuario.value = option.dataset.userid;
+            filtrarPedidos(option.dataset.userid);
+        } else {
+            idUsuario.value = '';
+            mostrarTodosPedidos();
+        }
+    });
+
+    function filtrarPedidos(userId) {
+        const opciones = document.querySelectorAll('#id_pedido option');
+        opciones.forEach(opcion => {
+            if (opcion.value === 'nuevo') {
+                opcion.hidden = false;
+            } else {
+                opcion.hidden = opcion.dataset.user !== userId;
+            }
+        });
+        if (selectPedido.value) {
+            const opcionSeleccionada = selectPedido.querySelector(`option[value="${selectPedido.value}"]`);
+            if (opcionSeleccionada && opcionSeleccionada.value !== 'nuevo' && opcionSeleccionada.dataset.user !== userId) {
+                selectPedido.value = '';
+            }
+        }
+    }
+    function mostrarTodosPedidos() {
+        const opciones = document.querySelectorAll('#id_pedido option');
+        opciones.forEach(opcion => { opcion.hidden = false; });
+        selectPedido.value = '';
+    }
+</script>
 </body>
 </html>

@@ -31,18 +31,89 @@ h3 { margin-top: 16px; font-size: 1rem; }
 }
 .btn:hover { filter: brightness(.95); }
 
-.btn-primary  { background:#15c221; border-color:#15c221; color:#fff; margin-left: 0;}
-.btn-edit    { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; }
-.btn-danger  { background:#ef4444; border-color:#ef4444; color:#fff; }
+.btn-primary  { background:#16a34a; border-color:#16a34a; color:#fff; margin-left: 0; font-weight: bold;}
+.btn-edit    { background:#7c3aed; border-color:#7c3aed; color:#fff; font-weight: bold; }
+.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; } /* Eliminar */
 
-/* Badge gris para "Pedido cerrado" */
-.bg-gray {
-  background: #6b7280 !important;
+.estado-cerrado {
+  background: #db2777 !important;
   color: #fff !important;
   display:inline-block;
   padding:4px 8px;
   border-radius:6px;
   font-size:.85rem;
+  font-weight: bold;
+}
+.estado-vencido {
+  background: #ea580c !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+  font-weight: bold;
+}
+
+.bg-cerrado {
+  background: #db2777 !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+  font-weight: bold;
+}
+.bg-vencido {
+  background: #ea580c !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+  font-weight: bold;
+}
+
+.bg-activo {
+  background: #16a34a !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+  font-weight: bold;
+}
+
+.bg-metodo {
+  background: #8b5cf6 !important;
+  color: #fff !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.85rem;
+  font-weight: bold;
+}
+
+.bg-mensaje {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.90rem;
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.bg-mensajes {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:.90rem;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  line-height: 1.2;
 }
 
 /* ==== FORMULARIO DE BÚSQUEDA ==== */
@@ -135,20 +206,12 @@ th, td, tr {
   vertical-align: middle;
 }
 
-thead th { background:#f3f4f6; }
-tbody tr:nth-child(odd) { background: #fafafa; }
+thead th { background:#ffffff; }
+tbody tr:nth-child(odd) { background: #ffffff; }
 tbody tr:hover { background: #f2f7ff; }
 .cerrado { background: #f2f2f2; }
 
-/* --- Columnas específicas --- */
-th:nth-child(1), td:nth-child(1) { width: 8%; }   /* ID pedido */
-th:nth-child(2), td:nth-child(2) { width: 8%; }   /* Crédito */
-th:nth-child(3), td:nth-child(3) { width: 8%; }   /* Total */
-th:nth-child(4), td:nth-child(5) { width: 14%; }  /* Creado */
-th:nth-child(5), td:nth-child(6) { width: 14%; }  /* Actualizado */
-th:nth-child(6), td:nth-child(7) { width: 8%; }  /* Eliminar */
-th:nth-child(7), td:nth-child(8) { width: 12%; }  /* Método */
-th:nth-child(8), td:nth-child(9) { width: 10%; }  /* Reabrir */
+
 
 /* --- Columna Método --- */
 td[data-label="Método"] { text-align:center; }
