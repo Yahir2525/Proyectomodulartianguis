@@ -97,7 +97,7 @@
             <button type="submit" class="btn btn-primary">Actualizar producto</button>
 
             <center><div class="back-wrap">
-                <a href="{{ route('producto.index') }}" class="btn btn-gray">Cancelar</a>
+                <a href="{{ route('producto.index') }}" class="btn btn-danger">Cancelar</a>
             </div></center>
         </form>
     </div>

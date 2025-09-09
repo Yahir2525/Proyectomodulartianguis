@@ -152,6 +152,7 @@
                     $creditosTodos = \App\Models\Credito::where('id_user', $usuario->id_user)->where('estado', 1)->get();
                     $creditosVigentes = $creditosTodos->filter(fn($c) => $c->fecha_vencimiento >= now());
                     $creditosVencidos = $creditosTodos->filter(fn($c) => $c->fecha_vencimiento < now());
+                    $totalExcede = $total > 10000;
                     $bloqueadoPorHistorial = $creditosVencidos->count() >= 2;
                     $totalCreditosVigentes = $creditosVigentes->sum('saldo_total');
                     $bloqueadoPorSaldo = ($totalCreditosVigentes + $total) > 10000;
@@ -159,7 +160,6 @@
                     $bloqueadoPorNivel = ($nivelUsuario === 'malo');
                     $puedeCrearCredito = ($creditosTodos->count() < 3);
                     $creditosDisponibles = $creditosVigentes->filter(fn($c) => ($c->saldo_total + $total) <= 10000);
-                    $sinCreditosUsables = $creditosDisponibles->isEmpty() && !$puedeCrearCredito;
                     $bloqueado = $bloqueadoPorSaldo || $bloqueadoPorHistorial || $bloqueadoPorNivel || $sinCreditosUsables;
                 @endphp
 

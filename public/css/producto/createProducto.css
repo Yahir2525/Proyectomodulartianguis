@@ -50,8 +50,9 @@ input:focus, select:focus {
 }
 .btn:hover { filter: brightness(.95); }
 
-.btn-primary { background:#2563eb; border-color:#2563eb; color:#fff; width: 100%; }
-.btn-gray { background:#ef4444; border-color:#ef4444; color:#fff; }
+
+.btn-primary  { background:#16a34a; border-color:#16a34a; color:#fff; margin-left: 0; font-weight: bold; width: 100%;}
+.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; } /* Eliminar */
 
 /* Enlace cancelar */
 .back-wrap { margin-top: 10px; }

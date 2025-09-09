@@ -1,1 +1,116 @@
-body { margin: 0; color: #222; background: #8cfdff; min-height: 100vh;}
+/* ==== RESET & TIPOGRAFÍA ==== */
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; color: #222; background: #fff87a; min-height: 100vh; }
+
+.container { max-width: 500px; margin: 0 auto; padding: 14px; }
+h1 { margin: 12px 0 16px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+hr.hr-grueso { height:1px; border:none; background:#000; margin:12px 0; }
+
+/* ==== BOTONES ==== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:hover { filter: brightness(.95); }
+.btn-primary  { background:#16a34a; border:1px solid #16a34a; color:#fff; }
+.btn-edit     { background:#7c3aed; border:1px solid #7c3aed; color:#fff; }
+.btn-danger   { background:#dc2626; border:1px solid #dc2626; color:#fff; margin-left: 6px; }
+.btn-warning  { background:#2563eb; border:1px solid #2563eb; color:#fff; }
+.btn-gray     { background:#6b7280; border:1px solid #6b7280; color:#fff; }
+
+/* ==== TABLAS ==== */
+.table-wrap { width: 100%; overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+th, td {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: center;
+  font-size:.9rem;
+  vertical-align: middle;
+}
+thead th { background:#ffffff; }
+tbody tr:nth-child(odd) { background: #ffffff; }
+tbody tr:hover { background: #f2f7ff; }
+
+/* ==== CHIP DE PERMISOS ==== */
+.permiso-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 150px;
+  padding: 6px 10px;
+  background-color: #2563eb;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.permiso-chip form {
+  margin: 0;
+  display: inline;
+}
+
+.permiso-chip button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 0.75rem;
+  margin-left: 6px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.permiso-chip button:hover {
+  color: #ffcccc;
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 768px) {
+  table, thead, tbody, th, td, tr { display: block; }
+  thead { display: none; }
+  tbody tr {
+    background: #fff;
+    margin: 8px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  td {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    border-top: 1px solid #f1f5f9;
+  }
+  td:first-child { border-top: none; }
+  td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    min-width: 120px;
+  }
+  td .btn, td form, td input[type="submit"] {
+    width: 100%;
+    margin: 6px 0;
+  }
+}

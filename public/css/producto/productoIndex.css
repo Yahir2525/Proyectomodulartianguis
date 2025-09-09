@@ -28,13 +28,14 @@ hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
   white-space: nowrap;
   font-weight: bold;
 }
+
 .btn:hover { filter: brightness(.95); }
-.btn-primary  { background:#15c221; border-color:#15c221; color:#fff;}
-.btn-registrar { background:#15c221; border-color:#15c221; color:#fff; margin-left: 0;}
-.btn-edit      { background:hsl(275, 100%, 59%); border-color:hsl(275, 100%, 59%); color:#fff; }
-.btn-agregar   { background:#2563eb; border-color:#2563eb; color:#fff; }
-.btn-danger    { background:#ef4444; border-color:#ef4444; color:#fff; }
-.btn-gray      { background:#6b7280; border-color:#6b7280; color:#fff; }
+.btn-primary{ background:#16a34a; border-color:#16a34a; color:#fff; font-weight: bold;}
+.btn-registrar{ background:#16a34a; border-color:#16a34a; color:#fff; margin-left: 0; font-weight: bold;}
+.btn-edit { background:#7c3aed; border-color:#7c3aed; color:#fff; font-weight: bold;}
+.btn-agregar{ background:#2563eb; border-color:#2563eb; color:#fff; font-weight: bold;}
+.btn-danger{ background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold;}
+.btn-gray{ background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold;}
 
 /* --- Formulario búsqueda --- */
 .buscar {

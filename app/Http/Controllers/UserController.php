@@ -94,26 +94,27 @@ class UserController extends Controller
             return back()->with('error', 'Debes ingresar un ID o un nombre de usuario.');
         }
 
-        // Si es numérico → búsqueda por ID
+        // ===== 🔍 Búsqueda por ID parcial =====
         if (is_numeric($busqueda)) {
-            $usuario = User::find($busqueda);
+            $usuarios = User::where('id_user', 'LIKE', "%{$busqueda}%")->get();
 
-            if (!$usuario) {
-                return back()->with('error', 'Usuario no encontrado por ID.');
+            if ($usuarios->isEmpty()) {
+                return back()->with('error', 'No se encontraron usuarios con ese ID.');
             }
 
-            return view('user.showUser', ['usuarios' => collect([$usuario])]);
+            return view('user.showUser', compact('usuarios'));
         }
 
-        // Si es texto → búsqueda por nombre de usuario parcial (ej. "car" → carlos, carmen)
-        $usuarios = User::where('nombre_usuario', 'ILIKE', '%' . $busqueda . '%')->get();
+        // ===== 🔍 Búsqueda por nombre de usuario parcial =====
+        $usuarios = User::where('nombre_usuario', 'ILIKE', "%{$busqueda}%")->get();
 
         if ($usuarios->isEmpty()) {
             return back()->with('error', 'No se encontraron usuarios con ese nombre.');
         }
 
-        return view('user.showUser', ['usuarios' => $usuarios]);
+        return view('user.showUser', compact('usuarios'));
     }
+
 
     public function edit($id)
     {

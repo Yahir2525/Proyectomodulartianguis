@@ -5,92 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="{{ asset('css/perfil/perfilindex.css') }}">
-    <title>Mi Perfil</title>
+    <title>Mi perfil</title>
 </head>
 <body>
 <div class="page-container">
 <main class="content">
-<br><x-barraadmin/>
+@if (Auth::check() && Auth::user()->hasRole('administrador'))
+    <br><x-barraadmin/>
+@else
+    <br><x-barrageneral/>
+@endif
 <div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Mi Perfil</h4>
+    
+    <div class="profile-card shadow">
+    <div class="text-center mb-4">
+        <h1 class="page-title"></i> Mi perfil</h1>
+    </div><br>
+    <div class="profile-avatar">
+        @if (!empty($user->imagen))
+            <img src="{{ Storage::disk('s3')->url($user->imagen) }}" alt="Foto de perfil" loading="lazy">
+        @else
+            <div class="no-img"><i class="fa-solid fa-user"></i></div>
+        @endif
+    </div>
+
+    <div class="profile-body">
+        <h3 class="profile-name">{{ $user->name }}</h3>
+        <p class="profile-role">{{ $user->getRoleNames()->implode(', ') }}</p>
+
+        <div class="profile-info-grid">
+            <div>
+                <h6><i class="fa-solid fa-at"></i> Usuario</h6>
+                <span>{{ $user->nombre_usuario }}</span>
+            </div>
+            <div>
+                <h6><i class="fa-solid fa-envelope"></i> Email</h6>
+                <span>{{ $user->email }}</span>
+            </div>
+            <div>
+                <h6><i class="fa-solid fa-venus-mars"></i> Género</h6>
+                <span>
+                    @switch($user->genero)
+                        @case('H') Hombre @break
+                        @case('M') Mujer @break
+                        @case('O') Otro @break
+                        @default No registrado
+                    @endswitch
+                </span>
+            </div>
+            <div>
+                <h6><i class="fa-solid fa-cake-candles"></i> Edad</h6>
+                <span>{{ $user->edad ?? 'No registrada' }} años</span>
+            </div>
+            <div>
+                <h6><i class="fa-solid fa-phone"></i> Teléfono</h6>
+                <span>{{ $user->telefono ?? 'No registrado' }}</span>
+            </div>
+            <div>
+                <h6><i class="fa-solid fa-location-dot"></i> Dirección</h6>
+                <span>{{ $user->direccion ?? 'No registrada' }}</span>
+            </div>
+            <div>
+                <h6><i class="fa-solid fa-star"></i> Nivel usuario</h6>
+                <span>{{ $user->nivel_usuario }}</span>
+            </div>
         </div>
-        <div class="card-body">
 
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
 
-            @php $user = auth()->user(); @endphp
-
-            <div class="text-center mb-4">
-                @if (!empty($user->imagen))
-                    <img src="{{ Storage::disk('s3')->url($user->imagen) }}" alt="Foto de perfil" class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
-                @else
-                    <span>Sin imagen</span>
-                @endif
-            </div>
-
-            <!-- Tabla responsiva -->
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle mb-4">
-                    <tbody>
-                        <tr>
-                            <th>Nombre completo</th>
-                            <td>{{ $user->name }}</td>
-                        </tr>
-                        <tr>
-                            <th>Correo electrónico</th>
-                            <td>{{ $user->email }}</td>
-                        </tr>
-                        <tr>
-                            <th>Nombre de usuario</th>
-                            <td>{{ $user->nombre_usuario }}</td>
-                        </tr>
-                        <tr>
-                            <th>Género</th>
-                            <td>
-                                @switch($user->genero)
-                                    @case('H') Hombre @break
-                                    @case('M') Mujer @break
-                                    @case('O') Otro @break
-                                    @default No registrado
-                                @endswitch
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Edad</th>
-                            <td>{{ $user->edad ?? 'No registrada' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Teléfono</th>
-                            <td>{{ $user->telefono ?? 'No registrado' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Dirección</th>
-                            <td>{{ $user->direccion ?? 'No registrada' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Rol</th>
-                            <td>{{ $user->getRoleNames()->implode(', ') }}</td>
-                        </tr>
-                        <tr>
-                            <th>Nivel de usuario</th>
-                            <td>{{ $user->nivel_usuario}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="text-end">
-                <a href="{{ route('perfil.editPerfil') }}" class="btn btn-warning w-100 w-sm-auto">Editar perfil</a>
-            </div>
-
+        <div class="text-center mt-4">
+            <a href="{{ route('perfil.editPerfil') }}" class="btn-edit-profile">Editar perfil</a>
         </div>
     </div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 </div>
 
 <!-- Bootstrap JS (opcional) -->

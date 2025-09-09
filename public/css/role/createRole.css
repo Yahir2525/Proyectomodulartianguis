@@ -5,10 +5,6 @@ body { margin: 0; color: #222; background: #e1b1b1; min-height: 100vh;}
 
 .container { max-width: 920px; margin: 0 auto; padding: 16px; }
 
-.top-nav { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-.top-nav a { color: #2563eb; text-decoration: none; }
-.top-nav a:hover { text-decoration: underline; }
-
 h1 { margin: 8px 0 16px; font-size: clamp(1.4rem, 1rem + 1.2vw, 2rem); }
 
 .card {
@@ -29,28 +25,26 @@ input[type="text"] {
   border-radius: 8px;
 }
 
-.perm-toolbar {
+/* ==== LISTA DE PERMISOS ==== */
+.perm-actions {
   display: flex;
-  gap: 12px;
-  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
+  margin-bottom: 12px;
 }
-.perm-toolbar input[type="text"] {
-  flex: 1 1 260px;
+.perm-actions .btn {
+  /* ANTES: flex: 1;  → lo quitamos */
+  min-width: 100px;  /* tamaño mínimo para que no se aplasten */
 }
-
-.perm-actions { display: flex; gap: 8px; }
 
 .perm-list {
-  margin-top: 12px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
 }
 
 .perm-item {
-  display: grid;
-  grid-template-columns: 20px 1fr;
+  display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
@@ -61,47 +55,26 @@ input[type="text"] {
   user-select: none;
   transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
 }
-
 .perm-item:hover { border-color: #d1d5db; background: #fafafa; }
 .perm-item input { width: 18px; height: 18px; }
 
-.perm-item .check {
-  width: 18px; height: 18px; border-radius: 4px;
-  border: 1px solid #cbd5e1; display: inline-block;
-  position: relative; background: #fff;
-}
-.perm-item input:checked + .check {
-  background: #2563eb; border-color: #2563eb;
-}
-.perm-item input:checked + .check::after {
-  content: ""; position: absolute; left: 5px; top: 1px;
-  width: 5px; height: 10px; border: solid #fff;
-  border-width: 0 2px 2px 0; transform: rotate(45deg);
-}
-
-.perm-item .perm-text { line-height: 1.2; }
-
-.form-actions {
-  display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;
-}
-
+/* ==== BOTONES ==== */
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
-  padding: 10px 14px; border-radius: 8px; border: 1px solid #d1d5db;
-  background: #fff; color: #111827; text-decoration: none; cursor: pointer;
+  padding: 10px 14px; border-radius: 8px; border: 1px solid transparent;
+  font-weight: bold; cursor: pointer; text-decoration: none;
   min-height: 40px;
 }
-.btn:hover { background: #f9fafb; }
+.btn:hover { filter: brightness(.95); }
 
-.btn.primary {
-  border-color: #2563eb; background: #2563eb; color: #fff;
-}
-.btn.primary:hover { filter: brightness(0.95); }
+.btn-primary   { background:#16a34a; border-color:#16a34a; color:#fff; }
+.btn-registrar { background:#16a34a; border-color:#16a34a; color:#fff; }
+.btn-edit      { background:#7c3aed; border-color:#7c3aed; color:#fff; }
+.btn-danger    { background:#dc2626; border-color:#dc2626; color:#fff; }
+.btn-gray      { background:#6b7280; border-color:#6b7280; color:#fff; }
+.btn-warning   { background:#2563eb; border-color:#2563eb; color:#fff; }
 
-.btn.ghost {
-  background: #fff; border-color: #cbd5e1; color: #111827;
-}
-
+/* ==== ALERTAS ==== */
 .alert {
   padding: 10px 12px; border-radius: 8px; margin-bottom: 12px;
   border: 1px solid transparent;
@@ -109,10 +82,33 @@ input[type="text"] {
 .alert.success { background: #ecfdf5; border-color: #34d399; color: #065f46; }
 .alert.danger  { background: #fef2f2; border-color: #fca5a5; color: #7f1d1d; }
 
-.muted { color: #6b7280; }
+/* ==== ACCIONES ==== */
+.form-actions {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 16px;
+  justify-content: center;
+}
 
+/* ==== RESPONSIVE ==== */
 @media (max-width: 640px) {
   .container { padding: 12px; }
+  .card { padding: 12px; }
+
+  /* Botones de acciones al 100% */
   .form-actions { flex-direction: column; }
-  .btn, .btn.primary { width: 100%; }
+  .form-actions .btn { width: 100%; }
+
+  /* Botones seleccionar/limpiar → dos columnas iguales */
+  .perm-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .perm-actions .btn { width: 100%; }
+
+  /* Permisos en una sola columna */
+  .perm-list {
+    grid-template-columns: 1fr;
+  }
 }

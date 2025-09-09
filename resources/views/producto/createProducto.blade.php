@@ -98,10 +98,10 @@
                 Producto activo
             </label>
 
-            <button type="submit" class="btn btn-primary w-100">Registrar producto</button>
+            <button type="submit" class="btn btn-primary">Registrar producto</button>
 
             <div class="back-wrap text-center">
-                <a href="{{ url('/producto') }}" class="btn btn-gray">Cancelar</a>
+                <a href="{{ url('/producto') }}" class="btn btn-danger">Cancelar</a>
             </div>
         </form>
     </section>

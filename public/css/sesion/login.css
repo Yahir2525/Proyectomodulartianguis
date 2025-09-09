@@ -1,39 +1,83 @@
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh;}
+body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
 
 /* Corrige altura en móviles con barras dinámicas */
 .hero.is-fullheight { min-height: 100dvh; }
 
-/* Padding lateral fluido para evitar que pegue a los bordes en móviles */
-.hero-body { padding-left: clamp(12px, 3vw, 24px); padding-right: clamp(12px, 3vw, 24px); }
-
-/* Limita el ancho del card en pantallas grandes para mejor legibilidad */
-.columns.is-centered > .column.is-12-mobile.is-8-tablet.is-5-desktop.is-4-widescreen {
-  max-width: 520px;
+/* Contenedor general con card centrada */
+.login-wrapper {
+  width: 100%;
+  max-width: 480px; /* límite para pantallas grandes */
+  padding: clamp(12px, 3vw, 24px);
 }
 
-/* Títulos fluidos para que no “brinquen” entre breakpoints */
-.title { font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem); }
-.subtitle { font-size: clamp(1rem, 0.9rem + 0.4vw, 1.15rem); }
+/* Caja de login estilo card */
+.login-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  padding: clamp(1rem, 2vw, 2rem);
+  animation: fadeIn 0.5s ease-in-out;
+}
 
-/* Ajustes en móvil/tablet: compacidad y ritmo vertical */
+/* Títulos fluidos */
+.title { 
+  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+.subtitle { 
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.15rem);
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #6b7280;
+}
+
+/* Inputs y campos */
+.field { margin-bottom: 1rem; }
+.label { font-weight: 600; margin-bottom: .25rem; display: block; }
+.input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+
+/* Botones */
+.button.is-large {
+  min-height: 44px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+.button.is-info { background: #2563eb; border-color: #2563eb; color: #fff; }
+.button.is-info:hover { background: #1e40af; border-color: #1e40af; }
+.button.is-primary { background: #16a34a; border-color: #16a34a; color: #fff; }
+.button.is-primary:hover { background: #15803d; border-color: #15803d; }
+
+/* Enlaces inferiores */
+.login-links {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+.login-links a {
+  display: inline-block;
+  padding: 6px 10px;
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+}
+.login-links a:hover { text-decoration: underline; }
+
+/* Responsivo */
 @media (max-width: 768px) {
-  .box { padding: 1rem; }
+  .login-card { padding: 1rem; }
   .field + .field { margin-top: 0.75rem; }
 }
 
-/* Alto táctil mínimo en botones grandes */
-.button.is-large { min-height: 44px; }
-
-/* Utilitarios por si no hay CSS de Bootstrap cargado */
-.mt-4 { margin-top: 1.5rem !important; }
-.mr-2 { margin-right: .5rem !important; }
-
-/* Enlaces inferiores: mejor distribución y área de toque */
-.has-text-centered.mt-4 a {
-  display: inline-block;
-  padding: 6px 8px;
-  line-height: 1.2;
+/* Animación de entrada */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-

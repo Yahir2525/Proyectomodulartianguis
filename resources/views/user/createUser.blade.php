@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,140 +7,193 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/user/createUser.css') }}">
-    <title>Crear usuarios</title>
+    <title>Crear usuario</title>
 </head>
 <body>
 <div class="page-container">
 <main class="content">
-<br>
+<br><x-barracreate/>
 <div class="container mt-5">
-    <br><hr class="hr-grueso"><center><h1>Principal de créditos</h1></center><hr class="hr-grueso"><br>
-        <div class="row">
-            <div class="col-md-12">
+    <div class="profile-edit-card shadow">
+        <!-- Cabecera -->
+        <div class="profile-edit-header">
+            <h2>Crear usuario</h2>
+            <p class="subtitle">Registra un nuevo usuario en el sistema</p>
+        </div>
 
-                @if ($errors->any())
-                <ul class="alert alert-warning">
-                    @foreach ($errors->all() as $error)
-                        <li>{{$error}}</li>
-                    @endforeach
-                </ul>
-                @endif
-                    <div class="card-body">
-                    <form action="{{ url('/user') }}" method="POST" enctype="multipart/form-data"> 
-                            @csrf
+        <!-- Cuerpo -->
+        <div class="profile-edit-body">
+            <form action="{{ url('/user') }}" method="POST" enctype="multipart/form-data">
+                @csrf
 
-                            <<div class="field">
-                            <label class="label" for="name">Nombre</label>
-                            <div class="control">
-                                <input class="input" type="text" name="name" id="name" value="{{ old('name') }}" required>
+                <!-- Imagen -->
+                <h5 class="section-title"><i class="fa-solid fa-image"></i> Imagen de perfil</h5>
+                <div class="mb-4 text-center">
+                    <input type="file" class="form-control w-50 mx-auto" name="imagen" accept="image/*">
+                </div>
+
+                <!-- Datos personales -->
+                <h5 class="section-title"><i class="fa-solid fa-id-card"></i> Datos personales</h5>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre completo</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                            <input type="text" class="form-control" name="name" value="{{ old('name') }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre de usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-at"></i></span>
+                            <input type="text" class="form-control" name="nombre_usuario" value="{{ old('nombre_usuario') }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Teléfono</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                            <input type="text" class="form-control" name="telefono" value="{{ old('telefono') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Dirección</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
+                            <input type="text" class="form-control" name="direccion" value="{{ old('direccion') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Edad</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-cake-candles"></i></span>
+                            <input type="number" class="form-control" name="edad" min="0" value="{{ old('edad') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Género</label>
+                        <div class="d-flex gap-4 align-items-center mt-1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="genero" value="H" {{ old('genero') == 'H' ? 'checked' : '' }}>
+                                <label class="form-check-label"><i class="fa-solid fa-mars"></i> Hombre</label>
                             </div>
-                            @error('name')
-                                <p class="help is-danger">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="field">
-                            <label class="label" for="email">Correo</label>
-                            <div class="control">
-                                <input class="input" type="email" name="email" id="email" value="{{ old('email') }}" required>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="genero" value="M" {{ old('genero') == 'M' ? 'checked' : '' }}>
+                                <label class="form-check-label"><i class="fa-solid fa-venus"></i> Mujer</label>
                             </div>
-                            @error('email')
-                                <p class="help is-danger">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
-                                <label for="">Password</label>
-                                <input type="text" name="password" class="form-control" />
-                        </div>
-                        <div class="field">
-                        <label class="form-label">Género</label><br>
-                        <div>
-                            <input type="radio" id="generoH" name="genero" value="H" required>
-                            <label for="generoH">Hombre</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="generoM" name="genero" value="M" required>
-                            <label for="generoM">Mujer</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="generoU" name="genero" value="U" required>
-                            <label for="generoU">Otro</label>
-                        </div>
-                            @error('genero')
-                                <p class="help is-danger">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="field">
-                            <label class="label" for="edad">Edad</label>
-                            <div class="control">
-                                <input class="input" type="number" name="edad" id="edad" value="{{ old('edad') }}" required min="0">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="genero" value="O" {{ old('genero') == 'O' ? 'checked' : '' }}>
+                                <label class="form-check-label"><i class="fa-solid fa-genderless"></i> Otro</label>
                             </div>
-                            @error('edad')
-                                <p class="help is-danger">{{ $message }}</p>
-                            @enderror
                         </div>
+                    </div>
+                </div>
 
-                        <div class="field">
-                            <label class="label" for="telefono">Teléfono</label>
-                            <div class="control">
-                                <input class="input" type="text" name="telefono" id="telefono" value="{{ old('telefono') }}" required>
-                            </div>
-                            @error('telefono')
-                                <p class="help is-danger">{{ $message }}</p>
-                            @enderror
-                        </div>
+                <!-- Cuenta -->
+                <h5 class="section-title"><i class="fa-solid fa-envelope"></i> Cuenta</h5>
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <label class="form-label">Correo electrónico</label>
+                        <input type="email" class="form-control" name="email" value="{{ old('email') }}" required>
+                    </div>
+                </div>
 
-                        <div class="field">
-                            <label class="label" for="direccion">Dirección</label>
-                            <div class="control">
-                                <input class="input" type="text" name="direccion" id="direccion" value="{{ old('direccion') }}" required>
-                            </div>
-                            @error('direccion')
-                                <p class="help is-danger">{{ $message }}</p>
-                            @enderror
+                <!-- Seguridad -->
+                <h5 class="section-title"><i class="fa-solid fa-lock"></i> Seguridad y permisos</h5>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" id="password" class="form-control" name="password" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Confirmar contraseña</label>
+                        <input type="password" id="password_confirmation" class="form-control" name="password_confirmation" required>
+                        <small id="message" class="form-text"></small>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="showPassword">
+                            <label class="form-check-label" for="showPassword">
+                                <i class="fa-solid fa-eye"></i> Mostrar contraseñas
+                            </label>
                         </div>
+                    </div>
 
-                        <div class="field">
-                            <label class="label" for="nombre_usuario">Nombre de Usuario</label>
-                            <div class="control">
-                                <input class="input" type="text" name="nombre_usuario" id="nombre_usuario" value="{{ old('nombre_usuario') }}" required>
-                            </div>
-                            @error('nombre_usuario')
-                                <p class="help is-danger">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="imagen">Foto de perfil:</label>
-                            <input type="file" name="imagen" id="imagen" accept="image/*">
-                            @if (isset($user) && !empty($user->imagen_url))
-                                <div class="mt-2">
-                                    <img src="{{ $user->imagen_url }}" alt="Foto seleccionada"
-                                        class="img-thumbnail img-fluid" style="max-width:150px" loading="lazy">
-                                </div>
-                            @endif
-                        </div> <br><br>
-                        <div class="mb-3">
-                            <label for="">Roles</label>
-                            <select name="roles[]" class="form-control" multiple>
-                                <option value="">Select Role</option>
+                    <!-- Roles y Nivel -->
+                    <div class="col-md-6">
+                        <label class="form-label">Rol</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-user-shield"></i></span>
+                            <select class="form-select" name="roles" required>
                                 @foreach ($roles as $role)
-                                <option value="{{ $role }}">{{ $role }}</option>
+                                    <option value="{{ $role }}" {{ old('roles') == $role ? 'selected' : '' }}>
+                                        {{ ucfirst($role) }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="control">
-                        <button class="button is-block is-info is-large is-fullwidth" type="submit">
-                            Enviar</button>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Nivel del usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-star"></i></span>
+                            <select class="form-select" name="nivel_usuario" required>
+                                <option value="excelente" {{ old('nivel_usuario') == 'excelente' ? 'selected' : '' }}>Excelente cliente</option>
+                                <option value="bueno" {{ old('nivel_usuario') == 'bueno' ? 'selected' : '' }}>Buen cliente</option>
+                                <option value="malo" {{ old('nivel_usuario') == 'malo' ? 'selected' : '' }}>Mal cliente</option>
+                            </select>
                         </div>
-                        </form>
                     </div>
                 </div>
-            </div>
+
+                <!-- Botones -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn-save">Crear usuario</button>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ route('user.index') }}" class="btn-cancel">Cancelar</a>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+
 </main>
 <x-footer/>
 </div>
+
+<script>
+const password = document.getElementById("password");
+const confirmPassword = document.getElementById("password_confirmation");
+const message = document.getElementById("message");
+
+// Validación en tiempo real
+function checkPasswords() {
+    if (confirmPassword.value === "") {
+        message.textContent = "";
+        confirmPassword.style.borderColor = "";
+        return;
+    }
+    if (password.value === confirmPassword.value) {
+        confirmPassword.style.borderColor = "green";
+        message.textContent = "✔ Contraseñas coinciden";
+        message.style.color = "green";
+    } else {
+        confirmPassword.style.borderColor = "red";
+        message.textContent = "✘ Contraseñas no coinciden";
+        message.style.color = "red";
+    }
+}
+password.addEventListener("keyup", checkPasswords);
+confirmPassword.addEventListener("keyup", checkPasswords);
+
+// Mostrar/ocultar contraseñas
+document.getElementById('showPassword').addEventListener('change', function() {
+    [password, confirmPassword].forEach(field => {
+        field.type = this.checked ? 'text' : 'password';
+    });
+});
+</script>
 </body>
 </html>
