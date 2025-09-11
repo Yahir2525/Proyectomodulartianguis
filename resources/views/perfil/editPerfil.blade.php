@@ -13,7 +13,6 @@
 <main class="content">
 <br><x-barracreate/>
 <div class="container mt-5">
-    <div class="container mt-5">
     <div class="profile-edit-card shadow">
         <div class="profile-edit-header">
             <h2>Editar perfil</h2>
@@ -116,25 +115,47 @@
                 </div>
 
                 <!-- Sección: Seguridad -->
-                <!-- Sección: Seguridad -->
                 <h5 class="section-title"><i class="fa-solid fa-lock"></i> Seguridad</h5>
                 <div class="row g-4 mb-4">
+
+                    <!-- Contraseña actual -->
+                    <div class="col-12">
+                        <label class="form-label">Contraseña actual</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                            <input type="password" class="form-control" name="current_password" id="current_password">
+                        </div>
+                        @error('current_password')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+
+                    <!-- Nueva contraseña -->
                     <div class="col-md-6">
                         <label class="form-label">Nueva contraseña</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
                             <input type="password" id="password" class="form-control" name="password">
                         </div>
+                        <small class="form-text text-justify">
+                            La contraseña debe tener entre 8 y 20 caracteres, incluir al menos una letra mayúscula, una minúscula, un número y un carácter especial. Además, no puede ser igual a la contraseña actual.
+                        </small>
+                        @error('password')
+                            <small class="text-danger">{{ $message }}</small>
+                        @enderror
                     </div>
+
+                    <!-- Confirmar contraseña -->
                     <div class="col-md-6">
                         <label class="form-label">Confirmar contraseña</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
                             <input type="password" id="confirm_password" class="form-control" name="password_confirmation">
                         </div>
-                        <!-- Mensaje dinámico -->
                         <small id="message" class="form-text"></small>
                     </div>
+
+                    <!-- Mostrar/Ocultar contraseñas -->
                     <div class="col-12 mt-2">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="showPassword">
@@ -144,6 +165,7 @@
                         </div>
                     </div>
                 </div>
+
 
 
                 <!-- Botones -->
@@ -156,8 +178,6 @@
             </form>
         </div>
     </div>
-</div>
-
 </div>
 
 <script>
@@ -202,7 +222,6 @@ document.getElementById('showPassword').addEventListener('change', function() {
     });
 });
 </script>
-<!-- Bootstrap JS (opcional) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </main>
 <x-footer/>

@@ -136,7 +136,22 @@ class UserController extends Controller
         $request->validate([
             'name'            => 'nullable|string|max:255',
             'email'           => 'nullable|email|max:255|unique:users,email,' . $user->id_user . ',id_user',
-            'password'        => 'nullable|string|min:8|max:20|confirmed',
+            'password'        => [
+                'nullable',
+                'string',
+                'min:8',
+                'max:20',
+                'confirmed',
+                'regex:/[a-z]/',      // al menos una minúscula
+                'regex:/[A-Z]/',      // al menos una mayúscula
+                'regex:/[0-9]/',      // al menos un número
+                'regex:/[@$!%*?&]/',  // al menos un carácter especial
+                function ($attribute, $value, $fail) use ($user) {
+                    if (!empty($value) && Hash::check($value, $user->password)) {
+                        $fail('La nueva contraseña no puede ser igual a la actual.');
+                    }
+                }
+            ],
             'genero'          => 'nullable|in:H,M,O',
             'edad'            => 'nullable|integer|min:0',
             'telefono'        => 'nullable|string|max:20',
@@ -191,7 +206,7 @@ class UserController extends Controller
             // Subir nueva
             if (config('filesystems.default') === 's3') {
                 Storage::disk('s3')->putFileAs('perfiles', $file, $filename, [
-                    'visibility'  => 'private',                 // bucket privado
+                    'visibility'  => 'private',
                     'ContentType' => $file->getMimeType(),
                 ]);
             } else {
@@ -211,6 +226,7 @@ class UserController extends Controller
         return redirect()->route('user.index')
             ->with('success', 'El usuario se ha actualizado con éxito.');
     }
+
 
 
     

@@ -40,7 +40,6 @@
                 </div>
 
                 <!-- Datos personales -->
-                <!-- Datos personales -->
                 <h5 class="section-title"><i class="fa-solid fa-id-card"></i> Datos personales</h5>
                 <div class="row g-4 mb-4">
                     <div class="col-md-6">
@@ -102,7 +101,6 @@
                     </div>
                 </div>
 
-
                 <!-- Cuenta -->
                 <h5 class="section-title"><i class="fa-solid fa-envelope"></i> Cuenta</h5>
                 <div class="row g-4 mb-4">
@@ -118,6 +116,10 @@
                     <div class="col-md-6">
                         <label class="form-label">Nueva contraseña</label>
                         <input type="password" id="password" class="form-control" name="password">
+                        <small class="form-text text-justify">
+                            La contraseña debe tener entre 8 y 20 caracteres, incluir al menos una letra mayúscula, 
+                            una minúscula, un número y un carácter especial. Además, no puede ser igual a la contraseña actual.
+                        </small>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Confirmar contraseña</label>
@@ -162,9 +164,6 @@
                             </div>
                         </div>
                     </div>
-
-
-
                 </div>
 
                 <!-- Botones -->

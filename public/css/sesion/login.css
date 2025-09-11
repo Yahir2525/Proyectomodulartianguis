@@ -1,43 +1,50 @@
+/* ====== RESET Y BODY ====== */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-
-/* Corrige altura en móviles con barras dinámicas */
-.hero.is-fullheight { min-height: 100dvh; }
-
-/* Contenedor general con card centrada */
-.login-wrapper {
-  width: 100%;
-  max-width: 480px; /* límite para pantallas grandes */
-  padding: clamp(12px, 3vw, 24px);
+body { 
+  margin: 0; 
+  color: #222; 
+  background: #86c1ff; 
+  min-height: 100vh; 
 }
 
-/* Caja de login estilo card */
+/* ====== HERO LOGIN ====== */
+.hero.is-fullheight {
+  min-height: 100dvh;
+  display: flex;              /* ✅ centra solo el login */
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3vw, 24px); /* espaciado lateral */
+}
+
+/* ====== CARD LOGIN ====== */
 .login-card {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  box-shadow: 0 6px 20px rgba(0,0,0,.1);
   padding: clamp(1rem, 2vw, 2rem);
+  width: 100%;
+  max-width: 420px;
   animation: fadeIn 0.5s ease-in-out;
+  text-align: center;
 }
 
-/* Títulos fluidos */
+/* ====== TÍTULOS ====== */
 .title { 
   font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
-  text-align: center;
   margin-bottom: 0.75rem;
 }
 .subtitle { 
   font-size: clamp(1rem, 0.9rem + 0.4vw, 1.15rem);
-  text-align: center;
   margin-bottom: 1.5rem;
   color: #6b7280;
 }
 
-/* Inputs y campos */
-.field { margin-bottom: 1rem; }
+/* ====== FORMULARIO ====== */
+.field { margin-bottom: 1rem; text-align: left; }
 .label { font-weight: 600; margin-bottom: .25rem; display: block; }
-.input {
+.input, 
+.form-control {
   width: 100%;
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -45,38 +52,51 @@ body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; display: 
   font-size: 1rem;
 }
 
-/* Botones */
-.button.is-large {
+/* ====== BOTONES ====== */
+.btn, .button {
   min-height: 44px;
   border-radius: 8px;
   font-weight: bold;
 }
-.button.is-info { background: #2563eb; border-color: #2563eb; color: #fff; }
-.button.is-info:hover { background: #1e40af; border-color: #1e40af; }
-.button.is-primary { background: #16a34a; border-color: #16a34a; color: #fff; }
-.button.is-primary:hover { background: #15803d; border-color: #15803d; }
 
-/* Enlaces inferiores */
-.login-links {
-  text-align: center;
-  margin-top: 1.5rem;
+.btn-info, .button.is-info { 
+  background: #2563eb; 
+  border-color: #2563eb; 
+  color: #fff; 
 }
+.btn-info:hover, .button.is-info:hover { 
+  background: #6a8dff; 
+  border-color: #6a8dff; 
+  color: #fff;
+}
+
+.btn-primary, .button.is-primary { 
+  background: #16a34a; 
+  border-color: #16a34a; 
+  color: #fff; 
+}
+.btn-primary:hover, .button.is-primary:hover { 
+  background: #3cc16d; 
+  border-color: #3cc16d; 
+}
+
+/* ====== LINKS INFERIORES ====== */
 .login-links a {
-  display: inline-block;
-  padding: 6px 10px;
   color: #2563eb;
   font-weight: 500;
   text-decoration: none;
+  padding: 6px 8px;
+  line-height: 1.2;
 }
 .login-links a:hover { text-decoration: underline; }
 
-/* Responsivo */
+/* ====== RESPONSIVO ====== */
 @media (max-width: 768px) {
   .login-card { padding: 1rem; }
   .field + .field { margin-top: 0.75rem; }
 }
 
-/* Animación de entrada */
+/* ====== ANIMACIÓN ====== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }

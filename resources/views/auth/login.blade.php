@@ -10,67 +10,66 @@
     <title>Iniciar sesión</title>
 </head>
 <body>
+
 <div class="page-container">
+<br><x-barrasesion/>
 <main class="content">
-    <br><x-barrasesion/>
+    
 
-    <section class="hero is-fullheight d-flex align-items-center">
-        <div class="login-wrapper">
-            <div class="login-card">
+    <section class="hero is-fullheight d-flex justify-content-center align-items-center">
+        <div class="login-card text-center">
+            <h2 class="title mb-3">Inicio de sesión</h2>
+            <p class="subtitle mb-4">Por favor ingrese sus datos</p>
 
-                <h2 class="title">Inicio de sesión</h2>
-                <p class="subtitle">Por favor ingrese sus datos</p>
-
-                @if (session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('login') }}">
-                    @csrf
-
-                    <!-- Email -->
-                    <div class="field mb-3">
-                        <label class="label">Correo</label>
-                        <input class="input form-control" type="email" name="email" placeholder="Correo"
-                               value="{{ old('email') }}" required autofocus>
-                        @error('email')
-                            <p class="text-danger small mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Password -->
-                    <div class="field mb-3">
-                        <label class="label">Contraseña</label>
-                        <input class="input form-control" type="password" name="password" placeholder="Contraseña" required>
-                        @error('password')
-                            <p class="text-danger small mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Remember -->
-                    <div class="field mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                        <label for="remember" class="form-check-label">Recordarme</label>
-                    </div>
-
-                    <!-- Buttons -->
-                    <div class="field mb-2">
-                        <button type="submit" class="button is-info is-large w-100">
-                            Conectarse
-                        </button>
-                    </div>
-                    <div class="field">
-                        <input class="button is-primary is-large w-100" type="reset" value="Limpiar datos">
-                    </div>
-                </form>
-
-                <!-- Links abajo -->
-                <div class="login-links">
-                    <a href="/" class="me-2">Inicio</a>
-                    <a href="{{ url('/registro') }}">Registrar</a>
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
                 </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}">
+                @csrf
+
+                <!-- Email -->
+                <div class="field mb-3 text-start">
+                    <label class="label">Correo</label>
+                    <input class="form-control" type="email" name="email" placeholder="Correo"
+                           value="{{ old('email') }}" required autofocus>
+                    @error('email')
+                        <p class="text-danger small mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Password -->
+                <div class="field mb-3 text-start">
+                    <label class="label">Contraseña</label>
+                    <input class="form-control" type="password" name="password" placeholder="Contraseña" required>
+                    @error('password')
+                        <p class="text-danger small mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Remember -->
+                <div class="form-check mb-4 text-start">
+                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                    <label for="remember" class="form-check-label">Recordarme</label>
+                </div>
+
+                <!-- Buttons -->
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        Conectarse
+                    </button>
+                </div>
+                <div class="mb-3">
+                    <input class="btn btn-info btn-lg w-100" type="reset" value="Limpiar datos">
+                </div>
+            </form>
+
+            <!-- Links -->
+            <div class="login-links mt-4">
+                <a href="/" class="me-3">Inicio</a>
+                <a href="{{ url('/registro') }}">Registrar</a>
             </div>
         </div>
     </section>

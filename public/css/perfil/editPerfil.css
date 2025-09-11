@@ -131,3 +131,8 @@ a.btn.btn-secondary{
     color: #2563eb;
     margin-right: 8px;
 }
+
+.text-justify {
+  text-align: justify;
+  color: black;
+}
