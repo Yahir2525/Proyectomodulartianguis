@@ -1,11 +1,7 @@
-/* ==== PRODUCTO INDEX (similar a carro create, estilo unificado) ==== */
-
-/* Reset & tipografía */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
+body { margin: 0; color: #222; background: linear-gradient(135deg, #a8d8ff 0%, #e6f3ff 100%); min-height: 100vh; }
 
-/* Layout */
 section { max-width: 1200px; margin: 0 auto; padding: 16px; }
 h1 { margin: 0 0 12px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
 h3 { margin-top: 24px; font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem); }
@@ -37,10 +33,9 @@ hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
 .btn-danger{ background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold;}
 .btn-gray{ background:#6b7280; border-color:#6b7280; color:#fff; font-weight: bold;}
 
-/* --- Formulario búsqueda --- */
 .buscar {
   display: grid;
-  grid-template-columns: max-content minmax(160px, 220px) max-content; /* compacto en desktop */
+  grid-template-columns: max-content minmax(160px, 220px) max-content;
   gap: 6px;
   align-items: center;
   margin: 12px 0 18px;
@@ -80,7 +75,6 @@ hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
 }
 .buscar input[type="submit"]:hover { filter: brightness(.95); }
 
-/* =================== TABLA =================== */
 .table-wrap { width: 100%; overflow-x: auto; }
 table {
   width: 100%;
@@ -101,14 +95,12 @@ thead th { background:#ffffff; }
 tbody tr:nth-child(odd) { background: #ffffff; }
 tbody tr:hover { background: #f2f7ff; }
 
-/* Imagen */
 td img {
   max-width: 120px;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0,0,0,.15);
 }
 
-/* Responsive (tablas con muchas columnas → scroll) */
 @media (max-width: 992px) {
   html { font-size: 15px; }
   section { padding: 12px; }
@@ -126,7 +118,6 @@ td img {
     padding: 8px 12px;
   }
 
-  /* En móvil → usar scroll horizontal en tabla, no tarjetas */
   .table-wrap { overflow-x: auto; }
   table { min-width: 800px; }
 }
@@ -137,7 +128,6 @@ td img {
   td img { max-width: 60px; }
 }
 
-/* ==== SECCIÓN FINAL (usuario, pedido, botón) ==== */
 .form-footer {
   text-align: center;
   margin-top: 24px;
@@ -153,7 +143,6 @@ td img {
   margin-top: 20px;
 }
 
-/* ==== FILTROS ==== */
 .filtros {
   display: flex;
   flex-wrap: wrap;
@@ -183,7 +172,6 @@ td img {
 .pagination + .pagination-summary,
 .pagination-summary { margin-left: 12px; }
 
-/* === Estilo uniforme para inputs/selects === */
 .form-input {
   padding: 6px 10px;
   border: 1px solid #999;
@@ -198,7 +186,6 @@ td img {
   outline: none;
 }
 
-/* Cantidad */
 .cant-input {
   min-width: 40px;
   max-width: 70px;
@@ -214,4 +201,3 @@ td img {
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
   outline: none;
 }
-

@@ -52,6 +52,14 @@ class AbonoController extends Controller
             'id_user' => 'required|exists:users,id_user',
             'id_credito' => 'required|exists:creditos,id_credito',
             'monto_abono' => 'required|numeric|min:0.01',
+        ], [
+            'id_user.required'   => 'El usuario es obligatorio.',
+            'id_user.exists'     => 'El usuario seleccionado no existe.',
+            'id_credito.required' => 'El crédito es obligatorio.',
+            'id_credito.exists'   => 'El crédito seleccionado no existe.',
+            'monto_abono.required' => 'El monto del abono es obligatorio.',
+            'monto_abono.numeric'  => 'El monto del abono debe ser un número.',
+            'monto_abono.min'      => 'El monto del abono debe ser mayor a 0.',
         ]);
 
         $credito = Credito::find($request->input('id_credito'));
@@ -108,7 +116,6 @@ class AbonoController extends Controller
             ->with('info', 'Se mostró la lista completa porque no ingresaste ningún criterio de búsqueda.');
         }
 
-        // ===== 🔍 Búsqueda por ID parcial =====
         if (is_numeric($busqueda)) {
             if ($user->hasRole('administrador')) {
                 $abonos = Abono::with(['user', 'credito'])
@@ -125,12 +132,10 @@ class AbonoController extends Controller
                 return back()->with('error', 'No se encontraron abonos con ese ID.');
             }
 
-            // 🔹 siempre pasa $usuarios para el datalist
             $usuarios = $user->hasRole('administrador') ? User::all() : collect();
             return view('abono.showAbono', compact('abonos', 'usuarios'));
         }
 
-        // ===== 🔍 Búsqueda por nombre de usuario (solo admin) =====
         if ($user->hasRole('administrador')) {
             $usuariosEncontrados = User::where('nombre_usuario', 'ILIKE', "%{$busqueda}%")->get();
 
@@ -146,14 +151,12 @@ class AbonoController extends Controller
                 return back()->with('error', 'No se encontraron abonos para el usuario "' . $busqueda . '".');
             }
 
-            // 🔹 para el datalist seguimos mandando TODOS los usuarios, no solo los encontrados
             $usuarios = User::all();
             return view('abono.showAbono', compact('abonos', 'usuarios'));
         }
 
         return back()->with('error', 'Solo puedes buscar tus abonos por ID.');
     }
-
 
     public function edit($id)
     {
@@ -193,8 +196,14 @@ class AbonoController extends Controller
         }
 
         $request->validate([
-            'monto_abono' => 'required|numeric|min:0.01',
             'id_credito' => 'required|exists:creditos,id_credito',
+            'monto_abono' => 'required|numeric|min:0.01',
+        ], [
+            'id_credito.required' => 'El crédito es obligatorio.',
+            'id_credito.exists'   => 'El crédito seleccionado no existe.',
+            'monto_abono.required' => 'El monto del abono es obligatorio.',
+            'monto_abono.numeric'  => 'El monto del abono debe ser un número.',
+            'monto_abono.min'      => 'El monto del abono debe ser mayor a 0.',
         ]);
 
         $nuevoMonto = (float) $request->input('monto_abono');
@@ -298,7 +307,6 @@ class AbonoController extends Controller
             return redirect()->route('abono.index')->with('error', 'El crédito asociado no existe.');
         }
 
-        // 🚫 Bloqueo si el crédito está cerrado o vencido
         if ($credito->estado == 0) {
             return redirect()->route('abono.index')->with('error', 'No se puede eliminar un abono de un crédito cerrado.');
         }
@@ -307,7 +315,6 @@ class AbonoController extends Controller
             return redirect()->route('abono.index')->with('error', 'No se puede eliminar un abono de un crédito vencido.');
         }
 
-        // ✅ Si pasa las validaciones, se revierte el saldo
         $credito->saldo_total += $abono->monto_abono;
         $credito->save();
 
@@ -320,7 +327,6 @@ class AbonoController extends Controller
 
         return redirect()->route('abono.index')->with('success', 'El abono se ha eliminado con éxito.');
     }
-
 
     public function aplicarAlCredito($id)
     {

@@ -20,7 +20,6 @@ class Pedido extends Model
     protected $fillable = [
     'id_user',
     'id_credito',
-    // otros campos si los hay
     ];
 
         public function carro(): HasOne
@@ -35,5 +34,4 @@ class Pedido extends Model
     {
         return $this->belongsTo(Credito::class, 'id_credito', 'id_credito');
     }
-    
 }

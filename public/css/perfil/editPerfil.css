@@ -1,16 +1,13 @@
-/* ======== EDITAR PERFIL ======== */
-body { margin: 0; color: #222; background: #007bff; min-height: 100vh; }
+body { margin: 0; color: #222; background: linear-gradient(135deg, #feceed 0%, #fff0f8 100%); min-height: 100vh; }
 
-/* Card principal */
 .profile-edit-card {
     border-radius: 16px;
     background: #ffffff;
     overflow: hidden;
-    max-width: 700px;   /* 🔹 ancho máximo */
+    max-width: 700px;
     margin: 40px auto;
 }
 
-/* Encabezado */
 .profile-edit-header {
     text-align: center;
     padding: 2rem 1rem 1.5rem;
@@ -27,12 +24,10 @@ body { margin: 0; color: #222; background: #007bff; min-height: 100vh; }
     color: #666;
 }
 
-/* Cuerpo */
 .profile-edit-body {
     padding: 2rem 2.5rem;
 }
 
-/* Secciones */
 .section-title {
     font-size: 1.1rem;
     font-weight: 600;
@@ -43,7 +38,6 @@ body { margin: 0; color: #222; background: #007bff; min-height: 100vh; }
     gap: 10px;
 }
 
-/* Inputs */
 .input-group-text {
     background: #f7f7f7;
     border: 1px solid #ddd;
@@ -61,7 +55,6 @@ body { margin: 0; color: #222; background: #007bff; min-height: 100vh; }
     box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
 }
 
-/* Radios */
 .form-check-label i {
     margin-right: 6px;
     color: #2563eb;
@@ -72,7 +65,6 @@ body { margin: 0; color: #222; background: #007bff; min-height: 100vh; }
     border-color: #2563eb;
 }
 
-/* Botones */
 .btn-save {
     background: #2563eb;
     color: #fff;
@@ -109,7 +101,6 @@ a.btn.btn-secondary{
   background:#6b7280; border-color:#6b7280; color:#fff; padding: 10px 14px; justify-content:center; border-radius: 6px; font-weight: bold;
 }
 
-/* Responsivo */
 @media (max-width: 576px) {
     .profile-edit-body {
         padding: 1.5rem;
@@ -118,7 +109,6 @@ a.btn.btn-secondary{
         font-size: 0.9rem;
     }
 }
-
 
 .page-title {
     font-size: 2rem;

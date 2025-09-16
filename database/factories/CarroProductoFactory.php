@@ -14,12 +14,10 @@ class CarroProductoFactory extends Factory
     public function definition(): array
     {
         $carro = Carro::inRandomOrder()->first();
-        // SOLO productos con stock positivo
         $producto = Producto::where('piezas', '>', 0)->inRandomOrder()->first();
 
         if (!$carro || !$producto) return [];
 
-        // Evitar repetir el mismo producto en otro carro del mismo pedido
         if ($carro->id_pedido) {
             $carrosDelPedido = Carro::where('id_pedido', $carro->id_pedido)->pluck('id_carro');
             $yaExisteEnPedido = CarroProducto::whereIn('id_carro', $carrosDelPedido)
@@ -28,11 +26,9 @@ class CarroProductoFactory extends Factory
             if ($yaExisteEnPedido) return [];
         }
 
-        // Disponibilidad simple: piezas - ya reservado en cualquier carro
         $reservado   = CarroProducto::where('id_producto', $producto->id_producto)->sum('cantidad');
         $disponibles = max(0, $producto->piezas - $reservado);
 
-        // Si no hay disponibilidad, NO crear
         if ($disponibles < 1) return [];
 
         return [

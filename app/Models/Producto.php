@@ -39,18 +39,14 @@ class Producto extends Model
             return null;
         }
 
-        // 1) Si ya es URL absoluta (S3/CloudFront), úsala tal cual
         if (Str::startsWith($this->imagen, ['http://', 'https://'])) {
             return $this->imagen;
         }
 
-        // 2) Si es ruta relativa, genera URL pública desde el disco S3 (sin prefirmar)
-        //    Esto usará el 'url' configurado del disco s3 (ideal: tu dominio de CloudFront)
         if (config('filesystems.disks.s3')) {
             return Storage::disk('s3')->url(ltrim($this->imagen, '/'));
         }
 
-        // 3) Fallback local (por si todavía tienes imágenes en public/)
         return asset(ltrim($this->imagen, '/'));
     }
 }

@@ -9,14 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware('permission:view role', ['only' => ['index', 'show']]);
-    //     $this->middleware('permission:create role', ['only' => ['create','store']]);
-    //     $this->middleware('permission:edit role', ['only' => ['update','edit']]);
-    //     $this->middleware('permission:delete role', ['only' => ['destroy']]);
-    // }
-    
     public function index()
     {
         $role = new Role();
@@ -36,20 +28,23 @@ class RoleController extends Controller
             'name' => ['required','string','unique:roles,name'],
             'permissions' => ['required','array'],
             'permissions.*' => ['integer','exists:permissions,id'],
+        ], [
+            'name.required' => 'El nombre del rol es obligatorio.',
+            'name.string'   => 'El nombre del rol debe ser texto válido.',
+            'name.unique'   => 'Este nombre de rol ya existe. Por favor elige otro.',
+
+            'permissions.required' => 'Debes seleccionar al menos un permiso.',
         ]);
 
         $role = Role::create([
             'name' => $validated['name'],
-            'guard_name' => 'web', // asegura el guard
+            'guard_name' => 'web',
         ]);
 
-        // Opción A: convertir a enteros y pasar IDs (Spatie >= v5 suele aceptarlos)
         $ids = collect($validated['permissions'] ?? [])->map(fn($v)=>(int)$v)->all();
-        // $role->syncPermissions($ids);
 
-        // Opción B (más robusta): cargar modelos por ID y sincronizar
         $perms = Permission::whereIn('id', $ids)
-                ->where('guard_name', $role->guard_name) // asegura mismo guard
+                ->where('guard_name', $role->guard_name)
                 ->get();
         $role->syncPermissions($perms);
 
@@ -74,6 +69,13 @@ class RoleController extends Controller
             'name' => ['required','string','unique:roles,name,'.$role->id],
             'permissions' => ['required','array'],
             'permissions.*' => ['integer','exists:permissions,id'],
+        ], [
+            'name.required' => 'El nombre del rol es obligatorio.',
+            'name.string'   => 'El nombre del rol debe ser texto válido.',
+            'name.unique'   => 'Este nombre de rol ya está registrado. Por favor elige otro.',
+
+            'permissions.required' => 'Debes seleccionar al menos un permiso.',
+            'permissions.array'    => 'El formato de los permisos no es válido.',
         ]);
 
         $role->update([
@@ -90,18 +92,15 @@ class RoleController extends Controller
         return redirect()->route('role.index')->with('success','Rol actualizado correctamente.');
     }
 
-
     public function destroyPermissionFromRole(Role $role, Permission $permission)
     {
-    $role = Role::find($role->id);
-    $permission = Permission::find($permission->id);
+        $role = Role::find($role->id);
+        $permission = Permission::find($permission->id);
 
-    // Elimina solo la relación entre el rol y el permiso
-    $role->revokePermissionTo($permission);
+        $role->revokePermissionTo($permission);
 
-    return redirect()->back()->with('success', 'Permiso eliminado del rol correctamente.');
+        return redirect()->back()->with('success', 'Permiso eliminado del rol correctamente.');
     }
-
 
     public function destroy(Role $role, Permission $permission)
     {

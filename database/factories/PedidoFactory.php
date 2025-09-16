@@ -27,7 +27,6 @@ class PedidoFactory extends Factory
     
     public function definition(): array
     {
-        // Si ya se pasó id_user e id_credito en create(), respetarlos:
         if (isset($this->attributes['id_user']) && isset($this->attributes['id_credito'])) {
             return [
                 'id_user' => $this->attributes['id_user'],
@@ -39,10 +38,8 @@ class PedidoFactory extends Factory
             ];
         }
 
-        // Buscar un crédito aleatorio con su usuario
         $credito = Credito::with('user')->inRandomOrder()->first();
 
-        // Si no hay créditos aún en la BD, crear uno
         if (!$credito) {
             $user = User::factory()->create();
             $credito = Credito::factory()->create([
@@ -59,5 +56,4 @@ class PedidoFactory extends Factory
             'updated_at' => now(),
         ];
     }
-
 }

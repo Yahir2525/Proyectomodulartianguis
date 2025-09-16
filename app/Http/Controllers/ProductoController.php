@@ -19,14 +19,12 @@ class ProductoController extends Controller
 
         $seleccion = $request->input('sel', []);
 
-        // Base query según rol
         if ($usuario && $usuario->hasRole('administrador')) {
             $query = Producto::query();
         } else {
             $query = Producto::where('estado_producto', true);
         }
 
-        // ====== 🔍 BÚSQUEDA ======
         if ($request->filled('buscar')) {
             $busqueda = $request->input('buscar');
 
@@ -42,7 +40,6 @@ class ProductoController extends Controller
             }
         }
 
-        // ====== 🎛 FILTROS ======
         if ($request->filled('tipo')) {
             $query->where('tipo', $request->tipo);
         }
@@ -65,27 +62,23 @@ class ProductoController extends Controller
             $query->where('estado_producto', $request->estado);
         }
 
-        // ====== 📑 Paginación ======
         $productoIndex = $query
             ->orderBy('tipo')
             ->orderBy('id_producto')
             ->paginate(10)
             ->withQueryString();
 
-        // ==== Opciones únicas para filtros ====
         $tipos      = Producto::select('tipo')->distinct()->pluck('tipo');
         $materiales = Producto::select('material')->distinct()->pluck('material');
         $colores    = Producto::select('color')->distinct()->pluck('color');
         $tamanios   = Producto::select('tamanio')->distinct()->pluck('tamanio');
 
-        // Nombres únicos para datalist
         $nombresUnicos = Producto::select('nombre')
             ->distinct()
             ->orderBy('nombre')
             ->limit(7)
             ->pluck('nombre');
 
-        // Usuarios y pedidos
         $usuarios = collect();
         $pedidosUsuario = collect();
 
@@ -93,11 +86,11 @@ class ProductoController extends Controller
             if ($usuario->hasRole('administrador')) {
                 $usuarios = User::all();
                 $pedidosUsuario = Pedido::with('user')
-                    ->where('estado_pedido', 1) // solo abiertos
+                    ->where('estado_pedido', 1)
                     ->get();
             } else {
                 $pedidosUsuario = Pedido::where('id_user', $usuario->id_user)
-                    ->where('estado_pedido', 1) // solo abiertos
+                    ->where('estado_pedido', 1)
                     ->get();
             }
         }
@@ -137,17 +130,56 @@ class ProductoController extends Controller
         $producto = new Producto();
 
         $request->validate([
-            'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            'nombre' => ['required', 'string'],
-            // ...tus demás reglas
+            'imagen'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'nombre'           => ['required', 'string', 'max:150'],
+            'tipo'             => ['nullable', 'string', 'max:100'],
+            'material'         => ['nullable', 'string', 'max:100'],
+            'color'            => ['nullable', 'string', 'max:50'],
+            'tamanio'          => ['nullable', 'string', 'max:50'],
+            'marca'            => ['nullable', 'string', 'max:100'],
+            'precio_unitario'  => ['required', 'numeric', 'min:0'],
+            'piezas'           => ['required', 'integer', 'min:0'],
+            'estado_producto'  => ['nullable', 'boolean'],
+        ], [
+            'imagen.image'   => 'El archivo debe ser una imagen.',
+            'imagen.mimes'   => 'La imagen debe estar en formato JPG, JPEG, PNG o WEBP.',
+            'imagen.max'     => 'La imagen no puede superar los 5 MB.',
+
+            'nombre.required' => 'El nombre del producto es obligatorio.',
+            'nombre.string'   => 'El nombre debe ser texto válido.',
+            'nombre.max'      => 'El nombre no puede tener más de 150 caracteres.',
+
+            'tipo.string' => 'El tipo debe ser texto válido.',
+            'tipo.max'    => 'El tipo no puede tener más de 100 caracteres.',
+
+            'material.string' => 'El material debe ser texto válido.',
+            'material.max'    => 'El material no puede tener más de 100 caracteres.',
+
+            'color.string' => 'El color debe ser texto válido.',
+            'color.max'    => 'El color no puede tener más de 50 caracteres.',
+
+            'tamanio.string' => 'El tamaño debe ser texto válido.',
+            'tamanio.max'    => 'El tamaño no puede tener más de 50 caracteres.',
+
+            'marca.string' => 'La marca debe ser texto válido.',
+            'marca.max'    => 'La marca no puede tener más de 100 caracteres.',
+
+            'precio_unitario.required' => 'El precio unitario es obligatorio.',
+            'precio_unitario.numeric'  => 'El precio unitario debe ser un número.',
+            'precio_unitario.min'      => 'El precio unitario no puede ser negativo.',
+
+            'piezas.required' => 'La cantidad de piezas es obligatoria.',
+            'piezas.integer'  => 'Las piezas deben ser un número entero.',
+            'piezas.min'      => 'Las piezas no pueden ser negativas.',
+
+            'estado_producto.boolean' => 'El estado del producto debe ser válido (activo o inactivo).',
         ]);
 
         if ($request->hasFile('imagen')) {
             $file        = $request->file('imagen');
             $filename    = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-            $relative    = 'img/' . $filename;  // misma convención en toda la app
+            $relative    = 'img/' . $filename;
 
-            // Borrar anterior
             if (!empty($user->imagen)) {
                 if (config('filesystems.default') === 's3') {
                     try { Storage::disk('s3')->delete($producto->imagen); } catch (\Throwable $e) {}
@@ -157,20 +189,18 @@ class ProductoController extends Controller
                 }
             }
 
-            // Subir nueva
             if (config('filesystems.default') === 's3') {
                 Storage::disk('s3')->putFileAs('img', $file, $filename, [
-                    'visibility'  => 'private',                 // bucket privado
+                    'visibility'  => 'private',
                     'ContentType' => $file->getMimeType(),
                 ]);
             } else {
                 $file->move(public_path('img'), $filename);
             }
 
-            $producto->imagen = $relative; // la vista usará $user->imagen_url (accessor)
+            $producto->imagen = $relative;
         }
 
-        // Campos normales
         $producto->nombre = $request->input('nombre');
         $producto->tipo = $request->input('tipo');
         $producto->material = $request->input('material');
@@ -179,7 +209,7 @@ class ProductoController extends Controller
         $producto->marca = $request->input('marca');
         $producto->precio_unitario = $request->input('precio_unitario');
         $producto->piezas = $request->input('piezas');
-        $producto->estado_producto = $request->input('estado_producto', true); // por default activo
+        $producto->estado_producto = $request->input('estado_producto', true);
         $producto->save();
 
         return redirect('/producto')->with('success', 'Producto registrado correctamente.');
@@ -191,7 +221,6 @@ class ProductoController extends Controller
 
         $seleccion = $request->input('sel', []);
 
-        // Si no hay búsqueda, volver al index
         if (!$busqueda) {
             return redirect()->route('producto.index')
             ->with('info', 'Se mostró la lista completa porque no ingresaste ningún criterio de búsqueda.');
@@ -209,12 +238,12 @@ class ProductoController extends Controller
                     ['path' => $request->url(), 'query' => $request->query()]
                 );
             } else {
-                $productos = collect(); // vacío
+                $productos = collect();
             }
         } else {
             $productos = Producto::where('nombre', 'ILIKE', "%$busqueda%")
-                ->orderBy('tipo')          // 🔹 asegura orden estable
-                ->orderBy('id_producto')   // 🔹 mantiene el orden dentro del tipo
+                ->orderBy('tipo')
+                ->orderBy('id_producto')
                 ->paginate(10)
                 ->withQueryString();
         }
@@ -261,21 +290,56 @@ class ProductoController extends Controller
             return redirect()->route('producto.index')->with('error', 'Producto no encontrado.');
         }
 
-        // (opcional) validaciones
         $request->validate([
-            'imagen' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            // agrega aquí tus reglas para los demás campos si quieres
+            'imagen'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'nombre'           => ['nullable', 'string', 'max:150'],
+            'tipo'             => ['nullable', 'string', 'max:100'],
+            'material'         => ['nullable', 'string', 'max:100'],
+            'color'            => ['nullable', 'string', 'max:50'],
+            'tamanio'          => ['nullable', 'string', 'max:50'],
+            'marca'            => ['nullable', 'string', 'max:100'],
+            'precio_unitario'  => ['nullable', 'numeric', 'min:0'],
+            'piezas'           => ['nullable', 'integer', 'min:0'],
+            'estado_producto'  => ['nullable', 'boolean'],
+        ], [
+            'imagen.image'   => 'El archivo debe ser una imagen.',
+            'imagen.mimes'   => 'La imagen debe estar en formato JPG, JPEG, PNG o WEBP.',
+            'imagen.max'     => 'La imagen no puede superar los 5 MB.',
+
+            'nombre.string'  => 'El nombre debe ser texto válido.',
+            'nombre.max'     => 'El nombre no puede tener más de 150 caracteres.',
+
+            'tipo.string'    => 'El tipo debe ser texto válido.',
+            'tipo.max'       => 'El tipo no puede tener más de 100 caracteres.',
+
+            'material.string'=> 'El material debe ser texto válido.',
+            'material.max'   => 'El material no puede tener más de 100 caracteres.',
+
+            'color.string'   => 'El color debe ser texto válido.',
+            'color.max'      => 'El color no puede tener más de 50 caracteres.',
+
+            'tamanio.string' => 'El tamaño debe ser texto válido.',
+            'tamanio.max'    => 'El tamaño no puede tener más de 50 caracteres.',
+
+            'marca.string'   => 'La marca debe ser texto válido.',
+            'marca.max'      => 'La marca no puede tener más de 100 caracteres.',
+
+            'precio_unitario.numeric' => 'El precio unitario debe ser un número.',
+            'precio_unitario.min'     => 'El precio unitario no puede ser negativo.',
+
+            'piezas.integer' => 'Las piezas deben ser un número entero.',
+            'piezas.min'     => 'Las piezas no pueden ser negativas.',
+
+            'estado_producto.boolean' => 'El estado del producto debe ser válido (activo o inactivo).',
         ]);
 
-        $urlTemporal = null; // si suben imagen a S3 privado, la generamos
+        $urlTemporal = null;
 
-        // Si subieron una imagen, la actualizamos
         if ($request->hasFile('imagen')) {
             $archivo       = $request->file('imagen');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaRelativa  = 'img/' . $nombreArchivo; // seguimos guardando "img/xxx.ext" en DB
+            $rutaRelativa  = 'img/' . $nombreArchivo;
 
-            // 1) Borra la imagen anterior según el disk activo
             if ($producto->imagen) {
                 if (config('filesystems.default') === 's3') {
                     try { Storage::disk('s3')->delete($producto->imagen); } catch (\Throwable $e) {}
@@ -285,36 +349,29 @@ class ProductoController extends Controller
                 }
             }
 
-            // 2) Sube la nueva imagen
             if (config('filesystems.default') === 's3') {
-                // bucket privado
                 Storage::disk('s3')->putFileAs('img', $archivo, $nombreArchivo, [
                     'visibility'  => 'private',
                     'ContentType' => $archivo->getMimeType(),
                 ]);
 
-                // URL temporal (válida 10 min) para mostrar en la vista si quieres
                 $urlTemporal = Storage::disk('s3')->temporaryUrl($rutaRelativa, now()->addMinutes(10));
             } else {
-                // entorno local: public/img
                 $archivo->move(public_path('img'), $nombreArchivo);
-                $urlTemporal = asset($rutaRelativa); // por si quieres previsualizar tras actualizar
+                $urlTemporal = asset($rutaRelativa);
             }
 
-            $producto->imagen = $rutaRelativa; // guardamos misma convención en DB
+            $producto->imagen = $rutaRelativa;
         }
 
-        // Checkbox a booleano real
         $producto->estado_producto = $request->boolean('estado_producto');
 
-        // Campos de texto (solo si vienen y no están vacíos)
         foreach (['nombre','tipo','material','color','tamanio','marca'] as $campo) {
             if ($request->filled($campo)) {
                 $producto->$campo = $request->input($campo);
             }
         }
 
-        // Numéricos con 'has' para permitir 0
         if ($request->has('precio_unitario')) {
             $producto->precio_unitario = $request->input('precio_unitario');
         }
@@ -324,7 +381,6 @@ class ProductoController extends Controller
 
         $producto->save();
 
-        // Si generamos URL temporal (S3 privado o local), la mandamos por sesión para mostrar previsualización
         return redirect()
             ->route('producto.index')
             ->with('success', 'Producto actualizado correctamente.')
@@ -339,6 +395,7 @@ class ProductoController extends Controller
         }
 
         $producto->delete();
+        
         return redirect()->route('producto.index')->with('success', 'Producto eliminado.');
     }
 }

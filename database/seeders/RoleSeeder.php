@@ -80,7 +80,6 @@ class RoleSeeder extends Seeder
         $viewUserPermission, $editUserPermission,
     
     );
-
         // Assign role to user
         $adminPermisos = User::firstOrCreate([
             'email' => 'admin@gmail.com'
@@ -91,14 +90,10 @@ class RoleSeeder extends Seeder
             'genero' => 'H',
             'edad' => '20',
             'telefono' => '3333331111',
-            'direccion' => 'juanitoaddress',
+            'direccion' => 'yahiraddress',
             'nombre_usuario' => 'yahiradmin',
 
-        ]); // Example user with ID 1
+        ]);
         $adminPermisos->assignRole('administrador');
-
-        // $userPermisos = User::find(1);
-        // $userPermisos->assignRole('user');
-
     }
 }

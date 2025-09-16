@@ -1,6 +1,4 @@
-
-body { color: #222; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: linear-gradient(to right, #c186ff, #c446ff); min-height: 100vh; margin: 0;}
-
+body { color: #222; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: linear-gradient(135deg, #c471ed 0%, #d8a7ff 50%, #f0e6ff 100%); min-height: 100vh; margin: 0;}
 
 .inicio-container h1 { font-size: 3rem; font-weight: 800; margin-bottom: 10px; letter-spacing: .5px; }
 .inicio-container p.frase { font-size: 1.35rem; font-style: italic; opacity: .95; margin-bottom: 40px; }
@@ -9,8 +7,6 @@ body { color: #222; font-family: system-ui, -apple-system, "Segoe UI", Roboto, A
 .accesos a:hover, .accesos form button:hover { background: #f5f7ff; transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.18); }
 footer { background: rgba(255,255,255,0.08); padding: 18px 0; text-align: center; color: #fff; margin-top: 50px; }
 
-
-/* Collage simple y responsive */
 .collage{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -18,7 +14,6 @@ footer { background: rgba(255,255,255,0.08); padding: 18px 0; text-align: center
     margin-top: 24px;
 }
 
-/* Tarjetas de imagen */
 .tile{
     position: relative;
     overflow: hidden;
@@ -27,7 +22,6 @@ footer { background: rgba(255,255,255,0.08); padding: 18px 0; text-align: center
     transition: transform .15s ease, box-shadow .15s ease;
 }
 
-/* Proporciones (nada loco, solo variedad sutil) */
 .tile.square{ aspect-ratio: 1 / 1; }
 .tile.wide{ aspect-ratio: 16 / 9; }
 .tile.tall{ aspect-ratio: 3 / 4; }
@@ -39,13 +33,11 @@ footer { background: rgba(255,255,255,0.08); padding: 18px 0; text-align: center
     display: block;
 }
 
-/* Hover suave */
 .tile:hover{
     transform: translateY(-2px);
     box-shadow: 0 12px 24px rgba(0,0,0,.20);
 }
 
-/* Opcional: espaciar un poco en móviles */
 @media (max-width: 576px){
     .collage{ gap: 10px; }
 }

@@ -24,10 +24,10 @@ class PedidoSeeder extends Seeder
                 ->count($numPedidos)
                 ->create([
                     'id_user'    => $usuario->id_user,
-                    'id_credito' => null, // todos sin crédito de inicio
+                    'id_credito' => null,
                 ]);
         }
 
-        $this->command->info('Se crearon 4–5 pedidos por usuario.');
+        $this->command->info('Se crearon 4-5 pedidos por usuario.');
     }
 }

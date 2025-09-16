@@ -10,21 +10,18 @@ use Illuminate\Support\Facades\Hash;
 
 class PerfilController extends Controller
 {
-    // Mostrar perfil del usuario actual
     public function index()
     {
         $user = Auth::user();
         return view('perfil.perfilIndex', compact('user'));
     }
 
-    // Mostrar formulario para editar perfil del usuario actual
     public function edit()
     {
         $user = Auth::user();
         return view('perfil.editPerfil', compact('user'));
     }
 
-    // Guardar los cambios del perfil
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -40,27 +37,59 @@ class PerfilController extends Controller
                 'min:8',
                 'max:20',
                 'confirmed',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/'
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
+                'unique:users,password',
             ],
             'telefono'        => 'nullable|string|max:20',
             'direccion'       => 'nullable|string|max:80',
             'edad'            => 'nullable|integer|min:0',
             'genero'          => 'nullable|in:H,M,O',
             'imagen'          => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ], [
+            'name.string'            => 'El nombre debe ser texto válido.',
+            'name.max'               => 'El nombre no puede tener más de 255 caracteres.',
+
+            'nombre_usuario.string'  => 'El nombre de usuario debe ser texto.',
+            'nombre_usuario.max'     => 'El nombre de usuario no puede superar los 50 caracteres.',
+            'nombre_usuario.unique'  => 'Ese nombre de usuario ya está en uso.',
+
+            'email.email'            => 'El correo debe tener un formato válido.',
+            'email.max'              => 'El correo no puede superar los 255 caracteres.',
+            'email.unique'           => 'Ese correo ya está en uso.',
+
+            'current_password.required_with' => 'Ingrese su contraseña actual para poder cambiarla.',
+
+            'password.min'           => 'La nueva contraseña debe tener al menos 8 caracteres.',
+            'password.max'           => 'La nueva contraseña no puede superar los 20 caracteres.',
+            'password.confirmed'     => 'La confirmación de la contraseña no coincide.',
+            'password.regex'         => 'La contraseña debe incluir al menos una mayúscula, una minúscula, un número y un carácter especial.',
+            'password.unique'    => 'La contraseña ya está en uso.',
+
+            'telefono.string'        => 'El teléfono debe ser un texto válido.',
+            'telefono.max'           => 'El teléfono no puede superar los 20 caracteres.',
+
+            'direccion.string'       => 'La dirección debe ser un texto válido.',
+            'direccion.max'          => 'La dirección no puede superar los 80 caracteres.',
+
+            'edad.integer'           => 'La edad debe ser un número.',
+            'edad.min'               => 'La edad no puede ser negativa.',
+
+            'genero.in'              => 'El género debe ser H (hombre), M (mujer) u O (otro).',
+
+            'imagen.image'           => 'El archivo debe ser una imagen.',
+            'imagen.mimes'           => 'La imagen debe ser jpeg, png, jpg, gif o webp.',
+            'imagen.max'             => 'La imagen no puede superar los 2 MB.',
         ]);
 
         if ($request->filled('name'))           $user->name = $request->name;
         if ($request->filled('nombre_usuario')) $user->nombre_usuario = $request->nombre_usuario;
         if ($request->filled('email'))          $user->email = $request->email;
 
-        // --- Cambio de contraseña ---
         if ($request->filled('password')) {
-            // Verificar contraseña actual
             if (!\Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'La contraseña actual no es correcta.']);
             }
 
-            // Evitar que sea la misma contraseña
             if (\Hash::check($request->password, $user->password)) {
                 return back()->withErrors(['password' => 'La nueva contraseña no puede ser igual a la actual.']);
             }
@@ -78,7 +107,6 @@ class PerfilController extends Controller
             $filename    = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
             $relative    = 'perfiles/' . $filename;
 
-            // Borrar anterior
             if (!empty($user->imagen)) {
                 if (config('filesystems.default') === 's3') {
                     try { \Storage::disk('s3')->delete($user->imagen); } catch (\Throwable $e) {}
@@ -88,7 +116,6 @@ class PerfilController extends Controller
                 }
             }
 
-            // Subir nueva
             if (config('filesystems.default') === 's3') {
                 \Storage::disk('s3')->putFileAs('perfiles', $file, $filename, [
                     'visibility'  => 'private',
@@ -103,10 +130,6 @@ class PerfilController extends Controller
 
         $user->save();
 
-        return redirect()->route('perfil.perfilIndex')
-            ->with('success', 'Perfil actualizado correctamente.');
+        return redirect()->route('perfil.perfilIndex')->with('success', 'Perfil actualizado correctamente.');
     }
-
-
-
 }

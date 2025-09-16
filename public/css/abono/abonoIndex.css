@@ -1,7 +1,6 @@
-/* ==== RESET & TIPOGRAFÍA ==== */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #fff87a; min-height: 100vh; }
+body { margin: 0; color: #222; background: linear-gradient(135deg, #fdecda 0%, #fff4eb 100%); min-height: 100vh; }
 
 .container { max-width: 1100px; margin: 0 auto; padding: 14px; }
 h1 { margin: 0 0 16px; margin-top: 12px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
@@ -11,7 +10,6 @@ a { color: #2563eb; text-decoration: none; }
 a:hover { text-decoration: underline; }
 hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; margin-top: 12px; }
 
-/* ==== BOTONES ==== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -25,11 +23,12 @@ hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; margin-to
   text-decoration: none;
   white-space: nowrap;
 }
+
 .btn:hover { filter: brightness(.95); }
 
-.btn-primary { background:#16a34a; border-color:#16a34a; color:#fff; font-weight: bold; } /* Registrar */
-.btn-edit    { background:#7c3aed; border-color:#7c3aed; color:#fff; font-weight: bold; } /* Editar */
-.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; } /* Eliminar */
+.btn-primary { background:#16a34a; border-color:#16a34a; color:#fff; font-weight: bold; }
+.btn-edit    { background:#7c3aed; border-color:#7c3aed; color:#fff; font-weight: bold; }
+.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; }
 .bg-cerrado {
   background: #db2777 !important;
   color: #fff !important;
@@ -49,7 +48,6 @@ hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; margin-to
   font-weight: bold;
 }
 
-/* ==== FORMULARIO DE BÚSQUEDA ==== */
 form:has(#buscar) {
   display: grid;
   grid-template-columns: max-content minmax(160px, 220px) max-content;
@@ -106,7 +104,6 @@ form:has(#buscar) input[type="submit"] {
   }
 }
 
-/* ==== TABLAS ==== */
 .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table {
   width: 100%;
@@ -127,11 +124,9 @@ thead th { background:#ffffff; }
 tbody tr:nth-child(odd) { background: #ffffff; }
 tbody tr:hover { background: #f2f7ff; }
 
-/* Botones dentro de la tabla */
 td .btn { display:inline-flex; }
 form[method="POST"][style*="display:inline"] .btn { margin-left:6px; }
 
-/* ==== RESPONSIVE (Tablas → tarjetas) ==== */
 @media (max-width: 768px) {
   table, thead, tbody, th, td, tr { display: block; }
   thead { display: none; }

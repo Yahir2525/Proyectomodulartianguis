@@ -16,7 +16,7 @@ class AdminRole
      */
     public function handle(Request $request, Closure $next): Response
     {
-        echo "Permitido para administradores";
+        
         if(Auth::check() && Auth::user()->hasRole('administrador')){
         return $next($request);
         }

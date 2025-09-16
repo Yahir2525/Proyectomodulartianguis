@@ -36,11 +36,7 @@ class ProductoSeeder extends Seeder
             $piezas          = (int)   ($row[7] ?? 0);
             $nombreImagen    = trim((string)($row[8] ?? ''));
 
-
-            // Guarda tal cual en BD (absoluta o relativa)
             $rutaImagen = $nombreImagen !== '' ? $nombreImagen : null;
-
-            // (Opcional) Si es relativa, puedes verificar que exista en S3 para avisar:
 
             Producto::create([
                 'nombre'          => $nombre,
@@ -51,7 +47,7 @@ class ProductoSeeder extends Seeder
                 'marca'           => $marca,
                 'precio_unitario' => $precioUnitario,
                 'piezas'          => $piezas,
-                'imagen'          => $rutaImagen,   // sigue siendo "img/archivo.jpg"
+                'imagen'          => $rutaImagen,
                 'estado_producto' => true,
             ]);
         }

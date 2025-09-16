@@ -6,12 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Creación de la tabla Abonos
         Schema::create('abonos', function (Blueprint $table) {
             $table->id('id_abono');
             $table->unsignedBigInteger('id_credito')->nullable();

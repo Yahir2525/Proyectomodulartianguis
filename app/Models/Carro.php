@@ -21,7 +21,6 @@ class Carro extends Model
     protected $fillable = [
     'id_user',
     'id_pedido',
-    // otros campos si los hay
     ];
     public function productos(): BelongsToMany
     {

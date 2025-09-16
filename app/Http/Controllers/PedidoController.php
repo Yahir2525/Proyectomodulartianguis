@@ -37,10 +37,9 @@ class PedidoController extends Controller
         $usuario = Auth::user();
 
         if ($usuario->hasRole('administrador')) {
-            // Obtener todos los usuarios para mostrar en el select
             $usuarios = User::all();
         } else {
-            $usuarios = null; // No se muestra select para usuarios normales
+            $usuarios = null;
         }
 
         return view('pedido.createPedido', compact('usuarios', 'usuario'));
@@ -71,15 +70,12 @@ class PedidoController extends Controller
             ->with('info', 'Se mostró la lista completa porque no ingresaste ningún criterio de búsqueda.');
         }
 
-        // ===== 🔍 Búsqueda por ID parcial =====
         if (is_numeric($busqueda)) {
             if ($user->hasRole('administrador')) {
-                // Admin ve todos los pedidos cuyo id contenga la cadena
                 $pedidos = Pedido::with('user')
                     ->where('id_pedido', 'LIKE', "%{$busqueda}%")
                     ->get();
             } else {
-                // Usuario normal solo sus propios pedidos
                 $pedidos = Pedido::with('user')
                     ->where('id_pedido', 'LIKE', "%{$busqueda}%")
                     ->where('id_user', $user->id_user)
@@ -94,7 +90,6 @@ class PedidoController extends Controller
             return view('pedido.showPedido', compact('pedidos', 'usuarios'));
         }
 
-        // ===== 🔍 Búsqueda por nombre de usuario (solo admin) =====
         if (!$user->hasRole('administrador')) {
             return back()->with('error', 'Solo puedes buscar tus propios pedidos por ID.');
         }
@@ -111,10 +106,9 @@ class PedidoController extends Controller
             return back()->with('error', 'No se encontraron pedidos para "' . $busqueda . '".');
         }
 
-        $usuarios = User::all(); // Para el datalist en la vista
+        $usuarios = User::all();
         return view('pedido.showPedido', compact('pedidos', 'usuarios'));
     }
-
 
     public function edit($id)
     {
@@ -145,7 +139,6 @@ class PedidoController extends Controller
 
     private function esNivelMalo(User $user): bool
     {
-        // Ajusta el nombre del campo según tu modelo User
         $nivel = strtolower((string)($user->nivel ?? $user->nivel_usuario ?? $user->nivel_riesgo ?? ''));
         return $nivel === 'malo';
     }
@@ -157,7 +150,6 @@ class PedidoController extends Controller
         $totalAnterior = $pedido->total_pedido;
         $nuevoTotal = (float) $request->input('total', $totalAnterior);
 
-        // ✅ NUEVO: impedir cambiar método a crédito si el usuario es "malo"
         $metodoNuevo = $request->input('metodo_pago', $pedido->metodo_pago);
         if ($metodoNuevo === 'credito' && $this->esNivelMalo($pedido->user)) {
             return back()->with('error', 'Tu nivel actual es "malo". No puedes cambiar el método de pago a crédito.');
@@ -260,7 +252,6 @@ class PedidoController extends Controller
             return back()->with('error', 'No puedes cerrar un pedido con total $0.');
         }
 
-        // ✅ Bloquear cierre a crédito para usuarios con nivel "malo"
         $user->refresh();
         if ($metodo === 'credito' && $this->esNivelMalo($user)) {
             return back()->with('error', 'Tu nivel actual es "malo". Solo puedes cerrar pedidos a contado.');
@@ -279,7 +270,6 @@ class PedidoController extends Controller
             return back()->with('error', 'No puedes cerrar el pedido. La suma de tus deudas superaría los $10,000.');
         }
 
-        // Si el crédito anterior existe y se cambia a contado o a otro crédito, ajustar el saldo anterior
         if ($id_credito_anterior && ($metodo !== 'credito' || $id_credito_anterior != $id_credito_nuevo)) {
             $creditoAnterior = Credito::find($id_credito_anterior);
             if ($creditoAnterior) {
@@ -299,12 +289,10 @@ class PedidoController extends Controller
                 // Usar crédito existente
                 $credito = Credito::find($id_credito_nuevo);
 
-                // ✅ Bloquear si el crédito está cerrado o vencido
                 if (!$credito || $credito->estado == 0 || $credito->fecha_vencimiento < now()) {
                     return back()->with('error', 'No puedes cerrar el pedido porque el crédito seleccionado está cerrado o vencido.');
                 }
 
-                // ✅ Solo sumar diferencia si es el mismo crédito
                 if ($id_credito_nuevo == $id_credito_anterior) {
                     $credito->saldo_total = $credito->saldo_total - $total_anterior + $total;
                 } else {
@@ -314,7 +302,6 @@ class PedidoController extends Controller
                 $credito->save();
                 $pedido->id_credito = $credito->id_credito;
             } else {
-                // Crear nuevo crédito solo si tiene menos de 3 activos
                 $creditosActivos = $creditosUsuario->filter(function ($c) {
                     return $c->estado == 1 && $c->fecha_vencimiento >= now();
                 });
@@ -352,7 +339,6 @@ class PedidoController extends Controller
         return redirect()->route('pedido.index')->with('success', 'El pedido se ha cerrado con éxito.');
     }
 
-
     public function reabrir(Request $request, $id_pedido)
     {
         $pedido = Pedido::findOrFail($id_pedido);
@@ -360,23 +346,20 @@ class PedidoController extends Controller
         if ($pedido->id_credito) {
             $credito = Credito::find($pedido->id_credito);
 
-            // 🚨 Bloquear si el crédito está cerrado o vencido
             if ($credito && ($credito->estado == 0 || now()->greaterThan($credito->fecha_vencimiento))) {
                 return redirect()->back()->with('error', 'No se puede reabrir el pedido porque está asociado a un crédito cerrado o vencido.');
             }
 
             if ($credito) {
-                // 🚨 Bloquear si el pedido supera el saldo disponible
                 if ($pedido->total_pedido > $credito->saldo_total) {
                     return redirect()->back()->with('error', 'No se puede reabrir este pedido porque su total supera el saldo restante del crédito.');
                 }
 
-                // 🔹 Restar total del pedido al crédito
                 $credito->saldo_total -= $pedido->total_pedido;
 
                 if ($credito->saldo_total <= 0) {
                     $credito->saldo_total = 0;
-                    $credito->estado = 0; // Cerrado
+                    $credito->estado = 0;
                     $credito->fecha_liquidacion = now();
                 }
 
@@ -384,10 +367,8 @@ class PedidoController extends Controller
             }
         }
 
-        // Guardamos el total antes de abrir
         session()->put("total_anterior_pedido_{$pedido->id_pedido}", $pedido->total_pedido);
 
-        // 🔹 Reabrir en limpio
         $pedido->estado_pedido = 1;
         $pedido->metodo_pago = null;
         $pedido->id_credito = null;
@@ -409,11 +390,9 @@ class PedidoController extends Controller
 
         $pedido->delete();
 
-        // Recalcular saldo del crédito si aplica
         if ($idCredito) {
             $credito = Credito::find($idCredito);
             if ($credito) {
-                // Sumar todos los totales de pedidos restantes de ese crédito
                 $totalPedidos = Pedido::where('id_credito', $idCredito)->sum('total_pedido');
                 $credito->saldo_total = $totalPedidos;
                 $credito->save();
@@ -430,9 +409,7 @@ class PedidoController extends Controller
 
     private function usuarioBloqueadoParaCredito($idUser)
     {
-        $creditosActivos = Credito::where('id_user', $idUser)
-                                ->where('estado', 1)
-                                ->get();
+        $creditosActivos = Credito::where('id_user', $idUser)->where('estado', 1)->get();
 
         if ($creditosActivos->count() >= 3) {
             return true;
@@ -447,7 +424,6 @@ class PedidoController extends Controller
 
     private function puedeCerrarAPedidoACredito(Pedido $pedido, $montoNuevo = null, $esNuevoCredito = false)
     {
-        // ✅ NUEVO: rechaza inmediatamente si el usuario es "malo"
         if ($this->esNivelMalo($pedido->user)) {
             return false;
         }
@@ -456,10 +432,9 @@ class PedidoController extends Controller
 
         $creditosActivos = Credito::where('id_user', $user->id_user)
             ->where('estado', 1)
-            ->whereDate('fecha_vencimiento', '>=', now()) // No vencidos
+            ->whereDate('fecha_vencimiento', '>=', now())
             ->get();
 
-        // Si alguno está vencido bloquea
         if ($creditosActivos->contains(fn($c) => $c->fecha_vencimiento < now())) {
             return false;
         }
@@ -477,7 +452,6 @@ class PedidoController extends Controller
             $nuevoSaldo = $credito->saldo_total + $montoNuevo;
             return $nuevoSaldo <= 10000;
         } else {
-            // Si no hay crédito seleccionado, se intenta crear uno nuevo
             if ($esNuevoCredito && $creditosActivos->count() >= 3) {
                 return false;
             }
@@ -487,7 +461,6 @@ class PedidoController extends Controller
 
     private function validarCreditoAlModificar(Pedido $pedido, $nuevoTotal, $esNuevoCredito = false)
     {
-        // ✅ NUEVO: si es "malo" no puede operar a crédito
         if ($this->esNivelMalo($pedido->user)) {
             return false;
         }
@@ -503,7 +476,6 @@ class PedidoController extends Controller
             ->whereDate('fecha_vencimiento', '>=', now())
             ->get();
 
-        // Solo si se va a crear un nuevo crédito aplicamos la regla de máximo 3 créditos activos
         if ($esNuevoCredito && $creditosActivos->count() >= 3) {
             return false;
         }
@@ -513,7 +485,6 @@ class PedidoController extends Controller
 
         $nuevoSaldo = $credito->saldo_total + ($nuevoTotal - $pedido->total_pedido);
 
-        // Validar que no supere $10,000
         return $nuevoSaldo <= 10000;
     }
 

@@ -1,20 +1,15 @@
-/* ===== editAbono.css — diseño simple y consistente (match con create) ===== */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh;}
+body { margin: 0; color: #222; background: linear-gradient(135deg, #fdecda 0%, #fff4eb 100%); min-height: 100vh;}
 
-/* Contenedor cómodo y centrado horizontal */
 .container { max-width: 420px; margin: 0 auto; padding: 18px; background:transparent;}
 
-/* Titulares / info */
 h1 { margin: 0 0 16px; margin-top: 12px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
 p  { margin: 6px 0; }
 
-/* Formulario fluido (simple y compacto) */
 form { display: grid; gap: 12px; }
 label { font-weight: 600; font-size: 0.95rem; }
 
-/* Inputs y selects con estilo ovalado */
 input[type="number"],
 input[type="text"],
 input[list],
@@ -37,33 +32,30 @@ select:focus {
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
 }
 
-/* Botón principal (submit) */
 button,
 .btn.btn-primary {
   width: 100%;
   padding: 8px 12px;
   min-height: 36px;
-  border-radius: 6px; /* ovalado */
+  border-radius: 6px;
   border: 1px solid #16a34a;
   background: #16a34a;
   color: #fff;
   font-size: .94rem;
   line-height: 1;
   cursor: pointer;
-  text-decoration: none; /* para <a> con .btn */
+  text-decoration: none;
   display: inline-flex; align-items: center; justify-content: center;
   font-weight: bold;
 }
-.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; } /* Eliminar */
+.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; }
 
 button:hover,
 .btn.btn-primary:hover { filter: brightness(.95); }
 
-/* Botón “Volver al listado” */
 .back-wrap { margin-top: 10px; }
 .back-wrap .btn.btn-primary { width: auto; }
 
-/* Mensajes de error */
 .errors {
   color: #7f1d1d;
   background: #fef2f2;
@@ -76,7 +68,6 @@ button:hover,
 .errors ul { margin: 0 0 0 18px; padding: 0; }
 .errors li { margin: 4px 0; }
 
-/* Fix para inline style="color:red;" */
 [style*="color: red;"] {
   color: #7f1d1d !important;
   background: #fef2f2;
@@ -87,7 +78,6 @@ button:hover,
   margin: 10px auto 8px;
 }
 
-/* Responsivo */
 @media (max-width: 768px) {
   html { font-size: 15px; }
   .container { padding: 14px; }
@@ -100,5 +90,5 @@ button:hover,
 hr.hr-grueso { height:1px; border:none; background:#000; margin:1px 0; margin-top: 12px; }
 
 form > div {
-  margin-bottom: 15px; /* separa cada bloque un poco */
+  margin-bottom: 15px;
 }

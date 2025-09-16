@@ -47,14 +47,13 @@ class PrediccionController extends Controller
                 $nivel = is_string($nivel) ? strtolower(trim($nivel)) : null;
 
                 if (!$id || !in_array($nivel, ['excelente','bueno','malo'], true)) {
-                    continue; // salta registros incompletos
+                    continue;
                 }
 
                 $diasAplazo = ($nivel === 'excelente') ? 1 : 0;
 
-                // Nota: si tu columna se llama distinto, cámbiala aquí
                 User::where('id_user', $id)->update([
-                    'nivel_usuario' => $nivel,  // o 'nivel_usuario' si tu esquema lo usa
+                    'nivel_usuario' => $nivel,
                     'dias_aplazo' => $diasAplazo,
                 ]);
             }

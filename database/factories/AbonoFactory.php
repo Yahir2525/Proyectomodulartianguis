@@ -13,10 +13,8 @@ class AbonoFactory extends Factory
 
     public function definition(): array
     {
-        // 1) Tomar un crédito existente y usar SU usuario
         $credito = Credito::inRandomOrder()->first();
 
-        // 2) Si no hay créditos aún, crear user + crédito ligados
         if (!$credito) {
             $user = User::factory()->create();
             $credito = Credito::factory()->create([
@@ -25,7 +23,6 @@ class AbonoFactory extends Factory
         }
 
         return [
-            // Por defecto: mismo user del crédito
             'id_credito'   => $credito->id_credito,
             'id_user'      => $credito->id_user,
             'monto_abono' => $this->faker->numberBetween(1, 2000),

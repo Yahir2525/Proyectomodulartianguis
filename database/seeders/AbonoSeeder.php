@@ -19,7 +19,6 @@ class AbonoSeeder extends Seeder
         }
 
         foreach ($usuarios as $usuario) {
-            // Obtener (o crear) un crédito del usuario
             $credito = Credito::where('id_user', $usuario->id_user)->first();
 
             if (!$credito) {
@@ -28,7 +27,6 @@ class AbonoSeeder extends Seeder
                 ]);
             }
 
-            // Crear 2 o 3 abonos para este crédito
             $numAbonos = rand(2, 4);
 
             Abono::factory()
@@ -38,7 +36,6 @@ class AbonoSeeder extends Seeder
                     'id_user'    => $usuario->id_user,
                 ]);
         }
-
-        $this->command->info('Se crearon 2–3 abonos por usuario.');
+        $this->command->info('Se crearon abonos por usuario.');
     }
 }

@@ -1,7 +1,6 @@
-/* Create Role — estilos en public/css/pages/roles/create.css */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #e1b1b1; min-height: 100vh;}
+body { margin: 0; color: #222; background: linear-gradient(135deg, #ffcae6 0%, #fff5fa 100%); min-height: 100vh;}
 
 .container { max-width: 920px; margin: 0 auto; padding: 16px; }
 
@@ -25,16 +24,15 @@ input[type="text"] {
   border-radius: 8px;
 }
 
-/* ==== LISTA DE PERMISOS ==== */
 .perm-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 12px;
 }
+
 .perm-actions .btn {
-  /* ANTES: flex: 1;  → lo quitamos */
-  min-width: 100px;  /* tamaño mínimo para que no se aplasten */
+  min-width: 100px;
 }
 
 .perm-list {
@@ -58,7 +56,6 @@ input[type="text"] {
 .perm-item:hover { border-color: #d1d5db; background: #fafafa; }
 .perm-item input { width: 18px; height: 18px; }
 
-/* ==== BOTONES ==== */
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 10px 14px; border-radius: 8px; border: 1px solid transparent;
@@ -74,7 +71,6 @@ input[type="text"] {
 .btn-gray      { background:#6b7280; border-color:#6b7280; color:#fff; }
 .btn-warning   { background:#2563eb; border-color:#2563eb; color:#fff; }
 
-/* ==== ALERTAS ==== */
 .alert {
   padding: 10px 12px; border-radius: 8px; margin-bottom: 12px;
   border: 1px solid transparent;
@@ -82,7 +78,6 @@ input[type="text"] {
 .alert.success { background: #ecfdf5; border-color: #34d399; color: #065f46; }
 .alert.danger  { background: #fef2f2; border-color: #fca5a5; color: #7f1d1d; }
 
-/* ==== ACCIONES ==== */
 .form-actions {
   display: flex; gap: 10px; flex-wrap: wrap;
   justify-content: flex-end;
@@ -90,16 +85,13 @@ input[type="text"] {
   justify-content: center;
 }
 
-/* ==== RESPONSIVE ==== */
 @media (max-width: 640px) {
   .container { padding: 12px; }
   .card { padding: 12px; }
 
-  /* Botones de acciones al 100% */
   .form-actions { flex-direction: column; }
   .form-actions .btn { width: 100%; }
 
-  /* Botones seleccionar/limpiar → dos columnas iguales */
   .perm-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -107,7 +99,6 @@ input[type="text"] {
   }
   .perm-actions .btn { width: 100%; }
 
-  /* Permisos en una sola columna */
   .perm-list {
     grid-template-columns: 1fr;
   }

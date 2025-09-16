@@ -8,15 +8,13 @@
 </nav>
 
 <style>
-    /* Fondo morado */
-   nav { background: transparent !important; }
+    nav { background: transparent !important; }
 
     .navbar-brand { 
     font-weight: 700; 
     color: #222; 
     }
 
-    /* Botones tipo chip */
     :root {
     --btn-chip-bg: #fff;
     --btn-chip-text: #4b2a7b;
@@ -44,7 +42,6 @@
     text-decoration: none;
     }
 
-    /* Avatar chip */
     .avatar-chip {
     display: inline-flex;
     align-items: center;
@@ -67,7 +64,6 @@
     font-size: 20px; width: 20px; text-align: center;
     }
 
-    /* Centrado real del menú entre el logo y el avatar */
     @media (min-width: 992px) {
     nav.navbar { position: relative; }
     #mainNavbar .navbar-nav.mx-auto {
@@ -79,28 +75,25 @@
     #mainNavbar .navbar-nav.ms-auto { margin-left: auto !important; }
     }
 
-    /* Responsive: chips a 100% en móvil */
     @media (max-width: 991.98px) {
     .btn-chip { width: 100%; justify-content: center; }
     }
 
-    /* Dropdown más compacto */
     .navbar .dropdown-menu {
-    min-width: auto;       /* que no se alargue de más */
-    width: auto;           /* se ajusta al contenido */
-    max-width: 250px;      /* ancho máximo */
+    min-width: auto;
+    width: auto;
+    max-width: 250px;
     font-size: 0.9rem;
     padding: 4px 0;
     }
     .navbar .dropdown-menu .dropdown-item {
     padding: 6px 10px;
-    white-space: nowrap;   /* evita saltos de línea */
+    white-space: nowrap;
     }
     .navbar .dropdown-menu .dropdown-item:hover {
     background-color: #f2f7ff;
     }
 
-    /* En móviles: menú al 100% */
     @media (max-width: 991.98px) {
     .navbar .dropdown-menu {
         width: 100%;
@@ -109,11 +102,11 @@
     }
 
     .navbar-toggler {
-        padding: 8px 14px;   /* reduce espacio interno */
-        font-size: 1.25rem;  /* opcional, ícono más chico */
+        padding: 8px 14px;
+        font-size: 1.25rem;
         line-height: 1;
-        border: none;       /* opcional, quita borde gordo */
-        width: auto;        /* asegura que no se estire */
+        border: none;
+        width: auto;
     }
 
 </style>

@@ -1,9 +1,7 @@
-/* ==== CREATE PRODUCTO ==== */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
+body { margin: 0; color: #222; background: linear-gradient(135deg, #a8d8ff 0%, #e6f3ff 100%); min-height: 100vh; }
 
-/* Contenedor centrado */
 .container {
   max-width: 420px;
   margin: 0 auto;
@@ -11,11 +9,9 @@ body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
   background:transparent;
 }
 
-/* Titulares */
 h1 { margin: 0 0 12px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
 hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
 
-/* Formulario */
 form { display: grid; gap: 12px; }
 label { font-weight: 600; font-size: .95rem; }
 
@@ -36,7 +32,6 @@ input:focus, select:focus {
   box-shadow: 0 0 0 2px rgba(37,99,235,.15);
 }
 
-/* Botones */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -52,12 +47,10 @@ input:focus, select:focus {
 
 
 .btn-primary  { background:#16a34a; border-color:#16a34a; color:#fff; margin-left: 0; font-weight: bold; width: 100%;}
-.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; } /* Eliminar */
+.btn-danger  { background:#dc2626; border-color:#dc2626; color:#fff; font-weight: bold; }
 
-/* Enlace cancelar */
 .back-wrap { margin-top: 10px; }
 
-/* Errores */
 .errors {
   color: #7f1d1d;
   background: #fef2f2;
@@ -70,7 +63,6 @@ input:focus, select:focus {
 .errors ul { margin: 0 0 0 18px; padding: 0; }
 .errors li { margin: 4px 0; }
 
-/* Responsivo */
 @media (max-width: 768px) {
   html { font-size: 15px; }
   .container { padding: 14px; }

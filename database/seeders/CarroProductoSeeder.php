@@ -17,7 +17,6 @@ class CarroProductoSeeder extends Seeder
         $productos = Producto::all();
 
         foreach ($usuarios as $usuario) {
-            // Asegurarse de que tenga al menos un pedido
             $pedido = $usuario->pedido()->first();
             if (!$pedido) {
                 $pedido = Pedido::factory()->create([
@@ -25,7 +24,6 @@ class CarroProductoSeeder extends Seeder
                 ]);
             }
 
-            // Asegurarse de que tenga un carro (1:1 por pedido)
             $carro = $pedido->carro;
             if (!$carro) {
                 $carro = Carro::factory()->create([
@@ -33,7 +31,6 @@ class CarroProductoSeeder extends Seeder
                 ]);
             }
 
-            // Crear al menos un producto del carro
             CarroProducto::factory()->create([
                 'id_carro' => $carro->id_carro,
                 'id_producto' => $productos->random()->id_producto,

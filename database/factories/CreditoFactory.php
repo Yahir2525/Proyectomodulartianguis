@@ -26,7 +26,6 @@ class CreditoFactory extends Factory
 
     public function definition(): array
     {
-        // Obtener un usuario aleatorio, si no hay crear uno
         $userId = User::inRandomOrder()->value('id_user');
         if (!$userId) {
             $user = User::factory()->create();
@@ -42,5 +41,4 @@ class CreditoFactory extends Factory
             'updated_at' => now(),
         ];
     }
-
 }

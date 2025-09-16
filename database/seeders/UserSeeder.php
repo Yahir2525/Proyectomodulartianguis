@@ -23,13 +23,12 @@ class UserSeeder extends Seeder
             return;
         }
 
-        // Aseguramos que exista el rol 'user'
         $rolUser = Role::firstOrCreate(['name' => 'user']);
 
         $rows = array_map('str_getcsv', file($path));
 
         foreach ($rows as $index => $row) {
-            if ($index === 0) continue; // Saltar encabezado
+            if ($index === 0) continue;
 
             $nombre = $row[0] ?? null;
             $email = $row[1] ?? null;
@@ -46,16 +45,12 @@ class UserSeeder extends Seeder
             $nombreImagen    = trim((string)($row[8] ?? ''));
             $nivel = $row[9] ?? 'excelente';
 
-           
-
-
-            // Guarda tal cual en BD (absoluta o relativa)
             $rutaImagen = $nombreImagen !== '' ? $nombreImagen : null;
 
             $user = User::create([
                 'name' => $nombre,
                 'email' => $email,
-                'password' => $hashedPassword, // <- del archivo, hasheada
+                'password' => $hashedPassword,
                 'genero' => $genero,
                 'edad' => $edad,
                 'telefono' => $telefono,
@@ -67,7 +62,6 @@ class UserSeeder extends Seeder
 
             ]);
 
-            // 🔁 A cada usuario le asignamos el rol
             $user->syncRoles($rolUser);
         }
 

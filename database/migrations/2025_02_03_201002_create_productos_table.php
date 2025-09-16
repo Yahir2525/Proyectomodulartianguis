@@ -8,7 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-    // Creación de la tabla Productos
         Schema::create('productos', function (Blueprint $table) {
         $table->id('id_producto');
         $table->string('nombre',40);

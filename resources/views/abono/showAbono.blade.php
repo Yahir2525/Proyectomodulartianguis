@@ -7,129 +7,125 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/abono/showAbono.css') }}">
-    <title>Detalle(s) de Abono</title>
+    <title>Detalles del abono</title>
 </head>
 <body>
-<div class="page-container">
-<main class="content">
-<br><x-barrageneral/>
-<section class="container">
-    <br><hr class="hr-grueso"><center><h1>Detalles del Abono</h1></center><hr class="hr-grueso">
-    <br>
-    <form action="{{ url('/abono/showAbono') }}" method="GET" class="buscar">
-        <label for="buscar">Buscar abono:</label>
-        <input
-            type="text"
-            id="buscar"
-            name="buscar"
-            placeholder="Ej. 21 o Carlitos"
-            list="{{ Auth::user()->can('edit abono') ? 'usuarios' : '' }}"
-            value="{{ request('buscar') }}"
-            autocomplete="off"
-        />
-        @can('edit abono')
-            <datalist id="usuarios">
-                @foreach($usuarios as $usuario)
-                    <option value="{{ $usuario->nombre_usuario }}"></option>
-                @endforeach
-            </datalist>
-        @endcan
-        <input type="submit" value="Buscar"/>
-    </form>
+    <div class="page-container">
+        <main class="content">
+        <br><x-barrageneral/>
+            <section class="container">
+                <br><hr class="hr-grueso"><center><h1>Detalles del abono</h1></center><hr class="hr-grueso"><br>
 
-    @php
-        $listaAbonos = isset($abonos) ? $abonos : (isset($abono) ? collect([$abono]) : collect([]));
-    @endphp
+                <form action="{{ url('/abono/showAbono') }}" method="GET" class="buscar">
+                    <label for="buscar">Buscar abono:</label>
+                    <input
+                        type="text"
+                        id="buscar"
+                        name="buscar"
+                        placeholder="Ej. 21 o Carlitos"
+                        list="{{ Auth::user()->can('edit abono') ? 'usuarios' : '' }}"
+                        value="{{ request('buscar') }}"
+                        autocomplete="off"
+                    />
+                    @can('edit abono')
+                        <datalist id="usuarios">
+                            @foreach($usuarios as $usuario)
+                                <option value="{{ $usuario->nombre_usuario }}"></option>
+                            @endforeach
+                        </datalist>
+                    @endcan
+                    <input type="submit" value="Buscar"/>
+                </form>
 
-    @if($listaAbonos->isEmpty())
-        <p>No se encontraron abonos para mostrar.</p>
-    @else
-        @php
-            // Agrupar por crédito; si no tiene, va al grupo "Sin crédito"
-            $abonosPorCredito = $listaAbonos->groupBy(function($a) {
-                return optional($a->credito)->id_credito ?? 'Sin crédito';
-            });
-        @endphp
+                @php
+                    $listaAbonos = isset($abonos) ? $abonos : (isset($abono) ? collect([$abono]) : collect([]));
+                @endphp
 
-        @foreach($abonosPorCredito as $idCredito => $grupoAbonos)
-            @php
-                $nombreUsuario = optional($grupoAbonos->first()->user)->nombre_usuario ?? 'Usuario desconocido';
-            @endphp
+                @if($listaAbonos->isEmpty())
+                    <p>No se encontraron abonos para mostrar.</p>
+                @else
+                    @php
+                        $abonosPorCredito = $listaAbonos->groupBy(function($a) {
+                            return optional($a->credito)->id_credito ?? 'Sin crédito';
+                        });
+                    @endphp
 
-            @if($idCredito === 'Sin crédito')
-                <h2>Abonos sin crédito @if($nombreUsuario) de {{ $nombreUsuario }} @endif</h2>
-            @else
-                <h2>Abonos del crédito #{{ $idCredito }} @if($nombreUsuario) de {{ $nombreUsuario }} @endif</h2>
-            @endif
+                    @foreach($abonosPorCredito as $idCredito => $grupoAbonos)
+                        @php
+                            $nombreUsuario = optional($grupoAbonos->first()->user)->nombre_usuario ?? 'Usuario desconocido';
+                        @endphp
 
-            
-            <div class="table-responsive table-wrap">
-                    <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>ID del abono</th>
-                            <th>Fecha de creación</th>
-                            <th>Última actualización</th>
-                            <th>Monto</th>
-                            <th>Editar</th>
-                            <th>Eliminar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($grupoAbonos as $abono)
-                            @php
-                                $credito = $abono->credito;
-                                $estaCerrado = $credito && $credito->estado == 0;
-                                $estaVencido = $credito && $credito->fecha_vencimiento && $credito->fecha_vencimiento < now();
-                            @endphp
+                        @if($idCredito === 'Sin crédito')
+                            <h2>Abonos sin crédito @if($nombreUsuario) de {{ $nombreUsuario }} @endif</h2>
+                        @else
+                            <h2>Abonos del crédito #{{ $idCredito }} @if($nombreUsuario) de {{ $nombreUsuario }} @endif</h2>
+                        @endif
 
-                            <tr>
-                                <td data-label="ID">{{ $abono->id_abono }}</td>
-                                <td data-label="Creado">{{ $abono->created_at }}</td>
-                                <td data-label="Actualizado">{{ $abono->updated_at }}</td>
-                                <td data-label="Monto">${{ number_format($abono->monto_abono, 2) }}</td>
+                        <div class="table-responsive table-wrap">
+                                <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>ID del abono</th>
+                                        <th>Fecha de creación</th>
+                                        <th>Última actualización</th>
+                                        <th>Monto</th>
+                                        <th>Editar</th>
+                                        <th>Eliminar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($grupoAbonos as $abono)
+                                        @php
+                                            $credito = $abono->credito;
+                                            $estaCerrado = $credito && $credito->estado == 0;
+                                            $estaVencido = $credito && $credito->fecha_vencimiento && $credito->fecha_vencimiento < now();
+                                        @endphp
 
-                                {{-- Columna Editar --}}
-                                <td data-label="Editar">
-                                    @can('edit abono')
-                                        @if($estaCerrado)
-                                            <span class="badge bg-cerrado">Crédito cerrado</span>
-                                        @else
-                                            <a href="{{ route('abono.edit', $abono->id_abono) }}" class="btn btn-edit">Editar</a>
-                                        @endif
-                                    @endcan
-                                </td>
+                                        <tr>
+                                            <td data-label="ID">{{ $abono->id_abono }}</td>
+                                            <td data-label="Creado">{{ $abono->created_at }}</td>
+                                            <td data-label="Actualizado">{{ $abono->updated_at }}</td>
+                                            <td data-label="Monto">${{ number_format($abono->monto_abono, 2) }}</td>
 
-                                {{-- Columna Eliminar --}}
-                                <td data-label="Eliminar">
-                                    @can('delete abono')
-                                        @if($estaCerrado)
-                                            <span class="badge bg-cerrado">Crédito cerrado</span>
-                                        @elseif($estaVencido)
-                                            <span class="badge bg-vencido">Crédito vencido</span>
-                                        @else
-                                            <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Eliminar</button>
-                                            </form>
-                                        @endif
-                                    @endcan
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endforeach
-    @endif
+                                            <td data-label="Editar">
+                                                @can('edit abono')
+                                                    @if($estaCerrado)
+                                                        <span class="badge bg-cerrado">Crédito cerrado</span>
+                                                    @else
+                                                        <a href="{{ route('abono.edit', $abono->id_abono) }}" class="btn btn-edit">Editar</a>
+                                                    @endif
+                                                @endcan
+                                            </td>
 
-    <br><div class="back-wrap">
-        <a href="{{ route('abono.index') }}" class="btn btn-warning">Volver al listado</a>
+                                            <td data-label="Eliminar">
+                                                @can('delete abono')
+                                                    @if($estaCerrado)
+                                                        <span class="badge bg-cerrado">Crédito cerrado</span>
+                                                    @elseif($estaVencido)
+                                                        <span class="badge bg-vencido">Crédito vencido</span>
+                                                    @else
+                                                        <form action="{{ route('abono.destroy', $abono->id_abono) }}" method="POST" style="display:inline;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                                        </form>
+                                                    @endif
+                                                @endcan
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endforeach
+                @endif
+
+                <br><div class="back-wrap">
+                    <a href="{{ route('abono.index') }}" class="btn btn-warning">Volver al listado</a>
+                </div>
+            </section>
+        </main>
+        <x-footer/>
     </div>
-</section>
-</main>
-<x-footer/>
-</div>
 </body>
 </html>

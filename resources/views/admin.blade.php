@@ -11,42 +11,43 @@
     <title>Página de inicio</title>
 </head>
 <body>
-<div class="page-container">
-<main class="content">
-<br><x-barra></x-barra><br><br>
-    <div class="inicio-container">
-            <center><h1>BLANCOS DOÑA COLCHAS</h1>
-            <p class="frase">¡La mejor calidad y crédito a tu alcance!</p></center>
-            <div class="collage">
-                <figure class="tile wide">
-                    <a href="{{ url('/producto') }}" aria-label="Ver productos: Almohada">
-                        <img src="{{ asset('img/almohada.jpeg') }}" alt="Almohada">
-                    </a>
-                </figure>
-                <figure class="tile square">
-                    <a href="{{ url('/producto') }}" aria-label="Ver productos: Bata">
-                        <img src="{{ asset('img/bata.jpeg') }}" alt="Bata">
-                    </a>
-                </figure>
-                <figure class="tile tall">
-                    <a href="{{ url('/producto') }}" aria-label="Ver productos: Cobertor">
-                        <img src="{{ asset('img/cobertor.jpeg') }}" alt="Cobertor">
-                    </a>
-                </figure>
-                <figure class="tile square">
-                    <a href="{{ url('/producto') }}" aria-label="Ver productos: Colcha">
-                        <img src="{{ asset('img/colcha.jpeg') }}" alt="Colcha">
-                    </a>
-                </figure>
-                <figure class="tile wide">
-                    <a href="{{ url('/producto') }}" aria-label="Ver productos: Cobija">
-                        <img src="{{ asset('img/cobija.jpeg') }}" alt="Cobija">
-                    </a>
-                </figure>
+    <div class="page-container">
+        <main class="content">
+        <br><x-barra></x-barra><br><br>
+            <div class="inicio-container">
+                <center><h1>BLANCOS DOÑA COLCHAS</h1>
+                <p class="frase">¡La mejor calidad y crédito a tu alcance!</p></center>
+            
+                <div class="collage">
+                    <figure class="tile wide">
+                        <a href="{{ url('/producto') }}" aria-label="Ver productos: Almohada">
+                            <img src="{{ asset('img/almohada.jpeg') }}" alt="Almohada">
+                        </a>
+                    </figure>
+                    <figure class="tile square">
+                        <a href="{{ url('/producto') }}" aria-label="Ver productos: Bata">
+                            <img src="{{ asset('img/bata.jpeg') }}" alt="Bata">
+                        </a>
+                    </figure>
+                    <figure class="tile tall">
+                        <a href="{{ url('/producto') }}" aria-label="Ver productos: Cobertor">
+                            <img src="{{ asset('img/cobertor.jpeg') }}" alt="Cobertor">
+                        </a>
+                    </figure>
+                    <figure class="tile square">
+                        <a href="{{ url('/producto') }}" aria-label="Ver productos: Colcha">
+                            <img src="{{ asset('img/colcha.jpeg') }}" alt="Colcha">
+                        </a>
+                    </figure>
+                    <figure class="tile wide">
+                        <a href="{{ url('/producto') }}" aria-label="Ver productos: Cobija">
+                            <img src="{{ asset('img/cobija.jpeg') }}" alt="Cobija">
+                        </a>
+                    </figure>
+                </div>
             </div>
-        </div>
-</main>
-<x-footer/>
-</div>
+        </main>
+        <x-footer/>
+    </div>
 </body>
 </html>

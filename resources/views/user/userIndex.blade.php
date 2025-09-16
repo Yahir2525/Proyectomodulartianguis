@@ -10,118 +10,116 @@
     <title>Principal de usuarios</title>
 </head>
 <body>
-<div class="page-container">
-<main class="content">
-<br><x-barraadmin/>
-<section class="container">
-    <br><hr class="hr-grueso"><center><h1>Listado de usuarios</h1></center><hr class="hr-grueso"><br>
+    <div class="page-container">
+        <main class="content">
+        <br><x-barraadmin/>
+            <section class="container">
+                <br><hr class="hr-grueso"><center><h1>Listado de usuarios</h1></center><hr class="hr-grueso"><br>
 
-    @can('create user')
-        <a class="btn btn-primary" href="{{ url('/user/create') }}">
-        Registrar un nuevo usuario
-        </a>
-    @endcan
+                @can('create user')
+                    <a class="btn btn-primary" href="{{ url('/user/create') }}">
+                    Registrar un nuevo usuario
+                    </a>
+                @endcan
 
-    <!-- 🔎 Buscador -->
-    <form action="{{ url('/user/showUser') }}" method="GET">
-        <label for="buscar">Buscar por ID o nombre de usuario:</label>
-        <input 
-            type="text" 
-            id="buscar" 
-            name="busqueda" 
-            placeholder="Ej. 21 o Pepito" 
-            list="usuarios"
-            value="{{ request('busqueda') }}"
-            autocomplete="off"
-        >
-        <datalist id="usuarios">
-            @foreach ($usuarios as $usuario)
-                <option value="{{ $usuario->nombre_usuario }}"></option>
-            @endforeach
-        </datalist>
-        <input type="submit" value="Buscar">
-    </form>
+                <form action="{{ url('/user/showUser') }}" method="GET">
+                    <label for="buscar">Buscar por ID o nombre de usuario:</label>
+                    <input 
+                        type="text" 
+                        id="buscar" 
+                        name="busqueda" 
+                        placeholder="Ej. 21 o Pepito" 
+                        list="usuarios"
+                        value="{{ request('busqueda') }}"
+                        autocomplete="off"
+                    >
+                    <datalist id="usuarios">
+                        @foreach ($usuarios as $usuario)
+                            <option value="{{ $usuario->nombre_usuario }}"></option>
+                        @endforeach
+                    </datalist>
+                    <input type="submit" value="Buscar">
+                </form>
 
-    @php
-        $administradores = $userIndex->filter(fn($u) => $u->hasRole('administrador'));
-        $usuariosNormales = $userIndex->filter(fn($u) => !$u->hasRole('administrador'));
-
-        // Función auxiliar para clasificar por nivel
-        $niveles = ['excelente', 'bueno', 'malo'];
-    @endphp
-
-    @foreach (['Administradores' => $administradores, 'Usuarios normales' => $usuariosNormales] as $tituloRol => $grupo)
-        @if ($grupo->isNotEmpty())
-            <h2>{{ $tituloRol }}</h2>
-
-            @foreach ($niveles as $nivel)
                 @php
-                    $usuariosNivel = $grupo->filter(fn($u) => strtolower($u->nivel_usuario) === $nivel);
+                    $administradores = $userIndex->filter(fn($u) => $u->hasRole('administrador'));
+                    $usuariosNormales = $userIndex->filter(fn($u) => !$u->hasRole('administrador'));
+
+                    $niveles = ['excelente', 'bueno', 'malo'];
                 @endphp
 
-                @if($usuariosNivel->isNotEmpty())
-                    <h3>Nivel {{ ucfirst($nivel) }}</h3>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Imagen</th>
-                                    <th>Nombre</th>
-                                    <th>Correo</th>
-                                    <th>Usuario</th>
-                                    <th>Teléfono</th>
-                                    <th>Dirección</th>
-                                    <th>Editar</th>
-                                    <th>Eliminar</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($usuariosNivel as $user)
-                                    <tr>
-                                        <td data-label="ID">{{ $user->id_user }}</td>
-                                        <td data-label="Imagen">
-                                            @if (!empty($user->imagen))
-                                                <img src="{{ Storage::disk('s3')->url($user->imagen) }}" alt="Foto de perfil" width="70">
-                                            @else
-                                                <span>Sin imagen</span>
-                                            @endif
-                                        </td>
-                                        <td data-label="Nombre">{{ $user->name }}</td>
-                                        <td data-label="Correo">{{ $user->email }}</td>
-                                        <td data-label="Usuario">{{ $user->nombre_usuario }}</td>
-                                        <td data-label="Teléfono">{{ $user->telefono }}</td>
-                                        <td data-label="Dirección">{{ $user->direccion }}</td>
-                                        <td data-label="Editar">
-                                            @can('edit user')
-                                                <a  class="btn btn-edit" href="{{ route('user.edit', $user->id_user) }}">
-                                                    Editar
-                                                </a>
-                                            @endcan
-                                        </td>
-                                        <td data-label="Eliminar">
-                                            @can('delete user')
-                                                <form action="{{ route('user.destroy', $user->id_user) }}" method="POST" onsubmit="return confirm('¿Eliminar usuario?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">
-                                                    Eliminar
-                                                    </button>
-                                                </form>
-                                            @endcan
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
-            @endforeach
-        @endif
-    @endforeach
-</section>
-</main>
-<x-footer/>
-</div>
+                @foreach (['Administradores' => $administradores, 'Usuarios normales' => $usuariosNormales] as $tituloRol => $grupo)
+                    @if ($grupo->isNotEmpty())
+                        <h2>{{ $tituloRol }}</h2>
+
+                        @foreach ($niveles as $nivel)
+                            @php
+                                $usuariosNivel = $grupo->filter(fn($u) => strtolower($u->nivel_usuario) === $nivel);
+                            @endphp
+
+                            @if($usuariosNivel->isNotEmpty())
+                                <h3>Nivel {{ ucfirst($nivel) }}</h3>
+                                <div class="table-wrap">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Imagen</th>
+                                                <th>Nombre</th>
+                                                <th>Correo</th>
+                                                <th>Usuario</th>
+                                                <th>Teléfono</th>
+                                                <th>Dirección</th>
+                                                <th>Editar</th>
+                                                <th>Eliminar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($usuariosNivel as $user)
+                                                <tr>
+                                                    <td data-label="ID">{{ $user->id_user }}</td>
+                                                    <td data-label="Imagen">
+                                                        @if (!empty($user->imagen))
+                                                            <img src="{{ Storage::disk('s3')->url($user->imagen) }}" alt="Foto de perfil" width="70">
+                                                        @else
+                                                            <span>Sin imagen</span>
+                                                        @endif
+                                                    </td>
+                                                    <td data-label="Nombre">{{ $user->name }}</td>
+                                                    <td data-label="Correo">{{ $user->email }}</td>
+                                                    <td data-label="Usuario">{{ $user->nombre_usuario }}</td>
+                                                    <td data-label="Teléfono">{{ $user->telefono }}</td>
+                                                    <td data-label="Dirección">{{ $user->direccion }}</td>
+                                                    <td data-label="Editar">
+                                                        @can('edit user')
+                                                            <a  class="btn btn-edit" href="{{ route('user.edit', $user->id_user) }}">
+                                                                Editar
+                                                            </a>
+                                                        @endcan
+                                                    </td>
+                                                    <td data-label="Eliminar">
+                                                        @can('delete user')
+                                                            <form action="{{ route('user.destroy', $user->id_user) }}" method="POST" onsubmit="return confirm('¿Eliminar usuario?');">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-danger">
+                                                                Eliminar
+                                                                </button>
+                                                            </form>
+                                                        @endcan
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+                        @endforeach
+                    @endif
+                @endforeach
+            </section>
+        </main>
+        <x-footer/>
+    </div>
 </body>
 </html>

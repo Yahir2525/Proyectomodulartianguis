@@ -21,13 +21,14 @@ class CreditoController extends Controller
         if ($user->hasRole('administrador')) {
             $creditoIndex = Credito::all();
         } else {
-            $creditoIndex = Credito::where('id_user', $user->id_user)->get(); // solo los del usuario
+            $creditoIndex = Credito::where('id_user', $user->id_user)->get();
         }
 
         $usuarios = $user->hasRole('administrador') ? User::all() : collect();
 
         return view('credito/creditoIndex', compact('creditoIndex', 'usuarios'));
     }
+
     public function create()
     {
         $usuarios = User::all();
@@ -49,6 +50,12 @@ class CreditoController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'id_user' => 'nullable|exists:users,id_user',
+        ], [
+            'id_user.exists' => 'El usuario seleccionado no existe.',
+        ]);
+
         $userId = $request->input('id_user') ?? Auth::id();
 
         $creditosActivos = Credito::where('id_user', $userId)
@@ -69,12 +76,10 @@ class CreditoController extends Controller
             ]);
         }
 
-        
         $user = User::find($userId);
         $diasAplazo = $user ? $user->dias_aplazo : 0;
 
         $fechaVencimiento = now()->addDays($diasAplazo)->addMinutes(5);
-
 
         $credito = new Credito();
         $credito->id_user = $userId;
@@ -147,7 +152,6 @@ class CreditoController extends Controller
         return redirect('/credito')->with('success', 'Crédito registrado correctamente.');
     }
 
-
     public function show(Request $request)
     {
         $busqueda = $request->input('buscar');
@@ -158,15 +162,12 @@ class CreditoController extends Controller
             >with('info', 'Se mostró la lista completa porque no ingresaste ningún criterio de búsqueda.');
         }
 
-        // ===== 🔍 Búsqueda por ID parcial =====
         if (is_numeric($busqueda)) {
             if ($user->hasRole('administrador')) {
-                // Admin puede buscar créditos cuyo ID contenga el valor
                 $creditos = Credito::with('user')
                     ->where('id_credito', 'LIKE', "%{$busqueda}%")
                     ->get();
             } else {
-                // Usuario normal solo puede buscar entre sus propios créditos
                 $creditos = Credito::with('user')
                     ->where('id_credito', 'LIKE', "%{$busqueda}%")
                     ->where('id_user', $user->id_user)
@@ -180,7 +181,6 @@ class CreditoController extends Controller
             return view('credito.showCredito', compact('creditos', 'usuarios'));
         }
 
-        // ===== 🔍 Búsqueda por nombre de usuario (solo admin) =====
         if ($user->hasRole('administrador')) {
             $usuarios = User::where('nombre_usuario', 'ILIKE', "%{$busqueda}%")->get();
 
@@ -201,7 +201,6 @@ class CreditoController extends Controller
             return view('credito.showCredito', compact('creditos', 'usuarios'));
         }
 
-        // Usuario no admin intenta buscar por nombre (no permitido)
         return back()->with('error', 'Solo puedes buscar tus créditos por ID.');
     }
 
@@ -251,19 +250,15 @@ class CreditoController extends Controller
             return redirect()->route('credito.index')->with('error', 'El crédito no se puede eliminar porque está cerrado y tiene un historial.');
         }
 
-        // Desvincular pedidos antes de eliminar el crédito
         Pedido::where('id_credito', $id)->update([
             'id_credito' => null,
             'metodo_pago' => 'contado',
         ]);
 
-        // Eliminar abonos relacionados
         Abono::where('id_credito', $id)->delete();
 
-        // Eliminar el crédito
         $credito->delete();
 
         return redirect()->route('credito.index')->with('success', 'El crédito se ha eliminado con éxito.');
     }
-
 }

@@ -1,23 +1,14 @@
-/* ==== CARRO CREATE (con centrado en responsive y tarjetas con data-label) ==== */
-
-/* Reset & tipografía */
 * { box-sizing: border-box; }
 html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
+body { margin: 0; color: #222; background: linear-gradient(135deg, #c8eedd 0%, #e0f7ec 100%); min-height: 100vh; }
 
-/* Layout */
-section { 
-  max-width: 1200px; 
-  margin: 0 auto; 
-  padding: 16px; 
-}
+section { max-width: 1200px; margin: 0 auto; padding: 16px; }
 h1 { margin: 0 0 12px; font-size: clamp(1.3rem, 1rem + 1vw, 1.8rem); text-align: center; }
 h3 { margin-top: 24px; font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem); }
 a { color: #2563eb; text-decoration: none; }
 a:hover { text-decoration: underline; }
 hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
 
-/* --- Botones --- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -40,14 +31,13 @@ hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
 .btn-danger    { background:#ef4444; border-color:#ef4444; color:#fff; }
 .btn-gray      { background:#6b7280; border-color:#6b7280; color:#fff; }
 
-/* --- Formulario búsqueda --- */
 .buscar {
   display: grid;
   grid-template-columns: max-content minmax(160px, 220px) max-content; 
   gap: 6px;
   align-items: center;
   margin: 12px 0 18px;
-  justify-content: left; /* 🔹 centra en desktop */
+  justify-content: left;
 }
 .buscar label {
   margin: 0;
@@ -83,13 +73,12 @@ hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
   width: auto;
 }
 
-/* ==== FILTROS ==== */
 .filtros {
   display: flex;
   flex-wrap: wrap;
   gap: 12px 18px;
   align-items: center;
-  justify-content: center; /* 🔹 centrado */
+  justify-content: center;
   margin: 20px 0;
 }
 .filtros label { font-weight: 600; margin-right: 6px; }
@@ -109,13 +98,12 @@ hr.hr-grueso { height: 1px; border: none; background: #000; margin: 12px 0; }
   outline: none;
 }
 
-/* =================== TABLA =================== */
 .table-wrap { 
   width: 100%; 
   overflow-x: auto; 
   -webkit-overflow-scrolling: touch;
   display: flex;
-  justify-content: center; /* 🔹 centra la tabla dentro del scroll */
+  justify-content: center;
 }
 table {
   width: 100%;
@@ -137,14 +125,12 @@ thead th { background:#ffffff; }
 tbody tr:nth-child(odd) { background: #ffffff; }
 tbody tr:hover { background: #f2f7ff; }
 
-/* Imagen */
 td img {
   max-width: 120px;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0,0,0,.15);
 }
 
-/* =================== RESPONSIVE =================== */
 @media (max-width: 992px) {
   html { font-size: 15px; }
   section { padding: 12px; }
@@ -166,7 +152,6 @@ td img {
   .filtros { flex-direction: column; align-items: stretch; }
   .filtros > div { width: 100%; }
 
-  /* Tabla → tarjetas con data-label */
   table, thead, tbody, th, tr { display: block; }
   thead { display: none; }
   tbody tr {
@@ -189,12 +174,11 @@ td img {
   }
   td:first-child { border-top: none; }
   td::before {
-    content: attr(data-label);  /* 🔹 usa data-label en el <td> */
+    content: attr(data-label);
     font-weight: 600;
     min-width: 120px;
   }
 
-  /* Botones a ancho completo en móvil */
   td .btn, td form, td input[type="submit"], td button {
     width: 100%;
     margin: 6px 0;
@@ -221,7 +205,6 @@ td img {
   outline: none;
 }
 
-/* Cantidad */
 .cant-input {
   min-width: 40px;
   max-width: 70px;

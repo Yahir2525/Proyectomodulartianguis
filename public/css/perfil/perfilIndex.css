@@ -1,7 +1,5 @@
-/* ======== PERFIL ESTILO ELEGANTE ======== */
-body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
+body { margin: 0; color: #222; background: linear-gradient(135deg, #feceed 0%, #fff0f8 100%); min-height: 100vh; }
 
-/* ======== CARD PRINCIPAL ======== */
 .profile-card {
     max-width: 700px;
     margin: 3rem auto;
@@ -12,7 +10,6 @@ body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
     text-align: center;
 }
 
-/* ======== AVATAR ======== */
 .profile-avatar {
     margin-bottom: 2rem;
 }
@@ -34,7 +31,6 @@ body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
     margin: 0 auto;
 }
 
-/* ======== NOMBRE Y ROL ======== */
 .profile-name {
     font-size: 1.8rem;
     font-weight: 700;
@@ -48,7 +44,6 @@ body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
     margin-bottom: 2.5rem;
 }
 
-/* ======== GRID INFORMACIÓN ======== */
 .profile-info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -64,7 +59,6 @@ body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
     box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
 }
 
-/* Títulos con iconos */
 .profile-info-grid h6 {
     font-size: 0.9rem;
     font-weight: 600;
@@ -82,7 +76,6 @@ body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
     font-size: 1rem;
 }
 
-/* Valores */
 .profile-info-grid span {
     font-size: 1.05rem;
     font-weight: 500;
@@ -92,7 +85,6 @@ body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
     line-height: 1.5;
 }
 
-/* ======== BOTÓN EDITAR ======== */
 .btn-edit-profile {
     display: inline-block;
     background: #7c3aed;
@@ -110,7 +102,6 @@ body { margin: 0; color: #222; background: #86c1ff; min-height: 100vh; }
     color: #fff;
 }
 
-/* ======== RESPONSIVE ======== */
 @media (max-width: 576px) {
     .profile-card {
         padding: 2rem 1rem;
