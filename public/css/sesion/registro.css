@@ -1,0 +1,86 @@
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+body { margin: 0; color: #222; background: linear-gradient(135deg, #7ec8f7 0%, #a8ddff 50%, #e6f7ff 100%); min-height: 100vh; }
+
+.hero.is-fullheight { min-height: 100dvh; }
+
+.registro-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  padding: clamp(1rem, 2vw, 2rem);
+  width: 100%;
+  max-width: 480px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.title { 
+  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
+  font-weight: 600;
+}
+.subtitle { 
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.15rem);
+  color: #6b7280;
+}
+
+.form-control { 
+  min-height: 44px; 
+  border-radius: 8px; 
+  border: 1px solid #d1d5db;
+  padding: 10px 12px;
+}
+
+.btn-lg {
+  min-height: 44px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.btn-info, .button.is-info { 
+  background: #2563eb; 
+  border-color: #2563eb; 
+  color: #fff; 
+}
+.btn-info:hover, .button.is-info:hover { 
+  background: #6a8dff; 
+  border-color: #6a8dff; 
+  color: #fff;
+}
+
+.btn-primary, .button.is-primary { 
+  background: #16a34a; 
+  border-color: #16a34a; 
+  color: #fff; 
+}
+.btn-primary:hover, .button.is-primary:hover { 
+  background: #3cc16d; 
+  border-color: #3cc16d; 
+}
+.btn-success { background: #16a34a; border-color: #16a34a; color: #fff; }
+.btn-success:hover { background: #3cc16d; border-color: #3cc16d; color: #fff; }
+.btn-secondary { background: #2563eb; border-color: #2563eb; color: #fff; }
+.btn-secondary:hover { background: #6a8dff; border-color: #6a8dff; color: #fff; }
+
+.registro-links a {
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+}
+.registro-links a:hover { text-decoration: underline; }
+
+@media (max-width: 768px) {
+  .registro-card { padding: 1rem; }
+  .field + .field { margin-top: 0.75rem; }
+}
+@media (max-width: 420px) {
+  .registro-card { margin: 0 8px; }
+  .registro-links a {
+    display: inline-block;
+    padding: 6px 8px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

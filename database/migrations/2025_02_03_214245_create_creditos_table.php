@@ -1,0 +1,42 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('creditos', function (Blueprint $table) {
+            $table->id('id_credito');
+            $table->unsignedBigInteger('id_user')->nullable();
+            $table->decimal('saldo_total')->nullable();
+            $table->dateTime('fecha_liquidacion')->nullable();
+            $table->dateTime('fecha_vencimiento');
+            $table->boolean('estado');
+            $table->timestamps();
+
+
+            $table->foreign('id_user')
+            ->references('id_user')
+            ->on('users')
+            ->onDelete('cascade');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    // public function down(): void
+    // {
+    //     Schema::dropIfExists('creditos');
+        
+    // }
+
+    public function down(): void {
+        Schema::table('creditos', function (Blueprint $table) {
+            $table->dropColumn('total_abonado');
+        });
+    }
+};

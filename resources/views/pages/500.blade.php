@@ -19,10 +19,10 @@
                             <div class="col-lg-6">
                                 <div class="text-center mt-4">
                                     <h1 class="display-1">500</h1>
-                                    <p class="lead">Internal Server Error</p>
+                                    <p class="lead">Error Interno del Servidor</p>
                                     <a href="index.html">
                                         <i class="fas fa-arrow-left me-1"></i>
-                                        Return to Dashboard
+                                        Regresar al inicio
                                     </a>
                                 </div>
                             </div>
@@ -34,11 +34,11 @@
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
                         <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                            <div class="text-muted">Derechos Reservados &copy; Blancos Doña Colchas</div>
                             <div>
-                                <a href="#">Privacy Policy</a>
+                                <!-- <a href="#">Privacy Policy</a>
                                 &middot;
-                                <a href="#">Terms &amp; Conditions</a>
+                                <a href="#">Terms &amp; Conditions</a> -->
                             </div>
                         </div>
                     </div>

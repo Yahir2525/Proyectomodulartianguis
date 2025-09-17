@@ -5,6 +5,15 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\Abono;
+use App\Models\Cliente;
+use App\Models\Compra;
+use App\Models\Credito;
+use App\Models\Pedido;
+use App\Models\Producto;
+use App\Models\DetallePedido;
+use App\Models\Vendedor;
+use App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -14,7 +23,7 @@ class UserFactory extends Factory
     /**
      * The current password being used by the factory.
      */
-    protected static ?string $password;
+    // protected static ?string $password;
 
     /**
      * Define the model's default state.
@@ -23,22 +32,27 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ];
-    }
+    //     return [
+    //         'name' => fake()->name(),
+    //         'email' => fake()->unique()->safeEmail(),
+    //         'email_verified_at' => now(),
+    //         'password' => static::$password ??= Hash::make('password'),
+    //         'remember_token' => Str::random(10),
+    //         'genero' => $this->faker->randomElement(['M', 'F', 'O']),
+    //         'edad' => $this->faker->numberBetween(18, 120),
+    //         'telefono' => $this->faker->numerify('##########'),
+    //         'direccion' => $this->faker->address(),
+    //         'nombre_usuario' => $this->faker->unique()->userName(),
+    //     ];
+    // }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+    // /**
+    //  * Indicate that the model's email address should be unverified.
+    //  */
+    // public function unverified(): static
+    // {
+    //     return $this->state(fn (array $attributes) => [
+    //         'email_verified_at' => null,
+    //     ]);
     }
 }

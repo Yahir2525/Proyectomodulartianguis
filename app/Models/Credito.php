@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
+class Credito extends Model
+{
+    use HasFactory;
+
+    protected $guarded = [];
+    
+    protected $table = 'creditos';
+    protected $primaryKey = 'id_credito';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
+
+    protected $casts = [
+    'fecha_vencimiento' => 'datetime',
+    'fecha_liquidacion' => 'datetime',
+    ];
+
+
+        public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_user', 'id_user');
+    }
+        public function abonos(): HasMany
+    {
+        return $this->hasMany(Abono::class, 'id_credito', 'id_credito');
+    }
+        public function pedido(): HasMany
+    {
+        return $this->hasMany(Pedido::class, 'id_credito', 'id_credito');
+    }
+
+}

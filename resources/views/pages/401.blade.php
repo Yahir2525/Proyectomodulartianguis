@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>404 Error - SB Admin</title>
+        <title>404 Error</title>
         <link href="{{asset('css/template.css')}}" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     </head>
@@ -18,12 +18,12 @@
                         <div class="row justify-content-center">
                             <div class="col-lg-6">
                                 <div class="text-center mt-4">
-                                    <h1 class="display-1">401</h1>
-                                    <p class="lead">Unauthorized</p>
-                                    <p>Access to this resource is denied.</p>
+                                    <img class="mb-4 img-error" src="{{asset('assets/img/401error.jpeg')}}" />
+                                    <!-- <h1 class="display-1">401</h1> -->
+                                    <p class="lead">Acceso no autorizado</p>
                                     <a href="index.html">
                                         <i class="fas fa-arrow-left me-1"></i>
-                                        Return to Dashboard
+                                        Regresar al inicio
                                     </a>
                                 </div>
                             </div>
@@ -35,11 +35,11 @@
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
                         <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                            <div class="text-muted">Derechos Reservados &copy; Blancos Doña Colchas</div>
                             <div>
-                                <a href="#">Privacy Policy</a>
+                                <!-- <a href="#">Privacy Policy</a>
                                 &middot;
-                                <a href="#">Terms &amp; Conditions</a>
+                                <a href="#">Terms &amp; Conditions</a> -->
                             </div>
                         </div>
                     </div>

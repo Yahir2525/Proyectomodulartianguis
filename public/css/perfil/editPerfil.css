@@ -1,0 +1,128 @@
+body { margin: 0; color: #222; background: linear-gradient(135deg, #feceed 0%, #fff0f8 100%); min-height: 100vh; }
+
+.profile-edit-card {
+    border-radius: 16px;
+    background: #ffffff;
+    overflow: hidden;
+    max-width: 700px;
+    margin: 40px auto;
+}
+
+.profile-edit-header {
+    text-align: center;
+    padding: 2rem 1rem 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-edit-header h2 {
+    font-weight: 700;
+    color: #222;
+}
+
+.profile-edit-header .subtitle {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.profile-edit-body {
+    padding: 2rem 2.5rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2563eb;
+    margin: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.input-group-text {
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    color: #555;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    padding: 10px 12px;
+}
+
+.form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+.form-check-label i {
+    margin-right: 6px;
+    color: #2563eb;
+}
+
+.form-check-input:checked {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.btn-save {
+    background: #2563eb;
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 6px;
+    font-weight: 600;
+    border: none;
+    margin-top: 15px;
+    transition: background 0.2s ease;
+}
+
+.btn-save:hover {
+    background: #1e4fd9;
+}
+
+.btn-cancel {
+    background: #dc2626;
+    color: #fff;
+    padding: 12px 28px;
+    margin-top: 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    transition: background 0.2s ease;
+    display: inline-block;
+}
+
+.btn-cancel:hover {
+    background: #b91c1c;
+}
+
+a.btn.btn-secondary{
+  background:#6b7280; border-color:#6b7280; color:#fff; padding: 10px 14px; justify-content:center; border-radius: 6px; font-weight: bold;
+}
+
+@media (max-width: 576px) {
+    .profile-edit-body {
+        padding: 1.5rem;
+    }
+    .form-control {
+        font-size: 0.9rem;
+    }
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 0.2rem;
+}
+
+.page-title i {
+    color: #2563eb;
+    margin-right: 8px;
+}
+
+.text-justify {
+  text-align: justify;
+  color: black;
+}

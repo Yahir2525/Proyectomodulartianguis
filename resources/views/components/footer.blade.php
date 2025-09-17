@@ -1,0 +1,121 @@
+<footer class="footer">
+    <div class="footer-container">
+
+        <div class="footer-brand text-black d-flex align-items-center">
+            <img src="{{ asset('img/blanco.ico') }}" 
+                alt="Logo Blancos Doña Colchas" 
+                width="40" 
+                class="rounded-circle me-2">
+            <div>
+                <h4 class="mb-0">Blancos Doña Colchas</h4>
+                <p class="parrafo mb-0">© {{ date('Y') }} Todos los derechos reservados</p>
+            </div>
+        </div>
+
+
+        <div class="footer-contact">
+        <h5>Contacto</h5>
+        <p class="parrafo"><i class="fa-solid fa-location-dot"></i> Calle Ejemplo 123, Ciudad</p>
+        <p class="parrafo"><i class="fa-solid fa-phone"></i> +52 123 456 7890</p>
+        <p class="parrafo"><i class="fa-solid fa-envelope"></i> contacto@misitio.com</p>
+        </div>
+
+        <div class="footer-social">
+        <h5>Síguenos</h5>
+        <a href="/"><i class="fa-brands fa-facebook"></i></a>
+        <a href="/"><i class="fa-brands fa-instagram"></i></a>
+        </div>
+
+    </div>
+</footer>
+
+<style>
+.footer {
+background: transparent;
+padding: 30px 15px;
+margin-top: 40px;
+font-size: 0.9rem;
+width: 100%;
+
+}
+
+.footer-container {
+max-width: 1200px;
+margin: 0 auto;
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+gap: 20px;
+text-align: center;
+justify-items: center;
+}
+
+.footer-brand h4 {
+margin: 0;
+font-size: 1.2rem;
+font-weight: 700;
+justify-content: center;
+}
+
+.footer-brand p,
+.footer-contact p,
+.parrafo {
+margin: 4px 0;
+font-size: 0.9rem;
+color: #000;
+}
+
+.footer-links h5,
+.footer-contact h5,
+.footer-social h5 {
+font-size: 1rem;
+margin-bottom: 10px;
+font-weight: 600;
+color: #222;
+}
+
+.footer-links ul {
+list-style: none;
+padding: 0;
+margin: 0;
+}
+
+.footer-links ul li {
+margin: 6px 0;
+}
+
+.footer-links a {
+text-decoration: none;
+color: #222;
+transition: color 0.3s;
+}
+
+.footer-links a:hover {
+color: #000000ff;
+}
+
+.footer-contact i {
+margin-right: 6px;
+color: #000000ff;
+}
+
+.footer-social a {
+margin: 0 8px 0 0;
+font-size: 1.3rem;
+color: #000000ff;
+transition: color 0.3s;
+}
+
+.footer-social a:hover {
+color: #000000ff;
+}
+
+@media (max-width: 640px) {
+.footer-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+}
+.footer-social a {
+    margin: 0 5px;
+}
+}
+</style>
