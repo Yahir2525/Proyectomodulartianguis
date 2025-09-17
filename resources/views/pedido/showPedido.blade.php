@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/pedido/showPedido.css') }}">
+    <link rel="icon" href="{{ asset('img/blanco.ico') }}" type="image/x-icon">
     <title>Detalles del pedido</title>
 </head>
 <body>
@@ -117,7 +118,6 @@
                                     <thead>
                                         <tr>
                                             <th>ID Pedido</th>
-                                            <th>Crédito</th>
                                             <th>Total</th>
                                             <th>Creado</th>
                                             <th>Actualizado</th>
@@ -144,7 +144,6 @@
                                             @endphp
                                             <tr>
                                                 <td data-label="ID">{{ $pedido->id_pedido }}</td>
-                                                <td data-label="Crédito">{{ $pedido->id_credito ?? 'N/A' }}</td>
                                                 <td data-label="Total">${{ number_format($totalPedido, 2) }}</td>
                                                 <td data-label="Creado">{{ $pedido->created_at }}</td>
                                                 <td data-label="Actualizado">{{ $pedido->updated_at }}</td>
@@ -209,7 +208,7 @@
                                                                         @if($puedeCrearCredito)
                                                                             <option value="" {{ $pedido->id_credito === null ? 'selected' : '' }}>-- Nuevo crédito --</option>
                                                                         @endif
-                                                                        @foreach($creditosActivos as $credito)
+                                                                        @foreach($creditosActivos->filter(fn($c) => $c->estado == 1 && $c->fecha_vencimiento >= now()) as $credito)
                                                                             <option value="{{ $credito->id_credito }}" {{ $pedido->id_credito == $credito->id_credito ? 'selected' : '' }}>
                                                                                 Crédito #{{ $credito->id_credito }} - Saldo: ${{ number_format($credito->saldo_total, 2) }}
                                                                             </option>
@@ -232,7 +231,7 @@
                                                     @endif
                                                 </td>
 
-                                                @if($hayCerrados && Auth::user()->can('edit pedido'))
+                                                @if($hayCerrados && Auth::user()->can('edit producto'))
                                                     <td data-label="Reabrir">
                                                         @if($pedido->estado_pedido == 0)
                                                             @php

@@ -1,5 +1,11 @@
 <nav class="navbar navbar-expand-lg navbar-dark px-3">
-    <a class="navbar-brand fw-semibold" href="/">Blancos Doña Colchas</a>    
+    <a class="navbar-brand fw-semibold d-flex align-items-center" href="/">
+        <img src="{{ asset('img/blanco.ico') }}" 
+            alt="Logo Blancos Doña Colchas" 
+            width="30" 
+            class="rounded-circle me-2">
+        Blancos Doña Colchas
+    </a>    
     <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav mx-auto align-items-lg-center">
                 <li class="nav-item"><a class="nav-link btn-chip" href="/">Inicio</a></li>

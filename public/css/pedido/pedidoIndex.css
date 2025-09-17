@@ -7,7 +7,7 @@ h2 { margin-top: 24px; font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem); }
 h3 { margin-top: 16px; font-size: 1rem; }
 
 .container, .pedidos-container {
-  max-width: 1100px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 14px;
 }

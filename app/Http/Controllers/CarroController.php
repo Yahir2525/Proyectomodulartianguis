@@ -149,7 +149,6 @@ class CarroController extends Controller
             'id_user'     => 'required|exists:users,id_user',
             'id_producto' => 'required|exists:productos,id_producto',
             'cantidad'    => 'required|integer|min:1',
-            'id_pedido'   => 'required|exists:pedidos,id_pedido',
             
         ], [
             'id_user.required'     => 'El usuario es obligatorio.',
@@ -162,8 +161,6 @@ class CarroController extends Controller
             'cantidad.integer'     => 'La cantidad debe ser un número entero.',
             'cantidad.min'         => 'La cantidad debe ser al menos 1.',
             
-            'id_pedido.required'     => 'El pedido es obligatorio.',
-            'id_pedido.exists'     => 'El pedido seleccionado no existe.',
         ]);
         
         $userId = $request->input('id_user');
@@ -266,17 +263,6 @@ class CarroController extends Controller
 
     public function agregarMultiples(Request $request)
     {
-        $request->validate([
-            'id_user'               => 'required|exists:users,id_user',
-            'id_pedido'             => 'required|exists:pedidos,id_pedido',
-        ], [
-            'id_user.required'        => 'El usuario es obligatorio.',
-            'id_user.exists'          => 'El usuario seleccionado no existe.',
-            
-            'id_pedido.required'     => 'El pedido es obligatorio.',
-            'id_pedido.exists'        => 'El pedido seleccionado no existe.',
-            
-        ]);
 
         $userId     = $request->input('id_user');
         $idPedido   = $request->input('id_pedido');
@@ -543,7 +529,6 @@ class CarroController extends Controller
         $request->validate([
             'id_producto' => 'required|exists:productos,id_producto',
             'cantidad'    => 'required|integer|min:1',
-            'id_pedido'   => 'required|exists:pedidos,id_pedido',
         ], [
             'id_producto.required' => 'El producto es obligatorio.',
             'id_producto.exists'   => 'El producto seleccionado no existe.',
@@ -552,8 +537,6 @@ class CarroController extends Controller
             'cantidad.integer'     => 'La cantidad debe ser un número entero.',
             'cantidad.min'         => 'La cantidad debe ser al menos 1.',
 
-            'id_pedido.required' => 'El pedido es obligatorio.',
-            'id_pedido.exists'     => 'El pedido seleccionado no existe.',
         ]);
 
         $nuevoIdProducto = $request->input('id_producto');

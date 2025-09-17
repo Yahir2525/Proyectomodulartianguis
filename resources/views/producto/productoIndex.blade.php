@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/producto/productoIndex.css') }}">
+    <link rel="icon" href="{{ asset('img/blanco.ico') }}" type="image/x-icon">
     <title>Menú de productos</title>
     @php use App\Models\CarroProducto; @endphp
 </head>
@@ -29,7 +30,7 @@
 
                     <form id="form-filtros" action="{{ url('/producto') }}" method="GET">
                         <div class="buscar">
-                            <label for="buscar">Buscar por ID o por nombre:</label>
+                            <label for="buscar">Buscar producto:</label>
                             <input list="productos" id="buscar" name="buscar"
                                 placeholder="Ej. 21 o Cortina de baño"
                                 value="{{ request('buscar') }}">

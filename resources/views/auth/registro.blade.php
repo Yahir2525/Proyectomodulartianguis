@@ -7,6 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="{{ asset('css/sesion/registro.css') }}">
+  <link rel="icon" href="{{ asset('img/blanco.ico') }}" type="image/x-icon">
   <title>Registro de Usuario</title>
 </head>
 <body>
@@ -35,25 +36,21 @@
                         <form action="{{ route('registro.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
-                            <!-- Nombre -->
                             <div class="field mb-3 text-start fw-bold">
                             <label class="label">Nombre Completo</label>
                             <input type="text" name="name" class="form-control" required value="{{ old('name') }}">
                             </div>
 
-                            <!-- Nombre usuario -->
                             <div class="field mb-3 text-start fw-bold">
                             <label class="label">Nombre de usuario</label>
                             <input type="text" name="nombre_usuario" class="form-control" required value="{{ old('nombre_usuario') }}">
                             </div>
 
-                            <!-- Email -->
                             <div class="field mb-3 text-start fw-bold">
                             <label class="label">Correo Electrónico</label>
                             <input type="email" name="email" class="form-control" required value="{{ old('email') }}">
                             </div>
 
-                            <!-- Contraseña -->
                             <div class="field mb-3 text-start fw-bold">
                             <label class="label">Contraseña</label>
                             <input type="password" id="password" name="password" class="form-control" required>
@@ -66,7 +63,6 @@
                             </ul>
                             </div>
 
-                            <!-- Confirmar -->
                             <div class="field mb-4 text-start fw-bold">
                             <label class="label">Confirmar Contraseña</label>
                             <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>

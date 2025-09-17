@@ -7,7 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/producto/showIndex.css') }}">
-    <title>Detalle del Producto</title>
+    <link rel="icon" href="{{ asset('img/blanco.ico') }}" type="image/x-icon">
+    <title>Detalles del Producto</title>
     @php use App\Models\CarroProducto; @endphp
 </head>
 <body class="producto-index">

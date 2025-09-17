@@ -180,7 +180,7 @@ class ProductoController extends Controller
             $filename    = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
             $relative    = 'img/' . $filename;
 
-            if (!empty($user->imagen)) {
+            if (!empty($producto->imagen)) {
                 if (config('filesystems.default') === 's3') {
                     try { Storage::disk('s3')->delete($producto->imagen); } catch (\Throwable $e) {}
                 } else {

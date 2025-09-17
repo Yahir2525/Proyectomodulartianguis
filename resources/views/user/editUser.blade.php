@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/user/editUser.css') }}">
+    <link rel="icon" href="{{ asset('img/blanco.ico') }}" type="image/x-icon">
     <title>Editar usuario</title>
 </head>
 <body>
@@ -110,7 +111,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label">Nueva contraseña</label>
                                     <input type="password" id="password" class="form-control" name="password">
-                                    <ul class="form-text mt-2 ps-3" style="font-size: 0.9rem; color: blue;">
+                                    <ul class="form-text mt-2 ps-3 fw-bold" style="font-size: 0.9rem; color: blue;">
                                         <li>Mínimo 8 y máximo 20 caracteres</li>
                                         <li>Al menos una letra minúscula (a-z)</li>
                                         <li>Al menos una letra mayúscula (A-Z)</li>

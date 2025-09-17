@@ -8,16 +8,24 @@
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/dashboard/admin.css') }}">
-    <title>Página de inicio</title>
+    <link rel="icon" href="{{ asset('img/blanco.ico') }}" type="image/x-icon">
+    <title>Inicio</title>
 </head>
 <body>
     <div class="page-container">
         <main class="content">
-        <br><x-barra></x-barra><br><br>
-            <div class="inicio-container">
-                <center><h1>BLANCOS DOÑA COLCHAS</h1>
-                <p class="frase">¡La mejor calidad y crédito a tu alcance!</p></center>
-            
+            <br><x-barra></x-barra><br>
+
+            <section class="inicio-container text-center">
+                <div class="logo-text-container">
+                    <img src="{{ asset('img/blanco.ico') }}" 
+                        alt="Logo Blancos Doña Colchas" 
+                        width="220" 
+                        class="rounded-circle logo-difuminado">
+
+                    <p class="frase fw-bold">¡La mejor calidad y crédito a tu alcance!</p>
+                </div>
+
                 <div class="collage">
                     <figure class="tile wide">
                         <a href="{{ url('/producto') }}" aria-label="Ver productos: Almohada">
@@ -45,8 +53,9 @@
                         </a>
                     </figure>
                 </div>
-            </div>
+            </section>
         </main>
+
         <x-footer/>
     </div>
 </body>

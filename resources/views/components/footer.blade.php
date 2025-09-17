@@ -1,10 +1,17 @@
 <footer class="footer">
     <div class="footer-container">
 
-        <div class="footer-brand text-black">
-        <h4>Blancos Doña Colchas</h4>
-        <p class="parrafo">© {{ date('Y') }} Todos los derechos reservados</p>
+        <div class="footer-brand text-black d-flex align-items-center">
+            <img src="{{ asset('img/blanco.ico') }}" 
+                alt="Logo Blancos Doña Colchas" 
+                width="40" 
+                class="rounded-circle me-2">
+            <div>
+                <h4 class="mb-0">Blancos Doña Colchas</h4>
+                <p class="parrafo mb-0">© {{ date('Y') }} Todos los derechos reservados</p>
+            </div>
         </div>
+
 
         <div class="footer-contact">
         <h5>Contacto</h5>
@@ -15,8 +22,8 @@
 
         <div class="footer-social">
         <h5>Síguenos</h5>
-        <a href="#"><i class="fa-brands fa-facebook"></i></a>
-        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+        <a href="/"><i class="fa-brands fa-facebook"></i></a>
+        <a href="/"><i class="fa-brands fa-instagram"></i></a>
         </div>
 
     </div>

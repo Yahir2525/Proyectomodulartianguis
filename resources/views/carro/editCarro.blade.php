@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/carro/editCarro.css') }}">
+    <link rel="icon" href="{{ asset('img/blanco.ico') }}" type="image/x-icon">
     <title>Editar carro</title>
 </head>
 <body>
@@ -222,7 +223,6 @@
                         <br><br>
                         <label for="id_pedido">Selecciona un pedido existente o crea uno nuevo:</label>
                         <select name="id_pedido" class="form-input">
-                            <option value="" disabled selected>-- Ninguno --</option>
                             <option value="nuevo">-- Crear nuevo pedido --</option>
                             @foreach($pedidosUsuario as $pedido)
                                 @php
